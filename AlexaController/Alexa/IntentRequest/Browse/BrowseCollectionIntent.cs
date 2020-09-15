@@ -24,9 +24,9 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class BrowseCollectionIntent : IntentResponseModel
+    public class BrowseCollectionIntent : IIntentResponseModel
     {
-        public override string Response
+        public string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             var roomManager = new RoomContextManager();

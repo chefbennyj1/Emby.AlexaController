@@ -12,14 +12,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
 // ReSharper disable TooManyArguments
-// ReSharper disable once InconsistentNaming
 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
@@ -34,7 +27,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         }
 
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager)
         {
             var roomManager = new RoomContextManager();
             Room room = null;
@@ -42,6 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
 
             var context = alexaRequest.context;
             // we need the room object to proceed because we will only show libraries on emby devices
+            
             if (room is null || (room is null && context.Viewport is null))
             {
                 session.PersistedRequestData = alexaRequest;

@@ -3,7 +3,6 @@ using System.Threading;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
@@ -26,7 +25,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
     }
 
     [Intent]
-    public class RoomSetupIntent : IntentResponseModel, IService
+    public class RoomSetupIntent : IIntentResponseModel, IService
     {
         private IJsonSerializer JsonSerializer { get; }
         public RoomSetupIntent(IJsonSerializer json)
@@ -39,7 +38,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             return true;
         }
 
-        public override string Response
+        public string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             var room = session.room;

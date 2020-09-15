@@ -14,18 +14,13 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 
 // ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
+// ReSharper disable once ComplexConditionExpression
 // ReSharper disable TooManyArguments
-// ReSharper disable once InconsistentNaming
 
 namespace AlexaController.Alexa.IntentRequest.Playback
 {
     [Intent]
-    public class PlayItemIntent : IntentResponseModel
+    public class PlayItemIntent : IIntentResponseModel
     {
         /*         
             If no room is requested in the PlayItemIntent intent, we follow up immediately to get a room value from 'RoomName' intent. 
@@ -44,7 +39,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                                 
          */
 
-        public override string Response
+        public string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             //we need a room object
@@ -53,10 +48,10 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
             if (room is null) return roomManager.RequestRoom(alexaRequest, session, responseClient);
 
-            var request = alexaRequest.request;
-            var context = alexaRequest.context;
+            var request        = alexaRequest.request;
+            var context        = alexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
-            var requestId = request.requestId;
+            var requestId      = request.requestId;
             responseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
 
 

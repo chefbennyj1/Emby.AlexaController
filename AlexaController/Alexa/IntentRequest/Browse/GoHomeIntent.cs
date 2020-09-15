@@ -1,11 +1,4 @@
-﻿// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable TooManyArguments
-// ReSharper disable once ComplexConditionExpression
+﻿// ReSharper disable TooManyArguments
 
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -15,11 +8,10 @@ using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-    public class GoHomeIntent : IntentResponseModel
+    public class GoHomeIntent : IIntentResponseModel
     {
-        public override string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient,
-            ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        public string Response
+        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             return responseClient.BuildAlexaResponse(new Response()
             {

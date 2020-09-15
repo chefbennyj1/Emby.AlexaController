@@ -15,9 +15,9 @@ using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
-    public class HelpIntent : IntentResponseModel
+    public class HelpIntent : IIntentResponseModel
     {
-        public override string Response
+        public string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient,
             ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {

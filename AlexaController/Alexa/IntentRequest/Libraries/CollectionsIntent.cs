@@ -5,24 +5,17 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
 // ReSharper disable TooManyArguments
-// ReSharper disable once InconsistentNaming
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
     [Intent]
-    public class CollectionsIntent  : IntentResponseModel
+    public class CollectionsIntent  : IIntentResponseModel
     {
-        public override string Response
+        public string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
-            return new LibraryIntentResponseManager("Collections").Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager);
+            return new LibraryIntentResponseManager("Collections").Response(alexaRequest, session, responseClient, libraryManager);
         }
     }
 }

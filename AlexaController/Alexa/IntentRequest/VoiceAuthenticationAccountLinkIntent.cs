@@ -8,20 +8,15 @@ using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable TooManyArguments
+// ReSharper disable once TooManyChainedReferences
+// ReSharper disable once TooManyArguments
 
 namespace AlexaController.Alexa.IntentRequest
 {
     [Intent]
-    public class VoiceAuthenticationAccountLinkIntent : IntentResponseModel
+    public class VoiceAuthenticationAccountLinkIntent : IIntentResponseModel
     {
-        public override string Response
+        public string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             var person        = alexaRequest.context.System.person;
