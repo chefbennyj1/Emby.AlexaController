@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+<PropertyGroup> <TargetFrameworks>netstandard2.0;</TargetFrameworks> <AssemblyVersion>1.0.0.2</AssemblyVersion> <FileVersion>1.0.0.3</FileVersion> </PropertyGroup>
+
+<ItemGroup>
+  <Compile Remove="Alexa\IntentRequest\CancelIntent.cs" />
+</ItemGroup>
+
+<ItemGroup>
+  <None Remove="Configuration\AlexaPluginConfigurationPage.html" />
+  <None Remove="Configuration\AlexaPluginConfigurationPage.js" />
+  <None Remove="Configuration\InteractionModel.json" />
+  <None Remove="empty.png" />
+  <None Remove="fiberOptics.mp4" />
+  <None Remove="ICON_VERSION6.mp4" />
+  <None Remove="MoviesLibrary.mp4" />
+  <None Remove="particles.mp4" />
+  <None Remove="thumb.gif" />
+  <None Remove="thumb.jpg" />
+  <None Remove="Utils\ttd3km1d.3sb~" />
+</ItemGroup>
+
+<ItemGroup>
+  <EmbeddedResource Include="Configuration\AlexaPluginConfigurationPage.html" />
+  <EmbeddedResource Include="Configuration\AlexaPluginConfigurationPage.js" />
+  <EmbeddedResource Include="Configuration\InteractionModel.json" />
+  <EmbeddedResource Include="Resources\empty.png" />
+  <EmbeddedResource Include="Resources\fiberOptics.mp4" />
+  <EmbeddedResource Include="Resources\ICON_VERSION6.mp4" />
+  <EmbeddedResource Include="Resources\MoviesLibrary.mp4" />
+  <EmbeddedResource Include="Resources\particles.mp4" />
+  <EmbeddedResource Include="thumb.gif" />
+</ItemGroup>
+
+<ItemGroup>
+  <None Include="Alexa\IntentRequest\AMAZON\CancelIntent.cs" />
+</ItemGroup>
+
+<ItemGroup> <PackageReference Include="mediabrowser.server.core" Version="4.2.0.40" /> <PackageReference Include="Newtonsoft.Json" Version="12.0.2" /> <PackageReference Include="System.Memory" Version="4.5.3" /> </ItemGroup>
+
+</Project>

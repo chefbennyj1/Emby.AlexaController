@@ -1,0 +1,456 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "home theater",
+            "intents": [
+                {
+                    "name": "Libraries_MoviesIntent",
+                    "slots": [
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        }
+                    ],
+                    "samples": [
+                        "to {VisualModeTrigger} the movie library in the {Room}",
+                        "to {VisualModeTrigger} the movies library",
+                        "to {VisualModeTrigger} the movie library ",
+                        "to {VisualModeTrigger} movies in the {Room}"
+                    ]
+                },
+                {
+                    "name": "AMAZON.YesIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NoIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "Libraries_TvShowsIntent",
+                    "slots": [
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        }
+                    ],
+                    "samples": [
+                        "to {VisualModeTrigger} tv shows in the {Room}",
+                        "to {VisualModeTrigger} tv shows",
+                        "to {VisualModeTrigger} the TV shows library",
+                        "to {VisualModeTrigger} the TV Library",
+                        "to {VisualModeTrigger} TV Series",
+                        "to {VisualModeTrigger} the TV Series Library",
+                        "to {VisualModeTrigger} TV Series in the {Room}",
+                        "to {VisualModeTrigger} the TV Series Library in the {Room}",
+                        "to {VisualModeTrigger} the TV Library in the {Room}",
+                        "to {VisualModeTrigger} TV Library in the {Room}"
+                    ]
+                },
+                {
+                    "name": "Libraries_CollectionsIntent",
+                    "slots": [
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        }
+                    ],
+                    "samples": [
+                        "to {VisualModeTrigger} the movie collections library",
+                        "to {VisualModeTrigger} movie collections",
+                        "to {VisualModeTrigger} the collections library",
+                        "to {VisualModeTrigger} collections in the {Room}",
+                        "to {VisualModeTrigger} me the collection library in the {Room}",
+                        "to show collection library in the {Room}",
+                        "to show movie collections in the {Room}"
+                    ]
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": [
+                        "open help",
+                        "help",
+                        "for help"
+                    ]
+                },
+                {
+                    "name": "Browse_BrowseCollectionIntent",
+                    "slots": [
+                        {
+                            "name": "MovieCollection",
+                            "type": "AMAZON.MovieSeries"
+                        },
+                        {
+                            "name": "Movie",
+                            "type": "AMAZON.Movie"
+                        },
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        }
+                    ],
+                    "samples": [
+                        "to {VisualModeTrigger} all the {Movie} movies",
+                        "to {VisualModeTrigger} all the {Movie} movies in the {Room}",
+                        "{VisualModeTrigger} the  {Movie} collection in the {Room}",
+                        "to {VisualModeTrigger} me all  {Movie} movies",
+                        "to {VisualModeTrigger} {MovieCollection} ",
+                        "to {VisualModeTrigger} me  {MovieCollection} "
+                    ]
+                },
+                {
+                    "name": "Browse_BrowseBaseItemDetailsIntent",
+                    "slots": [
+                        {
+                            "name": "Movie",
+                            "type": "AMAZON.Movie"
+                        },
+                        {
+                            "name": "Series",
+                            "type": "AMAZON.TVSeries"
+                        },
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        }
+                    ],
+                    "samples": [
+                        "to {VisualModeTrigger} the series {Series}",
+                        "to {VisualModeTrigger} the movie {Movie}",
+                        "to {VisualModeTrigger} the movie {Movie} and {VisualModeTrigger} it in the {Room}",
+                        "to {VisualModeTrigger} the series  {Series} and {VisualModeTrigger} it in the {Room}",
+                        "to {VisualModeTrigger} the series {Series} in the {Room}",
+                        "to {VisualModeTrigger} the movie {Movie} in the {Room}"
+                    ]
+                },
+                {
+                    "name": "Browse_BrowseNextUpEpisodeIntent",
+                    "slots": [
+                        {
+                            "name": "Series",
+                            "type": "AMAZON.TVSeries"
+                        },
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        }
+                    ],
+                    "samples": [
+                        "to {VisualModeTrigger} the next up episode for {Series} in the {Room}",
+                        "to {VisualModeTrigger} next up for {Series} in the {Room}"
+                    ]
+                },
+                {
+                    "name": "Browse_GoHomeIntent",
+                    "slots": [],
+                    "samples": [
+                        "Go Home"
+                    ]
+                },
+                {
+                    "name": "PlayTVShowsIntent",
+                    "slots": [
+                        {
+                            "name": "Series",
+                            "type": "AMAZON.TVSeries"
+                        },
+                        {
+                            "name": "Season",
+                            "type": "AMAZON.TVSeason"
+                        },
+                        {
+                            "name": "Episode",
+                            "type": "AMAZON.TVEpisode"
+                        },
+                        {
+                            "name": "SeasonNumber",
+                            "type": "AMAZON.NUMBER"
+                        },
+                        {
+                            "name": "EpisodeNumber",
+                            "type": "AMAZON.NUMBER"
+                        },
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        }
+                    ],
+                    "samples": [
+                        "to play season {SeasonNumber}  episode {EpisodeNumber} from the series {Series}"
+                    ]
+                },
+                {
+                    "name": "Playback_StopPlaybackIntent",
+                    "slots": [
+                        {
+                            "name": "Device",
+                            "type": "AMAZON.DeviceType"
+                        },
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        }
+                    ],
+                    "samples": [
+                        "to stop playback in the {Room}",
+                        "to stop playback on {Device}"
+                    ]
+                },
+                {
+                    "name": "Playback_PlayItemIntent",
+                    "slots": [
+                        {
+                            "name": "Movie",
+                            "type": "AMAZON.Movie"
+                        },
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        },
+                        {
+                            "name": "Anaphor",
+                            "type": "AMAZON.Anaphor"
+                        }
+                    ],
+                    "samples": [
+                        "play the movie {Movie}",
+                        "play the movie {Movie} in the {Room}",
+                        "play {Anaphor} in the {Room}",
+                        "play {Anaphor}",
+                        "play",
+                        "to play the movie {Movie} in {Room}",
+                        "to play the movie {Movie} in the {Room}"
+                    ]
+                },
+                {
+                    "name": "Playback_PlayNextUpEpisodeIntent",
+                    "slots": [
+                        {
+                            "name": "Series",
+                            "type": "AMAZON.TVSeries"
+                        },
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        }
+                    ],
+                    "samples": [
+                        "to play the next episode for {Series} in the {Room}",
+                        "to play next up for {Series} in the {Room}",
+                        "to play next up for the series {Series} in {Room}",
+                        "to play next up for {Series} in {Room}",
+                        "to play the next episode from {Series} in the {Room}",
+                        "to play the next episode for {Series} in {Room}",
+                        "to play next up episode for the series {Series} in the {Room}",
+                        "to play next up episode for {Series} in {Room}",
+                        "to play next up from {Series} in the {Room}"
+                    ]
+                },
+                {
+                    "name": "AMAZON.MoreIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.PreviousIntent",
+                    "samples": [
+                        "go back"
+                    ]
+                },
+                {
+                    "name": "VoiceAuthenticationAccountLinkIntent",
+                    "slots": [],
+                    "samples": [
+                        "to learn my voice"
+                    ]
+                },
+                {
+                    "name": "Rooms_RoomNameIntent",
+                    "slots": [
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        }
+                    ],
+                    "samples": [
+                        "the {Room}",
+                        "{Room}",
+                        "in the {Room}"
+                    ]
+                },
+                {
+                    "name": "Rooms_RoomSetupIntent",
+                    "slots": [],
+                    "samples": [
+                        "to add a new room",
+                        "to setup a room",
+                        "to add a room",
+                        "to setup a new room"
+                    ]
+                },
+                {
+                    "name": "StreamingUsersIntent",
+                    "slots": [],
+                    "samples": [
+                        "who is logged on",
+                        "who is using the movie services",
+                        "who is currently watching movies",
+                        "who is watching movies",
+                        "who is using the server"
+                    ]
+                },
+                {
+                    "name": "NewItemsIntent",
+                    "slots": [
+                        {
+                            "name": "TVAlternatives",
+                            "type": "LIST_OF_TV_ALTS"
+                        },
+                        {
+                            "name": "MovieAlternatives",
+                            "type": "LIST_OF_MOVIE_ALTS"
+                        },
+                        {
+                            "name": "Duration",
+                            "type": "AMAZON.DURATION"
+                        }
+                    ],
+                    "samples": [
+                        "to show {TVAlternatives} added in the last {Duration}",
+                        "to show {MovieAlternatives} added in the last {Duration}",
+                        "to show new {TVAlternatives} added in the last {Duration}",
+                        "to show new {MovieAlternatives} added in the last {Duration}",
+                        "about new {TVAlternatives} added in the last {Duration}",
+                        "about new {MovieAlternatives} added in the last {Duration}",
+                        "about new {MovieAlternatives} from the last {Duration}",
+                        "about new {TVAlternatives} from the last {Duration}",
+                        "about new {TVAlternatives}",
+                        "about new {MovieAlternatives}"
+                    ]
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateSettingsIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NextIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.PageUpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.PageDownIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ScrollRightIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ScrollDownIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ScrollLeftIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ScrollUpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "Browse_BrowseEpisodesIntent",
+                    "slots": [
+                        {
+                            "name": "SeasonNumber",
+                            "type": "AMAZON.NUMBER"
+                        }
+                    ],
+                    "samples": [
+                        "season {SeasonNumber}",
+                        "show season {SeasonNumber}"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "LIST_OF_MOVIE_ALTS",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "movies"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "LIST_OF_TV_ALTS",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "television show"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "television series"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Television"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "TV Series"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "TV Shows"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
