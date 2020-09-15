@@ -21,7 +21,7 @@ namespace AlexaController.Session
         void UpdateSession(AlexaSession session, RenderDocumentTemplateInfo templateInfo = null, bool? isBack = null);
         //bool ValidateRoomConfiguration(string room, PluginConfiguration config);
 
-        Room ValidateRoom(AlexaRequest alexaRequest, AlexaSession session);
+        //Room ValidateRoom(AlexaRequest alexaRequest, AlexaSession session);
         //void UpdateSessionRenderDocumentPages(AlexaSession session, RenderDocumentTemplateInfo templateInfo = null, bool? goBack = null);
     }
 
@@ -138,18 +138,15 @@ namespace AlexaController.Session
             OpenSessions.Add(session);
         }
 
-        private AlexaSession UpdateSessionPaging(AlexaSession session, RenderDocumentTemplateInfo templateInfo, bool? isBack = null)
+        private static AlexaSession UpdateSessionPaging(AlexaSession session, RenderDocumentTemplateInfo templateInfo, bool? isBack = null)
         {
             if (isBack == true)
             {
                 session.paging.pages.Remove(session.paging.currentPage);
                 session.paging.currentPage -= 1;
 
-                if (session.paging.pages.Count <= 1)
-                {
-                    session.paging.canGoBack = false;
-                }
-
+                if (session.paging.pages.Count <= 1) session.paging.canGoBack = false;
+                
                 return session;
             }
 
@@ -224,29 +221,6 @@ namespace AlexaController.Session
 
         }
 
-        public Room ValidateRoom(AlexaRequest alexaRequest, AlexaSession session)
-        {
-            var request = alexaRequest.request;
-            var intent  = request.intent;
-            var slots   = intent.slots;
-            var config  = Plugin.Instance.Configuration;
-            
-            string room = (slots.Room.value ?? session.room?.Name) ?? request.arguments[1];
-            
-            if (string.IsNullOrEmpty(room)) return null;
-
-            
-            return ValidateRoomConfiguration(room, config) 
-                ? config.Rooms.FirstOrDefault(r => 
-                    string.Equals(r.Name, room, StringComparison.CurrentCultureIgnoreCase)) 
-                : null;
-
-        }
-
-        private bool ValidateRoomConfiguration(string room, PluginConfiguration config)
-        {
-            return config.Rooms.Exists(r => string.Equals(r.Name, room,
-                StringComparison.InvariantCultureIgnoreCase));
-        }
+        
     }
 }

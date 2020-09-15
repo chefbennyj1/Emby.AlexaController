@@ -21,6 +21,7 @@ using User = MediaBrowser.Controller.Entities.User;
 // ReSharper disable once TooManyArguments
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable once MethodNameNotMeaningful
+// ReSharper disable once ComplexConditionExpression
 
 namespace AlexaController.Utils
 {
@@ -33,7 +34,7 @@ namespace AlexaController.Utils
         IEnumerable<BaseItem> GetLatestTv(User user, DateTime duration);
         void BrowseItemAsync(string room, User user, BaseItem request);
         void PlayMediaItemAsync(AlexaSession alexaSession, BaseItem item, User user);
-        BaseItem NarrowSearchResults(string searchName, string[] type, User user);
+        BaseItem QuerySpeechResultItems(string searchName, string[] type, User user);
     }
 
     public class CollectionInfo
@@ -47,16 +48,14 @@ namespace AlexaController.Utils
         private ILibraryManager LibraryManager        { get; }
         private ITVSeriesManager TvSeriesManager      { get; }
         private ISessionManager SessionManager        { get; }
-        //private IUserDataManager UserDataManager      { get; }
-
+        
         public static IEmbyControllerUtility Instance { get; private set; }
 
-        public EmbyControllerUtility(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)//, IUserDataManager userData)
+        public EmbyControllerUtility(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)
         {
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
             SessionManager  = sesMan;
-            //UserDataManager = userData;
             Instance        = this;
         }
         
@@ -65,7 +64,7 @@ namespace AlexaController.Utils
             try
             {
                 var series = intent.slots.Series;
-                var id     = NarrowSearchResults(series.value, new[] { "Series" }, user).InternalId;
+                var id     = QuerySpeechResultItems(series.value, new[] { "Series" }, user).InternalId;
                 var nextUp = TvSeriesManager.GetNextUp(new NextUpQuery()
                 {
                     SeriesId = id,
@@ -87,7 +86,7 @@ namespace AlexaController.Utils
         
         public CollectionInfo GetCollectionItems(User user, string collectionName)
         {
-            var result = NarrowSearchResults(collectionName, new[] { "collections", "Boxset" }, user);
+            var result = QuerySpeechResultItems(collectionName, new[] { "collections", "Boxset" }, user);
 
             var collectionItem = LibraryManager.QueryItems(new InternalItemsQuery()
             {
@@ -189,7 +188,9 @@ namespace AlexaController.Utils
 
             var session = GetSession(deviceId);
 
-            if(request.GetType().Name == "Movie") BrowseHome(room, user, deviceId, session);
+            var type = request.GetType().Name;
+           
+            if (!type.Equals("Season") || !type.Equals("Series")) BrowseHome(room, user, deviceId, session);
 
             Task.Delay(1500).Wait();
 

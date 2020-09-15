@@ -27,44 +27,26 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         public override string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
-            var config         = Plugin.Instance.Configuration;
             var request        = alexaRequest.request;
-            var intent         = request.intent;
-            //var room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);//(intent.slots.Room.value ?? session.room) ?? string.Empty;
             var context        = alexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
+            var roomManager    = new RoomContextManager();
 
             Room room = null;
-            try
-            {
-                room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);
-            }
-            catch
-            {
-            }
+            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+
+            var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
+            if (room is null && displayNone)
+                return roomManager.RequestRoom(alexaRequest, session, responseClient);
+
 
             var progressiveSpeech = "";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
 
             responseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
-
-            ////do we understand the room object to proceed if it exists
-            //if (!string.IsNullOrEmpty(room))
-            //{
-            //    if (!AlexaSessionManager.Instance.ValidateRoomConfiguration(room, config))
-            //        return new RoomContextIntent().Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager);
-            //}
-            ////if the room object doesn't exist do we need one
-            //else
-            //{
-                var displayNone = session.alexaSessionDisplayType == AlexaSessionDisplayType.NONE;
-                if (room == null && displayNone)
-                    return new RoomContextIntent().Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager);
-            //}
-
-
+            
             var nextUpEpisode = EmbyControllerUtility.Instance.GetNextUpEpisode(request.intent, session.User);
             
             if (nextUpEpisode is null)
@@ -105,10 +87,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 });
             }
 
-            if (room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, nextUpEpisode); } catch {}
-
-
+            if (room != null) try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, nextUpEpisode); } catch {}
+            
             var documentTemplateInfo = new RenderDocumentTemplateInfo()
             {
                 baseItems          = new List<BaseItem>() {nextUpEpisode},

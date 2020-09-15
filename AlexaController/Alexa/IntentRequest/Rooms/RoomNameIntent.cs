@@ -4,7 +4,6 @@ using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
 using AlexaController.Session;
-using AlexaController.Utils;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 
@@ -24,19 +23,12 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         public override string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
-            var request            = alexaRequest.request;
             var rePromptIntent     = session.PersistedRequestData.request.intent;
-            //var room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);//request.intent.slots.Room.value;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
 
+            var roomManager = new RoomContextManager();
             Room room = null;
-            try
-            {
-                room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);
-            }
-            catch
-            {
-            }
+            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
 
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {

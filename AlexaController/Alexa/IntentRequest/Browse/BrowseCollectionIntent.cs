@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
@@ -30,35 +29,29 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         public override string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
+            var roomManager = new RoomContextManager();
+            Room room = null;
+            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+            var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
+            if (room is null && displayNone) return roomManager.RequestRoom(alexaRequest, session, responseClient);
+            
             var request           = alexaRequest.request;
             var intent            = request.intent;
             var slots             = intent.slots;
             var collectionRequest = slots.MovieCollection.value ?? slots.Movie.value;
-            //var room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);//(intent.slots.Room.value ?? session.room) ?? string.Empty;
             var context           = alexaRequest.context;
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
-
-            Room room = null;
-            try
-            {
-                room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);
-            }
-            catch
-            {
-            }
-
+            
             var progressiveSpeech = $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
             responseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
-
-
+            
             collectionRequest       = StringNormalization.NormalizeText(collectionRequest);
             
             var collection          = EmbyControllerUtility.Instance.GetCollectionItems(session.User, collectionRequest);
             var collectionItems     = collection.Items;
             var collectionBaseItem  = libraryManager.GetItemById(collection.Id);
             
-
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
             {
@@ -75,28 +68,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     });
                 }
             }
-
-            ////do we understand the room object to proceed if it exists
-            //if (!string.IsNullOrEmpty(room))
-            //{
-            //    if (!AlexaSessionManager.Instance.ValidateRoomConfiguration(room, Plugin.Instance.Configuration))
-            //        return new RoomContextIntent().Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager);
-            //}
-            ////if the room object doesn't exist do we need one
-            //else
-            //{
-                var displayNone = session.alexaSessionDisplayType == AlexaSessionDisplayType.NONE;
-                if (room == null && displayNone)
-                    return new RoomContextIntent().Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager);
-            //}
-
-
-            // user requested an Emby client/room display not this viewport
-            // or user has designated a room from a prior request - display both if possible
-            if (room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, collectionBaseItem); } catch { }
-
-
+            
+            if (!(room is null)) try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, collectionBaseItem); } catch { }
             
             var documentTemplateInfo = new RenderDocumentTemplateInfo()
             {
@@ -104,7 +77,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
                 baseItems          = collectionItems,
                 collectionRoot     = collectionBaseItem
-
             };
 
             //Update Session

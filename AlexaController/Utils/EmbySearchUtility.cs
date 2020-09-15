@@ -16,7 +16,7 @@ namespace AlexaController.Utils
             LibraryManager = libMan;
         }
                 
-        public BaseItem NarrowSearchResults(string searchName, string[] type, User user)
+        public BaseItem QuerySpeechResultItems(string searchName, string[] type, User user)
         {
             
             var result = LibraryManager.GetItemIds(new InternalItemsQuery

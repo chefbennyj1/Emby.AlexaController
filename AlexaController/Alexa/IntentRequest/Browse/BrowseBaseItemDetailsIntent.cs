@@ -29,51 +29,34 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         public override string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
-            //var config         = Plugin.Instance.Configuration;
+            var roomManager = new RoomContextManager();
+            Room room = null;
+            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+            var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
+            if (room is null && displayNone) return roomManager.RequestRoom(alexaRequest, session, responseClient);
+            
+
             var request        = alexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
             var type           = request.intent.slots.Movie.value is null ? "Series" : "Movie";
             var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
-           //(slots.Room.value ?? session.room) ?? string.Empty;
             var context        = alexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-
-            Room room = null;
-            try { room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
             
-
             var progressiveSpeech = "";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
             responseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
 
-            ////do we understand the room object to proceed if it exists
-            //if (room != null)
-            //{
-            //    if (!AlexaSessionManager.Instance.ValidateRoomConfiguration(room, config))
-            //        return new RoomContextIntent().Response(alexaRequest, session, responseClient, libraryManager, sessionManager,  userManager);
-
-            //}
-            ////if the room object doesn't exist in the request - we need one for devices which do not support APL
-            //else
-            //{
-            if (room is null && session.alexaSessionDisplayType == AlexaSessionDisplayType.NONE)
-                    return new RoomContextIntent().Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager );
-            //}
-
             //Clean up search term
             searchName = StringNormalization.NormalizeText(searchName);
             
-            if (string.IsNullOrEmpty(searchName))
-            {
-                return new NotUnderstood().Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager);
-            }
+            if (string.IsNullOrEmpty(searchName)) return new NotUnderstood().Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager);
 
-            var result = EmbyControllerUtility.Instance.NarrowSearchResults(searchName, new[] { type }, session.User);
+            var result = EmbyControllerUtility.Instance.QuerySpeechResultItems(searchName, new[] { type }, session.User);
 
-            // No result, No exist
             if (result is null)
             {
                 return responseClient.BuildAlexaResponse(new Response()
@@ -85,8 +68,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     }
                 });
             }
-
-            //Parental Control check for baseItem
+            
             if (!result.IsParentalAllowed(session.User))
                 return responseClient.BuildAlexaResponse(new Response()
                 {
@@ -98,13 +80,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     }
                 });
 
-
-            // user requested an Emby client/room display not this viewport
-            // or user has designated a room from a prior request - display both if possible
-            if (room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, result); } catch { }
-
-            ServerEntryPoint.Instance.Log.Info("ALEXA ABOUT TO BUILD RENDER DOCUMENT");
+            if (!(room is null)) try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, result); } catch { }
+            
             var documentTemplateInfo = new RenderDocumentTemplateInfo()
             {
                 baseItems = new List<BaseItem>() { result },

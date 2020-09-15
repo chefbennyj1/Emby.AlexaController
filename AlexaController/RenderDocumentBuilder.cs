@@ -523,7 +523,9 @@ namespace AlexaController
                                 }
                             }
                         }
-                        : GetButtonFrame(args : type == "Movie" || type == "Episode" ? new List<object>() { "UserEventPlaybackStart", session.room != null ? session.room.Name : "" } : new List<object>() { "UserEventShowItemListSequenceTemplate" },
+                        : GetButtonFrame(args : type == "Movie" || type == "Episode" 
+                                ? new List<object>() { "UserEventPlaybackStart", session.room != null ? session.room.Name : "" } 
+                                : new List<object>() { "UserEventShowItemListSequenceTemplate" },
                                    icon : baseItem.GetType().Name == "Series" ? ListIcon : PlayOutlineIcon,
                                    id   : templateInfo.baseItems[0].InternalId.ToString())
                 }

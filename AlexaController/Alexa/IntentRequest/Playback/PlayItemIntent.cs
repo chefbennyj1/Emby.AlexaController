@@ -47,34 +47,24 @@ namespace AlexaController.Alexa.IntentRequest.Playback
         public override string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
-            var request        = alexaRequest.request;
-            var context        = alexaRequest.context;
-            var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
-
             //we need a room object
-            //var room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);//(request.intent.slots.Room.value ?? session.room) ?? string.Empty;
+            var roomManager = new RoomContextManager();
             Room room = null;
-            try
-            {
-                room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);
-            }
-            catch
-            {
-            }
+            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+            if (room is null) return roomManager.RequestRoom(alexaRequest, session, responseClient);
 
-            if (room is null)
-                return new RoomContextIntent().Response(alexaRequest, session, responseClient, libraryManager, sessionManager, userManager);
-
-
+            var request = alexaRequest.request;
+            var context = alexaRequest.context;
+            var apiAccessToken = context.System.apiAccessToken;
+            var requestId = request.requestId;
             responseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
 
 
             var result = session.NowViewingBaseItem ??
                          (!(request.intent.slots.Movie.value is null)
-                             ? EmbyControllerUtility.Instance.NarrowSearchResults(request.intent.slots.Movie.value, new[] { "Movie" }, session.User)
+                             ? EmbyControllerUtility.Instance.QuerySpeechResultItems(request.intent.slots.Movie.value, new[] { "Movie" }, session.User)
                              : !(request.intent.slots.Series.value is null)
-                                ? EmbyControllerUtility.Instance.NarrowSearchResults(request.intent.slots.Series.value, new[] { "Series" }, session.User) : null);
+                                ? EmbyControllerUtility.Instance.QuerySpeechResultItems(request.intent.slots.Series.value, new[] { "Series" }, session.User) : null);
 
             //If result is null here, then the item doesn't exist in the library
             if (result is null)

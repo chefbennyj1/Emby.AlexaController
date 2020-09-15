@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -27,31 +28,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
         public override string Response
         (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
-            var request = alexaRequest.request;
-
-            //check the room
-            //var room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);//(request.intent.slots.Room.value ?? session.room) ?? string.Empty;
-
+            //we need a room object
+            var roomManager = new RoomContextManager();
             Room room = null;
-            try
-            {
-                room = AlexaSessionManager.Instance.ValidateRoom(alexaRequest, session);
-            }
-            catch
-            {
-            }
+            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+            if (room is null) return roomManager.RequestRoom(alexaRequest, session, responseClient);
 
-            if (room is null)
-                return responseClient.BuildAlexaResponse(new Response()
-                {
-                    shouldEndSession = true,
-                    outputSpeech = new OutputSpeech()
-                    {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.ROOM_CONTEXT, session, null),
-                        semanticSpeechType = SemanticSpeechType.APOLOGETIC,
-                    }
-                });
-
+            var request = alexaRequest.request;
             var nextUpEpisode = EmbyControllerUtility.Instance.GetNextUpEpisode(request.intent, session?.User);
 
             if (nextUpEpisode is null)
