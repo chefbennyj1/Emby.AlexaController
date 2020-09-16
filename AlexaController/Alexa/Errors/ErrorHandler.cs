@@ -4,17 +4,8 @@ using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils.SemanticSpeech;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Plugins;
-using MediaBrowser.Controller.Session;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
 // ReSharper disable TooManyArguments
-// ReSharper disable once MethodNameNotMeaningful
 
 namespace AlexaController.Alexa.Errors
 {
@@ -24,20 +15,8 @@ namespace AlexaController.Alexa.Errors
         string OnError(Exception exception, AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient);
     }
 
-    public class ErrorHandler : IServerEntryPoint, IErrorHandler
+    public class ErrorHandler : IErrorHandler
     {
-        private ILibraryManager LibraryManager { get; }
-        private ISessionManager SessionManager { get; }
-        private IUserManager UserManager       { get; }
-        public static IErrorHandler Instance   { get; private set; }
-
-        public ErrorHandler(ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
-        {
-            SessionManager = sessionManager;
-            LibraryManager = libraryManager;
-            UserManager    = userManager;
-            Instance       = this;
-        }
         public string OnError(Exception exception, AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
         {
             return responseClient.BuildAlexaResponse(new Response()
@@ -60,17 +39,6 @@ namespace AlexaController.Alexa.Errors
                         }, session)
                 }
             }, session.alexaSessionDisplayType);
-        
-        }
-
-        public void Dispose()
-        {
-            
-        }
-
-        public void Run()
-        {
-            
         }
     }
 }

@@ -30,7 +30,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             {
                 if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    return ErrorHandler.Instance.OnError(new Exception("That room is currently not configured to show media."), alexaRequest, session, responseClient);
+                    return new ErrorHandler().OnError(new Exception("That room is currently not configured to show media."), alexaRequest, session, responseClient);
                 }
             }
 
@@ -50,7 +50,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }
             catch 
             {
-                return ErrorHandler.Instance.OnError(new Exception("Room Name Error"), alexaRequest, session, responseClient);
+                return new ErrorHandler().OnError(new Exception("Room Name Error"), alexaRequest, session, responseClient);
             }
 
         }

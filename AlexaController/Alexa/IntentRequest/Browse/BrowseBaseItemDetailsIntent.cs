@@ -121,7 +121,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
             catch (Exception exception)
             {
-                return ErrorHandler.Instance.OnError(exception.InnerException, alexaRequest, session, responseClient);
+                return new ErrorHandler().OnError(exception.InnerException, alexaRequest, session, responseClient);
             }
         }
     }

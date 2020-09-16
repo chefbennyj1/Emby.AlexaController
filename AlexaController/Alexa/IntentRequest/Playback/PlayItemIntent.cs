@@ -98,7 +98,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             }
             catch (Exception exception)
             {
-                return ErrorHandler.Instance.OnError(exception, alexaRequest, session, responseClient);
+                return new ErrorHandler().OnError(exception, alexaRequest, session, responseClient);
             }
 
             session.PlaybackStarted = true;

@@ -10,7 +10,6 @@ using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 // ReSharper disable TooManyArguments
 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -57,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             }
             catch (Exception exception)
             {
-                return ErrorHandler.Instance.OnError(exception, alexaRequest, session, responseClient);
+                return new ErrorHandler().OnError(exception, alexaRequest, session, responseClient);
             }
 
             session.NowViewingBaseItem = result;

@@ -50,7 +50,16 @@ namespace AlexaController
         VERTICAL_TEXT_LIST_TEMPLATE
     }
 
-    public class RenderDocumentTemplateInfo
+    public interface IRenderDocumentTemplateInfo
+    {
+        RenderDocumentType renderDocumentType { get; set; }
+        string HeaderTitle                    { get; set; }
+        List<BaseItem> baseItems              { get; set; }
+        BaseItem collectionRoot               { get; set; }
+        string HeadlinePrimaryText            { get; set; }
+    }
+
+    public class RenderDocumentTemplateInfo : IRenderDocumentTemplateInfo
     {                                                                //Defaults  
         public RenderDocumentType renderDocumentType { get; set; } = RenderDocumentType.NONE;
         public string HeaderTitle                    { get; set; } = "";
@@ -157,7 +166,7 @@ namespace AlexaController
             Instance       = this;
         }
 
-        public Directive GetRenderDocumentTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        public Directive GetRenderDocumentTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             switch (templateInfo.renderDocumentType)
             {
@@ -176,7 +185,7 @@ namespace AlexaController
             }
         }
 
-        private Directive GetItemListSequenceTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session, string scrollDirection = "horizontal")
+        private Directive GetItemListSequenceTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session, string scrollDirection = "horizontal")
         {
 
             var layout             = new List<Item>();
@@ -383,7 +392,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetItemDetailsTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        private Directive GetItemDetailsTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             ServerEntryPoint.Instance.Log.Info("ALEXA BUILDING RENDER DOCUMENT");
             var type = templateInfo.baseItems[0].GetType().Name;
@@ -643,7 +652,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetVerticalTextListTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        private Directive GetVerticalTextListTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             var layout = new List<Item>();
             var layoutBaseItems = new List<Item>();
@@ -812,7 +821,7 @@ namespace AlexaController
             };
         }
 
-        private Directive GetRoomSelectionTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        private Directive GetRoomSelectionTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             var endpoint = $"/Items/{templateInfo.baseItems[0].InternalId}/Images";
             var layout = new List<Item>();
@@ -870,7 +879,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetBrowseLibraryTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        private Directive GetBrowseLibraryTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             var layout = new List<Item>();
             const string token = "browseLibrary";
@@ -952,7 +961,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetQuestionRequestTemplate(RenderDocumentTemplateInfo templateInfo)
+        private Directive GetQuestionRequestTemplate(IRenderDocumentTemplateInfo templateInfo)
         {
             var layout = new List<Item>();
 
@@ -1094,7 +1103,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetGenericHeadlineRequestTemplate(RenderDocumentTemplateInfo templateInfo)
+        private Directive GetGenericHeadlineRequestTemplate(IRenderDocumentTemplateInfo templateInfo)
         {
             var layout = new List<Item>();
 
@@ -1168,7 +1177,7 @@ namespace AlexaController
             return view;
         }
         
-        private Directive GetRenderVideo(RenderDocumentTemplateInfo templateInfo)
+        private Directive GetRenderVideo(IRenderDocumentTemplateInfo templateInfo)
         {
             //Not currently used
             var videoUrl = "https://theater.unityhome.online/emby/videos/stream.mp4";
@@ -1265,7 +1274,7 @@ namespace AlexaController
 
 
         //On the room selection screen show the user the configured room, and mark them as available or not.
-        private List<Item> GetRoomButtonLayout(RenderDocumentTemplateInfo templateInfo)
+        private List<Item> GetRoomButtonLayout(IRenderDocumentTemplateInfo templateInfo)
         {
             var config = Plugin.Instance.Configuration;
             var roomButtons = new List<Item>();

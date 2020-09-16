@@ -22,8 +22,10 @@ using MediaBrowser.Model.Serialization;
 
 namespace AlexaController.Api
 {
+    
+
     [Route("/Alexa", "POST", Summary = "Alexa End Point")]
-    public class AlexaRequest : IRequiresRequestStream
+    public class AlexaRequest 
     {
         public Stream RequestStream  { get; set; }
         public AmazonSession session { get; set; }
@@ -123,7 +125,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                return ErrorHandler.Instance.OnError(new Exception($"I was unable to do that. Please try again. {exception.Message}"), alexaRequest, session, ResponseClient);
+                return new ErrorHandler().OnError(new Exception($"I was unable to do that. Please try again. {exception.Message}"), alexaRequest, session, ResponseClient);
             }
         }
 
