@@ -3,25 +3,25 @@
         <div class="verticalSection verticalSection">
             <div class="sectionTitleContainer sectionTitleContainer-cards align-items-center">
                 <h2 class="sectionTitle sectionTitle-cards">Alexa</h2>
+                <hr />
+                <div style="padding-top: 2em">
 
-                <form style="padding-top: 2em">
-
-                    <div class="paperList" style="padding: 1em;">
+                    <div class="" style="padding: 1em;">
                         <div class="detailSectionHeader" style="padding-bottom: 2em">
                             <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">
                                 Interaction Model Dialog
                             </h2>
                             <button is="emby-button" type="button" class="fab btnInteractionModel submit emby-button" style="margin-left: 1em;">
-                                <i class="md-icon">record_voice_over</i>
+                                <i class="md-icon">comment</i>
                             </button>
                             <p>The interaction dialog model JSON should be copied into the "JSON Editor" of your Alexa custom skill console.</p>
                         </div>
                     </div>
 
-                    <!--<h2 class="sectionTitle sectionTitle-cards">Personalization</h2>-->
-                    <div class="paperList" style="padding: 1em;">
+                    <hr />
 
-                        <div class="detailSectionHeader personalizationConfiguration" style="padding-bottom: 2em;">
+                    <div style="padding: 1em;">
+                        <div class="detailSectionHeader personalizationConfiguration">
                             <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">Personalization</h2>
                             <button is="emby-button" type="button" class="fab btnPersonalization submit emby-button" style="margin-left: 1em;">
                                 <i class="md-icon">add</i>
@@ -29,8 +29,9 @@
                             <p>Link Emby account users with Alexa's personalization account data</p>
                         </div>
 
-                        <table class="tblPersonalizationResults table detailTable" style="width: 100%; margin-top: 3em; padding-bottom: 3em;">
-                            <thead>
+                        <div class="paperList" style="padding: 2em;">
+                            <table class="tblPersonalizationResults table detailTable" style="width: 100%; margin-top: 3em; padding-bottom: 3em;">
+                                <thead>
                                 <tr style="text-align: left;">
                                     <th class="detailTableHeaderCell" data-priority="1" style="width: 5%"></th>
                                     <th class="detailTableHeaderCell" data-priority="2" style="width: 35%">Emby User Name</th>
@@ -38,34 +39,34 @@
                                     <th class="detailTableHeaderCell" data-priority="4" style="width: 10%">Remove</th>
                                     <th class="detailTableHeaderCell" data-priority="5"></th>
                                 </tr>
-                            </thead>
-                            <tbody class="personalizationTableResultBody"></tbody>
-                        </table>
-                        <div style="margin-left:80%">
-                            <button is="emby-button" type="button" class="fab btnClearAllPersonalizationResults submit emby-button hide" style="margin-right: 1em;">
-                                <i class="md-icon">clear_all</i>
-                            </button>
-                            <h3 style="vertical-align: middle; display: inline-block;">Clear all</h3>
+                                </thead>
+                                <tbody class="personalizationTableResultBody"></tbody>
+                            </table>
+                            <div style="margin-left: 80%">
+                                <button is="emby-button" type="button" class="fab btnClearAllPersonalizationResults submit emby-button hide" style="margin-right: 1em;">
+                                    <i class="md-icon">clear_all</i>
+                                </button>
+                                <h3 style="vertical-align: middle; display: inline-block;">Clear all</h3>
+                            </div>
+                        </div>
+                    
+                        <div style="padding: 0 1em 1em;">
+                            <div class="infoBanner restartInfoBanner flex align-items-center" style="margin: 1em 0;">
+                                Parental controls using voice recognition allows Alexa's personalization voice profiles to be used with Emby accounts parental controls to handle media requests based on rating.
+                                If turned off, Alexa will use the first Emby Administrator account to access media.
+                            </div>
+                            <div class="inputContainer">
+                                <label style="width: auto;" class="emby-toggle-label">
+                                    <input is="emby-toggle" type="checkbox" class="chkEnableParentalControlSpeechRecognition noautofocus emby-toggle emby-toggle-focusring">
+                                    <span class="toggleLabel">Enable parental control using voice recognition</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="paperList" style="padding: 1em;">
-                        <div class="infoBanner restartInfoBanner flex align-items-center" style="margin: 1em 0;">
-                            Parental controls using voice recognition allows Alexa's personalization voice profiles to be used with Emby accounts parental controls to handle media requests based on rating.
-                            If turned off, Alexa will use the first Emby Administrator account to access media.
-                        </div>
+                    <hr />
 
-                        <div class="inputContainer">
-                            <label style="width: auto;" class="emby-toggle-label">
-                                <input is="emby-toggle" type="checkbox" class="chkEnableParentalControlSpeechRecognition noautofocus emby-toggle emby-toggle-focusring">
-                                <span class="toggleLabel">Enable parental control using voice recognition</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!--<h2 class="sectionTitle sectionTitle-cards">Rooms</h2>-->
-
-                    <div class="paperList" style="padding: 1em;">
+                    <div style="padding: 1em;">
                         <div class="detailSectionHeader" style="padding-bottom: 2em">
                             <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">Rooms</h2>
                             <button is="emby-button" type="button" class="fab btnRoomsDevices submit emby-button" style="margin-left: 1em;">
@@ -74,8 +75,9 @@
                             <p>Create room names with emby devices.</p>
                         </div>
 
-                        <table class="tblRoomsResults table detailTable" style="width: 100%; margin-top: 3em; padding-bottom: 3em;">
-                            <thead>
+                        <div class="paperList" style="padding: 1em;">
+                            <table class="tblRoomsResults table detailTable" style="width: 100%; margin-top: 3em; padding-bottom: 3em;">
+                                <thead>
                                 <tr style="text-align: left;">
                                     <th class="detailTableHeaderCell" data-priority="1" style="width: 5%"></th>
                                     <th class="detailTableHeaderCell" data-priority="2" style="width: 35%">Name</th>
@@ -83,10 +85,11 @@
                                     <th class="detailTableHeaderCell" data-priority="4" style="width: 10%">Remove</th>
                                     <th class="detailTableHeaderCell" data-priority="5"></th>
                                 </tr>
-                            </thead>
-                            <tbody class="roomTableResultBody"></tbody>
-                        </table>
-                        <div style="margin-left:80%">
+                                </thead>
+                                <tbody class="roomTableResultBody"></tbody>
+                            </table>
+                        </div>
+                        <div style="margin-left: 80%">
                             <button is="emby-button" type="button" class="fab btnClearAllRoomsDevicesResults submit emby-button hide" style="margin-right: 1em;">
                                 <i class="md-icon">clear_all</i>
                             </button>
@@ -96,7 +99,7 @@
 
                     <button is="emby-button" class="btnTry raised button-submit block emby-button" style="margin: 2em auto; width: 50%;" id="saveButton">Things to try!</button>
 
-                </form>
+                </div>
             </div>
         </div>
     </div>

@@ -6,38 +6,16 @@ using AlexaController.Api;
 using AlexaController.Session;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
-using MediaBrowser.Model.Serialization;
 using MediaBrowser.Model.Services;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
+
 // ReSharper disable TooManyArguments
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
-    [Route("/AddEcho", Description = "Add Echo Device Id To the Room", Verbs = "GET")]
-    public class AddEcho : IReturn<bool>
-    {
-    }
-
     [Intent]
     public class RoomSetupIntent : IIntentResponseModel, IService
     {
-        private IJsonSerializer JsonSerializer { get; }
-        public RoomSetupIntent(IJsonSerializer json)
-        {
-            JsonSerializer = json;
-        }
-
-        public bool Get(AddEcho request)
-        {
-            return true;
-        }
-
         public string Response
         (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
