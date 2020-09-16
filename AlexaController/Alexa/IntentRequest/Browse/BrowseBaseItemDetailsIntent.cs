@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Errors;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
@@ -22,7 +23,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     public class BrowseBaseItemDetailsIntent : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             var roomManager = new RoomContextManager();
             Room room = null;
@@ -75,8 +76,19 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     }
                 });
 
-            if (!(room is null)) try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, result); } catch { }
-            
+            if (!(room is null))
+                try
+                {
+                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, result);
+                }
+                catch (Exception exception)
+                {
+                    responseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    room = null;
+                }
+
+            Task.Delay(1500);
+
             var documentTemplateInfo = new RenderDocumentTemplateInfo()
             {
                 baseItems = new List<BaseItem>() { result },

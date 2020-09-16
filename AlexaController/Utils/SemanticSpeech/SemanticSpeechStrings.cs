@@ -87,7 +87,7 @@ namespace AlexaController.Utils.SemanticSpeech
         };
 
         public static string GetPhrase
-        (SpeechResponseType type, AlexaSession session, List<BaseItem> items = null, string[] args = null)
+        (SpeechResponseType type, IAlexaSession session, List<BaseItem> items = null, string[] args = null)
         {
 
             switch (type)

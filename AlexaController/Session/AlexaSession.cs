@@ -14,7 +14,21 @@ namespace AlexaController.Session
         VIDEO
     }
 
-    public class AlexaSession
+    public interface IAlexaSession
+    {
+        User User { get; set; }
+        string SessionId { get; set; }
+        string DeviceId { get; set; }
+        AlexaSessionDisplayType alexaSessionDisplayType { get; set; }
+        Person person { get; set; }
+        AlexaRequest PersistedRequestData { get; set; }
+        BaseItem NowViewingBaseItem { get; set; }
+        bool PlaybackStarted { get; set; }
+        Room room { get; set; }
+        Paging paging { get; set; }
+    }
+
+    public class AlexaSession : IAlexaSession
     {
         public User User { get; set; }
         public string SessionId { get; set; }

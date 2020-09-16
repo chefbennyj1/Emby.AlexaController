@@ -157,7 +157,7 @@ namespace AlexaController
             Instance       = this;
         }
 
-        public Directive GetRenderDocumentTemplate(RenderDocumentTemplateInfo templateInfo, AlexaSession session)
+        public Directive GetRenderDocumentTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             switch (templateInfo.renderDocumentType)
             {
@@ -176,7 +176,7 @@ namespace AlexaController
             }
         }
 
-        private Directive GetItemListSequenceTemplate(RenderDocumentTemplateInfo templateInfo, AlexaSession session, string scrollDirection = "horizontal")
+        private Directive GetItemListSequenceTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session, string scrollDirection = "horizontal")
         {
 
             var layout             = new List<Item>();
@@ -383,7 +383,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetItemDetailsTemplate(RenderDocumentTemplateInfo templateInfo, AlexaSession session)
+        private Directive GetItemDetailsTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             ServerEntryPoint.Instance.Log.Info("ALEXA BUILDING RENDER DOCUMENT");
             var type = templateInfo.baseItems[0].GetType().Name;
@@ -643,7 +643,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetVerticalTextListTemplate(RenderDocumentTemplateInfo templateInfo, AlexaSession session)
+        private Directive GetVerticalTextListTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             var layout = new List<Item>();
             var layoutBaseItems = new List<Item>();
@@ -812,7 +812,7 @@ namespace AlexaController
             };
         }
 
-        private Directive GetRoomSelectionTemplate(RenderDocumentTemplateInfo templateInfo, AlexaSession session)
+        private Directive GetRoomSelectionTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             var endpoint = $"/Items/{templateInfo.baseItems[0].InternalId}/Images";
             var layout = new List<Item>();
@@ -870,7 +870,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetBrowseLibraryTemplate(RenderDocumentTemplateInfo templateInfo, AlexaSession session)
+        private Directive GetBrowseLibraryTemplate(RenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             var layout = new List<Item>();
             const string token = "browseLibrary";
@@ -1427,7 +1427,7 @@ namespace AlexaController
 
         //Create text at the bottom of the echo show screen which will give hints to the user for what they can say.
         //Use the currently displayed media items in the hint text.
-        private IEnumerable<Command> GetSequentialItemsHintText(IList<BaseItem> sequenceItems, AlexaSession session)
+        private IEnumerable<Command> GetSequentialItemsHintText(IList<BaseItem> sequenceItems, IAlexaSession session)
         {
             if (session.PlaybackStarted) return new List<Command>();
 

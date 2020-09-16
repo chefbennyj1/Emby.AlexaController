@@ -20,7 +20,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
     public class PlayNextUpEpisodeIntent : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             //we need a room object
             var roomManager = new RoomContextManager();

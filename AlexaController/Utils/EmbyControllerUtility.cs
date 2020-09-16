@@ -33,7 +33,7 @@ namespace AlexaController.Utils
         IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration );
         IEnumerable<BaseItem> GetLatestTv(User user, DateTime duration);
         void BrowseItemAsync(string room, User user, BaseItem request);
-        void PlayMediaItemAsync(AlexaSession alexaSession, BaseItem item, User user);
+        void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item, User user);
         BaseItem QuerySpeechResultItems(string searchName, string[] type, User user);
     }
 
@@ -210,7 +210,7 @@ namespace AlexaController.Utils
             }
         }
 
-        public async void PlayMediaItemAsync(AlexaSession alexaSession, BaseItem item, User user)
+        public async void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item, User user)
         {
             var deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
             

@@ -39,7 +39,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
 
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             var room = session.room;
             if (room == null)

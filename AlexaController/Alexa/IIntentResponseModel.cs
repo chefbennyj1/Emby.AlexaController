@@ -9,7 +9,6 @@ namespace AlexaController.Alexa
 {
     public interface IIntentResponseModel
     {
-        string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager);
+        string Response(AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient,ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager);
     }
 }

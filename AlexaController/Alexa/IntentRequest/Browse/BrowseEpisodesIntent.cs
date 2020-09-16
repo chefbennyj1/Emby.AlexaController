@@ -25,7 +25,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     public class BrowseEpisodesIntent : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             var roomManager = new RoomContextManager();
             Room room = null;
@@ -69,7 +69,17 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             var season = libraryManager.GetItemById(result.Items[0].Parent.InternalId);
-            if (!(room is null)) try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, season); } catch { }
+
+            if (!(room is null))
+                try
+                {
+                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, season);
+                }
+                catch (Exception exception)
+                {
+                    responseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    room = null;
+                }
 
             var documentTemplateInfo = new RenderDocumentTemplateInfo()
             {

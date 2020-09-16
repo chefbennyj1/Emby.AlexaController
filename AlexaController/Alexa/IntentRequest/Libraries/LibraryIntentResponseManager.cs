@@ -27,7 +27,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         }
 
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager)
         {
             var roomManager = new RoomContextManager();
             Room room = null;

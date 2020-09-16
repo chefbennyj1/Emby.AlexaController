@@ -11,7 +11,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     public class RoomContextManager 
     { 
-        public string RequestRoom(AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient)
+        public string RequestRoom(AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
         {
             session.PersistedRequestData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session);
@@ -35,7 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }, session.alexaSessionDisplayType);
         }
 
-        public Room ValidateRoom(AlexaRequest alexaRequest, AlexaSession session)
+        public Room ValidateRoom(AlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;
             var intent = request.intent;

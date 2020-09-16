@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using AlexaController.Configuration;
-using AlexaController.Utils;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Logging;
@@ -17,19 +14,16 @@ namespace AlexaController.Session
     public interface IAlexaSessionManager
     {
         void EndSession(AlexaRequest alexaRequest);
-        AlexaSession GetSession(AlexaRequest alexaRequest, User user = null);
-        void UpdateSession(AlexaSession session, RenderDocumentTemplateInfo templateInfo = null, bool? isBack = null);
-        //bool ValidateRoomConfiguration(string room, PluginConfiguration config);
+        IAlexaSession GetSession(AlexaRequest alexaRequest, User user = null);
+        void UpdateSession(IAlexaSession session, RenderDocumentTemplateInfo templateInfo = null, bool? isBack = null);
 
-        //Room ValidateRoom(AlexaRequest alexaRequest, AlexaSession session);
-        //void UpdateSessionRenderDocumentPages(AlexaSession session, RenderDocumentTemplateInfo templateInfo = null, bool? goBack = null);
     }
 
     public class AlexaSessionManager : IAlexaSessionManager, IServerEntryPoint
     {
         public static IAlexaSessionManager Instance { get; private set; }
 
-        private static readonly List<AlexaSession> OpenSessions = new List<AlexaSession>();
+        private static readonly List<IAlexaSession> OpenSessions = new List<IAlexaSession>();
 
         private ISessionManager SessionManager { get; }
         private ILogger log { get; }
@@ -59,7 +53,7 @@ namespace AlexaController.Session
             OpenSessions.RemoveAll(s => s.SessionId.Equals(alexaRequest.session.sessionId));
         }
 
-        public AlexaSession GetSession(AlexaRequest alexaRequest, User user = null)
+        public IAlexaSession GetSession(AlexaRequest alexaRequest, User user = null)
         {
             // A UserEvent can only happen in an open session because sessions will always start with voice.
             if (string.Equals(alexaRequest.request.type, "Alexa.Presentation.APL.UserEvent"))
@@ -73,7 +67,7 @@ namespace AlexaController.Session
             var amazonSession = alexaRequest.session;
 
             AlexaRequest persistedRequestData = null;
-            AlexaSession sessionInfo = null;
+            IAlexaSession sessionInfo = null;
             Room room = null;
             if (OpenSessions.Exists(s => s.SessionId.Equals(amazonSession.sessionId)))
             {
@@ -129,7 +123,7 @@ namespace AlexaController.Session
             return sessionInfo;
         }
 
-        public void UpdateSession(AlexaSession session, RenderDocumentTemplateInfo templateInfo = null, bool? isBack = null)
+        public void UpdateSession(IAlexaSession session, RenderDocumentTemplateInfo templateInfo = null, bool? isBack = null)
         {
             if (!(templateInfo is null))
                 session = UpdateSessionPaging(session, templateInfo, isBack);
@@ -138,7 +132,7 @@ namespace AlexaController.Session
             OpenSessions.Add(session);
         }
 
-        private static AlexaSession UpdateSessionPaging(AlexaSession session, RenderDocumentTemplateInfo templateInfo, bool? isBack = null)
+        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, RenderDocumentTemplateInfo templateInfo, bool? isBack = null)
         {
             if (isBack == true)
             {

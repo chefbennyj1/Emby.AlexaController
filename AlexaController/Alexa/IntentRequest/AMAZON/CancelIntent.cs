@@ -20,7 +20,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
     public class CancelIntent : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, 
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, 
             ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             return responseClient.BuildAlexaResponse(new Response()

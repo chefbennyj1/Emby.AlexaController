@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -20,21 +21,19 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     public class BrowseNextUpEpisodeIntent : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
-            var request        = alexaRequest.request;
-            var context        = alexaRequest.context;
-            var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
-            var roomManager    = new RoomContextManager();
-
+            var roomManager = new RoomContextManager();
             Room room = null;
             try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
-
             var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (room is null && displayNone)
                 return roomManager.RequestRoom(alexaRequest, session, responseClient);
 
+            var request = alexaRequest.request;
+            var context = alexaRequest.context;
+            var apiAccessToken = context.System.apiAccessToken;
+            var requestId = request.requestId;
 
             var progressiveSpeech = "";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
@@ -82,8 +81,17 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 });
             }
 
-            if (room != null) try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, nextUpEpisode); } catch {}
-            
+            if (!(room is null))
+                try
+                {
+                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, nextUpEpisode);
+                }
+                catch (Exception exception)
+                {
+                    responseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    room = null;
+                }
+
             var documentTemplateInfo = new RenderDocumentTemplateInfo()
             {
                 baseItems          = new List<BaseItem>() {nextUpEpisode},

@@ -13,7 +13,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
     public class CollectionsIntent  : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             return new LibraryIntentResponseManager("Collections").Response(alexaRequest, session, responseClient, libraryManager);
         }

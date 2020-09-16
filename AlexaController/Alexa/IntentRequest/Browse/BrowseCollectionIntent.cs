@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
@@ -27,7 +28,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     public class BrowseCollectionIntent : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             var roomManager = new RoomContextManager();
             Room room = null;
@@ -68,9 +69,18 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     });
                 }
             }
-            
-            if (!(room is null)) try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, collectionBaseItem); } catch { }
-            
+
+            if (!(room is null))
+                try
+                {
+                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, collectionBaseItem);
+                }
+                catch (Exception exception)
+                {
+                    responseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    room = null;
+                }
+
             var documentTemplateInfo = new RenderDocumentTemplateInfo()
             {
                 HeaderTitle        = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(collectionBaseItem.Name.ToLower()),

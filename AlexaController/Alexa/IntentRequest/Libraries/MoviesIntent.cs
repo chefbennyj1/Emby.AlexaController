@@ -12,7 +12,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
     public class MoviesIntent : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             return new LibraryIntentResponseManager("Movies").Response(alexaRequest, session, responseClient, libraryManager);
         }

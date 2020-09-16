@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.Errors
     
     public interface IErrorHandler
     {
-        string OnError(Exception exception, AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient);
+        string OnError(Exception exception, AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient);
     }
 
     public class ErrorHandler : IServerEntryPoint, IErrorHandler
@@ -38,7 +38,7 @@ namespace AlexaController.Alexa.Errors
             UserManager    = userManager;
             Instance       = this;
         }
-        public string OnError(Exception exception, AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient)
+        public string OnError(Exception exception, AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
         {
             return responseClient.BuildAlexaResponse(new Response()
             {
