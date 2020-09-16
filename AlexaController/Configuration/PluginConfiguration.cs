@@ -15,8 +15,8 @@ namespace AlexaController.Configuration
     public class UserCorrelation
     {
         public string AlexaPersonId { get; set; }
-        public string EmbyUserId  { get; set; }
-        public string EmbyUserName { get; set; }
+        public string EmbyUserId    { get; set; }
+        public string EmbyUserName  { get; set; }
     }
 
     public class Room

@@ -112,7 +112,6 @@ namespace AlexaController.Utils.SemanticSpeech
                     return $"{GetSpeechDysfluency(Emotion.disappointed)}, {SayWithEmotion(Apologetic[Plugin.RandomIndex.Next(1, Apologetic.Count)], Emotion.disappointed, Intensity.medium)} {InsertStrengthBreak(StrengthBreak.weak)}";
 
             }
-
             return string.Empty;
         }
 
@@ -149,9 +148,7 @@ namespace AlexaController.Utils.SemanticSpeech
                     return GetTimeOfDayResponse();
 
             }
-
             return string.Empty;
-
         }
       
     }

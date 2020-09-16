@@ -74,7 +74,7 @@ namespace AlexaController.Api
 
         private string OnIntentRequest(AlexaRequest alexaRequest)
         {
-            AlexaSession session = null;
+            IAlexaSession session = null;
 
             var request = alexaRequest.request;
             var intent  = request.intent;

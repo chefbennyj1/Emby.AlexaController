@@ -17,7 +17,7 @@ namespace AlexaController.Alexa.IntentRequest
     public class StreamingUsersIntent : IIntentResponseModel
     {
         public string Response
-        (AlexaRequest alexaRequest, AlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
             var speechString = GetUserSessionSpeechString(sessionManager.Sessions);
 

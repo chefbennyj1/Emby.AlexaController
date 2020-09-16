@@ -5,7 +5,7 @@ using AlexaController.Api;
 using AlexaController.Configuration;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
-using MediaBrowser.Model.Logging;
+//using MediaBrowser.Model.Logging;
 using User = MediaBrowser.Controller.Entities.User;
 
 
@@ -16,7 +16,6 @@ namespace AlexaController.Session
         void EndSession(AlexaRequest alexaRequest);
         IAlexaSession GetSession(AlexaRequest alexaRequest, User user = null);
         void UpdateSession(IAlexaSession session, RenderDocumentTemplateInfo templateInfo = null, bool? isBack = null);
-
     }
 
     public class AlexaSessionManager : IAlexaSessionManager, IServerEntryPoint
@@ -26,12 +25,13 @@ namespace AlexaController.Session
         private static readonly List<IAlexaSession> OpenSessions = new List<IAlexaSession>();
 
         private ISessionManager SessionManager { get; }
-        private ILogger log { get; }
-        public AlexaSessionManager(ISessionManager sessionManager, ILogManager logMan)
+        //private ILogger log                    { get; }
+
+        public AlexaSessionManager(ISessionManager sessionManager)//, ILogManager logMan)
         {
             Instance = this;
             SessionManager = sessionManager;
-            log = logMan.GetLogger(Plugin.Instance.Name);
+            //log = logMan.GetLogger(Plugin.Instance.Name);
         }
 
         private static AlexaSessionDisplayType GetCurrentViewport(AlexaRequest alexaRequest)
@@ -61,9 +61,9 @@ namespace AlexaController.Session
                 return OpenSessions.FirstOrDefault(s => s.SessionId == alexaRequest.session.sessionId);
             }
 
-            var context = alexaRequest.context;
-            var system = context.System;
-            var person = system.person;
+            var context       = alexaRequest.context;
+            var system        = context.System;
+            var person        = system.person;
             var amazonSession = alexaRequest.session;
 
             AlexaRequest persistedRequestData = null;
@@ -71,7 +71,7 @@ namespace AlexaController.Session
             Room room = null;
             if (OpenSessions.Exists(s => s.SessionId.Equals(amazonSession.sessionId)))
             {
-                // Not a new session open with AMAZON, we should have a corresponding session
+                // Not a new session with AMAZON, we should have a corresponding session
                 // already registered in the "OpenSessions" list
                 sessionInfo = OpenSessions.FirstOrDefault(s => s.SessionId == amazonSession.sessionId);
 
@@ -108,14 +108,14 @@ namespace AlexaController.Session
             // We sync the AMAZON session Id with our own.
             sessionInfo = new AlexaSession()
             {
-                SessionId = amazonSession.sessionId,
-                DeviceId = system.device.deviceId,
-                person = person,
-                room = room,
-                User = user,
+                SessionId               = amazonSession.sessionId,
+                DeviceId                = system.device.deviceId,
+                person                  = person,
+                room                    = room,
+                User                    = user,
                 alexaSessionDisplayType = GetCurrentViewport(alexaRequest),
-                PersistedRequestData = persistedRequestData,
-                paging = new Paging { pages = new Dictionary<int, RenderDocumentTemplateInfo>() }
+                PersistedRequestData    = persistedRequestData,
+                paging                  = new Paging { pages = new Dictionary<int, RenderDocumentTemplateInfo>() }
             };
 
             OpenSessions.Add(sessionInfo);
@@ -194,6 +194,7 @@ namespace AlexaController.Session
 
             var sessionToUpdate = OpenSessions.FirstOrDefault(session => session.room.Name == room?.Name);
 
+            // ReSharper disable once PossibleNullReferenceException
             sessionToUpdate.PlaybackStarted = false;
             UpdateSession(sessionToUpdate);
         }
