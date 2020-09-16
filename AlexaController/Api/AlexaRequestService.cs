@@ -25,7 +25,7 @@ namespace AlexaController.Api
     
 
     [Route("/Alexa", "POST", Summary = "Alexa End Point")]
-    public class AlexaRequest 
+    public class AlexaRequest : IRequiresRequestStream
     {
         public Stream RequestStream  { get; set; }
         public AmazonSession session { get; set; }
@@ -117,7 +117,7 @@ namespace AlexaController.Api
             }
             
             var requestHandlerParams = new object[] { alexaRequest, session, ResponseClient, LibraryManager, SessionManager, UserManager };
-            var type                 = Type.GetType(IntentNamespace(request));
+            var type = Type.GetType(IntentNamespace(request));
 
             try
             {
