@@ -45,17 +45,20 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 }, session.alexaSessionDisplayType);
             }
 
-            sessionManager.SendMessageToAdminSessions("RoomAndDeviceUtility", room, CancellationToken.None);
-
-            return responseClient.BuildAlexaResponse(new Response()
+            
+            var response = responseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"Thank you. Please see the plugin configuration to choose the emby device that is in the { room }, and press the \"Create Room button\".",
+                    phrase = $"Thank you. Please see the plugin configuration to choose the emby device that is in the { room.Name }, and press the \"Create Room button\".",
 
                 }
             }, session.alexaSessionDisplayType);
+
+            session.room = null;
+
+            return response;
         }
     }
 }

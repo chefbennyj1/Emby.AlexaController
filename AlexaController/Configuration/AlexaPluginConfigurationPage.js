@@ -430,12 +430,7 @@
 
             loading.hide();
             dialogHelper.open(dlg);
-
-            dlg.querySelector('.btnAddEcho').addEventListener('click', (e) => {
-                e.preventDefault();
-
-            });
-
+            
             dlg.querySelector('.btnCloseDialog').addEventListener('click',
                 () => {
                     dialogHelper.close(dlg);

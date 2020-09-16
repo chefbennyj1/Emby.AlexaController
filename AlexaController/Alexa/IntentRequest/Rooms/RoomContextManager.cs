@@ -35,6 +35,24 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }, session.alexaSessionDisplayType);
         }
 
+        //public Room CreateRoom(string name)
+        //{
+        //    var config = Plugin.Instance.Configuration;
+        //    var room = new Room()
+        //    {
+        //        Name = name
+        //    };
+            
+        //    if (!ValidateRoomConfiguration(name, config))
+        //    {
+        //        config.Rooms.Add(room);
+        //        return room;
+        //    }
+
+        //    return config.Rooms.FirstOrDefault(r =>
+        //        string.Equals(r.Name, name, StringComparison.CurrentCultureIgnoreCase));
+        //}
+
         public Room ValidateRoom(AlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;
@@ -52,9 +70,9 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
         }
 
-        private static bool ValidateRoomConfiguration(string room, PluginConfiguration config)
+        private static bool ValidateRoomConfiguration(string name, PluginConfiguration config)
         {
-            return config.Rooms.Exists(r => string.Equals(r.Name, room,
+            return config.Rooms.Exists(r => string.Equals(r.Name, name,
                 StringComparison.InvariantCultureIgnoreCase));
         }
     }

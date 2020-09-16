@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using AlexaController.Alexa.Errors;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
@@ -19,21 +20,33 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         public string Response
         (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
         {
+            var request = alexaRequest.request;
+            var intent = request.intent;
+            var slots = intent.slots;
+            var roomName = slots.Room.value;
+
             var rePromptIntent     = session.PersistedRequestData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
 
             var roomManager = new RoomContextManager();
             Room room = null;
-            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
-
+            
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {
+                try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
                 if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    return new ErrorHandler().OnError(new Exception("That room is currently not configured to show media."), alexaRequest, session, responseClient);
+                     throw new Exception("That room is currently not configured to show media.");
                 }
             }
-
+            else
+            {
+                sessionManager.SendMessageToAdminSessions("RoomAndDeviceUtility", roomName, CancellationToken.None);
+                //Give a Room object with the Setup Name back to the RoomSetupIntent Class through the Session object.
+                //Leave it to the  configuration JavaScript to finish saving the new room set up device information.
+                room = new Room(){ Name = roomName}; 
+            }
+            
             session.room = room;
             AlexaSessionManager.Instance.UpdateSession(session);
 
