@@ -21,20 +21,27 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
     public class UserEventShowItemListSequenceTemplate : IUserEventResponse
     {
-        public string Response(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
-        //(IAlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public UserEventShowItemListSequenceTemplate(IAlexaRequest alexaRequest, IAlexaEntryPoint alexa)
         {
-            var request  = alexaRequest.request;
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            var request  = AlexaRequest.request;
             var source   = request.source;
-            var baseItem = alexa.LibraryManager.GetItemById(source.id);
-            var session  = AlexaSessionManager.Instance.GetSession(alexaRequest);
+            var baseItem = Alexa.LibraryManager.GetItemById(source.id);
+            var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room     = session.room;
             var type     = baseItem.GetType().Name;
 
            
             var phrase = "";
             
-            var result   = alexa.LibraryManager.GetItemsResult(new InternalItemsQuery(session.User)
+            var result   = Alexa.LibraryManager.GetItemsResult(new InternalItemsQuery(session.User)
             {
                 Parent           =  baseItem,
                 IncludeItemTypes = new [] { type == "Series" ? "Season" : "Episode" },
@@ -42,7 +49,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             });
 
 
-            var documentTemplateInfo = new RenderDocumentTemplateInfo()
+            var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 baseItems          = result.Items.ToList(),
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
@@ -60,7 +67,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, baseItem); } catch { }
             
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

@@ -81,7 +81,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     room = null;
                 }
 
-            var documentTemplateInfo = new RenderDocumentTemplateInfo()
+            var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 baseItems          = result.Items.ToList(),
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,

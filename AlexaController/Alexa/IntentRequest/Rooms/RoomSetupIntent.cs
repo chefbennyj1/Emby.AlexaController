@@ -11,7 +11,7 @@ using MediaBrowser.Model.Services;
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
-    public class RoomSetupIntent : IIntentResponse, IService
+    public class RoomSetupIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
@@ -41,7 +41,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
+                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                             HeadlinePrimaryText = "Please say the name of the room you want to setup.",

@@ -3,8 +3,6 @@ using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable TooManyDependencies
@@ -19,10 +17,18 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
     public class goBack : IUserEventResponse
     {
-        public string Response(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public goBack(IAlexaRequest alexaRequest, IAlexaEntryPoint alexa)
+        {
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+        }
+        public string Response()
         //(IAlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
         {
-            var session = AlexaSessionManager.Instance.GetSession(alexaRequest);
+            var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
 
             var previousPage = session.paging.pages[session.paging.currentPage - 1];
             var currentPage = session.paging.pages[session.paging.currentPage];
@@ -31,9 +37,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             //if the user has requested an Emby client/room display during the session - go back on both if possible
             if (session.room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, alexa.LibraryManager.GetItemById(session.NowViewingBaseItem.Parent.InternalId)); } catch { }
+                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, Alexa.LibraryManager.GetItemById(session.NowViewingBaseItem.Parent.InternalId)); } catch { }
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()

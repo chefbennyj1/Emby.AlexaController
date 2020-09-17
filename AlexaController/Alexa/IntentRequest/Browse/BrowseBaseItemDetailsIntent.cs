@@ -16,12 +16,14 @@ using MediaBrowser.Controller.Entities;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
+    
     [Intent]
     public class BrowseBaseItemDetailsIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session      { get; }
         public IAlexaEntryPoint Alexa     { get; }
+
         public BrowseBaseItemDetailsIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
             AlexaRequest = alexaRequest;
@@ -92,7 +94,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             Task.Delay(1500); //<-Yep...
 
-            var documentTemplateInfo = new RenderDocumentTemplateInfo()
+            var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 baseItems = new List<BaseItem>() { result },
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE

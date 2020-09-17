@@ -13,11 +13,19 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
     public class UserEventPlaybackStart : IUserEventResponse
     {
-        public string Response(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public UserEventPlaybackStart(IAlexaRequest alexaRequest, IAlexaEntryPoint alexa)
         {
-            var source = alexaRequest.request.source;
-            var session = AlexaSessionManager.Instance.GetSession(alexaRequest);
-            var baseItem = alexa.LibraryManager.GetItemById(source.id);
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+        }
+        public string Response()
+        { 
+            var source = AlexaRequest.request.source;
+            var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
+            var baseItem = Alexa.LibraryManager.GetItemById(source.id);
             var room =  session.room;
             
             var responseData = new Response();
@@ -30,7 +38,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 responseData.shouldEndSession = null;
                 responseData.directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
                         baseItems          = new List<BaseItem>() { baseItem }
@@ -38,7 +46,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     }, session)
                 };
 
-                return alexa.ResponseClient.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+                return Alexa.ResponseClient.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
             }
 
             session.PlaybackStarted = true;
@@ -46,7 +54,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             Task.Run(() => EmbyControllerUtility.Instance.PlayMediaItemAsync(session, baseItem, session.User));
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 person = session.person,
                 outputSpeech = new OutputSpeech()
@@ -57,7 +65,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() {baseItem},
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE

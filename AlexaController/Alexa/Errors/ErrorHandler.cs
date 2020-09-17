@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.Errors
                 directives = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance
-                        .GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
+                        .GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                             HeadlinePrimaryText = exception.Message

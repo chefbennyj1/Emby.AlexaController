@@ -65,7 +65,7 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 case AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE:
                 {
-                        var documentTemplateInfo = new RenderDocumentTemplateInfo()
+                        var documentTemplateInfo = new RenderDocumentTemplate()
                         {
                             baseItems          = results,
                             renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,

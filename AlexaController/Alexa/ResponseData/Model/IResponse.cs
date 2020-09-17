@@ -3,7 +3,7 @@ using AlexaController.Alexa.RequestData.Model;
 
 namespace AlexaController.Alexa.ResponseData.Model
 {
-    public interface IResponse
+    public interface IResponse 
     {
         IPerson person              { get; }
         IOutputSpeech outputSpeech  { get; }

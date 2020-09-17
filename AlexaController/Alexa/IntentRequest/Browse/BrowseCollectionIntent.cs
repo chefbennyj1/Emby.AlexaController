@@ -87,7 +87,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     room = null;
                 }
 
-            var documentTemplateInfo = new RenderDocumentTemplateInfo()
+            var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 HeaderTitle        = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(collectionBaseItem.Name.ToLower()),
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,

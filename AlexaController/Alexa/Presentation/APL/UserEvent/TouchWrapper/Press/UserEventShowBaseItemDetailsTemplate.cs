@@ -21,17 +21,25 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
     public class UserEventShowBaseItemDetailsTemplate : IUserEventResponse
     {
-        public string Response(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
-        //(IAlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public UserEventShowBaseItemDetailsTemplate(IAlexaRequest alexaRequest, IAlexaEntryPoint alexa)
         {
-            var request        = alexaRequest.request;
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            Alexa.Log.Info("ALEXA UserEventTrigger");
+            var request        = AlexaRequest.request;
             var source         = request.source;
-            var baseItem       = alexa.LibraryManager.GetItemById(source.id);
-            var session        = AlexaSessionManager.Instance.GetSession(alexaRequest);
+            var baseItem       = Alexa.LibraryManager.GetItemById(source.id);
+            var session        = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room           = session.room;
             
 
-            var documentTemplateInfo = new RenderDocumentTemplateInfo()
+            var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 baseItems = new List<BaseItem>() {baseItem},
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
@@ -47,7 +55,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             if (room != null)
                 try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, baseItem); } catch { }
             
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

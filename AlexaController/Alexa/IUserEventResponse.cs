@@ -1,9 +1,12 @@
 ﻿using AlexaController.Api;
+using AlexaController.Session;
 
 namespace AlexaController.Alexa
 {
-    public interface IUserEventResponse
+    public interface IUserEventResponse 
     {
-        string Response(IAlexaRequest alexaRequest, AlexaEntryPoint alexa); 
+        IAlexaRequest AlexaRequest { get; }
+        IAlexaEntryPoint Alexa { get; }
+        string Response(); 
     }
 }

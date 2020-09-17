@@ -15,7 +15,7 @@ namespace AlexaController.Session
     {
         void EndSession(IAlexaRequest alexaRequest);
         IAlexaSession GetSession(IAlexaRequest alexaRequest, User user = null);
-        void UpdateSession(IAlexaSession session, IRenderDocumentTemplateInfo templateInfo = null, bool? isBack = null);
+        void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template = null, bool? isBack = null);
     }
 
     public class AlexaSessionManager : IAlexaSessionManager, IServerEntryPoint
@@ -114,7 +114,7 @@ namespace AlexaController.Session
                 User                    = user,
                 alexaSessionDisplayType = GetCurrentViewport(alexaRequest),
                 PersistedRequestData    = persistedRequestData,
-                paging                  = new Paging { pages = new Dictionary<int, IRenderDocumentTemplateInfo>() }
+                paging                  = new Paging { pages = new Dictionary<int, IRenderDocumentTemplate>() }
             };
 
             OpenSessions.Add(sessionInfo);
@@ -122,16 +122,16 @@ namespace AlexaController.Session
             return sessionInfo;
         }
 
-        public void UpdateSession(IAlexaSession session, IRenderDocumentTemplateInfo templateInfo = null, bool? isBack = null)
+        public void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template = null, bool? isBack = null)
         {
-            if (!(templateInfo is null))
-                session = UpdateSessionPaging(session, templateInfo, isBack);
+            if (!(template is null))
+                session = UpdateSessionPaging(session, template, isBack);
 
             OpenSessions.RemoveAll(s => s.SessionId.Equals(session.SessionId));
             OpenSessions.Add(session);
         }
 
-        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, IRenderDocumentTemplateInfo templateInfo, bool? isBack = null)
+        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, IRenderDocumentTemplate template, bool? isBack = null)
         {
             if (isBack == true)
             {
@@ -148,16 +148,16 @@ namespace AlexaController.Session
             {
                 //set the pages dictionary with page 1
                 session.paging.currentPage = 1;
-                session.paging.pages.Add(session.paging.currentPage, templateInfo);
+                session.paging.pages.Add(session.paging.currentPage, template);
 
                 return session;
             }
 
-            if (!session.paging.pages.ContainsValue(templateInfo))
+            if (!session.paging.pages.ContainsValue(template))
             {
                 session.paging.currentPage += 1;
                 session.paging.canGoBack = true;
-                session.paging.pages.Add(session.paging.currentPage, templateInfo);
+                session.paging.pages.Add(session.paging.currentPage, template);
 
                 return session;
             }

@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         renderDocumentType  = RenderDocumentType.QUESTION_TEMPLATE,
                         HeadlinePrimaryText = "Which room did you want?"

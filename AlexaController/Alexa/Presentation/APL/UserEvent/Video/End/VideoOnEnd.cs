@@ -3,27 +3,25 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable TooManyArguments
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
 {
     public class VideoOnEnd : IUserEventResponse
     {
-        public string Response(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
-        //(IAlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public VideoOnEnd(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
         {
-            var arguments = alexaRequest.request.arguments;
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            var arguments = AlexaRequest.request.arguments;
             
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()

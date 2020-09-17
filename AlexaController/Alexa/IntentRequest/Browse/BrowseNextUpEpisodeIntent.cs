@@ -65,7 +65,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = true,
                     directives       = new List<IDirective>()
                     {
-                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
+                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             HeadlinePrimaryText = "There doesn't seem to be a new episode available.",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
@@ -101,7 +101,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     room = null;
                 }
 
-            var documentTemplateInfo = new RenderDocumentTemplateInfo()
+            var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 baseItems          = new List<BaseItem>() {nextUpEpisode},
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE

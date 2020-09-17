@@ -50,16 +50,16 @@ namespace AlexaController
         VERTICAL_TEXT_LIST_TEMPLATE
     }
 
-    public interface IRenderDocumentTemplateInfo
+    public interface IRenderDocumentTemplate
     {
-        RenderDocumentType renderDocumentType { get; set; }
-        string HeaderTitle                    { get; set; }
-        List<BaseItem> baseItems              { get; set; }
-        BaseItem collectionRoot               { get; set; }
-        string HeadlinePrimaryText            { get; set; }
+        RenderDocumentType renderDocumentType { get; }
+        string HeaderTitle                    { get; }
+        List<BaseItem> baseItems              { get; }
+        BaseItem collectionRoot               { get; }
+        string HeadlinePrimaryText            { get; }
     }
 
-    public class RenderDocumentTemplateInfo : IRenderDocumentTemplateInfo
+    public class RenderDocumentTemplate : IRenderDocumentTemplate
     {                                                                 
         public RenderDocumentType renderDocumentType { get; set; } 
         public string HeaderTitle                    { get; set; } = "";
@@ -76,7 +76,7 @@ namespace AlexaController
         public static RenderDocumentBuilder Instance { get; private set; }
         private static string LanAddress             { get; set; }
 
-        private readonly List<Import> Imports = new List<Import>()
+        private readonly List<IImport> Imports = new List<IImport>()
         {
             new Import()
             {
@@ -90,7 +90,7 @@ namespace AlexaController
             }
         };
 
-        private readonly List<Resource> Resources = new List<Resource>()
+        private readonly List<IResource> Resources = new List<IResource>()
         {
             new Resource()
             {
@@ -166,34 +166,34 @@ namespace AlexaController
             Instance       = this;
         }
 
-        public Directive GetRenderDocumentTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        public IDirective GetRenderDocumentTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
-            switch (templateInfo.renderDocumentType)
+            switch (template.renderDocumentType)
             {
-                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return GetBrowseLibraryTemplate(templateInfo, session);
-                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return GetItemDetailsTemplate(templateInfo, session);
-                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return GetItemListSequenceTemplate(templateInfo, session);
-                case RenderDocumentType.QUESTION_TEMPLATE           : return GetQuestionRequestTemplate(templateInfo);
-                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return GetRoomSelectionTemplate(templateInfo, session);
-                case RenderDocumentType.VIDEO                       : return GetRenderVideo(templateInfo);
+                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return GetBrowseLibraryTemplate(template, session);
+                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return GetItemDetailsTemplate(template, session);
+                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return GetItemListSequenceTemplate(template, session);
+                case RenderDocumentType.QUESTION_TEMPLATE           : return GetQuestionRequestTemplate(template);
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return GetRoomSelectionTemplate(template, session);
+                case RenderDocumentType.VIDEO                       : return GetRenderVideo(template);
                 case RenderDocumentType.NOT_UNDERSTOOD              : return GetNotUnderstoodRequestTemplate();
-                case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE : return GetVerticalTextListTemplate(templateInfo, session);
+                case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE : return GetVerticalTextListTemplate(template, session);
                 case RenderDocumentType.HELP                        : return GetHelpTemplate();
-                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE   : return GetGenericHeadlineRequestTemplate(templateInfo);
+                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE   : return GetGenericHeadlineRequestTemplate(template);
                 case RenderDocumentType.NONE                        : return null;
                 default                                             : return null;
             }
         }
 
-        private Directive GetItemListSequenceTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session, string scrollDirection = "horizontal")
+        private IDirective GetItemListSequenceTemplate(IRenderDocumentTemplate template, IAlexaSession session, string scrollDirection = "horizontal")
         {
 
             var layout             = new List<IItem>();
             var touchWrapperLayout = new List<IItem>();
-            var baseItems          = templateInfo.baseItems;
+            var baseItems          = template.baseItems;
             var type               = baseItems[0].GetType().Name;
 
-            var collectionRoot = type == "Season" ? baseItems[0].Parent : type == "Episode" ? baseItems[0].Parent.Parent : templateInfo.collectionRoot;
+            var collectionRoot = type == "Season" ? baseItems[0].Parent : type == "Episode" ? baseItems[0].Parent.Parent : template.collectionRoot;
             
             // Wrap each media items Primary Image in a touch element for display
             baseItems.ForEach(i => touchWrapperLayout.Add(new TouchWrapper()
@@ -312,7 +312,7 @@ namespace AlexaController
                 {
                     new AlexaHeader()
                     {
-                        headerTitle            = $"{templateInfo.HeaderTitle}",
+                        headerTitle            = $"{template.HeaderTitle}",
                         headerBackButton       = session.paging.canGoBack,
                         headerDivider          = true,
                         headerAttributionImage = !(collectionRoot is null) ? collectionRoot.HasImage(ImageType.Logo) ? $"{Url}/Items/{collectionRoot.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : "" : "",
@@ -372,7 +372,7 @@ namespace AlexaController
                                 },
                                 new Sequential()
                                 {
-                                    commands    = GetSequentialItemsHintText(templateInfo.baseItems, session).ToList(),
+                                    commands    = GetSequentialItemsHintText(template.baseItems, session).ToList(),
                                     repeatCount = 5
                                 }
                             }
@@ -392,12 +392,12 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetItemDetailsTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        private IDirective GetItemDetailsTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             
-            var type = templateInfo.baseItems[0].GetType().Name;
+            var type = template.baseItems[0].GetType().Name;
 
-            var baseItem = type.Equals("Season") ? templateInfo.baseItems[0].Parent : templateInfo.baseItems[0];
+            var baseItem = type.Equals("Season") ? template.baseItems[0].Parent : template.baseItems[0];
             
             var layout = new List<IItem>();
             const string token = "mediaItemDetails";
@@ -406,8 +406,8 @@ namespace AlexaController
 
             layout.Add(new AlexaHeader()
             {
-                headerTitle            = templateInfo.HeaderTitle != "" ? templateInfo.HeaderTitle : templateInfo.baseItems[0].Name,
-                headerAttributionImage = templateInfo.baseItems[0].HasImage(ImageType.Logo) ? $"{Url}/Items/{baseItem.InternalId}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : "",
+                headerTitle            = template.HeaderTitle != "" ? template.HeaderTitle : template.baseItems[0].Name,
+                headerAttributionImage = template.baseItems[0].HasImage(ImageType.Logo) ? $"{Url}/Items/{baseItem.InternalId}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : "",
                 headerBackButton       = session.paging.canGoBack,
                 headerDivider          = true,
             });
@@ -451,7 +451,7 @@ namespace AlexaController
                 left = "87vw"
             });
             //Runtime span
-            var runTimeTicks = templateInfo.baseItems[0].RunTimeTicks;
+            var runTimeTicks = template.baseItems[0].RunTimeTicks;
             if (!ReferenceEquals(null, runTimeTicks))
                 layout.Add(new Text()
                 {
@@ -467,7 +467,7 @@ namespace AlexaController
             //End Time
             layout.Add(new Text()
             {
-                text     = $"Ends at: {DateTime.Now.AddTicks(templateInfo.baseItems[0].GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}",
+                text     = $"Ends at: {DateTime.Now.AddTicks(template.baseItems[0].GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}",
                 style    = "textStyleBody",
                 left     = "82%",
                 top      = "4vh",
@@ -486,7 +486,7 @@ namespace AlexaController
                 opacity = 0,
                 item    = new Text()
                 {
-                    text = $"{templateInfo.baseItems[0].Overview}",
+                    text = $"{template.baseItems[0].Overview}",
                     style = "textStyleBody",
                     width = "55vw",
                     fontSize = "20dp"
@@ -506,7 +506,7 @@ namespace AlexaController
                 {
                     new Image()
                     {
-                        source = $"{Url}/Items/{templateInfo.baseItems[0].InternalId}/Images/primary?maxWidth=400&amp;maxHeight=708&amp;quality=90",
+                        source = $"{Url}/Items/{template.baseItems[0].InternalId}/Images/primary?maxWidth=400&amp;maxHeight=708&amp;quality=90",
                         scale  = "best-fit",
                         height = "63vh",
                         width  = "100%",
@@ -536,7 +536,7 @@ namespace AlexaController
                                 ? new List<object>() { "UserEventPlaybackStart", session.room != null ? session.room.Name : "" } 
                                 : new List<object>() { "UserEventShowItemListSequenceTemplate" },
                                    icon : baseItem.GetType().Name == "Series" ? ListIcon : PlayOutlineIcon,
-                                   id   : templateInfo.baseItems[0].InternalId.ToString())
+                                   id   : template.baseItems[0].InternalId.ToString())
                 }
             });
 
@@ -572,7 +572,7 @@ namespace AlexaController
                                         pathData    = CheckMark,
                                         stroke      = "none",
                                         strokeWidth = "1px",
-                                        fill        = templateInfo.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
+                                        fill        = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
                                     }
                                 }
                             }
@@ -612,7 +612,7 @@ namespace AlexaController
                                     },
                                     new Image()
                                     {
-                                        source       = $"{Url}/Items/{templateInfo.baseItems[0].InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90",
+                                        source       = $"{Url}/Items/{template.baseItems[0].InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90",
                                         scale        = "best-fill",
                                         width        = "100vw",
                                         height       = "100vh",
@@ -621,7 +621,7 @@ namespace AlexaController
                                     },
                                     new Image()
                                     {
-                                        source = $"{Url}/Items/{templateInfo.baseItems[0].InternalId}/Images/logo?quality=90",
+                                        source = $"{Url}/Items/{template.baseItems[0].InternalId}/Images/logo?quality=90",
                                         width  = "55%",
                                         height = "25vh",
                                         left   = "20%",
@@ -652,11 +652,11 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetVerticalTextListTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        private IDirective GetVerticalTextListTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout = new List<IItem>();
             var layoutBaseItems = new List<IItem>();
-            var baseItems = templateInfo.baseItems;
+            var baseItems = template.baseItems;
 
             const string token = "textList";
 
@@ -695,7 +695,7 @@ namespace AlexaController
 
             layout.Add(new AlexaHeader()
             {
-                headerTitle = templateInfo.HeaderTitle,
+                headerTitle = template.HeaderTitle,
                 headerDivider = true
             });
 
@@ -821,18 +821,18 @@ namespace AlexaController
             };
         }
 
-        private Directive GetRoomSelectionTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        private IDirective GetRoomSelectionTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
-            var endpoint = $"/Items/{templateInfo.baseItems[0].InternalId}/Images";
+            var endpoint = $"/Items/{template.baseItems[0].InternalId}/Images";
             var layout = new List<IItem>();
             const string token = "roomSelection";
 
-            GetVideoBackdropLayout(templateInfo.baseItems[0], token).ForEach(b => layout.Add(b));
+            GetVideoBackdropLayout(template.baseItems[0], token).ForEach(b => layout.Add(b));
 
             layout.Add(new AlexaHeader()
             {
                 headerBackButton = true,
-                headerTitle = $"{templateInfo.baseItems[0].Name}",
+                headerTitle = $"{template.baseItems[0].Name}",
                 headerSubtitle = $"{session.User.Name} Play On...",
                 headerDivider = true
             });
@@ -846,7 +846,7 @@ namespace AlexaController
                 bottom = "5vh"
             });
 
-            GetRoomButtonLayout(templateInfo).ForEach(b => layout.Add(b));
+            GetRoomButtonLayout(template).ForEach(b => layout.Add(b));
 
             var view = new Directive()
             {
@@ -879,7 +879,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetBrowseLibraryTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
+        private IDirective GetBrowseLibraryTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout = new List<IItem>();
             const string token = "browseLibrary";
@@ -903,7 +903,7 @@ namespace AlexaController
             });
             layout.Add(new AlexaHeadline()
             {
-                primaryText = $"Now showing {templateInfo.baseItems[0].Name}",
+                primaryText = $"Now showing {template.baseItems[0].Name}",
                 secondaryText = $"{session.room.Name}",
                 backgroundColor = "rgba(0,0,0,0.45)"
             });
@@ -961,7 +961,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetQuestionRequestTemplate(IRenderDocumentTemplateInfo templateInfo)
+        private IDirective GetQuestionRequestTemplate(IRenderDocumentTemplate template)
         {
             var layout = new List<IItem>();
 
@@ -995,7 +995,7 @@ namespace AlexaController
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = templateInfo.HeadlinePrimaryText
+                primaryText = template.HeadlinePrimaryText
             });
 
             var view = new Directive()
@@ -1029,7 +1029,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetNotUnderstoodRequestTemplate()
+        private IDirective GetNotUnderstoodRequestTemplate()
         {
             var layout = new List<IItem>();
 
@@ -1103,7 +1103,7 @@ namespace AlexaController
             return view;
         }
 
-        private Directive GetGenericHeadlineRequestTemplate(IRenderDocumentTemplateInfo templateInfo)
+        private IDirective GetGenericHeadlineRequestTemplate(IRenderDocumentTemplate template)
         {
             var layout = new List<IItem>();
 
@@ -1137,7 +1137,7 @@ namespace AlexaController
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = templateInfo.HeadlinePrimaryText
+                primaryText = template.HeadlinePrimaryText
             });
             layout.Add(new AlexaFooter()
             {
@@ -1177,7 +1177,7 @@ namespace AlexaController
             return view;
         }
         
-        private Directive GetRenderVideo(IRenderDocumentTemplateInfo templateInfo)
+        private IDirective GetRenderVideo(IRenderDocumentTemplate template)
         {
             //Not currently used
             var videoUrl = "https://theater.unityhome.online/emby/videos/stream.mp4";
@@ -1189,14 +1189,14 @@ namespace AlexaController
                     source = $"{videoUrl}",
                     metadata = new Metadata()
                     {
-                        title = templateInfo.baseItems[0].Name
+                        title = template.baseItems[0].Name
                     }
                 }
             };
             return view;
         }
         
-        private Directive GetHelpTemplate()
+        private IDirective GetHelpTemplate()
         {
             var helpItems = new List<IItem>();
             
@@ -1274,7 +1274,7 @@ namespace AlexaController
 
 
         //On the room selection screen show the user the configured room, and mark them as available or not.
-        private List<IItem> GetRoomButtonLayout(IRenderDocumentTemplateInfo templateInfo)
+        private List<IItem> GetRoomButtonLayout(IRenderDocumentTemplate template)
         {
             var config = Plugin.Instance.Configuration;
             var roomButtons = new List<IItem>();
@@ -1300,7 +1300,7 @@ namespace AlexaController
                     {
                         new AlexaIconButton()
                         {
-                            id            = templateInfo.baseItems[0].InternalId.ToString(),
+                            id            = template.baseItems[0].InternalId.ToString(),
                             buttonSize    = "72dp",
                             vectorSource  = CastIcon,
                             disabled      = disabled,

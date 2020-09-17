@@ -130,10 +130,11 @@ namespace AlexaController.Api
             return null;
         }
 
+        
         private string OnUserEvent(IAlexaRequest alexaRequest)
         {
-            var request              = alexaRequest.request;
-            var type                 = Type.GetType(UserEventNamespace(request));
+            var request = alexaRequest.request;
+            var type = Type.GetType(UserEventNamespace(request));
             return GetResponseResult(type, alexaRequest, null); 
         }
 
@@ -173,7 +174,7 @@ namespace AlexaController.Api
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         HeadlinePrimaryText = "Welcome to Home Theater Emby Controller",
                         renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
@@ -200,12 +201,13 @@ namespace AlexaController.Api
 
         private static string GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var instance = Activator.CreateInstance(@namespace, alexaRequest, session, AlexaEntryPoint.Instance);
-            var method   = @namespace.GetMethod("Response");
-            var response = method?.Invoke(instance, null);
-            return (string)response; 
-        }
+            var paramsArgs = session is null
+                ?  new object[] { alexaRequest, AlexaEntryPoint.Instance }
+                :  new object[] { alexaRequest, session, AlexaEntryPoint.Instance };
 
+            var instance = Activator.CreateInstance(@namespace, paramsArgs);
+            return (string)@namespace.GetMethod("Response")?.Invoke(instance, null);
+        }
        
     }
 }
