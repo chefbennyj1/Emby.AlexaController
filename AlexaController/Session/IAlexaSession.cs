@@ -21,7 +21,7 @@ namespace AlexaController.Session
         string DeviceId                                 { get; set; }
         AlexaSessionDisplayType alexaSessionDisplayType { get; set; }
         Person person                                   { get; set; }
-        AlexaRequest PersistedRequestData               { get; set; }
+        IAlexaRequest PersistedRequestData               { get; set; }
         BaseItem NowViewingBaseItem                     { get; set; }
         bool PlaybackStarted                            { get; set; }
         Room room                                       { get; set; }
@@ -33,9 +33,9 @@ namespace AlexaController.Session
         public User User                                       { get; set; }
         public string SessionId                                { get; set; }
         public string DeviceId                                 { get; set; }
-        public AlexaSessionDisplayType alexaSessionDisplayType { get; set; } = AlexaSessionDisplayType.NONE;
+        public AlexaSessionDisplayType alexaSessionDisplayType { get; set; } 
         public Person person                                   { get; set; }
-        public AlexaRequest PersistedRequestData               { get; set; }
+        public IAlexaRequest PersistedRequestData               { get; set; }
         public BaseItem NowViewingBaseItem                     { get; set; }
         public bool PlaybackStarted                            { get; set; }
         public Room room                                       { get; set; } 

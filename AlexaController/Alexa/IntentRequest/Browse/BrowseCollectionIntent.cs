@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -10,8 +9,6 @@ using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable TooManyDependencies
@@ -25,16 +22,15 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class BrowseCollectionIntent : IIntentResponseModel
+    public class BrowseCollectionIntent : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
-            var roomManager = new RoomContextManager();
             Room room = null;
-            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
             var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return roomManager.RequestRoom(alexaRequest, session, responseClient);
+            if (room is null && displayNone) return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
             
             var request           = alexaRequest.request;
             var intent            = request.intent;
@@ -45,20 +41,20 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var requestId         = request.requestId;
             
             var progressiveSpeech = $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
-            responseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
+            alexa.ResponseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
             
             collectionRequest       = StringNormalization.NormalizeText(collectionRequest);
             
             var collection          = EmbyControllerUtility.Instance.GetCollectionItems(session.User, collectionRequest);
             var collectionItems     = collection.Items;
-            var collectionBaseItem  = libraryManager.GetItemById(collection.Id);
+            var collectionBaseItem  = alexa.LibraryManager.GetItemById(collection.Id);
             
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
             {
                 if (!collectionBaseItem.IsParentalAllowed(session.User))
                 {
-                    return responseClient.BuildAlexaResponse(new Response()
+                    return alexa.ResponseClient.BuildAlexaResponse(new Response()
                     {
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
@@ -77,7 +73,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch (Exception exception)
                 {
-                    responseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
                     room = null;
                 }
 
@@ -94,7 +90,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             session.room = room;
             AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 person       = session.person,
                 outputSpeech = new OutputSpeech()
@@ -102,7 +98,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     phrase         = $"{collectionBaseItem.Name}",
                 },
                 shouldEndSession = null,
-                directives       = new List<Directive>()
+                directives       = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
                 },

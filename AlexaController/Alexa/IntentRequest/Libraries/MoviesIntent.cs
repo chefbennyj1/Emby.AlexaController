@@ -1,4 +1,5 @@
-﻿using AlexaController.Alexa.RequestData.Model;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using MediaBrowser.Controller.Library;
@@ -9,12 +10,12 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
     [Intent]
-    public class MoviesIntent : IIntentResponseModel
+    public class MoviesIntent : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
-            return new LibraryIntentResponseManager("Movies").Response(alexaRequest, session, responseClient, libraryManager);
+            return new LibraryIntentResponseManager("Movies").Response(alexaRequest, session, alexa); //, responseClient, libraryManager, roomContextManager);
         }
     }
 }

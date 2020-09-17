@@ -20,7 +20,7 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Playback
 {
     [Intent]
-    public class PlayItemIntent : IIntentResponseModel
+    public class PlayItemIntent : IIntentResponse
     {
         /*         
             If no room is requested in the PlayItemIntent intent, we follow up immediately to get a room value from 'RoomName' intent. 
@@ -40,19 +40,18 @@ namespace AlexaController.Alexa.IntentRequest.Playback
          */
 
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             //we need a room object
-            var roomManager = new RoomContextManager();
             Room room = null;
-            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
-            if (room is null) return roomManager.RequestRoom(alexaRequest, session, responseClient);
+            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
+            if (room is null) return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
 
             var request        = alexaRequest.request;
             var context        = alexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-            responseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
+            alexa.ResponseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
 
 
             var result = session.NowViewingBaseItem ??
@@ -64,7 +63,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //If result is null here, then the item doesn't exist in the library
             if (result is null)
             {
-                return responseClient.BuildAlexaResponse(new Response()
+                return alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -79,7 +78,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //Parental Control check for baseItem
             if (!result.IsParentalAllowed(session.User))
             {
-                return responseClient.BuildAlexaResponse(new Response()
+                return alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -98,13 +97,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(exception, alexaRequest, session, responseClient);
+                return new ErrorHandler().OnError(exception, alexaRequest, session, alexa.ResponseClient);
             }
 
             session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -112,7 +111,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
                 },
                 shouldEndSession = null,
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                     {
                         RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
                         {

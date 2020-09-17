@@ -1,19 +1,17 @@
 ﻿using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 // ReSharper disable TooManyArguments
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-    public class GoHomeIntent : IIntentResponseModel
+    public class GoHomeIntent : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

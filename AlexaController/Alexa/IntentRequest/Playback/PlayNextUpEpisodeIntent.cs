@@ -17,23 +17,22 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Playback
 {
     [Intent]
-    public class PlayNextUpEpisodeIntent : IIntentResponseModel
+    public class PlayNextUpEpisodeIntent : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             //we need a room object
-            var roomManager = new RoomContextManager();
             Room room = null;
-            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
-            if (room is null) return roomManager.RequestRoom(alexaRequest, session, responseClient);
+            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
+            if (room is null) return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
 
             var request = alexaRequest.request;
             var nextUpEpisode = EmbyControllerUtility.Instance.GetNextUpEpisode(request.intent, session?.User);
 
             if (nextUpEpisode is null)
             {
-                return responseClient.BuildAlexaResponse(new Response()
+                return alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -50,7 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             session.room = room;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -58,7 +57,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     semanticSpeechType = SemanticSpeechType.COMPLIANCE,
                 },
                 shouldEndSession = true,
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
                     {

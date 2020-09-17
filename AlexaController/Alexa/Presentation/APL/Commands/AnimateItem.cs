@@ -2,16 +2,20 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Commands
 {
-    public class TransitionValue : Value
+    public class TransitionValue : IValue
     {
+        public List<From> from { get; set; }
+        public List<To> to { get; set; }
         public new string property => "transform";
+        public string type { get; set; }
     }
 
-    public class OpacityValue : Value
+    public class OpacityValue : IValue
     {
         public int from { get; set; }
-        public int to   { get; set; }
+        public int to { get; set; }
         public string property => "opacity";
+        public string type { get; set; }
     }
 
     public class From
@@ -38,21 +42,26 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
         public double skewY       { get; set; }
     }
 
-    public class Value
+    public interface IValue
     {
-        public string type { get; set; }
-        public string property { get; set; }
-        public List<From> from { get; set; }
-        public List<To> to { get; set; }
+        //string type { get; set; }
     }
 
-    public class AnimateItem : Command
+    public class Value : IValue
+    {
+        //public string type { get; set; }
+       
+    }
+
+    public class AnimateItem : ICommand
     {
         public object type => nameof(AnimateItem);
         public string easing { get; set; }
         public double duration { get; set; }
         public string componentId { get; set; }
-        public List<Value> value { get; set; }
-        
+        public List<IValue> value { get; set; }
+
+        public bool screenLock { get; set; }
+        public int delay { get; set; }
     }
 }

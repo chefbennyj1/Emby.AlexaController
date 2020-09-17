@@ -1,8 +1,6 @@
 ﻿using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 
 // ReSharper disable TooManyArguments
@@ -10,12 +8,13 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
     [Intent]
-    public class CollectionsIntent  : IIntentResponseModel
+    public class CollectionsIntent  : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
-            return new LibraryIntentResponseManager("Collections").Response(alexaRequest, session, responseClient, libraryManager);
+            return new LibraryIntentResponseManager("Collections").Response(alexaRequest, session,
+                alexa); //responseClient, libraryManager, roomContextManager);
         }
     }
 }

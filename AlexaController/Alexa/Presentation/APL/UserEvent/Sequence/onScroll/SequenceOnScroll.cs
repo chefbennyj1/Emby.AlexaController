@@ -18,23 +18,23 @@ using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.Sequence.onScroll
 {
-    public class SequenceOnScroll : UserEventResponse
+    public class SequenceOnScroll : IUserEventResponse
     {
-        public override string Response
-        (AlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
+        public string Response
+        (IAlexaRequest alexaRequest, AlexaEntryPoint alexa)//IResponseClient responseClient, ISessionManager sessionManager)
         {
             var arguments = alexaRequest.request.arguments;
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                     new Directive()
                     {
                         type = "Alexa.Presentation.APL.ExecuteCommands",
                         token = arguments[1],
-                        commands = new List<object>()
+                        commands = new List<ICommand>()
                         {
                             new SetValue()
                             {

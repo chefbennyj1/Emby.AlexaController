@@ -55,14 +55,14 @@ namespace AlexaController.Alexa.Viewport
     }
 
 
-    public interface IAlexaViewportUtility
+    public interface IViewportUtility
     {
         ViewportProfile GetViewportProfile(RequestData.Model.Viewport viewportState);
         bool ViewportSizeIsLessThen(ViewportProfile profile1, ViewportProfile profile2);
         bool ViewportSizeIsGreaterThen(ViewportProfile profile1, ViewportProfile profile2);
     }
 
-    public class ViewportUtility : IAlexaViewportUtility
+    public class ViewportUtility : IViewportUtility
     {
         private ViewportSizeGroup GetViewportSizeGroup(int size)
         {

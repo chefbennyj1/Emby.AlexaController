@@ -12,12 +12,12 @@ namespace AlexaController.Alexa.Errors
     
     public interface IErrorHandler
     {
-        string OnError(Exception exception, AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient);
+        string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient);
     }
 
     public class ErrorHandler : IErrorHandler
     {
-        public string OnError(Exception exception, AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
+        public string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
         {
             return responseClient.BuildAlexaResponse(new Response()
             {
@@ -28,7 +28,7 @@ namespace AlexaController.Alexa.Errors
                     semanticSpeechType = SemanticSpeechType.APOLOGETIC,
                 },
 
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance
                         .GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()

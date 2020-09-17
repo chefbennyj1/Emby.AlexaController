@@ -61,7 +61,7 @@ namespace AlexaController
 
     public class RenderDocumentTemplateInfo : IRenderDocumentTemplateInfo
     {                                                                //Defaults  
-        public RenderDocumentType renderDocumentType { get; set; } = RenderDocumentType.NONE;
+        public RenderDocumentType renderDocumentType { get; set; } //= RenderDocumentType.NONE;
         public string HeaderTitle                    { get; set; } = "";
         public List<BaseItem> baseItems              { get; set; }
         public BaseItem collectionRoot               { get; set; }
@@ -188,8 +188,8 @@ namespace AlexaController
         private Directive GetItemListSequenceTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session, string scrollDirection = "horizontal")
         {
 
-            var layout             = new List<Item>();
-            var touchWrapperLayout = new List<Item>();
+            var layout             = new List<IItem>();
+            var touchWrapperLayout = new List<IItem>();
             var baseItems          = templateInfo.baseItems;
             var type               = baseItems[0].GetType().Name;
 
@@ -202,17 +202,17 @@ namespace AlexaController
                 opacity = 0,
                 onPress = new Parallel()
                 {
-                    commands = new List<Command>()
+                    commands = new List<ICommand>()
                     {
                         new Sequential()
                         {
-                            commands = new List<Command>()
+                            commands = new List<ICommand>()
                             {
                                 new AnimateItem()
                                 {
                                     easing      = "ease",
                                     duration    = 250,
-                                    value = new List<Value>()
+                                    value = new List<IValue>()
                                     {
                                         new TransitionValue()
                                         {
@@ -231,7 +231,7 @@ namespace AlexaController
                                 {
                                     easing      = "ease",
                                     duration    = 250,
-                                    value = new List<Value>()
+                                    value = new List<IValue>()
                                     {
                                         new TransitionValue()
                                         {
@@ -259,13 +259,13 @@ namespace AlexaController
 
                 // Item types in the list are Episodes, place episode info text under each image
                 items = type == "Episode" ?
-                    new List<Item>()
+                    new List<IItem>()
                     {
                         new Container()
                         {
                             height = "70vh",
                             width  = "30vw",
-                            items  = new List<Item>()
+                            items  = new List<IItem>()
                             {
                                 new Image()
                                 {
@@ -291,7 +291,7 @@ namespace AlexaController
                             }
                         }
                     } : // Not an "Episode" - no need to place text under the image, just the primary image
-                    new List<Item>()
+                    new List<IItem>()
                     {
                         new Image()
                         {
@@ -308,7 +308,7 @@ namespace AlexaController
                 id     = "primary",
                 width  = "100vw",
                 height = "100vh",
-                items  = new List<Item>()
+                items  = new List<IItem>()
                 {
                     new AlexaHeader()
                     {
@@ -344,7 +344,7 @@ namespace AlexaController
              It's a limitation of the Echo Show devices
              use a semaphore slim to limit the data in the loop
             */
-            var scaleFadeInSequenceItems = new List<Command>();
+            var scaleFadeInSequenceItems = new List<ICommand>();
             for (var i = 0; i < baseItems.Count; i++)
             {
                 semaphore.Wait();
@@ -360,11 +360,11 @@ namespace AlexaController
                 {
                     theme   = "dark",
                     import  = Imports,
-                    onMount = new List<object>()
+                    onMount = new List<ICommand>()
                     {
                         new Sequential()
                         {
-                            commands = new List<Command>()
+                            commands = new List<ICommand>()
                             {
                                 new Parallel()
                                 {
@@ -399,7 +399,7 @@ namespace AlexaController
 
             var baseItem = type.Equals("Season") ? templateInfo.baseItems[0].Parent : templateInfo.baseItems[0];
             
-            var layout = new List<Item>();
+            var layout = new List<IItem>();
             const string token = "mediaItemDetails";
 
             GetVideoBackdropLayout(baseItem, token).ForEach(i => layout.Add(i));
@@ -502,7 +502,7 @@ namespace AlexaController
                 left = "3%",
                 top = "20%",
                 opacity = 1,
-                items = new List<Item>()
+                items = new List<IItem>()
                 {
                     new Image()
                     {
@@ -523,7 +523,7 @@ namespace AlexaController
                             id = "showing",
                             paddingLeft = "7vw",
                             position = "absolute",
-                            items = new List<Item>()
+                            items = new List<IItem>()
                             {
                                 new Text()
                                 {
@@ -565,7 +565,7 @@ namespace AlexaController
                                 width          = 35,
                                 viewportHeight = 25,
                                 viewportWidth  = 25,
-                                items          = new List<Item>()
+                                items          = new List<IItem>()
                                 {
                                     new Path()
                                     {
@@ -578,11 +578,11 @@ namespace AlexaController
                             }
                         }
                     },
-                    onMount = new List<object>()
+                    onMount = new List<ICommand>()
                     {
                         new Sequential()
                         {
-                            commands = new List<Command>()
+                            commands = new List<ICommand>()
                             {
                                 ScaleFadeInItem("playButton", 800),
                                 FadeInItem("overview", 800),
@@ -594,14 +594,14 @@ namespace AlexaController
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>() { "payload" },
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Container()
                             {
                                 when   = "${viewport.shape == 'round'}",
                                 width  = "100vw",
                                 height = "100vh",
-                                items  = new List<Item>()
+                                items  = new List<IItem>()
                                 {
                                     new AlexaHeader()
                                     {
@@ -654,8 +654,8 @@ namespace AlexaController
 
         private Directive GetVerticalTextListTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
-            var layout = new List<Item>();
-            var layoutBaseItems = new List<Item>();
+            var layout = new List<IItem>();
+            var layoutBaseItems = new List<IItem>();
             var baseItems = templateInfo.baseItems;
 
             const string token = "textList";
@@ -665,7 +665,7 @@ namespace AlexaController
                 id = item.InternalId.ToString(),
                 onPress = new Sequential()
                 {
-                    commands = new List<Command>()
+                    commands = new List<ICommand>()
                     {
                         new SendEvent()
                         {
@@ -673,14 +673,14 @@ namespace AlexaController
                         }
                     }
                 },
-                items = new List<Item>()
+                items = new List<IItem>()
                 {
                     new Container()
                     {
                         direction   = "row",
                         paddingLeft = "12vw",
                         paddingTop  = "4vh",
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Text()
                             {
@@ -724,7 +724,7 @@ namespace AlexaController
                         {
                             "payload"
                         },
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Container()
                             {
@@ -735,7 +735,7 @@ namespace AlexaController
                             new Container()
                             {
                                 position = "absolute",
-                                items = new List<Item>()
+                                items = new List<IItem>()
                                 {
                                     GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"}, Right, "ScrollNext" )
                                 }
@@ -743,7 +743,7 @@ namespace AlexaController
                             new Container()
                             {
                                 position = "absolute",
-                                items = new List<Item>()
+                                items = new List<IItem>()
                                 {
                                     GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"}, Left, "ScrollPrev" )
                                 }
@@ -761,13 +761,13 @@ namespace AlexaController
 
             var buttonPressAnimation = new Sequential()
             {
-                commands = new List<Command>()
+                commands = new List<ICommand>()
                 {
                     new AnimateItem()
                     {
                         easing = "ease",
                         duration = 250,
-                        value = new List<Value>()
+                        value = new List<IValue>()
                         {
                             new TransitionValue()
                             {
@@ -780,7 +780,7 @@ namespace AlexaController
                     {
                         easing = "ease",
                         duration = 250,
-                        value = new List<Value>()
+                        value = new List<IValue>()
                         {
                             new TransitionValue()
                             {
@@ -801,7 +801,7 @@ namespace AlexaController
                 borderColor     = "white",
                 borderRadius    = "75px",
                 backgroundColor = "rgba(0,0,0,0.35)",
-                items = new List<Item>()
+                items = new List<IItem>()
                 {
                     new AlexaIconButton()
                     {
@@ -810,7 +810,7 @@ namespace AlexaController
                         id = id,
                         primaryAction = new Parallel()
                         {
-                            commands = new List<Command>()
+                            commands = new List<ICommand>()
                             {
                                 buttonPressAnimation,
                                 new SendEvent() {arguments = args}
@@ -824,7 +824,7 @@ namespace AlexaController
         private Directive GetRoomSelectionTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
             var endpoint = $"/Items/{templateInfo.baseItems[0].InternalId}/Images";
-            var layout = new List<Item>();
+            var layout = new List<IItem>();
             const string token = "roomSelection";
 
             GetVideoBackdropLayout(templateInfo.baseItems[0], token).ForEach(b => layout.Add(b));
@@ -863,7 +863,7 @@ namespace AlexaController
                         {
                             "payload"
                         },
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Container()
                             {
@@ -881,7 +881,7 @@ namespace AlexaController
 
         private Directive GetBrowseLibraryTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
-            var layout = new List<Item>();
+            var layout = new List<IItem>();
             const string token = "browseLibrary";
 
             layout.Add(new AlexaBackground()
@@ -945,7 +945,7 @@ namespace AlexaController
                         {
                             "payload"
                         },
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Container()
                             {
@@ -963,7 +963,7 @@ namespace AlexaController
 
         private Directive GetQuestionRequestTemplate(IRenderDocumentTemplateInfo templateInfo)
         {
-            var layout = new List<Item>();
+            var layout = new List<IItem>();
 
             layout.Add(new Video()
             {
@@ -1013,7 +1013,7 @@ namespace AlexaController
                         {
                             "payload"
                         },
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Container()
                             {
@@ -1031,7 +1031,7 @@ namespace AlexaController
 
         private Directive GetNotUnderstoodRequestTemplate()
         {
-            var layout = new List<Item>();
+            var layout = new List<IItem>();
 
             layout.Add(new Video()
             {
@@ -1087,7 +1087,7 @@ namespace AlexaController
                         {
                             "payload"
                         },
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Container()
                             {
@@ -1105,7 +1105,7 @@ namespace AlexaController
 
         private Directive GetGenericHeadlineRequestTemplate(IRenderDocumentTemplateInfo templateInfo)
         {
-            var layout = new List<Item>();
+            var layout = new List<IItem>();
 
             layout.Add(new Video()
             {
@@ -1161,7 +1161,7 @@ namespace AlexaController
                         {
                             "payload"
                         },
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Container()
                             {
@@ -1198,7 +1198,7 @@ namespace AlexaController
         
         private Directive GetHelpTemplate()
         {
-            var helpItems = new List<Item>();
+            var helpItems = new List<IItem>();
             
             SemanticSpeechStrings.HelpStrings.ForEach(s => helpItems.Add(new Text()
             {
@@ -1224,13 +1224,13 @@ namespace AlexaController
                         {
                             "payload"
                         },
-                        items = new List<Item>()
+                        items = new List<IItem>()
                         {
                             new Container()
                             {
                                 width  = "100vw",
                                 height = "100vh",
-                                items  = new List<Item>()
+                                items  = new List<IItem>()
                                 {
                                     new AlexaBackground()
                                     {
@@ -1274,10 +1274,10 @@ namespace AlexaController
 
 
         //On the room selection screen show the user the configured room, and mark them as available or not.
-        private List<Item> GetRoomButtonLayout(IRenderDocumentTemplateInfo templateInfo)
+        private List<IItem> GetRoomButtonLayout(IRenderDocumentTemplateInfo templateInfo)
         {
             var config = Plugin.Instance.Configuration;
-            var roomButtons = new List<Item>();
+            var roomButtons = new List<IItem>();
 
             if (config.Rooms is null) return roomButtons;
 
@@ -1296,7 +1296,7 @@ namespace AlexaController
                     direction = "row",
                     left = "15vw",
                     top = "10vh",
-                    items = new List<Item>()
+                    items = new List<IItem>()
                     {
                         new AlexaIconButton()
                         {
@@ -1306,13 +1306,13 @@ namespace AlexaController
                             disabled      = disabled,
                             primaryAction = new Sequential()
                             {
-                                commands = new List<Command>()
+                                commands = new List<ICommand>()
                                 {
                                     new AnimateItem()
                                     {
                                         easing      = "ease",
                                         duration    = 250,
-                                        value = new List<Value>()
+                                        value = new List<IValue>()
                                         {
                                             new TransitionValue()
                                             {
@@ -1331,7 +1331,7 @@ namespace AlexaController
                                     {
                                         easing      = "ease",
                                         duration    = 250,
-                                        value = new List<Value>()
+                                        value = new List<IValue>()
                                         {
                                             new TransitionValue()
                                             {
@@ -1366,7 +1366,7 @@ namespace AlexaController
 
         //Use a video backdrop layout if available, then switch to a static image for the media item.
         //If no video backdrop is  available show a static background image.
-        private List<Item> GetVideoBackdropLayout(BaseItem baseItem, string token)
+        private List<IItem> GetVideoBackdropLayout(BaseItem baseItem, string token)
         {
             var videoBackdropIds = baseItem.ThemeVideoIds;
             var videoBackdropId = videoBackdropIds.Length > 0 ? LibraryManager.GetItemById(videoBackdropIds[0]).InternalId.ToString() : string.Empty;
@@ -1376,7 +1376,7 @@ namespace AlexaController
             var videoBackdropUrl = $"{Url}/videos/{videoBackdropId}/stream.mp4";
             var videoBackdropOverlay = $"{Url}/EmptyPng?quality=90";
 
-            var layout = new List<Item>();
+            var layout = new List<IItem>();
             if (!string.IsNullOrEmpty(videoBackdropId))
             {
                 layout.Add(new Video()
@@ -1436,20 +1436,20 @@ namespace AlexaController
 
         //Create text at the bottom of the echo show screen which will give hints to the user for what they can say.
         //Use the currently displayed media items in the hint text.
-        private IEnumerable<Command> GetSequentialItemsHintText(IList<BaseItem> sequenceItems, IAlexaSession session)
+        private IEnumerable<ICommand> GetSequentialItemsHintText(IList<BaseItem> sequenceItems, IAlexaSession session)
         {
             if (session.PlaybackStarted) return new List<Command>();
 
             var type = sequenceItems[0]?.GetType().Name;
             return (sequenceItems.Count >= 3 ? sequenceItems.Take(3) : sequenceItems).ToList().SelectMany(item =>
-                new List<Command>()
+                new List<ICommand>()
                 {
                     new AnimateItem()
                     {
                         componentId = "hint",
                         duration    = 1020,
                         easing      = "ease-in",
-                        value       = new List<Value>()
+                        value       = new List<IValue>()
                         {
                             new OpacityValue() {@from = 1, to = 0}
                         },
@@ -1468,7 +1468,7 @@ namespace AlexaController
                         componentId = "hint",
                         duration    = 1020,
                         easing      = "ease-out",
-                        value       = new List<Value>()
+                        value       = new List<IValue>()
                         {
                             new OpacityValue() {@from = 0, to = 1}
                         },
@@ -1479,7 +1479,7 @@ namespace AlexaController
 
 
 
-        private Command FadeInItem(string componentId, int duration, int? delay = null)
+        private ICommand FadeInItem(string componentId, int duration, int? delay = null)
         {
             return new AnimateItem()
             {
@@ -1487,7 +1487,7 @@ namespace AlexaController
                 easing = "ease-in",
                 duration = duration,
                 delay = delay ?? 0,
-                value = new List<Value>()
+                value = new List<IValue>()
                 {
                     new OpacityValue()
                     {
@@ -1498,19 +1498,19 @@ namespace AlexaController
             };
         }
 
-        private Command ScaleFadeInItem(string componentId, int duration, int? delay = null)
+        private ICommand ScaleFadeInItem(string componentId, int duration, int? delay = null)
         {
             
             var animation = new Parallel()
             {
-                commands = new List<Command>()
+                commands = new List<ICommand>()
                 {
                     new AnimateItem()
                     {
                         componentId = componentId,
                         duration = duration,
                         delay = delay ?? 0,
-                        value = new List<Value>()
+                        value = new List<IValue>()
                         {
                             new OpacityValue()
                             {
@@ -1524,7 +1524,7 @@ namespace AlexaController
                         componentId = componentId,
                         duration = duration,
                         delay = delay ?? 0,
-                        value = new List<Value>()
+                        value = new List<IValue>()
                         {
                             new TransitionValue()
                             {

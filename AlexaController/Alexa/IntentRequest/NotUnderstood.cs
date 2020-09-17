@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -10,12 +11,12 @@ using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.IntentRequest
 {
-    public class NotUnderstood : IIntentResponseModel
+    public class NotUnderstood : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = false,
                 outputSpeech = new OutputSpeech()
@@ -25,7 +26,7 @@ namespace AlexaController.Alexa.IntentRequest
                     semanticSpeechType = SemanticSpeechType.APOLOGETIC,
                 },
                 
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                      RenderDocumentBuilder.Instance
                         .GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()

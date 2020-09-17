@@ -63,6 +63,8 @@ namespace AlexaController.Alexa.ResponseData.Model
         medium,
         high
     }
+
+    
     public class OutputSpeech 
     {
         public string type => "SSML";

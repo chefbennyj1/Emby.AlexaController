@@ -7,6 +7,7 @@
 // ReSharper disable TooManyArguments
 
 using System.Collections.Generic;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -18,10 +19,10 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
-    public class PreviousIntent : IIntentResponseModel
+    public class PreviousIntent : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             
             var previousPage = session.paging.pages[session.paging.currentPage - 1];
@@ -31,12 +32,12 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
 
             //if the user has requested an Emby client/room display during the session - go back on both if possible
             if (session.room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, libraryManager.GetItemById(session.NowViewingBaseItem.Parent.InternalId)); } catch { }
+                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, alexa.LibraryManager.GetItemById(session.NowViewingBaseItem.Parent.InternalId)); } catch { }
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, session)
                 }

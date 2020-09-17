@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AlexaController.Alexa.Presentation.APL.Commands
+﻿namespace AlexaController.Alexa.Presentation.APL.Commands
 {
-    public class AutoPage : Command
+    public class AutoPage : ICommand
     {
         public string type => nameof(AutoPage);
         public int count { get; set; }
         public int duration { get; set; }
         public string componentId { get; set; }
+        public bool screenLock { get; set; }
+        public int delay { get; set; }
     }
 }

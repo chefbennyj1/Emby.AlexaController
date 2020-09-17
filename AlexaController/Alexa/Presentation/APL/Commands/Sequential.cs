@@ -2,10 +2,12 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Commands
 {
-    public class Sequential : Command
+    public class Sequential : ICommand
     {
-        public List<Command> commands { get; set; }
+        public List<ICommand> commands { get; set; }
         public object type => nameof(Sequential);
         public int repeatCount { get; set; }
+        public bool screenLock { get; set; }
+        public int delay { get; set; }
     }
 }

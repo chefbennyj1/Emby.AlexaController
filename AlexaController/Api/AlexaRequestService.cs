@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MediaBrowser.Model.Services;
 using System.IO;
+using AlexaController.Alexa;
 using AlexaController.Alexa.Errors;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.RequestData.Model;
@@ -11,21 +12,24 @@ using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Serialization;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable MethodNameNotMeaningful
-// ReSharper disable InconsistentNaming
-// ReSharper disable once CollectionNeverUpdated.Global
+
 // ReSharper disable once TooManyDependencies
 
 namespace AlexaController.Api
 {
-    
+    public interface IAlexaRequest
+    {
+        AmazonSession session { get; set; }
+        Request request { get; set; }
+        Context context { get; set; }
+        string version { get; set; }
+        Event @event { get; set; }
+    }
 
     [Route("/Alexa", "POST", Summary = "Alexa End Point")]
-    public class AlexaRequest : IRequiresRequestStream
+    public class AlexaRequest : IRequiresRequestStream, IAlexaRequest
     {
         public Stream RequestStream  { get; set; }
         public AmazonSession session { get; set; }
@@ -37,26 +41,20 @@ namespace AlexaController.Api
     
     public class AlexaRequestService : IService
     {
-
         private IJsonSerializer JsonSerializer { get; }
         private IUserManager UserManager       { get; }
-        private ISessionManager SessionManager { get; }
-        private ILibraryManager LibraryManager { get; }
         private IResponseClient ResponseClient { get; }
 
         private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent => intent.name == "VoiceAuthenticationAccountLink";
-        private readonly Func<Intent, bool> IsRoomNameRequest                       = intent => intent.name == "Rooms_RoomNameIntent";
+        private readonly Func<Intent, bool> IsRoomNameIntentRequest = intent => intent.name == "Rooms_RoomNameIntent";
 
         private readonly Func<Request, string> IntentNamespace    = request => $"AlexaController.Alexa.IntentRequest.{request.intent.name.Replace("_", ".")}";
         private readonly Func<Request, string> UserEventNamespace = request => $"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}";
         
-        public AlexaRequestService
-        (IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager session, ILibraryManager library)
+        public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user)
         {
             JsonSerializer = json;
             UserManager    = user;
-            SessionManager = session;
-            LibraryManager = library;
             ResponseClient = new ResponseClient(json, client);
         }
 
@@ -74,10 +72,10 @@ namespace AlexaController.Api
             }
         }
 
-        private string OnIntentRequest(AlexaRequest alexaRequest)
+        private string OnIntentRequest(IAlexaRequest alexaRequest)
         {
             IAlexaSession session = null;
-
+            
             var request = alexaRequest.request;
             var intent  = request.intent;
             var context = alexaRequest.context;
@@ -104,19 +102,18 @@ namespace AlexaController.Api
                 var user = SpeechAuthorization.Instance.GetRecognizedPersonalizationProfileResult(person);
 
                 session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-
                 
                 //The "RoomName" intent will always be used during follow up communication with Alexa.
                 //If Alexa thinks she has heard a "RoomName" intent request, without the session having any PersistedRequestData
                 //There has been a mistake, end the session.
-                if (session.PersistedRequestData is null && IsRoomNameRequest(intent))
+                if (session.PersistedRequestData is null && IsRoomNameIntentRequest(intent))
                 {
-                    return new NotUnderstood().Response(alexaRequest, session, ResponseClient, LibraryManager, SessionManager, UserManager);
+                    return new NotUnderstood().Response(alexaRequest, session, AlexaEntryPoint.Instance); //ResponseClient, LibraryManager, SessionManager, UserManager, roomContextManager);
                 }
 
             }
             
-            var requestHandlerParams = new object[] { alexaRequest, session, ResponseClient, LibraryManager, SessionManager, UserManager };
+            var requestHandlerParams = new object[] { alexaRequest, session, AlexaEntryPoint.Instance };
             var type = Type.GetType(IntentNamespace(request));
 
             try
@@ -129,21 +126,21 @@ namespace AlexaController.Api
             }
         }
 
-        private static string OnSessionEndRequest(AlexaRequest alexaRequest)
+        private static string OnSessionEndRequest(IAlexaRequest alexaRequest)
         {
             AlexaSessionManager.Instance.EndSession(alexaRequest);
             return null;
         }
 
-        private string OnUserEvent(AlexaRequest alexaRequest)
+        private string OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request              = alexaRequest.request;
-            var requestHandlerParams = new object[] { alexaRequest, LibraryManager, ResponseClient, SessionManager };
+            var requestHandlerParams = new object[] { alexaRequest, AlexaEntryPoint.Instance };
             var type                 = Type.GetType(UserEventNamespace(request));
             return GetResponseResult(type, requestHandlerParams);
         }
 
-        private string OnLaunchRequest(AlexaRequest alexaRequest)
+        private string OnLaunchRequest(IAlexaRequest alexaRequest)
         {
             var context             = alexaRequest.context;
 
@@ -177,7 +174,7 @@ namespace AlexaController.Api
                     semanticSpeechType = SemanticSpeechType.GREETINGS
                 },
                 shouldEndSession = false,
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
                     {

@@ -22,16 +22,16 @@ using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-    public class BrowseEpisodesIntent : IIntentResponseModel
+    public class BrowseEpisodesIntent : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
-            var roomManager = new RoomContextManager();
+            
             Room room = null;
-            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
             var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return roomManager.RequestRoom(alexaRequest, session, responseClient);
+            if (room is null && displayNone) return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
             
             var request        = alexaRequest.request;
             var intent         = request.intent;
@@ -41,11 +41,11 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            responseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
+            alexa.ResponseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
             
             // This is a recursive request, so if the user is viewing media at "Series" or "Season" level
             // it will return the episode list for the season. ASK: "Show Season 1" / "Season 1" .
-            var result = libraryManager.GetItemsResult(new InternalItemsQuery(session.User)
+            var result = alexa.LibraryManager.GetItemsResult(new InternalItemsQuery(session.User)
             {
                 Parent            = session.NowViewingBaseItem,
                 IncludeItemTypes  = new[] { "Episode" },
@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             // User requested season/episode data that doesn't exist
             if (!result.Items.Any())
             {
-                return responseClient.BuildAlexaResponse(new Response()
+                return alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -68,7 +68,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }, session.alexaSessionDisplayType);
             }
 
-            var season = libraryManager.GetItemById(result.Items[0].Parent.InternalId);
+            var season = alexa.LibraryManager.GetItemById(result.Items[0].Parent.InternalId);
 
             if (!(room is null))
                 try
@@ -77,7 +77,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch (Exception exception)
                 {
-                    responseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
                     room = null;
                 }
 
@@ -92,14 +92,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             session.room = room; 
             AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = $"Season { seasonNumber}"
                 },
                 shouldEndSession = null,
-                directives       = new List<Directive>()
+                directives       = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
                 }

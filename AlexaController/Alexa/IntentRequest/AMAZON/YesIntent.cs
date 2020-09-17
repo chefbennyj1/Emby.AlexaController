@@ -1,4 +1,5 @@
 ﻿using System;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -17,10 +18,9 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
-    public class YesIntent : IIntentResponseModel
+    public class YesIntent : IIntentResponse
     {
-        public string Response(AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient,
-            ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        public string Response(IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             throw new NotImplementedException();
         }

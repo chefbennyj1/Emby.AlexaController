@@ -2,10 +2,12 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Commands
 {
-    public class Parallel : Command
+    public class Parallel : ICommand
     {
-        public List<Command> commands { get; set; }
+        public List<ICommand> commands { get; set; }
         public object type => nameof(Parallel);
-        
+
+        public bool screenLock { get; set; }
+        public int delay { get; set; }
     }
 }

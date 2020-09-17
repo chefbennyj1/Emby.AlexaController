@@ -18,17 +18,16 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class BrowseNextUpEpisodeIntent : IIntentResponseModel
+    public class BrowseNextUpEpisodeIntent : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
-            var roomManager = new RoomContextManager();
             Room room = null;
-            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
             var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (room is null && displayNone)
-                return roomManager.RequestRoom(alexaRequest, session, responseClient);
+                return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
 
             var request = alexaRequest.request;
             var context = alexaRequest.context;
@@ -39,13 +38,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
 
-            responseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
+            alexa.ResponseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
             
             var nextUpEpisode = EmbyControllerUtility.Instance.GetNextUpEpisode(request.intent, session.User);
             
             if (nextUpEpisode is null)
             {
-                return responseClient.BuildAlexaResponse(new Response()
+                return alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -54,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         sound          = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
-                    directives       = new List<Directive>()
+                    directives       = new List<IDirective>()
                     {
                         RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
                         {
@@ -69,7 +68,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //Parental Control check for baseItem
             if (!nextUpEpisode.IsParentalAllowed(session.User))
             {
-                return responseClient.BuildAlexaResponse(new Response()
+                return alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -88,7 +87,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch (Exception exception)
                 {
-                    responseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
                     room = null;
                 }
 
@@ -102,7 +101,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             session.room = room;
             AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -110,7 +109,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     sound          = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                 },
                 shouldEndSession = null,
-                directives       = new List<Directive>()
+                directives       = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
                 }

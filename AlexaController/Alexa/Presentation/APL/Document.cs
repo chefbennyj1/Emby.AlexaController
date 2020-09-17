@@ -1,28 +1,36 @@
 ﻿using System.Collections.Generic;
+using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
 
 namespace AlexaController.Alexa.Presentation.APL
 {
-    
-    public class Graphic
+
+    public interface IDocument
     {
-        public string type    => "AVG";
-        public string version => "1.0";
-        public int height                  { get; set; }
-        public int width                   { get; set; }
-        public int viewportHeight          { get; set; }
-        public int viewportWidth           { get; set; }
-        public List<Parameter> parameters  { get; set; }
-        public List<Item> items            { get; set; }
+        string type                          { get; }
+        string version                       { get; }
+        Settings settings                    { get; set; }
+        string theme                         { get; set; }
+        List<Import> import                  { get; set; }
+        List<Resource> resources             { get; set; }
+        List<ICommand> onMount               { get; set; }
+        MainTemplate mainTemplate            { get; set; }
+        Dictionary<string, Graphic> graphics { get; set; }
     }
 
-    public class Parameter
+    public class Document : IDocument
     {
-        public string name     { get; set; }
-        public string type     { get; set; }
-        public object @default { get; set; }
+        public string type => "APL";
+        public string version => "1.1";
+        public Settings settings                    { get; set; }
+        public string theme                         { get; set; }
+        public List<Import> import                  { get; set; }
+        public List<Resource> resources             { get; set; }
+        public List<ICommand> onMount               { get; set; }
+        public MainTemplate mainTemplate            { get; set; }
+        public Dictionary<string, Graphic> graphics { get; set; }
     }
-    
+
     public class Import
     {
         public string name    { get; set; }
@@ -59,12 +67,7 @@ namespace AlexaController.Alexa.Presentation.APL
         public Dimensions dimensions { get; set; }
     }
     
-    public class OverlayGradient
-    {
-        public object type => GetType().Name;
-        public List<string> colorRange { get; set; }
-        public List<double> inputRange { get; set; }
-    }
+    
 
     public class Settings
     {
@@ -74,20 +77,8 @@ namespace AlexaController.Alexa.Presentation.APL
     public class MainTemplate
     {
         public List<string> parameters { get; set; }
-        public List<Item> items        { get; set; }
+        public List<IItem> items       { get; set; }
     }
-    
-    public class Document 
-    {
-        public string type    => "APL";
-        public string version => "1.1";
-        public Settings settings                    { get; set; }
-        public string theme                         { get; set; }
-        public List<Import> import                  { get; set; }
-        public List<Resource> resources             { get; set; }
-        public List<object> onMount                 { get; set; }
-        public MainTemplate mainTemplate            { get; set; }
-        public Dictionary<string, Graphic> graphics { get; set; }
 
-    }
+    
 }

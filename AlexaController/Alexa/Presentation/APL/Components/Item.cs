@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Item
+    public class Item : IItem
     {
         public string style            { get; set; }
         public string color            { get; set; }
@@ -10,8 +10,8 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string paddingTop       { get; set; }
         public string align            { get; set; }
         public string when             { get; set; }
-        public List<Item> items        { get; set; }
-        public Item item               { get; set; }
+        public List<IItem> items        { get; set; }
+        public IItem item               { get; set; }
         public string width            { get; set; }
         public string height           { get; set; }
         public string position         { get; set; }

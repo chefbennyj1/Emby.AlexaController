@@ -19,15 +19,14 @@ using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
-    public class UserEventShowItemListSequenceTemplate : UserEventResponse
+    public class UserEventShowItemListSequenceTemplate : IUserEventResponse
     {
-        public override string Response
-        (AlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient,
-            ISessionManager sessionManager)
+        public string Response(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
+        //(IAlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
         {
             var request  = alexaRequest.request;
             var source   = request.source;
-            var baseItem = libraryManager.GetItemById(source.id);
+            var baseItem = alexa.LibraryManager.GetItemById(source.id);
             var session  = AlexaSessionManager.Instance.GetSession(alexaRequest);
             var room     = session.room;
             var type     = baseItem.GetType().Name;
@@ -35,7 +34,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
            
             var phrase = "";
             
-            var result   = libraryManager.GetItemsResult(new InternalItemsQuery(session.User)
+            var result   = alexa.LibraryManager.GetItemsResult(new InternalItemsQuery(session.User)
             {
                 Parent           =  baseItem,
                 IncludeItemTypes = new [] { type == "Series" ? "Season" : "Episode" },
@@ -61,14 +60,14 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, baseItem); } catch { }
             
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = phrase
                 },
                 shouldEndSession = null,
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
                 }

@@ -15,10 +15,10 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
-    public class RoomNameIntent : IIntentResponseModel
+    public class RoomNameIntent : IIntentResponse
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             var request = alexaRequest.request;
             var intent = request.intent;
@@ -28,12 +28,12 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             var rePromptIntent     = session.PersistedRequestData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
 
-            var roomManager = new RoomContextManager();
+            
             Room room = null;
             
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {
-                try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+                try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
                 if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
                      throw new Exception("That room is currently not configured to show media.");
@@ -41,7 +41,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }
             else
             {
-                sessionManager.SendMessageToAdminSessions("RoomAndDeviceUtility", roomName, CancellationToken.None);
+                alexa.SessionManager.SendMessageToAdminSessions("RoomAndDeviceUtility", roomName, CancellationToken.None);
                 //Give a Room object with the Setup Name back to the RoomSetupIntent Class through the Session object.
                 //Leave it to the  configuration JavaScript to finish saving the new room set up device information.
                 room = new Room(){ Name = roomName}; 
@@ -50,7 +50,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             session.room = room;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            var requestHandlerParams = new object[] { session.PersistedRequestData, session, responseClient, libraryManager, sessionManager, userManager };
+            var requestHandlerParams = new object[] { session.PersistedRequestData, session, alexa };
 
             //Use Reflection to load the proper Intent class - AlexaController.Alexa.IntentRequest.{intent.Name}
             var type = Type.GetType($"AlexaController.Alexa.IntentRequest.{ rePromptIntentName }");
@@ -63,7 +63,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }
             catch 
             {
-                return new ErrorHandler().OnError(new Exception("Room Name Error"), alexaRequest, session, responseClient);
+                return new ErrorHandler().OnError(new Exception("Room Name Error"), alexaRequest, session, alexa.ResponseClient);
             }
 
         }

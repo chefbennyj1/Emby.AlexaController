@@ -9,9 +9,15 @@ using AlexaController.Utils.SemanticSpeech;
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
-    public class RoomContextManager 
+    public interface IRoomContextManager
+    {
+        string RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient);
+        Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session);
+    }
+
+    public class RoomContextManager : IRoomContextManager
     { 
-        public string RequestRoom(AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
+        public string RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
         {
             session.PersistedRequestData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session);
@@ -23,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.ROOM_CONTEXT, session)
                 },
                 shouldEndSession = false,
-                directives       = new List<Directive>()
+                directives       = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
                     {
@@ -53,7 +59,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         //        string.Equals(r.Name, name, StringComparison.CurrentCultureIgnoreCase));
         //}
 
-        public Room ValidateRoom(AlexaRequest alexaRequest, IAlexaSession session)
+        public Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;
             var intent = request.intent;

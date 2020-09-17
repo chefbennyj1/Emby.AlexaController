@@ -17,10 +17,10 @@ using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
-    public class goBack : UserEventResponse
+    public class goBack : IUserEventResponse
     {
-        public override string Response
-        (AlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
+        public string Response(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
+        //(IAlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
         {
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest);
 
@@ -31,12 +31,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             //if the user has requested an Emby client/room display during the session - go back on both if possible
             if (session.room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, libraryManager.GetItemById(session.NowViewingBaseItem.Parent.InternalId)); } catch { }
+                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, alexa.LibraryManager.GetItemById(session.NowViewingBaseItem.Parent.InternalId)); } catch { }
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, session)
                 }

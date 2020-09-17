@@ -22,13 +22,13 @@ namespace AlexaController
     public class AlexaResponse
     { 
         public string version                                              { get; set; }
-        public Response response                                           { get; set; }
+        public IResponse response                                           { get; set; }
         public string userAgent                                            { get; set; }
     }
 
     public interface IResponseClient
     {
-        string BuildAlexaResponse(Response response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE);
+        string BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE);
         void PostProgressiveResponse(string speechOutput, string accessToken, string requestId, string dialog = "");
     }
 
@@ -43,7 +43,7 @@ namespace AlexaController
             HttpClient     = client;
         }
 
-        public string BuildAlexaResponse(Response response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)
+        public string BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)
         {
             var person = !(response.person is null) ? OutputSpeech.SayName(response.person) : "";
             

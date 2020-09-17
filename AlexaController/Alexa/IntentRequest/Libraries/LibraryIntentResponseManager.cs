@@ -26,11 +26,11 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         }
 
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, IRoomContextManager roomContextManager)
         {
-            var roomManager = new RoomContextManager();
+            
             Room room = null;
-            try { room = roomManager.ValidateRoom(alexaRequest, session); } catch { }
+            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
 
             var context = alexaRequest.context;
             // we need the room object to proceed because we will only show libraries on emby devices
@@ -39,16 +39,16 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             {
                 session.PersistedRequestData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session);
-                return roomManager.RequestRoom(alexaRequest, session, responseClient);
+                return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
             }
 
             var request = alexaRequest.request;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId = request.requestId;
 
-            responseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
+            alexa.ResponseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
 
-            var result = libraryManager.GetItemById(EmbyControllerUtility.Instance.GetLibraryId(LibraryName));
+            var result = alexa.LibraryManager.GetItemById(EmbyControllerUtility.Instance.GetLibraryId(LibraryName));
 
             try
             {
@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(exception, alexaRequest, session, responseClient);
+                return new ErrorHandler().OnError(exception, alexaRequest, session, alexa.ResponseClient);
             }
 
             session.NowViewingBaseItem = result;
@@ -64,7 +64,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             session.PersistedRequestData = null;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -73,7 +73,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                 },
                 person = session.person,
                 shouldEndSession = null,
-                directives = new List<Directive>()
+                directives = new List<IDirective>()
                 {
                     RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
                     {

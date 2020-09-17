@@ -14,10 +14,10 @@ using MediaBrowser.Model.Services;
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
-    public class RoomSetupIntent : IIntentResponseModel, IService
+    public class RoomSetupIntent : IIntentResponse, IService
     {
         public string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             var room = session.room;
             if (room == null)
@@ -25,14 +25,14 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 session.PersistedRequestData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session);
 
-                return responseClient.BuildAlexaResponse(new Response()
+                return alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
                         phrase = "Welcome to room setup. Please say the name of the room you want to setup."
                     },
                     shouldEndSession = false,
-                    directives = new List<Directive>()
+                    directives = new List<IDirective>()
                     {
                         RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
                         {
@@ -44,9 +44,8 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
                 }, session.alexaSessionDisplayType);
             }
-
             
-            var response = responseClient.BuildAlexaResponse(new Response()
+            var response = alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

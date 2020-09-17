@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -17,10 +18,10 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest
 {
     [Intent]
-    public class NewItemsIntent : IIntentResponseModel
+    public class NewItemsIntent : IIntentResponse
     {
         public  string Response
-        (AlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager)
+        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             var request        = alexaRequest.request;
             var slots          = request.intent.slots;
@@ -36,7 +37,7 @@ namespace AlexaController.Alexa.IntentRequest
                     .GetMinDateCreation(DateTimeDurationNormalization.DeserializeDurationFromIso8601(duration));
 
             //TODO: Respond with the time frame the user request: "Looking for new movies from the last thrity days"
-            responseClient.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId);
+            alexa.ResponseClient.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId);
 
             var results = type == "New TV Shows" ? EmbyControllerUtility.Instance.GetLatestTv(session.User, d).ToList()
                 : EmbyControllerUtility.Instance.GetLatestMovies(session.User, d)
@@ -44,7 +45,7 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (!results.Any())
             {
-                return responseClient.BuildAlexaResponse(new Response()
+                return alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -70,7 +71,7 @@ namespace AlexaController.Alexa.IntentRequest
 
                         AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
 
-                        return responseClient.BuildAlexaResponse(new Response()
+                        return alexa.ResponseClient.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {
@@ -79,7 +80,7 @@ namespace AlexaController.Alexa.IntentRequest
                             },
                             person           = session.person,
                             shouldEndSession = null,
-                            directives       = new List<Directive>()
+                            directives       = new List<IDirective>()
                             {
                                 RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
                             }
@@ -88,7 +89,7 @@ namespace AlexaController.Alexa.IntentRequest
                     }
                 default: //Voice only
                     {
-                        return responseClient.BuildAlexaResponse(new Response()
+                        return alexa.ResponseClient.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {
