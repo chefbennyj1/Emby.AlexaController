@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Services;
 
 
@@ -16,16 +13,26 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
     [Intent]
     public class RoomSetupIntent : IIntentResponse, IService
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public RoomSetupIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            var room = session.room;
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            var room = Session.room;
             if (room == null)
             {
-                session.PersistedRequestData = alexaRequest;
-                AlexaSessionManager.Instance.UpdateSession(session);
+                Session.PersistedRequestData = AlexaRequest;
+                AlexaSessionManager.Instance.UpdateSession(Session);
 
-                return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -39,13 +46,13 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                             renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                             HeadlinePrimaryText = "Please say the name of the room you want to setup.",
 
-                        }, session)
+                        }, Session)
                     }
 
-                }, session.alexaSessionDisplayType);
+                }, Session.alexaSessionDisplayType);
             }
             
-            var response = alexa.ResponseClient.BuildAlexaResponse(new Response()
+            var response = Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
@@ -53,9 +60,9 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     phrase = $"Thank you. Please see the plugin configuration to choose the emby device that is in the { room.Name }, and press the \"Create Room button\".",
 
                 }
-            }, session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType);
 
-            session.room = null;
+            Session.room = null;
 
             return response;
         }

@@ -17,20 +17,29 @@ namespace AlexaController.Alexa.IntentRequest
     [Intent]
     public class VoiceAuthenticationAccountLinkIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+        public VoiceAuthenticationAccountLinkIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            var person        = alexaRequest.context.System.person;
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            var person        = AlexaRequest.context.System.person;
             var config        = Plugin.Instance.Configuration;
 
             if (person is null)
             {
-                return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, session),
+                        phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, Session),
                         semanticSpeechType = SemanticSpeechType.APOLOGETIC,
                     },
                 });
@@ -40,26 +49,26 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
-                    return alexa.ResponseClient.BuildAlexaResponse(new Response
+                    return Alexa.ResponseClient.BuildAlexaResponse(new Response
                     {
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, session),
+                            phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, Session),
                         }
                     });
                 }
             }
 
             //Send Message to Emby plugin UI
-            alexa.SessionManager.SendMessageToAdminSessions("SpeechAuthentication", person.personId, CancellationToken.None);
+            Alexa.SessionManager.SendMessageToAdminSessions("SpeechAuthentication", person.personId, CancellationToken.None);
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, session),
+                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, Session),
                 },
             });
         }

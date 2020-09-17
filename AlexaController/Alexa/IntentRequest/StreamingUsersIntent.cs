@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils.SemanticSpeech;
-using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 
 // ReSharper disable once ComplexConditionExpression
@@ -17,12 +15,23 @@ namespace AlexaController.Alexa.IntentRequest
     [Intent]
     public class StreamingUsersIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
-        {
-            var speechString = GetUserSessionSpeechString(alexa.SessionManager.Sessions);
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+        public StreamingUsersIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        {
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+
+        public string Response()
+        {
+            var speechString = GetUserSessionSpeechString(Alexa.SessionManager.Sessions);
+
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
@@ -30,7 +39,7 @@ namespace AlexaController.Alexa.IntentRequest
                     phrase = speechString,
                     semanticSpeechType = SemanticSpeechType.COMPLIANCE
                 }
-            }, session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType);
         }
 
         private static string GetUserSessionSpeechString(IEnumerable<SessionInfo> sessions)

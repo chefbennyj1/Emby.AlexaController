@@ -25,13 +25,11 @@ namespace AlexaController.Session
         private static readonly List<IAlexaSession> OpenSessions = new List<IAlexaSession>();
 
         private ISessionManager SessionManager { get; }
-        //private ILogger log                    { get; }
-
-        public AlexaSessionManager(ISessionManager sessionManager)//, ILogManager logMan)
+        
+        public AlexaSessionManager(ISessionManager sessionManager)
         {
             Instance = this;
             SessionManager = sessionManager;
-            //log = logMan.GetLogger(Plugin.Instance.Name);
         }
 
         private static AlexaSessionDisplayType GetCurrentViewport(IAlexaRequest alexaRequest)
@@ -67,8 +65,9 @@ namespace AlexaController.Session
             var amazonSession = alexaRequest.session;
 
             IAlexaRequest persistedRequestData = null;
-            IAlexaSession sessionInfo = null;
-            Room room = null;
+            IAlexaSession sessionInfo          = null;
+            Room room                          = null;
+
             if (OpenSessions.Exists(s => s.SessionId.Equals(amazonSession.sessionId)))
             {
                 // Not a new session with AMAZON, we should have a corresponding session
@@ -109,7 +108,7 @@ namespace AlexaController.Session
             sessionInfo = new AlexaSession()
             {
                 SessionId               = amazonSession.sessionId,
-                DeviceId                = system.device.deviceId,
+                EchoDeviceId            = system.device.deviceId,
                 person                  = person,
                 room                    = room,
                 User                    = user,
@@ -212,8 +211,7 @@ namespace AlexaController.Session
             if (!OpenSessions.Exists(session => session.room.Name == room?.Name)) return;
 
             var sessionToUpdate = OpenSessions.FirstOrDefault(session => session.room.Name == room?.Name);
-            ServerEntryPoint.Instance.Log.Info("ALEXA Playback started args session:" + sessionToUpdate?.room);
-
+            
         }
 
         

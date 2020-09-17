@@ -1,22 +1,27 @@
 ﻿using System.Collections.Generic;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils.SemanticSpeech;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
-
-// ReSharper disable once TooManyArguments
 
 namespace AlexaController.Alexa.IntentRequest
 {
     public class NotUnderstood : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public NotUnderstood(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = false,
                 outputSpeech = new OutputSpeech()
@@ -32,9 +37,9 @@ namespace AlexaController.Alexa.IntentRequest
                         .GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
                         {
                             renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
-                        }, session)
+                        }, Session)
                 }
-            }, session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType);
         }
     }
 }

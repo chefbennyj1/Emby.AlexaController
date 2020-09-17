@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using MediaBrowser.Model.Services;
 using System.IO;
-using AlexaController.Alexa;
 using AlexaController.Alexa.Errors;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.RequestData.Model;
@@ -22,10 +21,10 @@ namespace AlexaController.Api
     public interface IAlexaRequest
     {
         AmazonSession session { get; set; }
-        Request request { get; set; }
-        Context context { get; set; }
-        string version { get; set; }
-        Event @event { get; set; }
+        Request request       { get; set; }
+        Context context       { get; set; }
+        string version        { get; set; }
+        Event @event          { get; set; }
     }
 
     [Route("/Alexa", "POST", Summary = "Alexa End Point")]
@@ -108,17 +107,16 @@ namespace AlexaController.Api
                 //There has been a mistake, end the session.
                 if (session.PersistedRequestData is null && IsRoomNameIntentRequest(intent))
                 {
-                    return new NotUnderstood().Response(alexaRequest, session, AlexaEntryPoint.Instance); //ResponseClient, LibraryManager, SessionManager, UserManager, roomContextManager);
+                    return new NotUnderstood(alexaRequest, session, AlexaEntryPoint.Instance).Response(); 
                 }
 
             }
             
-            var requestHandlerParams = new object[] { alexaRequest, session, AlexaEntryPoint.Instance };
             var type = Type.GetType(IntentNamespace(request));
 
             try
             {
-                return GetResponseResult(type, requestHandlerParams);
+                return GetResponseResult(type, alexaRequest, session); 
             }
             catch (Exception exception)
             {
@@ -135,9 +133,8 @@ namespace AlexaController.Api
         private string OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request              = alexaRequest.request;
-            var requestHandlerParams = new object[] { alexaRequest, AlexaEntryPoint.Instance };
             var type                 = Type.GetType(UserEventNamespace(request));
-            return GetResponseResult(type, requestHandlerParams);
+            return GetResponseResult(type, alexaRequest, null); 
         }
 
         private string OnLaunchRequest(IAlexaRequest alexaRequest)
@@ -201,11 +198,11 @@ namespace AlexaController.Api
             });
         }
 
-        private string GetResponseResult(Type @namespace, object[] requestHandlerParams)
+        private static string GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var instance = Activator.CreateInstance(@namespace ?? throw new Exception("Error getting response"));
+            var instance = Activator.CreateInstance(@namespace, alexaRequest, session, AlexaEntryPoint.Instance);
             var method   = @namespace.GetMethod("Response");
-            var response = method?.Invoke(instance, requestHandlerParams);
+            var response = method?.Invoke(instance, null);
             return (string)response; 
         }
 

@@ -64,8 +64,17 @@ namespace AlexaController.Alexa.ResponseData.Model
         high
     }
 
-    
-    public class OutputSpeech 
+
+    public interface IOutputSpeech
+    {
+        string type { get; }
+        string ssml { get; set; }
+        string phrase { get; set; }
+        SemanticSpeechType semanticSpeechType { get; set; }
+        string sound { get; set; }
+    }
+
+    public class OutputSpeech : IOutputSpeech
     {
         public string type => "SSML";
         public string ssml                                                 { get; set; }
@@ -73,7 +82,7 @@ namespace AlexaController.Alexa.ResponseData.Model
         public SemanticSpeechType semanticSpeechType                       { get; set; } = SemanticSpeechType.NONE;
         public string sound                                                { get; set; } = string.Empty;
 
-        public static string SayName(Person person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
+        public static string SayName(IPerson person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
 
         public static string SayInDomain(Domain domain, string text) => $"<amazon:domain name='{domain}'>{text}</amazon:domain>";
 

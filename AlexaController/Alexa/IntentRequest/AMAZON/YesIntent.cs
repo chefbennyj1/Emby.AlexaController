@@ -20,7 +20,18 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
     [Intent]
     public class YesIntent : IIntentResponse
     {
-        public string Response(IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public YesIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        {
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
         {
             throw new NotImplementedException();
         }

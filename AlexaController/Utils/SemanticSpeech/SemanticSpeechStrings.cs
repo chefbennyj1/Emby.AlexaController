@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using AlexaController.Alexa.ResponseData.Model;
-using AlexaController.Configuration;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
-using Person = AlexaController.Alexa.RequestData.Model.Person;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable TooManyArguments
@@ -36,10 +34,6 @@ namespace AlexaController.Utils.SemanticSpeech
         VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS
     }
 
-    public class PhraseData
-    {
-
-    }
     public class SemanticSpeechStrings : SemanticSpeechUtility
     {
 

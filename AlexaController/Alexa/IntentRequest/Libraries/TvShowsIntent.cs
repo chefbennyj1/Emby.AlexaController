@@ -1,23 +1,26 @@
-﻿using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.RequestData.Model;
+﻿using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
-
-
-// ReSharper disable TooManyArguments
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
     [Intent]
     public class TvShowsIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public TvShowsIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            return new LibraryIntentResponseManager("TV Shows").Response(alexaRequest, session,
-                alexa); //responseClient, libraryManager, roomContextManager);
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            return new LibraryIntentResponseManager("TV Shows").Response(AlexaRequest, Session, Alexa);
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Errors;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -11,8 +10,6 @@ using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable TooManyArguments
@@ -22,56 +19,62 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     [Intent]
     public class BrowseBaseItemDetailsIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session      { get; }
+        public IAlexaEntryPoint Alexa     { get; }
+        public BrowseBaseItemDetailsIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-
+            AlexaRequest = alexaRequest;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
             Room room = null;
-            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
-            var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
+            try { room = Alexa.RoomContextManager.ValidateRoom(AlexaRequest, Session); } catch { }
+            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
+            if (room is null && displayNone) return Alexa.RoomContextManager.RequestRoom(AlexaRequest, Session, Alexa.ResponseClient);
             
-
-            var request        = alexaRequest.request;
+            var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
             var type           = request.intent.slots.Movie.value is null ? "Series" : "Movie";
             var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
-            var context        = alexaRequest.context;
+            var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
             
             var progressiveSpeech = "";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
-            alexa.ResponseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
+            Alexa.ResponseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
 
             //Clean up search term
             searchName = StringNormalization.NormalizeText(searchName);
 
-            if (string.IsNullOrEmpty(searchName)) return new NotUnderstood().Response(alexaRequest, session, alexa); //responseClient, libraryManager, sessionManager, userManager, roomContextManager);
+            if (string.IsNullOrEmpty(searchName)) return new NotUnderstood(AlexaRequest, Session, Alexa).Response(); 
 
-            var result = EmbyControllerUtility.Instance.QuerySpeechResultItems(searchName, new[] { type }, session.User);
+            var result = EmbyControllerUtility.Instance.QuerySpeechResultItem(searchName, new[] { type }, Session.User);
 
             if (result is null)
             {
-                return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, session),
+                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
                     }
                 });
             }
             
-            if (!result.IsParentalAllowed(session.User))
-                return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            if (!result.IsParentalAllowed(Session.User))
+                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, session, new List<BaseItem>() { result }),
+                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>() { result }),
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     }
                 });
@@ -79,15 +82,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (!(room is null))
                 try
                 {
-                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, result);
+                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, Session.User, result);
                 }
                 catch (Exception exception)
                 {
-                    alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    Alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
                     room = null;
                 }
 
-            Task.Delay(1500);
+            Task.Delay(1500); //<-Yep...
 
             var documentTemplateInfo = new RenderDocumentTemplateInfo()
             {
@@ -96,32 +99,32 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             };
 
             //Update Session
-            session.NowViewingBaseItem = result;
-            session.room = room;
-            AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
+            Session.NowViewingBaseItem = result;
+            Session.room = room;
+            AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
             
             try
             {
-                return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.BROWSE_ITEM, session, new List<BaseItem> { result }),
+                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.BROWSE_ITEM, Session, new List<BaseItem> { result }),
                         sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                     },
-                    person = session.person,
+                    person = Session.person,
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
+                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                     }
 
-                }, session.alexaSessionDisplayType);
+                }, Session.alexaSessionDisplayType);
 
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(exception.InnerException, alexaRequest, session, alexa.ResponseClient);
+                return new ErrorHandler().OnError(exception.InnerException, AlexaRequest, Session, Alexa.ResponseClient);
             }
         }
     }

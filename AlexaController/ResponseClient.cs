@@ -5,24 +5,13 @@ using MediaBrowser.Common.Net;
 using MediaBrowser.Model.Serialization;
 
 
-
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable TooManyArguments
-// ReSharper disable once MethodNameNotMeaningful
-// ReSharper disable once FlagArgument
-
 namespace AlexaController
 {
 
     public class AlexaResponse
     { 
         public string version                                              { get; set; }
-        public IResponse response                                           { get; set; }
+        public IResponse response                                          { get; set; }
         public string userAgent                                            { get; set; }
     }
 

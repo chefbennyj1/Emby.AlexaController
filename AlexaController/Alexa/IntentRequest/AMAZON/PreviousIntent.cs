@@ -7,42 +7,49 @@
 // ReSharper disable TooManyArguments
 
 using System.Collections.Generic;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
     public class PreviousIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public PreviousIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        {
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
         {
             
-            var previousPage = session.paging.pages[session.paging.currentPage - 1];
-            var currentPage  = session.paging.pages[session.paging.currentPage];
+            var previousPage = Session.paging.pages[Session.paging.currentPage - 1];
+            var currentPage  = Session.paging.pages[Session.paging.currentPage];
 
-            AlexaSessionManager.Instance.UpdateSession(session, currentPage, true);
+            AlexaSessionManager.Instance.UpdateSession(Session, currentPage, true);
 
             //if the user has requested an Emby client/room display during the session - go back on both if possible
-            if (session.room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, alexa.LibraryManager.GetItemById(session.NowViewingBaseItem.Parent.InternalId)); } catch { }
+            if (Session.room != null)
+                try { EmbyControllerUtility.Instance.BrowseItemAsync(Session.room.Name, Session.User, Alexa.LibraryManager.GetItemById(Session.NowViewingBaseItem.Parent.InternalId)); } catch { }
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, session)
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, Session)
                 }
 
-            }, session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType);
         }
     }
 }

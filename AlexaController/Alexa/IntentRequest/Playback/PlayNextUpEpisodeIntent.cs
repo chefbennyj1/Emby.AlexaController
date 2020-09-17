@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -8,8 +7,6 @@ using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 // ReSharper disable once PossibleNullReferenceException
 // ReSharper disable once TooManyArguments
@@ -19,41 +16,51 @@ namespace AlexaController.Alexa.IntentRequest.Playback
     [Intent]
     public class PlayNextUpEpisodeIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public PlayNextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        {
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
         {
             //we need a room object
             Room room = null;
-            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
-            if (room is null) return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
+            try { room = Alexa.RoomContextManager.ValidateRoom(AlexaRequest, Session); } catch { }
+            if (room is null) return Alexa.RoomContextManager.RequestRoom(AlexaRequest, Session, Alexa.ResponseClient);
 
-            var request = alexaRequest.request;
-            var nextUpEpisode = EmbyControllerUtility.Instance.GetNextUpEpisode(request.intent, session?.User);
+            var request = AlexaRequest.request;
+            var nextUpEpisode = EmbyControllerUtility.Instance.GetNextUpEpisode(request.intent, Session?.User);
 
             if (nextUpEpisode is null)
             {
-                return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, session),
+                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
                         semanticSpeechType = SemanticSpeechType.APOLOGETIC,
                     },
                 });
             }
 
-            EmbyControllerUtility.Instance.PlayMediaItemAsync(session, nextUpEpisode, session?.User);
+            EmbyControllerUtility.Instance.PlayMediaItemAsync(Session, nextUpEpisode, Session?.User);
 
-            session.NowViewingBaseItem = nextUpEpisode;
-            session.room = room;
-            AlexaSessionManager.Instance.UpdateSession(session);
+            Session.NowViewingBaseItem = nextUpEpisode;
+            Session.room = room;
+            AlexaSessionManager.Instance.UpdateSession(Session);
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PLAY_NEXT_UP_EPISODE, session, new List<BaseItem>() { nextUpEpisode }),
+                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PLAY_NEXT_UP_EPISODE, Session, new List<BaseItem>() { nextUpEpisode }),
                     semanticSpeechType = SemanticSpeechType.COMPLIANCE,
                 },
                 shouldEndSession = true,
@@ -64,9 +71,9 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         baseItems          = new List<BaseItem>() { nextUpEpisode },
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
 
-                    }, session)
+                    }, Session)
                 }
-            }, session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType);
         }
     }
 }

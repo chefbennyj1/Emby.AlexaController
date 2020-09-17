@@ -2,7 +2,7 @@
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
-using Person = AlexaController.Alexa.RequestData.Model.Person;
+using IPerson = AlexaController.Alexa.RequestData.Model.IPerson;
 // ReSharper disable once PossibleNullReferenceException
 // ReSharper disable once MethodNameNotMeaningful
 
@@ -19,13 +19,13 @@ namespace AlexaController.Utils
             Instance    = this;
         }
 
-        public bool UserPersonalizationProfileExists(Person person)
+        public bool UserPersonalizationProfileExists(IPerson person)
         {
             var config = Plugin.Instance.Configuration;
             return config.UserCorrelations.Exists(u => u.AlexaPersonId == person.personId);
         }
 
-        public User GetRecognizedPersonalizationProfileResult(Person person)
+        public User GetRecognizedPersonalizationProfileResult(IPerson person)
         {
 
             var users       = UserManager.Users;

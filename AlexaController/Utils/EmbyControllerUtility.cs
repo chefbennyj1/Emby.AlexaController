@@ -34,7 +34,7 @@ namespace AlexaController.Utils
         IEnumerable<BaseItem> GetLatestTv(User user, DateTime duration);
         void BrowseItemAsync(string room, User user, BaseItem request);
         void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item, User user);
-        BaseItem QuerySpeechResultItems(string searchName, string[] type, User user);
+        BaseItem QuerySpeechResultItem(string searchName, string[] type, User user);
     }
 
     public class CollectionInfo
@@ -64,7 +64,7 @@ namespace AlexaController.Utils
             try
             {
                 var series = intent.slots.Series;
-                var id     = QuerySpeechResultItems(series.value, new[] { "Series" }, user).InternalId;
+                var id     = QuerySpeechResultItem(series.value, new[] { "Series" }, user).InternalId;
                 var nextUp = TvSeriesManager.GetNextUp(new NextUpQuery()
                 {
                     SeriesId = id,
@@ -86,7 +86,7 @@ namespace AlexaController.Utils
         
         public CollectionInfo GetCollectionItems(User user, string collectionName)
         {
-            var result = QuerySpeechResultItems(collectionName, new[] { "collections", "Boxset" }, user);
+            var result = QuerySpeechResultItem(collectionName, new[] { "collections", "Boxset" }, user);
 
             var collectionItem = LibraryManager.QueryItems(new InternalItemsQuery()
             {

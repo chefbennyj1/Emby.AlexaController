@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
@@ -9,45 +8,46 @@ using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable TooManyArguments
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     public class BrowseEpisodesIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public BrowseEpisodesIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+
+        public string Response()
+        {     
             Room room = null;
-            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
-            var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
+            try { room = Alexa.RoomContextManager.ValidateRoom(AlexaRequest, Session); } catch { }
+            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
+            if (room is null && displayNone) return Alexa.RoomContextManager.RequestRoom(AlexaRequest, Session, Alexa.ResponseClient);
             
-            var request        = alexaRequest.request;
+            var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
             var seasonNumber   = slots.SeasonNumber.value;
-            var context        = alexaRequest.context;
+            var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            alexa.ResponseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
+            Alexa.ResponseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
             
             // This is a recursive request, so if the user is viewing media at "Series" or "Season" level
             // it will return the episode list for the season. ASK: "Show Season 1" / "Season 1" .
-            var result = alexa.LibraryManager.GetItemsResult(new InternalItemsQuery(session.User)
+            var result = Alexa.LibraryManager.GetItemsResult(new InternalItemsQuery(Session.User)
             {
-                Parent            = session.NowViewingBaseItem,
+                Parent            = Session.NowViewingBaseItem,
                 IncludeItemTypes  = new[] { "Episode" },
                 ParentIndexNumber = Convert.ToInt32(seasonNumber),
                 Recursive         = true
@@ -56,28 +56,28 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             // User requested season/episode data that doesn't exist
             if (!result.Items.Any())
             {
-                return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NO_SEASON_ITEM_EXIST, session, null, new[] {seasonNumber}),
+                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NO_SEASON_ITEM_EXIST, Session, null, new[] {seasonNumber}),
                         semanticSpeechType = SemanticSpeechType.APOLOGETIC,
                     },
                     shouldEndSession = null,
                     person           = null,
-                }, session.alexaSessionDisplayType);
+                }, Session.alexaSessionDisplayType);
             }
 
-            var season = alexa.LibraryManager.GetItemById(result.Items[0].Parent.InternalId);
+            var season = Alexa.LibraryManager.GetItemById(result.Items[0].Parent.InternalId);
 
             if (!(room is null))
                 try
                 {
-                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, season);
+                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, Session.User, season);
                 }
                 catch (Exception exception)
                 {
-                    alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    Alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
                     room = null;
                 }
 
@@ -88,11 +88,11 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 HeaderTitle        = $"Season {seasonNumber}"
             };
 
-            session.NowViewingBaseItem = season;
-            session.room = room; 
-            AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
+            Session.NowViewingBaseItem = season;
+            Session.room = room; 
+            AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -101,9 +101,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                 }
-            }, session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType);
 
         }
     }

@@ -7,23 +7,30 @@
 // ReSharper disable PossibleNullReferenceException
 // ReSharper disable TooManyArguments
 
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
     public class CancelIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session      { get; }
+        public IAlexaEntryPoint Alexa     { get; }
+
+        public CancelIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            AlexaRequest = alexaRequest;
+            Alexa        = alexa;
+            Session      = session;
+            Alexa        = alexa;
+        }
+        public string Response()
+        {
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

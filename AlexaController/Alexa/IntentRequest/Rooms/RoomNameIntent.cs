@@ -5,8 +5,6 @@ using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
 using AlexaController.Session;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
 // ReSharper disable once TooManyChainedReferences
 // ReSharper disable once PossibleNullReferenceException
@@ -15,10 +13,19 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
-    public class RoomNameIntent : IIntentResponse
+    public class RoomNameIntent //: IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        private IAlexaRequest alexaRequest { get; }
+        private IAlexaSession session { get; }
+        private IAlexaEntryPoint alexa { get; }
+        public RoomNameIntent(IAlexaRequest aR, IAlexaSession s, IAlexaEntryPoint a)
+        {
+            alexaRequest = aR;
+            session = s;
+            alexa = a;
+        }
+        public string Response()
+        //(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             var request = alexaRequest.request;
             var intent = request.intent;
@@ -27,7 +34,6 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             var rePromptIntent     = session.PersistedRequestData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
-
             
             Room room = null;
             
@@ -70,9 +76,9 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
         private string GetAlexaResponseResult(Type @namespace, object[] requestHandlerParams)
         {
-            var instance = Activator.CreateInstance(@namespace ?? throw new Exception("Error getting response"));
+            var instance = Activator.CreateInstance(@namespace ?? throw new Exception("Error getting response"), session.PersistedRequestData, session, alexa);
             var method   = @namespace.GetMethod("Response");
-            var response = method?.Invoke(instance, requestHandlerParams);
+            var response = method?.Invoke(instance, null);//, requestHandlerParams);
             return (string)response;
         }
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AlexaController.Alexa.Errors;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
@@ -16,7 +15,7 @@ using MediaBrowser.Controller.Library;
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
-    public class LibraryIntentResponseManager
+    public class LibraryIntentResponseManager 
     {
         private string LibraryName { get; }
 
@@ -25,8 +24,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             LibraryName = libraryName;
         }
 
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, IRoomContextManager roomContextManager)
+        public string Response(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
             
             Room room = null;

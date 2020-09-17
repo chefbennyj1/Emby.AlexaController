@@ -5,25 +5,25 @@ namespace AlexaController.Alexa.ResponseData.Model
 {
     public interface IResponse
     {
-        Person person { get; set; }
-        OutputSpeech outputSpeech { get; set; }
-        Card card { get; set; }
-        object shouldEndSession { get; set; }
+        IPerson person              { get; }
+        IOutputSpeech outputSpeech  { get; }
+        ICard card                   { get; set; }
+        object shouldEndSession     { get; }
         List<IDirective> directives { get; set; }
-        Header header { get; set; }
-        Directive directive { get; set; }
+        IHeader header               { get; }
+        IDirective directive        { get; }
     }
 
     public class Response : IResponse
     {
-        public Person person                                               { get; set; }
-        public OutputSpeech outputSpeech                                   { get; set; }
-        public Card card                                                   { get; set; } = null;
-        public object shouldEndSession                                     { get; set; }
-        public List<IDirective> directives                                  { get; set; }
+        public IPerson person              { get; set; }
+        public IOutputSpeech outputSpeech  { get; set; }
+        public ICard card                   { get; set; } = null;
+        public object shouldEndSession     { get; set; }
+        public List<IDirective> directives { get; set; }
 
         // Progressive Response elements
-        public Header header                                               { get; set; }
-        public Directive directive                                         { get; set; }
+        public IHeader header               { get; set; }
+        public IDirective directive        { get; set; }
     }
 }

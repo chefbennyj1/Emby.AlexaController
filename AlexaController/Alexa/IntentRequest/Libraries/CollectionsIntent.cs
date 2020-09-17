@@ -2,19 +2,25 @@
 using AlexaController.Api;
 using AlexaController.Session;
 
-
-// ReSharper disable TooManyArguments
-
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
     [Intent]
     public class CollectionsIntent  : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public CollectionsIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            return new LibraryIntentResponseManager("Collections").Response(alexaRequest, session,
-                alexa); //responseClient, libraryManager, roomContextManager);
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            return new LibraryIntentResponseManager("Collections").Response(AlexaRequest, Session, Alexa);
         }
     }
 }

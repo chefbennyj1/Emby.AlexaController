@@ -2,16 +2,24 @@
 using AlexaController.Api;
 using AlexaController.Session;
 
-// ReSharper disable TooManyArguments
-
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     public class GoHomeIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public GoHomeIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
+        {
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

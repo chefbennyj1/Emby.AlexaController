@@ -24,42 +24,52 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     [Intent]
     public class BrowseCollectionIntent : IIntentResponse
     {
-        public string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public BrowseCollectionIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        {
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public string Response()
         {
             Room room = null;
-            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
-            var displayNone = Equals(session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
+            try { room = Alexa.RoomContextManager.ValidateRoom(AlexaRequest, Session); } catch { }
+            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
+            if (room is null && displayNone) return Alexa.RoomContextManager.RequestRoom(AlexaRequest, Session, Alexa.ResponseClient);
             
-            var request           = alexaRequest.request;
+            var request           = AlexaRequest.request;
             var intent            = request.intent;
             var slots             = intent.slots;
             var collectionRequest = slots.MovieCollection.value ?? slots.Movie.value;
-            var context           = alexaRequest.context;
+            var context           = AlexaRequest.context;
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
             
             var progressiveSpeech = $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
-            alexa.ResponseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
+            Alexa.ResponseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
             
             collectionRequest       = StringNormalization.NormalizeText(collectionRequest);
             
-            var collection          = EmbyControllerUtility.Instance.GetCollectionItems(session.User, collectionRequest);
+            var collection          = EmbyControllerUtility.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems     = collection.Items;
-            var collectionBaseItem  = alexa.LibraryManager.GetItemById(collection.Id);
+            var collectionBaseItem  = Alexa.LibraryManager.GetItemById(collection.Id);
             
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
             {
-                if (!collectionBaseItem.IsParentalAllowed(session.User))
+                if (!collectionBaseItem.IsParentalAllowed(Session.User))
                 {
-                    return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                    return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                     {
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, session, new List<BaseItem>(){ collectionBaseItem }),
+                            phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>(){ collectionBaseItem }),
                             sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                         }
                     });
@@ -69,11 +79,11 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (!(room is null))
                 try
                 {
-                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, collectionBaseItem);
+                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, Session.User, collectionBaseItem);
                 }
                 catch (Exception exception)
                 {
-                    alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    Alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
                     room = null;
                 }
 
@@ -86,13 +96,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             };
 
             //Update Session
-            session.NowViewingBaseItem = collectionBaseItem;
-            session.room = room;
-            AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
+            Session.NowViewingBaseItem = collectionBaseItem;
+            Session.room = room;
+            AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {
-                person       = session.person,
+                person       = Session.person,
                 outputSpeech = new OutputSpeech()
                 {
                     phrase         = $"{collectionBaseItem.Name}",
@@ -100,10 +110,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                 },
 
-            }, session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType);
         }
     }
 }

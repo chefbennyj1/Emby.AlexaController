@@ -1,10 +1,14 @@
-﻿using AlexaController.Api;
+﻿using System.Runtime.CompilerServices;
+using AlexaController.Api;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa
 {
     public interface IIntentResponse
     {
-        string Response(IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa); 
+        IAlexaRequest AlexaRequest { get; }
+        IAlexaSession Session { get; }
+        IAlexaEntryPoint Alexa { get; }
+        string Response(); 
     }
 }

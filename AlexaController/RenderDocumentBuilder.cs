@@ -60,8 +60,8 @@ namespace AlexaController
     }
 
     public class RenderDocumentTemplateInfo : IRenderDocumentTemplateInfo
-    {                                                                //Defaults  
-        public RenderDocumentType renderDocumentType { get; set; } //= RenderDocumentType.NONE;
+    {                                                                 
+        public RenderDocumentType renderDocumentType { get; set; } 
         public string HeaderTitle                    { get; set; } = "";
         public List<BaseItem> baseItems              { get; set; }
         public BaseItem collectionRoot               { get; set; }
@@ -394,7 +394,7 @@ namespace AlexaController
 
         private Directive GetItemDetailsTemplate(IRenderDocumentTemplateInfo templateInfo, IAlexaSession session)
         {
-            ServerEntryPoint.Instance.Log.Info("ALEXA BUILDING RENDER DOCUMENT");
+            
             var type = templateInfo.baseItems[0].GetType().Name;
 
             var baseItem = type.Equals("Season") ? templateInfo.baseItems[0].Parent : templateInfo.baseItems[0];

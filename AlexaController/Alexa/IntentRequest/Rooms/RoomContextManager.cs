@@ -40,25 +40,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 }
             }, session.alexaSessionDisplayType);
         }
-
-        //public Room CreateRoom(string name)
-        //{
-        //    var config = Plugin.Instance.Configuration;
-        //    var room = new Room()
-        //    {
-        //        Name = name
-        //    };
-            
-        //    if (!ValidateRoomConfiguration(name, config))
-        //    {
-        //        config.Rooms.Add(room);
-        //        return room;
-        //    }
-
-        //    return config.Rooms.FirstOrDefault(r =>
-        //        string.Equals(r.Name, name, StringComparison.CurrentCultureIgnoreCase));
-        //}
-
+        
         public Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;

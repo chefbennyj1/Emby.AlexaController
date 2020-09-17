@@ -1,33 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
-
-// ReSharper disable twice TooManyChainedReferences
-// ReSharper disable once TooManyArguments
-// ReSharper disable once InconsistentNaming
 
 namespace AlexaController.Alexa.IntentRequest
 {
     [Intent]
     public class NewItemsIntent : IIntentResponse
     {
-        public  string Response
-        (IAlexaRequest alexaRequest, IAlexaSession session, AlexaEntryPoint alexa)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+        public IAlexaEntryPoint Alexa { get; }
+
+        public NewItemsIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
-            var request        = alexaRequest.request;
+            AlexaRequest = alexaRequest;
+            Alexa = alexa;
+            Session = session;
+            Alexa = alexa;
+        }
+        public  string Response()
+        {
+            var request        = AlexaRequest.request;
             var slots          = request.intent.slots;
             var duration       = slots.Duration.value;
             var type           = slots.MovieAlternatives.value is null ? "New TV Shows" : "New Movies";
-            var context        = alexaRequest.context;
+            var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
             
@@ -37,28 +40,28 @@ namespace AlexaController.Alexa.IntentRequest
                     .GetMinDateCreation(DateTimeDurationNormalization.DeserializeDurationFromIso8601(duration));
 
             //TODO: Respond with the time frame the user request: "Looking for new movies from the last thrity days"
-            alexa.ResponseClient.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId);
+            Alexa.ResponseClient.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId);
 
-            var results = type == "New TV Shows" ? EmbyControllerUtility.Instance.GetLatestTv(session.User, d).ToList()
-                : EmbyControllerUtility.Instance.GetLatestMovies(session.User, d)
-                    .Where(movie => movie.IsParentalAllowed(session.User)).ToList();
+            var results = type == "New TV Shows" ? EmbyControllerUtility.Instance.GetLatestTv(Session.User, d).ToList()
+                : EmbyControllerUtility.Instance.GetLatestMovies(Session.User, d)
+                    .Where(movie => movie.IsParentalAllowed(Session.User)).ToList();
 
             if (!results.Any())
             {
-                return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
                         phrase = $"No { type } have been added during that time.",
                         semanticSpeechType = SemanticSpeechType.APOLOGETIC,
                     },
-                    person = session.person,
+                    person = Session.person,
                     shouldEndSession = true,
 
-                }, session.alexaSessionDisplayType);
+                }, Session.alexaSessionDisplayType);
             }
            
-            switch (session.alexaSessionDisplayType)
+            switch (Session.alexaSessionDisplayType)
             {
                 case AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE:
                 {
@@ -69,37 +72,37 @@ namespace AlexaController.Alexa.IntentRequest
                             HeaderTitle        = type
                         };
 
-                        AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
+                        AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-                        return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                        return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, session, results),
+                                phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, Session, results),
                                 semanticSpeechType = SemanticSpeechType.COMPLIANCE,
                             },
-                            person           = session.person,
+                            person           = Session.person,
                             shouldEndSession = null,
                             directives       = new List<IDirective>()
                             {
-                                RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
+                                RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                             }
 
-                        }, session.alexaSessionDisplayType);
+                        }, Session.alexaSessionDisplayType);
                     }
                 default: //Voice only
                     {
-                        return alexa.ResponseClient.BuildAlexaResponse(new Response()
+                        return Alexa.ResponseClient.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, session, results),
+                                phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, Session, results),
                                 semanticSpeechType = SemanticSpeechType.COMPLIANCE,
                             },
-                            person           = session.person,
+                            person           = Session.person,
                             shouldEndSession = true,
 
-                        }, session.alexaSessionDisplayType);
+                        }, Session.alexaSessionDisplayType);
                     }
             }
         }
