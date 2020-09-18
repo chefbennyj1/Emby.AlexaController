@@ -154,6 +154,8 @@ namespace AlexaController
         private static string ListIcon        => "M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z";
         private static string Left            => "M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z";
         private static string Right           => "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z";
+        private static string Carousel        => "M18,6V17H22V6M2,17H6V6H2M7,19H17V4H7V19Z";
+        private static string ArrayIcon       => "M8,18H17V5H8M18,5V18H21V5M4,18H7V5H4V18Z";
 
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(2);
 
@@ -404,6 +406,67 @@ namespace AlexaController
 
             GetVideoBackdropLayout(baseItem, token).ForEach(i => layout.Add(i));
 
+            var graphicsDictionary = new Dictionary<string, Graphic>
+            {
+                {
+                    "CheckMark", new Graphic()
+                    {
+                        height = 35,
+                        width = 35,
+                        viewportHeight = 25,
+                        viewportWidth = 25,
+                        items = new List<IItem>()
+                        {
+                            new Path()
+                            {
+                                pathData = CheckMark,
+                                stroke = "none",
+                                strokeWidth = "1px",
+                                fill = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
+                            }
+                        }
+                    }
+                },
+                {
+                    "Carousel", new Graphic()
+                    {
+                        height = 35,
+                        width = 35,
+                        viewportHeight = 25,
+                        viewportWidth = 25,
+                        items = new List<IItem>()
+                        {
+                            new Path()
+                            {
+                                pathData = Carousel,
+                                stroke = "none",
+                                strokeWidth = "1px",
+                                fill = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
+                            }
+                        }
+                    }
+                },
+                {
+                    "ArrayIcon", new Graphic()
+                    {
+                        height = 35,
+                        width = 35,
+                        viewportHeight = 25,
+                        viewportWidth = 25,
+                        items = new List<IItem>()
+                        {
+                            new Path()
+                            {
+                                pathData = ArrayIcon,
+                                stroke = "none",
+                                strokeWidth = "1px",
+                                fill = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
+                            }
+                        }
+                    }
+                }
+            };
+
             layout.Add(new AlexaHeader()
             {
                 headerTitle            = template.HeaderTitle != "" ? template.HeaderTitle : template.baseItems[0].Name,
@@ -451,35 +514,38 @@ namespace AlexaController
                 left = "87vw"
             });
             //Runtime span
-            var runTimeTicks = template.baseItems[0].RunTimeTicks;
-            if (!ReferenceEquals(null, runTimeTicks))
+            if(string.Equals(type, "Movie")) { 
+                var runTimeTicks = template.baseItems[0].RunTimeTicks;
+                if (!(runTimeTicks is null))
+                    layout.Add(new Text()
+                    {
+                        text = $"{TimeSpan.FromTicks(runTimeTicks.Value).TotalMinutes.ToString(CultureInfo.InvariantCulture).Split('.')[0]} minutes",
+                        style = "textStyleBody",
+                        left = "82%",
+                        top = "3vh",
+                        width = "15vw",
+                        height = "5%",
+                        fontSize = "18dp",
+                        id = "timespan"
+                    });
+                //End Time
                 layout.Add(new Text()
                 {
-                    text = $"{TimeSpan.FromTicks(runTimeTicks.Value).TotalMinutes.ToString(CultureInfo.InvariantCulture).Split('.')[0]} minutes",
+                    text = $"Ends at: {DateTime.Now.AddTicks(template.baseItems[0].GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}",
                     style = "textStyleBody",
                     left = "82%",
-                    top = "3vh",
-                    width = "15vw",
+                    top = "4vh",
+                    width = "55vw",
                     height = "5%",
                     fontSize = "18dp",
-                    id = "timespan"
+                    id = "endTime"
                 });
-            //End Time
-            layout.Add(new Text()
-            {
-                text     = $"Ends at: {DateTime.Now.AddTicks(template.baseItems[0].GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}",
-                style    = "textStyleBody",
-                left     = "82%",
-                top      = "4vh",
-                width    = "55vw",
-                height   = "5%",
-                fontSize = "18dp",
-                id       = "endTime"
-            });
+            }
+
             //Overview
             layout.Add(new ScrollView()
             {
-                top     = "9vh",
+                top     = string.Equals(type, "Movie") ? "9vh" : "7vh",
                 left    = "42vw",
                 id      = "overview",
                 height  = "25vh",
@@ -492,10 +558,57 @@ namespace AlexaController
                     fontSize = "20dp"
                 }
             });
+            //Series - Season Count
+            if (string.Equals(type, "Series"))
+            {
+                
+                layout.Add(new Container()
+                {
+                    position = "absolute",
+                    left = "42vw",
+                    top = "78vh",
+                    direction = "row",
+                    items = new List<IItem>()
+                    {
+                        new VectorGraphic()
+                        {
+                            id = "SeasonCarouselArrayIcon",
+                            source = "ArrayIcon"
+                        },
+                        new VectorGraphic()
+                        {
+                            id = "SeasonCarouselIcon",
+                            source = "Carousel",
+                            position = "absolute",
+                            opacity = 0
+                        },
+                        new Text()
+                        {
+                            style = "textStyleBody",
+                            fontSize = "23dp",
+                            left = "12dp",
+                            text = "<b>" + LibraryManager.GetItemsResult(new InternalItemsQuery(session.User)
+                            {
+                                Parent = baseItem,
+                                IncludeItemTypes = new [] {"Season"}
+
+                            }).TotalRecordCount + "</b>"
+                        },
+                        new Text()
+                        {
+                            style = "textStyleBody",
+                            fontSize = "23dp",
+                            left = "24dp",
+                            width = "25vw",
+                            text = "Available Season(s)"
+                        }
+                    }
+                });
+            }
             //Primary Image
             layout.Add(new Container()
             {
-                id = "playButton",
+                id = "primaryButton",
                 position = "absolute",
                 width = "38%",
                 height = "75vh",
@@ -542,7 +655,7 @@ namespace AlexaController
 
             layout.Add(new AlexaFooter()
             {
-                hintText = "Alexa, play that...",
+                hintText = type == "Series" ? "Try \"Alexa, show season one...\"" : "Try \"Alexa, play that...\"",
                 position = "absolute",
                 bottom = "1vh"
             });
@@ -556,37 +669,25 @@ namespace AlexaController
                     theme    = "dark",
                     settings = new Settings() { idleTimeout = 120000 },
                     import   = Imports,
-                    graphics = new Dictionary<string, Graphic>()
-                    {
-                        {
-                            "CheckMark", new Graphic()
-                            {
-                                height         = 35,
-                                width          = 35,
-                                viewportHeight = 25,
-                                viewportWidth  = 25,
-                                items          = new List<IItem>()
-                                {
-                                    new Path()
-                                    {
-                                        pathData    = CheckMark,
-                                        stroke      = "none",
-                                        strokeWidth = "1px",
-                                        fill        = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
-                                    }
-                                }
-                            }
-                        }
-                    },
+                    graphics = graphicsDictionary,
                     onMount = new List<ICommand>()
                     {
                         new Sequential()
                         {
                             commands = new List<ICommand>()
                             {
-                                ScaleFadeInItem("playButton", 800),
+                                ScaleFadeInItem("primaryButton", 800),
                                 FadeInItem("overview", 800),
-                                FadeInItem("showing", 2000)
+                                FadeInItem("showing", 2000),
+                                new Parallel()
+                                {
+                                    delay = 2000,
+                                    commands = new List<ICommand>()
+                                    {
+                                        FadeInItem("SeasonCarouselIcon", 500),
+                                        FadeOutItem("SeasonCarouselArrayIcon", 500)
+                                    }
+                                }
                             }
                         }
                     },
@@ -1460,8 +1561,8 @@ namespace AlexaController
                         componentId = "hint",
                         property    = "hintText",
                         value       = type == "Episode" ? $"Try \"Alexa, play episode {item.IndexNumber}\""
-                            : type == "Season" ? $"Try \"Alexa, show season {item.IndexNumber}\""
-                            : $"Try \"Alexa, show the {type?.ToLowerInvariant()} {item.Name}\"" //Default "Series"/"Movie"
+                                    : type == "Season" ? $"Try \"Alexa, show season {item.IndexNumber}\""
+                                    : $"Try \"Alexa, show the {type?.ToLowerInvariant()} {item.Name}\"" //Default "Series"/"Movie"
                     },
                     new AnimateItem()
                     {
@@ -1478,6 +1579,24 @@ namespace AlexaController
         }
 
 
+        private ICommand FadeOutItem(string componentId, int duration, int? delay = null)
+        {
+            return new AnimateItem()
+            {
+                componentId = componentId,
+                easing = "ease-in",
+                duration = duration,
+                delay = delay ?? 0,
+                value = new List<IValue>()
+                {
+                    new OpacityValue()
+                    {
+                        from = 1,
+                        to = 0
+                    }
+                }
+            };
+        }
 
         private ICommand FadeInItem(string componentId, int duration, int? delay = null)
         {

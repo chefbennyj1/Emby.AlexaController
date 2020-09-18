@@ -37,7 +37,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             //if the user has requested an Emby client/room display during the session - go back on both if possible
             if (session.room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, Alexa.LibraryManager.GetItemById(session.NowViewingBaseItem.Parent.InternalId)); } catch { }
+                try { EmbyControllerUtility.Instance.BrowseItemAsync(session.room.Name, session.User, Alexa.LibraryManager.GetItemById(previousPage.baseItems[0].InternalId)); } catch { }
 
             return Alexa.ResponseClient.BuildAlexaResponse(new Response()
             {

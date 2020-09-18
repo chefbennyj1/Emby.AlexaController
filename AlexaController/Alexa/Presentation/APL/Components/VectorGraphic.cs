@@ -34,5 +34,6 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string speech { get; set; }
         public string display { get; set; }
         public string content { get; set; }
+        public HandleTick handleTick { get; set; }
     }
 }
