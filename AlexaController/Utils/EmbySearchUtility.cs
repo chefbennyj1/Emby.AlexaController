@@ -92,7 +92,6 @@ namespace AlexaController.Utils
                     }
             }
             
-
             //Return items that start with the first two letters of search term, removing proceeding  "the"
             if (!result.Any())
             {

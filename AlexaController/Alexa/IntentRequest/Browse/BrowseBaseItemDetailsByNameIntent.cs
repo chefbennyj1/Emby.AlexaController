@@ -18,13 +18,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 {
     
     [Intent]
-    public class BrowseBaseItemDetailsIntent : IIntentResponse
+    public class BrowseBaseItemDetailsByNameIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session      { get; }
         public IAlexaEntryPoint Alexa     { get; }
 
-        public BrowseBaseItemDetailsIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public BrowseBaseItemDetailsByNameIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
         {
             AlexaRequest = alexaRequest;
             Session = session;

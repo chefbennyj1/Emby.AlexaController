@@ -201,7 +201,7 @@ namespace AlexaController
             baseItems.ForEach(i => touchWrapperLayout.Add(new TouchWrapper()
             {
                 id      = i.InternalId.ToString(),
-                opacity = 0,
+                opacity = 1,
                 onPress = new Parallel()
                 {
                     commands = new List<ICommand>()
@@ -441,7 +441,7 @@ namespace AlexaController
                                 pathData = Carousel,
                                 stroke = "none",
                                 strokeWidth = "1px",
-                                fill = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
+                                fill = "rgba(255,250,0,1)" 
                             }
                         }
                     }
@@ -460,7 +460,7 @@ namespace AlexaController
                                 pathData = ArrayIcon,
                                 stroke = "none",
                                 strokeWidth = "1px",
-                                fill = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
+                                fill = "rgba(255,250,0,1)" 
                             }
                         }
                     }

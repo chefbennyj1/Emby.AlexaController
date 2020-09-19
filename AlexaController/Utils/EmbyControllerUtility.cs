@@ -13,6 +13,7 @@ using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.TV;
 using MediaBrowser.Model.Entities;
+using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Querying;
 using MediaBrowser.Model.Session;
 using User = MediaBrowser.Controller.Entities.User;
@@ -35,6 +36,7 @@ namespace AlexaController.Utils
         void BrowseItemAsync(string room, User user, BaseItem request);
         void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item, User user);
         BaseItem QuerySpeechResultItem(string searchName, string[] type, User user);
+        IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName);
     }
 
     public class CollectionInfo
@@ -48,14 +50,15 @@ namespace AlexaController.Utils
         private ILibraryManager LibraryManager        { get; }
         private ITVSeriesManager TvSeriesManager      { get; }
         private ISessionManager SessionManager        { get; }
-        
+        private ILogger Log { get; }
         public static IEmbyControllerUtility Instance { get; private set; }
 
-        public EmbyControllerUtility(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)
+        public EmbyControllerUtility(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)
         {
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
             SessionManager  = sesMan;
+            Log = logMan.GetLogger(Plugin.Instance.Name);
             Instance        = this;
         }
         
@@ -239,7 +242,26 @@ namespace AlexaController.Utils
 
         }
 
-        
+        public IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName)
+        {
+            var actorQuery = LibraryManager.GetItemsResult(new InternalItemsQuery()
+            {
+                IncludeItemTypes = new []{ "Person" },
+                SearchTerm = actorName,
+                Recursive = true
+            });
+          
+            if (actorQuery.TotalRecordCount <= 0) return null;
+
+            var query = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
+            {
+                Recursive = true,
+                PersonIds = new[] { actorQuery.Items[0].InternalId }
+            });
+
+            return new Dictionary<BaseItem, List<BaseItem>>() {{ actorQuery.Items[0], query.Items.ToList() }};
+
+        }
         public void Dispose()
         {
             

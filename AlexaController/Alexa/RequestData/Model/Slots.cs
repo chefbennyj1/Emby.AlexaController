@@ -11,6 +11,7 @@
         public slotData Movie { get; set; }
         public slotData Device { get; set; }
         public slotData Room { get; set; }
+        public slotData ActorName { get; set; }
         //Converts words that indicate durations ("five minutes") into a numeric duration ("PT5M").
         public slotData Duration { get; set; }
         public slotData SeasonNumber { get; set; }

@@ -123,7 +123,7 @@
                     ]
                 },
                 {
-                    "name": "Browse_BrowseBaseItemDetailsIntent",
+                    "name": "Browse_BrowseBaseItemDetailsByNameIntent",
                     "slots": [
                         {
                             "name": "Movie",
