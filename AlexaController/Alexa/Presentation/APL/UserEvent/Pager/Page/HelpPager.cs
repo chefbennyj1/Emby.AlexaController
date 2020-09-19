@@ -21,12 +21,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
     public class HelpPager : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public HelpPager(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
+        public HelpPager(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
@@ -34,7 +34,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
             var arguments     = request.arguments;
             var helpListIndex = Convert.ToInt32(arguments[2]);
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 outputSpeech = new OutputSpeech()

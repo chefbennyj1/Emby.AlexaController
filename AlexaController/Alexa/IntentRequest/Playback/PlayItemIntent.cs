@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AlexaController.Alexa.Errors;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -37,39 +38,37 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session      { get; }
-        public IAlexaEntryPoint Alexa     { get; }
-
-        public PlayItemIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        
+        public PlayItemIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa        = alexa;
             Session      = session;
-            Alexa        = alexa;
+            
         }
         public string Response()
         {
             //we need a room object
             Room room = null;
-            try { room = Alexa.RoomContextManager.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (room is null) return Alexa.RoomContextManager.RequestRoom(AlexaRequest, Session, Alexa.ResponseClient);
+            try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+            if (room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
 
             var request        = AlexaRequest.request;
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-            Alexa.ResponseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
+            ResponseClient.Instance.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
 
 
             var result = Session.NowViewingBaseItem ??
                          (!(request.intent.slots.Movie.value is null)
-                             ? EmbyControllerUtility.Instance.QuerySpeechResultItem(request.intent.slots.Movie.value, new[] { "Movie" }, Session.User)
+                             ? EmbyServerEntryPoint.Instance.QuerySpeechResultItem(request.intent.slots.Movie.value, new[] { "Movie" }, Session.User)
                              : !(request.intent.slots.Series.value is null)
-                                ? EmbyControllerUtility.Instance.QuerySpeechResultItem(request.intent.slots.Series.value, new[] { "Series" }, Session.User) : null);
+                                ? EmbyServerEntryPoint.Instance.QuerySpeechResultItem(request.intent.slots.Series.value, new[] { "Series" }, Session.User) : null);
 
             //If result is null here, then the item doesn't exist in the library
             if (result is null)
             {
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -83,7 +82,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //Parental Control check for baseItem
             if (!result.IsParentalAllowed(Session.User))
             {
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -97,18 +96,18 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
             try
             {
-                EmbyControllerUtility.Instance.PlayMediaItemAsync(Session, result, Session.User);
+                EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, result, Session.User);
             }
             catch (Exception exception)
             {
                 //TODO: Add progressive response with error, but show template on screen device is possible
-                return new ErrorHandler().OnError(exception, AlexaRequest, Session, Alexa.ResponseClient);
+                return new ErrorHandler().OnError(exception, AlexaRequest, Session, ResponseClient.Instance);
             }
 
             Session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(Session);
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

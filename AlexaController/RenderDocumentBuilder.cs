@@ -16,13 +16,11 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Entities;
+using MediaBrowser.Model.Logging;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 using Source = AlexaController.Alexa.Presentation.APL.Components.Source;
 using Video = AlexaController.Alexa.Presentation.APL.Components.Video;
 
-// ReSharper disable twice TooManyChainedReferences
-// ReSharper disable twice InconsistentNaming
-// ReSharper disable twice ComplexConditionExpression
 
 
 /*
@@ -55,17 +53,17 @@ namespace AlexaController
         RenderDocumentType renderDocumentType { get; }
         string HeaderTitle                    { get; }
         List<BaseItem> baseItems              { get; }
-        BaseItem collectionRoot               { get; }
         string HeadlinePrimaryText            { get; }
+        string HeaderAttributionImage         { get; }
     }
 
     public class RenderDocumentTemplate : IRenderDocumentTemplate
-    {                                                                 
+    {  
         public RenderDocumentType renderDocumentType { get; set; } 
         public string HeaderTitle                    { get; set; } = "";
         public List<BaseItem> baseItems              { get; set; }
-        public BaseItem collectionRoot               { get; set; }
         public string HeadlinePrimaryText            { get; set; } = "";
+        public string HeaderAttributionImage         { get; set; }
     }
 
     public class RenderDocumentBuilder : IServerEntryPoint
@@ -73,6 +71,7 @@ namespace AlexaController
         private ILibraryManager LibraryManager       { get; }
         private ISessionManager SessionManager       { get; }
         private IServerApplicationHost Host          { get; }
+        private ILogger Log { get; set; }
         public static RenderDocumentBuilder Instance { get; private set; }
         private static string LanAddress             { get; set; }
 
@@ -144,7 +143,8 @@ namespace AlexaController
                 }
             }
         };
-
+        // ReSharper disable twice UnusedMember.Local
+        // ReSharper disable twice InconsistentNaming
         private static string CastIcon        => "M1,10V12A9,9 0 0,1 10,21H12C12,14.92 7.07,10 1,10M1,14V16A5,5 0 0,1 6,21H8A7,7 0 0,0 1,14M1,18V21H4A3,3 0 0,0 1,18M21,3H3C1.89,3 1,3.89 1,5V8H3V5H21V19H14V21H21A2,2 0 0,0 23,19V5C23,3.89 22.1,3 21,3Z";
         private static string EmbyIcon        => "M11,2L6,7L7,8L2,13L7,18L8,17L13,22L18,17L17,16L22,11L17,6L16,7L11,2M10,8.5L16,12L10,15.5V8.5Z";
         private static string PlayOutlineIcon => "M8.5,8.64L13.77,12L8.5,15.36V8.64M6.5,5V19L17.5,12";
@@ -159,11 +159,12 @@ namespace AlexaController
 
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(2);
 
-        public RenderDocumentBuilder(ILibraryManager libraryManager, ISessionManager sessionManager, IServerApplicationHost host)
+        public RenderDocumentBuilder(ILogManager logManager, ILibraryManager libraryManager, ISessionManager sessionManager, IServerApplicationHost host)
         {
             LibraryManager = libraryManager;
             SessionManager = sessionManager;
             Host           = host;
+            Log = logManager.GetLogger(Plugin.Instance.Name);
             LanAddress     = Host.GetSystemInfo(CancellationToken.None).Result.LocalAddress;
             Instance       = this;
         }
@@ -194,8 +195,11 @@ namespace AlexaController
             var touchWrapperLayout = new List<IItem>();
             var baseItems          = template.baseItems;
             var type               = baseItems[0].GetType().Name;
-
-            var collectionRoot = type == "Season" ? baseItems[0].Parent : type == "Episode" ? baseItems[0].Parent.Parent : template.collectionRoot;
+            var IsMovie   = type.Equals("Movie");
+            var IsTrailer = type.Equals("Trailer");
+            var IsSeason  = type.Equals("Season");
+            var IsEpisode = type.Equals("Episode");
+            //var collectionRoot = type == "Season" ? baseItems[0].Parent : type == "Episode" ? baseItems[0].Parent.Parent : template.collectionRoot;
             
             // Wrap each media items Primary Image in a touch element for display
             baseItems.ForEach(i => touchWrapperLayout.Add(new TouchWrapper()
@@ -252,8 +256,8 @@ namespace AlexaController
                         },
                         new SendEvent()
                         {
-                            arguments = type == "Movie" ? new List<object>() { "UserEventShowBaseItemDetailsTemplate" }
-                                : type == "Episode" ? new List<object>() { "UserEventPlaybackStart", session.room != null ? session.room.Name : ""}
+                            arguments = IsMovie || IsTrailer ? new List<object>() { "UserEventShowBaseItemDetailsTemplate" }
+                                : IsEpisode ? new List<object>() { "UserEventPlaybackStart", session.room != null ? session.room.Name : ""}
                                 : new List<object>() { "UserEventShowItemListSequenceTemplate" }
                         }
                     }
@@ -317,7 +321,7 @@ namespace AlexaController
                         headerTitle            = $"{template.HeaderTitle}",
                         headerBackButton       = session.paging.canGoBack,
                         headerDivider          = true,
-                        headerAttributionImage = !(collectionRoot is null) ? collectionRoot.HasImage(ImageType.Logo) ? $"{Url}/Items/{collectionRoot.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : "" : "",
+                        headerAttributionImage = template.HeaderAttributionImage != null ? $"{Url}{template.HeaderAttributionImage}" : ""
                     },
                     new Sequence()
                     {
@@ -397,6 +401,7 @@ namespace AlexaController
         private IDirective GetItemDetailsTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             
+            // ReSharper disable once TooManyChainedReferences
             var type = template.baseItems[0].GetType().Name;
 
             var baseItem = type.Equals("Season") ? template.baseItems[0].Parent : template.baseItems[0];
@@ -645,6 +650,7 @@ namespace AlexaController
                                 }
                             }
                         }
+                        // ReSharper disable once ComplexConditionExpression
                         : GetButtonFrame(args : type == "Movie" || type == "Episode" 
                                 ? new List<object>() { "UserEventPlaybackStart", session.room != null ? session.room.Name : "" } 
                                 : new List<object>() { "UserEventShowItemListSequenceTemplate" },
@@ -753,6 +759,7 @@ namespace AlexaController
             return view;
         }
 
+        // ReSharper disable once UnusedParameter.Local
         private IDirective GetVerticalTextListTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout = new List<IItem>();
@@ -857,7 +864,7 @@ namespace AlexaController
             return view;
         }
 
-        private Frame GetButtonFrame(List<object> args, string icon, string id = "")
+        private static Frame GetButtonFrame(List<object> args, string icon, string id = "")
         {
 
             var buttonPressAnimation = new Sequential()
@@ -1470,6 +1477,7 @@ namespace AlexaController
         private List<IItem> GetVideoBackdropLayout(BaseItem baseItem, string token)
         {
             var videoBackdropIds = baseItem.ThemeVideoIds;
+            // ReSharper disable once TooManyChainedReferences
             var videoBackdropId = videoBackdropIds.Length > 0 ? LibraryManager.GetItemById(videoBackdropIds[0]).InternalId.ToString() : string.Empty;
 
 
@@ -1579,7 +1587,7 @@ namespace AlexaController
         }
 
 
-        private ICommand FadeOutItem(string componentId, int duration, int? delay = null)
+        private static ICommand FadeOutItem(string componentId, int duration, int? delay = null)
         {
             return new AnimateItem()
             {
@@ -1598,7 +1606,7 @@ namespace AlexaController
             };
         }
 
-        private ICommand FadeInItem(string componentId, int duration, int? delay = null)
+        private static ICommand FadeInItem(string componentId, int duration, int? delay = null)
         {
             return new AnimateItem()
             {
@@ -1617,10 +1625,10 @@ namespace AlexaController
             };
         }
 
-        private ICommand ScaleFadeInItem(string componentId, int duration, int? delay = null)
+        private static ICommand ScaleFadeInItem(string componentId, int duration, int? delay = null)
         {
-            
-            var animation = new Parallel()
+            // ReSharper disable once ComplexConditionExpression
+            return new Parallel()
             {
                 commands = new List<ICommand>()
                 {
@@ -1668,8 +1676,6 @@ namespace AlexaController
                     }
                 }
             };
-           
-            return animation;
         }
 
         public void Dispose()
@@ -1677,6 +1683,7 @@ namespace AlexaController
 
         }
 
+        // ReSharper disable once MethodNameNotMeaningful
         public void Run()
         {
 

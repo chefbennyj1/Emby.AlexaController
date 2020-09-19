@@ -9,8 +9,7 @@ using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
+using MediaBrowser.Model.Entities;
 
 
 // ReSharper disable TooManyArguments
@@ -18,26 +17,26 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class BrowseNextUpEpisodeIntent : IIntentResponse
+    public class NextUpEpisodeIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public BrowseNextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public NextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
             Session = session;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
             Room room = null;
-            try { room = Alexa.RoomContextManager.ValidateRoom(AlexaRequest, Session); } catch { }
+            try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (room is null && displayNone)
-                return Alexa.RoomContextManager.RequestRoom(AlexaRequest, Session, Alexa.ResponseClient);
+                return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
 
             var request = AlexaRequest.request;
             var context = AlexaRequest.context;
@@ -48,13 +47,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
 
-            Alexa.ResponseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
+            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
             
-            var nextUpEpisode = EmbyControllerUtility.Instance.GetNextUpEpisode(request.intent, Session.User);
+            var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(request.intent, Session.User);
             
             if (nextUpEpisode is null)
             {
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -78,7 +77,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //Parental Control check for baseItem
             if (!nextUpEpisode.IsParentalAllowed(Session.User))
             {
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -93,25 +92,27 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (!(room is null))
                 try
                 {
-                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, Session.User, nextUpEpisode);
+                    EmbyServerEntryPoint.Instance.BrowseItemAsync(room.Name, Session.User, nextUpEpisode);
                 }
                 catch (Exception exception)
                 {
-                    Alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
                     room = null;
                 }
 
+            var series = nextUpEpisode.Parent.Parent;
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 baseItems          = new List<BaseItem>() {nextUpEpisode},
-                renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
+                renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
+                HeaderAttributionImage = series.HasImage(ImageType.Logo) ? $"/Items/{series.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
             Session.NowViewingBaseItem = nextUpEpisode;
             Session.room = room;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

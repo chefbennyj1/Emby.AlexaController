@@ -224,7 +224,8 @@ namespace AlexaController.Utils
 
         private static string NormalizeQueryString(string sample)
         {
-            var result = sample.Replace("-", string.Empty)
+            var result = sample
+                .Replace("-", string.Empty)
                 .Replace("(", string.Empty)
                 .Replace(")", string.Empty)
                 .Replace("&", string.Empty)

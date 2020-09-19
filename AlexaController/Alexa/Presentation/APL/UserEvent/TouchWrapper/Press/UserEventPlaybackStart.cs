@@ -14,18 +14,18 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
     public class UserEventPlaybackStart : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public UserEventPlaybackStart(IAlexaRequest alexaRequest, IAlexaEntryPoint alexa)
+        public UserEventPlaybackStart(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         { 
             var source = AlexaRequest.request.source;
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
-            var baseItem = Alexa.LibraryManager.GetItemById(source.id);
+            var baseItem = EmbyServerEntryPoint.Instance.GetItemById(source.id);
             var room =  session.room;
             
             var responseData = new Response();
@@ -46,15 +46,15 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     }, session)
                 };
 
-                return Alexa.ResponseClient.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+                return ResponseClient.Instance.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
             }
 
             session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            Task.Run(() => EmbyControllerUtility.Instance.PlayMediaItemAsync(session, baseItem, session.User));
+            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(session, baseItem, session.User));
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 person = session.person,
                 outputSpeech = new OutputSpeech()

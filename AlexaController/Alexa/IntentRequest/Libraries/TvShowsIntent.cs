@@ -9,18 +9,18 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public TvShowsIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public TvShowsIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
             Session = session;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
-            return new LibraryIntentResponseManager("TV Shows").Response(AlexaRequest, Session, Alexa);
+            return new LibraryIntentResponseManager("TV Shows").Response(AlexaRequest, Session);
         }
     }
 }

@@ -10,18 +10,18 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
     public class VideoOnEnd : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public VideoOnEnd(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
+        public VideoOnEnd(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
             var arguments = AlexaRequest.request.arguments;
             
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()

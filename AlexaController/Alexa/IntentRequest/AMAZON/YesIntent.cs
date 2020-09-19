@@ -22,14 +22,13 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public YesIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public YesIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
             Session = session;
-            Alexa = alexa;
+           
         }
         public string Response()
         {

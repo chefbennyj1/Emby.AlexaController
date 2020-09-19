@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -18,28 +19,28 @@ namespace AlexaController.Alexa.IntentRequest.Playback
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public PlayNextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public PlayNextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
             Session = session;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
             //we need a room object
             Room room = null;
-            try { room = Alexa.RoomContextManager.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (room is null) return Alexa.RoomContextManager.RequestRoom(AlexaRequest, Session, Alexa.ResponseClient);
+            try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+            if (room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
 
             var request = AlexaRequest.request;
-            var nextUpEpisode = EmbyControllerUtility.Instance.GetNextUpEpisode(request.intent, Session?.User);
+            var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(request.intent, Session?.User);
 
             if (nextUpEpisode is null)
             {
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -50,13 +51,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 });
             }
 
-            EmbyControllerUtility.Instance.PlayMediaItemAsync(Session, nextUpEpisode, Session?.User);
+            EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode, Session?.User);
 
             Session.NowViewingBaseItem = nextUpEpisode;
             Session.room = room;
             AlexaSessionManager.Instance.UpdateSession(Session);
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

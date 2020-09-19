@@ -89,12 +89,12 @@ namespace AlexaController.Utils.SemanticSpeech
                 case SpeechResponseType.NO_SEASON_ITEM_EXIST:
 
                     return
-                        $"{SpeechRate(Rate.fast, SayWithEmotion(StringNormalization.NormalizeText(session?.NowViewingBaseItem.Name), Emotion.disappointed, Intensity.high))} ... " +
+                        $"{SpeechRate(Rate.fast, SayWithEmotion(StringNormalization.ValidateSpeechQueryString(session?.NowViewingBaseItem.Name), Emotion.disappointed, Intensity.high))} ... " +
                         $"{ExpressiveInterjection("doesn't contain")} season {args?[0]}!";
 
                 case SpeechResponseType.BROWSE_ITEM:
 
-                    return $"{StringNormalization.NormalizeText(items?[0].Name)}, Rated {items?[0].OfficialRating}. {(session.room != null ? $" Showing in the {session.room.Name}." : string.Empty)}";
+                    return $"{StringNormalization.ValidateSpeechQueryString(items?[0].Name)}, Rated {items?[0].OfficialRating}. {(session.room != null ? $" Showing in the {session.room.Name}." : string.Empty)}";
                            
 
                 case SpeechResponseType.BROWSE_NEXT_UP_EPISODE:
@@ -169,7 +169,7 @@ namespace AlexaController.Utils.SemanticSpeech
                         $"{SayAsCardinal(items?.Count.ToString())} new " +
                         $"{(items?.Count > 1 ? items[0].GetType().Name + "s" : items?[0].GetType().Name)}. ";
                    
-                    s += string.Join($", {InsertStrengthBreak(StrengthBreak.weak)}", items?.ToArray().Select(item => StringNormalization.NormalizeText(item.Name)));
+                    s += string.Join($", {InsertStrengthBreak(StrengthBreak.weak)}", items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name)));
 
                     return s;
 

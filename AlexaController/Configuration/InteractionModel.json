@@ -94,7 +94,7 @@
                     ]
                 },
                 {
-                    "name": "Browse_BrowseCollectionIntent",
+                    "name": "Browse_CollectionIntent",
                     "slots": [
                         {
                             "name": "MovieCollection",
@@ -123,7 +123,7 @@
                     ]
                 },
                 {
-                    "name": "Browse_BrowseBaseItemDetailsByNameIntent",
+                    "name": "Browse_BaseItemDetailsByNameIntent",
                     "slots": [
                         {
                             "name": "Movie",
@@ -152,7 +152,7 @@
                     ]
                 },
                 {
-                    "name": "Browse_BrowseNextUpEpisodeIntent",
+                    "name": "Browse_NextUpEpisodeIntent",
                     "slots": [
                         {
                             "name": "Series",
@@ -396,7 +396,7 @@
                     "samples": []
                 },
                 {
-                    "name": "Browse_BrowseEpisodesIntent",
+                    "name": "Browse_EpisodesIntent",
                     "slots": [
                         {
                             "name": "SeasonNumber",
@@ -406,6 +406,24 @@
                     "samples": [
                         "season {SeasonNumber}",
                         "show season {SeasonNumber}"
+                    ]
+                },
+                {
+                    "name": "Browse_BaseItemsByActorIntent",
+                    "slots": [
+                        {
+                            "name": "ActorName",
+                            "type": "AMAZON.Actor"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        }
+                    ],
+                    "samples": [
+                        "to {VisualModeTrigger}  {ActorName} movies",
+                        "to {VisualModeTrigger} movies with {ActorName}",
+                        "to {VisualModeTrigger}  {ActorName}"
                     ]
                 }
             ],

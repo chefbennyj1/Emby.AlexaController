@@ -25,11 +25,12 @@ namespace AlexaController
     {
         private IJsonSerializer JsonSerializer { get; }
         private IHttpClient HttpClient         { get; }
-
+        public static IResponseClient Instance { get; set; }
         public ResponseClient(IJsonSerializer jsonSerializer, IHttpClient client)
         {
             JsonSerializer = jsonSerializer;
             HttpClient     = client;
+            Instance = this;
         }
 
         public string BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)

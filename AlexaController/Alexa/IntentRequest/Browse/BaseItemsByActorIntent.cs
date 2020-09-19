@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
@@ -8,27 +9,26 @@ using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Model.Entities;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-    public class BrowseBaseItemsByActorIntent : IIntentResponse
+    public class BaseItemsByActorIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
-
-        public BrowseBaseItemsByActorIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        
+        public BaseItemsByActorIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
             Session = session;
-            Alexa = alexa;
         }
         public string Response()
         {
             Room room = null;
-            try { room = Alexa.RoomContextManager.ValidateRoom(AlexaRequest, Session); } catch { }
+            try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return Alexa.RoomContextManager.RequestRoom(AlexaRequest, Session, Alexa.ResponseClient);
+            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
             
             var request = AlexaRequest.request;
             var intent = request.intent;
@@ -42,13 +42,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var progressiveSpeech = "";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
             progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
-            Alexa.ResponseClient.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
+            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
 
-            var result = EmbyControllerUtility.Instance.GetItemsByActor(Session.User, searchName);
+            var result = EmbyServerEntryPoint.Instance.GetItemsByActor(Session.User, searchName);
 
             if (result is null)
             {
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -72,21 +72,26 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (!(room is null))
                 try
                 {
-                    EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, Session.User, result.Keys.FirstOrDefault());
+                    EmbyServerEntryPoint.Instance.BrowseItemAsync(room.Name, Session.User, result.Keys.FirstOrDefault());
                 }
                 catch (Exception exception)
                 {
-                    Alexa.ResponseClient.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+                    ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
                     room = null;
                 }
 
+            var actor = result.Keys.FirstOrDefault();
+            var actorCollection = result.Values.FirstOrDefault();
+
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
-                baseItems =  result.Values.FirstOrDefault() ,
-                renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE
+                baseItems =  actorCollection ,
+                renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
+                HeaderTitle = $"Staring {actor?.Name}",
+                HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

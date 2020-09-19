@@ -16,7 +16,12 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
     }
 
     public class RoomContextManager : IRoomContextManager
-    { 
+    {
+        public static IRoomContextManager Instance { get; set; }
+        public RoomContextManager()
+        {
+            Instance = this;
+        }
         public string RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
         {
             session.PersistedRequestData = alexaRequest;

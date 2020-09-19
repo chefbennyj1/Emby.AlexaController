@@ -10,17 +10,17 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Sequence.onScroll
     public class SequenceOnScroll : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaEntryPoint Alexa { get; }
-        public SequenceOnScroll(IAlexaRequest alexaRequest, AlexaEntryPoint alexa)
+        
+        public SequenceOnScroll(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
             var arguments = AlexaRequest.request.arguments;
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()

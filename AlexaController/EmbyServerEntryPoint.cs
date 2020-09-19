@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Session;
+using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
@@ -24,13 +25,18 @@ using User = MediaBrowser.Controller.Entities.User;
 // ReSharper disable once MethodNameNotMeaningful
 // ReSharper disable once ComplexConditionExpression
 
-namespace AlexaController.Utils
+namespace AlexaController
 {
-    public interface IEmbyControllerUtility
+    public interface IEmbyServerEntryPoint
     {
+        List<BaseItem> GetBaseItems(BaseItem parent, string[] types, User user);
+        IEnumerable<SessionInfo> GetCurrentSessions();
         BaseItem GetNextUpEpisode(Intent intent, User user);
         string GetLibraryId(string name);
+        BaseItem GetItemById<T>(T id);
+        void SendMessageToConfiguration<T>(string name, T data);
         CollectionInfo GetCollectionItems(User userName, string collectionName);
+        List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user);
         IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration );
         IEnumerable<BaseItem> GetLatestTv(User user, DateTime duration);
         void BrowseItemAsync(string room, User user, BaseItem request);
@@ -45,15 +51,15 @@ namespace AlexaController.Utils
         public List<BaseItem> Items { get; set; }
     }
 
-    public class EmbyControllerUtility : EmbySearchUtility, IServerEntryPoint, IEmbyControllerUtility
+    public class EmbyServerEntryPoint : EmbySearchUtility, IServerEntryPoint, IEmbyServerEntryPoint
     {
         private ILibraryManager LibraryManager        { get; }
         private ITVSeriesManager TvSeriesManager      { get; }
         private ISessionManager SessionManager        { get; }
-        private ILogger Log { get; }
-        public static IEmbyControllerUtility Instance { get; private set; }
+        private ILogger Log                           { get; }
+        public static IEmbyServerEntryPoint Instance { get; private set; }
 
-        public EmbyControllerUtility(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)
+        public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)
         {
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
@@ -61,7 +67,45 @@ namespace AlexaController.Utils
             Log = logMan.GetLogger(Plugin.Instance.Name);
             Instance        = this;
         }
-        
+
+        public void SendMessageToConfiguration<T>(string name, T data)
+        {
+            SessionManager.SendMessageToAdminSessions(name, data, CancellationToken.None);
+        }
+
+        public IEnumerable<SessionInfo> GetCurrentSessions()
+        {
+            return SessionManager.Sessions;
+        }
+
+        public List<BaseItem> GetBaseItems(BaseItem parent, string[] types, User user)
+        {
+            var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
+            {
+                Parent = parent,
+                IncludeItemTypes = types,
+                Recursive = true
+            });
+            return result.Items.ToList();
+        }
+
+        public List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user)
+        {
+            var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
+            {
+                Parent = parent,
+                IncludeItemTypes = new[] { "Episode" },
+                ParentIndexNumber = seasonNumber,
+                Recursive = true
+            });
+            return result.Items.ToList();
+        }
+
+        public BaseItem GetItemById<T>(T id)
+        {
+            return LibraryManager.GetItemById(id.ToString());
+        }
+
         public BaseItem GetNextUpEpisode(Intent intent, User user)
         {
             try
@@ -244,6 +288,7 @@ namespace AlexaController.Utils
 
         public IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName)
         {
+            actorName = StringNormalization.ValidateSpeechQueryString(actorName);
             var actorQuery = LibraryManager.GetItemsResult(new InternalItemsQuery()
             {
                 IncludeItemTypes = new []{ "Person" },
@@ -255,6 +300,7 @@ namespace AlexaController.Utils
 
             var query = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
             {
+                IncludeItemTypes = new []{"Series", "Movie"},
                 Recursive = true,
                 PersonIds = new[] { actorQuery.Items[0].InternalId }
             });
@@ -262,6 +308,7 @@ namespace AlexaController.Utils
             return new Dictionary<BaseItem, List<BaseItem>>() {{ actorQuery.Items[0], query.Items.ToList() }};
 
         }
+
         public void Dispose()
         {
             

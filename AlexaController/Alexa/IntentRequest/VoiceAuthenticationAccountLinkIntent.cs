@@ -1,10 +1,12 @@
 ﻿using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
+using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
@@ -19,13 +21,13 @@ namespace AlexaController.Alexa.IntentRequest
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
-        public VoiceAuthenticationAccountLinkIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        
+        public VoiceAuthenticationAccountLinkIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
             Session = session;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
@@ -34,7 +36,7 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (person is null)
             {
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -49,7 +51,7 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
-                    return Alexa.ResponseClient.BuildAlexaResponse(new Response
+                    return ResponseClient.Instance.BuildAlexaResponse(new Response
                     {
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
@@ -61,9 +63,9 @@ namespace AlexaController.Alexa.IntentRequest
             }
 
             //Send Message to Emby plugin UI
-            Alexa.SessionManager.SendMessageToAdminSessions("SpeechAuthentication", person.personId, CancellationToken.None);
+            Task.Factory.StartNew(() => EmbyServerEntryPoint.Instance.SendMessageToConfiguration("SpeechAuthentication", person.personId));
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response
+            return ResponseClient.Instance.BuildAlexaResponse(new Response
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

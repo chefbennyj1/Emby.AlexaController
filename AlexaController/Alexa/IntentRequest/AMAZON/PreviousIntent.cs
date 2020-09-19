@@ -20,14 +20,14 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public PreviousIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public PreviousIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
             Session = session;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
@@ -39,9 +39,9 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
 
             //if the user has requested an Emby client/room display during the session - go back on both if possible
             if (Session.room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(Session.room.Name, Session.User, Alexa.LibraryManager.GetItemById(Session.NowViewingBaseItem.Parent.InternalId)); } catch { }
+                try { EmbyServerEntryPoint.Instance.BrowseItemAsync(Session.room.Name, Session.User, EmbyServerEntryPoint.Instance.GetItemById(Session.NowViewingBaseItem.Parent.InternalId)); } catch { }
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()

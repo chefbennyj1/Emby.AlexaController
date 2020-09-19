@@ -7,7 +7,6 @@ namespace AlexaController.Alexa
     {
         IAlexaRequest AlexaRequest { get; }
         IAlexaSession Session      { get; }
-        IAlexaEntryPoint Alexa     { get; }
         string Response(); 
     }
 }

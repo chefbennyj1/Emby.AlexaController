@@ -15,14 +15,14 @@ namespace AlexaController.Alexa.IntentRequest
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public NewItemsIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public NewItemsIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
             Session = session;
-            Alexa = alexa;
+            ;
         }
         public  string Response()
         {
@@ -40,15 +40,15 @@ namespace AlexaController.Alexa.IntentRequest
                     .GetMinDateCreation(DateTimeDurationNormalization.DeserializeDurationFromIso8601(duration));
 
             //TODO: Respond with the time frame the user request: "Looking for new movies from the last thrity days"
-            Alexa.ResponseClient.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId);
+            ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId);
 
-            var results = type == "New TV Shows" ? EmbyControllerUtility.Instance.GetLatestTv(Session.User, d).ToList()
-                : EmbyControllerUtility.Instance.GetLatestMovies(Session.User, d)
+            var results = type == "New TV Shows" ? EmbyServerEntryPoint.Instance.GetLatestTv(Session.User, d).ToList()
+                : EmbyServerEntryPoint.Instance.GetLatestMovies(Session.User, d)
                     .Where(movie => movie.IsParentalAllowed(Session.User)).ToList();
 
             if (!results.Any())
             {
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -74,7 +74,7 @@ namespace AlexaController.Alexa.IntentRequest
 
                         AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-                        return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                        return ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {
@@ -92,7 +92,7 @@ namespace AlexaController.Alexa.IntentRequest
                     }
                 default: //Voice only
                     {
-                        return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                        return ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {

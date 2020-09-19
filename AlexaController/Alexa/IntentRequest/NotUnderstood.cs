@@ -10,18 +10,16 @@ namespace AlexaController.Alexa.IntentRequest
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public NotUnderstood(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public NotUnderstood(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
             Session = session;
-            Alexa = alexa;
         }
         public string Response()
         {
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = false,
                 outputSpeech = new OutputSpeech()

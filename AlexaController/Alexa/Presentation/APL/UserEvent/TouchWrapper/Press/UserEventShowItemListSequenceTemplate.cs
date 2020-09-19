@@ -22,18 +22,18 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
     public class UserEventShowItemListSequenceTemplate : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public UserEventShowItemListSequenceTemplate(IAlexaRequest alexaRequest, IAlexaEntryPoint alexa)
+        public UserEventShowItemListSequenceTemplate(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
             var request  = AlexaRequest.request;
             var source   = request.source;
-            var baseItem = Alexa.LibraryManager.GetItemById(source.id);
+            var baseItem = EmbyServerEntryPoint.Instance.GetItemById(source.id);
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room     = session.room;
             var type     = baseItem.GetType().Name;
@@ -41,17 +41,19 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
            
             var phrase = "";
             
-            var result   = Alexa.LibraryManager.GetItemsResult(new InternalItemsQuery(session.User)
-            {
-                Parent           =  baseItem,
-                IncludeItemTypes = new [] { type == "Series" ? "Season" : "Episode" },
-                Recursive        = true
-            });
+            //var result   = Alexa.LibraryManager.GetItemsResult(new InternalItemsQuery(session.User)
+            //{
+            //    Parent           =  baseItem,
+            //    IncludeItemTypes = new [] { type == "Series" ? "Season" : "Episode" },
+            //    Recursive        = true
+            //});
 
+            var results = EmbyServerEntryPoint.Instance.GetBaseItems(baseItem,
+                new[] {type == "Series" ? "Season" : "Episode"}, session.User);
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
-                baseItems          = result.Items.ToList(),
+                baseItems          = results,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
                 HeaderTitle        = type == "Season" ? $"{baseItem.Parent.Name} > {baseItem.Name}" : baseItem.Name
             };
@@ -64,10 +66,10 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             //if the user has requested an Emby client/room display during the session - display both if possible
             if (room != null)
-                try { EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session.User, baseItem); } catch { }
+                try { EmbyServerEntryPoint.Instance.BrowseItemAsync(room.Name, session.User, baseItem); } catch { }
             
 
-            return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

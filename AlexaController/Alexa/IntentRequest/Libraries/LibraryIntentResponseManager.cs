@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AlexaController.Alexa.Errors;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
@@ -24,11 +25,11 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             LibraryName = libraryName;
         }
 
-        public string Response(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public string Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             
             Room room = null;
-            try { room = alexa.RoomContextManager.ValidateRoom(alexaRequest, session); } catch { }
+            try { room = RoomContextManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
 
             var context = alexaRequest.context;
             // we need the room object to proceed because we will only show libraries on emby devices
@@ -37,24 +38,24 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             {
                 session.PersistedRequestData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session);
-                return alexa.RoomContextManager.RequestRoom(alexaRequest, session, alexa.ResponseClient);
+                return RoomContextManager.Instance.RequestRoom(alexaRequest, session, ResponseClient.Instance);
             }
 
             var request = alexaRequest.request;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId = request.requestId;
 
-            alexa.ResponseClient.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
+            ResponseClient.Instance.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
 
-            var result = alexa.LibraryManager.GetItemById(EmbyControllerUtility.Instance.GetLibraryId(LibraryName));
+            var result = EmbyServerEntryPoint.Instance.GetItemById(EmbyServerEntryPoint.Instance.GetLibraryId(LibraryName));
 
             try
             {
-                EmbyControllerUtility.Instance.BrowseItemAsync(room.Name, session?.User, result);
+                EmbyServerEntryPoint.Instance.BrowseItemAsync(room.Name, session?.User, result);
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(exception, alexaRequest, session, alexa.ResponseClient);
+                return new ErrorHandler().OnError(exception, alexaRequest, session, ResponseClient.Instance);
             }
 
             session.NowViewingBaseItem = result;
@@ -62,7 +63,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             session.PersistedRequestData = null;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            return alexa.ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

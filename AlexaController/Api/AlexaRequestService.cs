@@ -4,6 +4,7 @@ using MediaBrowser.Model.Services;
 using System.IO;
 using AlexaController.Alexa.Errors;
 using AlexaController.Alexa.IntentRequest;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
@@ -42,8 +43,7 @@ namespace AlexaController.Api
     {
         private IJsonSerializer JsonSerializer { get; }
         private IUserManager UserManager       { get; }
-        private IResponseClient ResponseClient { get; }
-
+        
         private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent => intent.name == "VoiceAuthenticationAccountLink";
         private readonly Func<Intent, bool> IsRoomNameIntentRequest = intent => intent.name == "Rooms_RoomNameIntent";
 
@@ -54,7 +54,11 @@ namespace AlexaController.Api
         {
             JsonSerializer = json;
             UserManager    = user;
-            ResponseClient = new ResponseClient(json, client);
+            if(RoomContextManager.Instance is null)
+                Activator.CreateInstance<RoomContextManager>();
+            if(ResponseClient.Instance is null)
+                Activator.CreateInstance(typeof(ResponseClient), json, client);
+            //Activator.CreateInstance(typeof(AlexaEntryPoint), json, client);
         }
 
         public object Post(AlexaRequest data)
@@ -87,7 +91,7 @@ namespace AlexaController.Api
                 if (!(person is null))
                 {
                     if (!SpeechAuthorization.Instance.UserPersonalizationProfileExists(person))
-                        return ResponseClient.BuildAlexaResponse(new Response()
+                        return ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
                             shouldEndSession = true,
                             outputSpeech = new OutputSpeech()
@@ -107,7 +111,7 @@ namespace AlexaController.Api
                 //There has been a mistake, end the session.
                 if (session.PersistedRequestData is null && IsRoomNameIntentRequest(intent))
                 {
-                    return new NotUnderstood(alexaRequest, session, AlexaEntryPoint.Instance).Response(); 
+                    return new NotUnderstood(alexaRequest, session).Response(); 
                 }
 
             }
@@ -120,7 +124,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(new Exception($"I was unable to do that. Please try again. {exception.Message}"), alexaRequest, session, ResponseClient);
+                return new ErrorHandler().OnError(new Exception($"I was unable to do that. Please try again. {exception.Message}"), alexaRequest, session, ResponseClient.Instance);
             }
         }
 
@@ -149,7 +153,7 @@ namespace AlexaController.Api
             var person = !ReferenceEquals(null, context.System.person) ? OutputSpeech.SayName(context.System.person) : "";
 
             if (user is null)
-                return ResponseClient.BuildAlexaResponse(
+                return ResponseClient.Instance.BuildAlexaResponse(
                     new Response()
                     {
                         shouldEndSession = true,
@@ -162,7 +166,7 @@ namespace AlexaController.Api
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
 
-            return ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -189,7 +193,7 @@ namespace AlexaController.Api
 
         private string OnDefault()
         {
-            return ResponseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
@@ -202,8 +206,8 @@ namespace AlexaController.Api
         private static string GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var paramsArgs = session is null
-                ?  new object[] { alexaRequest, AlexaEntryPoint.Instance }
-                :  new object[] { alexaRequest, session, AlexaEntryPoint.Instance };
+                ?  new object[] { alexaRequest }
+                :  new object[] { alexaRequest, session };
 
             var instance = Activator.CreateInstance(@namespace, paramsArgs);
             return (string)@namespace.GetMethod("Response")?.Invoke(instance, null);

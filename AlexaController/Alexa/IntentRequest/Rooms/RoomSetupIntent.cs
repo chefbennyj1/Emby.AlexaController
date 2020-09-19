@@ -15,14 +15,14 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        public IAlexaEntryPoint Alexa { get; }
+        
 
-        public RoomSetupIntent(IAlexaRequest alexaRequest, IAlexaSession session, IAlexaEntryPoint alexa)
+        public RoomSetupIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Alexa = alexa;
+            ;
             Session = session;
-            Alexa = alexa;
+            ;
         }
         public string Response()
         {
@@ -32,7 +32,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 Session.PersistedRequestData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session);
 
-                return Alexa.ResponseClient.BuildAlexaResponse(new Response()
+                return ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -52,7 +52,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 }, Session.alexaSessionDisplayType);
             }
             
-            var response = Alexa.ResponseClient.BuildAlexaResponse(new Response()
+            var response = ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
