@@ -11,7 +11,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     public interface IRoomContextManager
     {
-        string RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient);
+        string RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session);
         Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session);
     }
 
@@ -22,16 +22,16 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         {
             Instance = this;
         }
-        public string RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
+        public string RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             session.PersistedRequestData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            return responseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.ROOM_CONTEXT, session)
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.ROOM_CONTEXT, session)
                 },
                 shouldEndSession = false,
                 directives       = new List<IDirective>()

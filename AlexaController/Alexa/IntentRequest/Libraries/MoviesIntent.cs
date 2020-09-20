@@ -9,14 +9,11 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
 
         public MoviesIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
         public string Response()
         {

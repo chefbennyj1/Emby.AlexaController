@@ -174,9 +174,7 @@ namespace AlexaController.Session
         // ReSharper disable once MethodNameNotMeaningful
         public void Run()
         {
-            SessionManager.PlaybackStart += SessionManager_PlaybackStart;
             SessionManager.PlaybackStopped += SessionManager_PlaybackStopped;
-
         }
 
         private void SessionManager_PlaybackStopped(object sender, MediaBrowser.Controller.Library.PlaybackStopEventArgs e)
@@ -197,23 +195,7 @@ namespace AlexaController.Session
             sessionToUpdate.PlaybackStarted = false;
             UpdateSession(sessionToUpdate);
         }
-
-        private void SessionManager_PlaybackStart(object sender, MediaBrowser.Controller.Library.PlaybackProgressEventArgs e)
-        {
-            var deviceName = e.DeviceName;
-            var config = Plugin.Instance.Configuration;
-            var configRooms = config.Rooms;
-
-            if (!configRooms.Exists(r => r.Device == deviceName)) return;
-
-            var room = configRooms.FirstOrDefault(r => r.Device == deviceName);
-
-            if (!OpenSessions.Exists(session => session.room.Name == room?.Name)) return;
-
-            var sessionToUpdate = OpenSessions.FirstOrDefault(session => session.room.Name == room?.Name);
-            
-        }
-
+        
         
     }
 }

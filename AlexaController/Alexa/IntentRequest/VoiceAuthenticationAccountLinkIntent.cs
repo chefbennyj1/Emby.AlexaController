@@ -41,8 +41,8 @@ namespace AlexaController.Alexa.IntentRequest
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, Session),
-                        semanticSpeechType = SemanticSpeechType.APOLOGETIC,
+                        phrase             = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, Session),
+                        speechType = SpeechType.APOLOGETIC,
                     },
                 });
             }
@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, Session),
+                            phrase = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, Session),
                         }
                     });
                 }
@@ -70,7 +70,7 @@ namespace AlexaController.Alexa.IntentRequest
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, Session),
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, Session),
                 },
             });
         }

@@ -53,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest
                     outputSpeech = new OutputSpeech()
                     {
                         phrase = $"No { type } have been added during that time.",
-                        semanticSpeechType = SemanticSpeechType.APOLOGETIC,
+                        speechType = SpeechType.APOLOGETIC,
                     },
                     person = Session.person,
                     shouldEndSession = true,
@@ -78,8 +78,8 @@ namespace AlexaController.Alexa.IntentRequest
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, Session, results),
-                                semanticSpeechType = SemanticSpeechType.COMPLIANCE,
+                                phrase             = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, Session, results),
+                                speechType = SpeechType.COMPLIANCE,
                             },
                             person           = Session.person,
                             shouldEndSession = null,
@@ -96,8 +96,8 @@ namespace AlexaController.Alexa.IntentRequest
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase             = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, Session, results),
-                                semanticSpeechType = SemanticSpeechType.COMPLIANCE,
+                                phrase             = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, Session, results),
+                                speechType = SpeechType.COMPLIANCE,
                             },
                             person           = Session.person,
                             shouldEndSession = true,

@@ -12,6 +12,7 @@ using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Serialization;
 
 
@@ -50,15 +51,17 @@ namespace AlexaController.Api
         private readonly Func<Request, string> IntentNamespace    = request => $"AlexaController.Alexa.IntentRequest.{request.intent.name.Replace("_", ".")}";
         private readonly Func<Request, string> UserEventNamespace = request => $"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}";
         
-        public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user)
+        public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager sessionManager)
         {
             JsonSerializer = json;
             UserManager    = user;
-            if(RoomContextManager.Instance is null)
-                Activator.CreateInstance<RoomContextManager>();
-            if(ResponseClient.Instance is null)
+
+            if (ResponseClient.Instance is null)
                 Activator.CreateInstance(typeof(ResponseClient), json, client);
-            //Activator.CreateInstance(typeof(AlexaEntryPoint), json, client);
+
+            if (RoomContextManager.Instance is null)
+                Activator.CreateInstance<RoomContextManager>();
+            
         }
 
         public object Post(AlexaRequest data)
@@ -97,7 +100,7 @@ namespace AlexaController.Api
                             outputSpeech = new OutputSpeech()
                             {
                                 phrase = "You are not a recognized user. Please take moment to register your voice profile.",
-                                semanticSpeechType = SemanticSpeechType.APOLOGETIC
+                                speechType = SpeechType.APOLOGETIC
                             },
                         });
                 }
@@ -124,7 +127,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(new Exception($"I was unable to do that. Please try again. {exception.Message}"), alexaRequest, session, ResponseClient.Instance);
+                return new ErrorHandler().OnError(new Exception($"I was unable to do that. Please try again. {exception.Message}"), alexaRequest, session);
             }
         }
 
@@ -160,7 +163,7 @@ namespace AlexaController.Api
                         outputSpeech = new OutputSpeech()
                         {
                             phrase = "I don't recognize the current user. Please go to the plugin configuration and link emby account personalization. Or ask for help.",
-                            semanticSpeechType = SemanticSpeechType.APOLOGETIC
+                            speechType = SpeechType.APOLOGETIC
                         },
                     });
 
@@ -173,7 +176,7 @@ namespace AlexaController.Api
                     phrase = "<audio src=\"soundbank://soundlibrary/alarms/beeps_and_bloops/intro_02\"/>" +
                              person + $"{OutputSpeech.InsertStrengthBreak(StrengthBreak.strong)} " +
                              "What media can I help you find.",
-                    semanticSpeechType = SemanticSpeechType.GREETINGS
+                    speechType = SpeechType.GREETINGS
                 },
                 shouldEndSession = false,
                 directives = new List<IDirective>()
@@ -205,11 +208,11 @@ namespace AlexaController.Api
 
         private static string GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var paramsArgs = session is null
+            var paramArgs = session is null
                 ?  new object[] { alexaRequest }
                 :  new object[] { alexaRequest, session };
 
-            var instance = Activator.CreateInstance(@namespace, paramsArgs);
+            var instance = Activator.CreateInstance(@namespace, paramArgs);
             return (string)@namespace.GetMethod("Response")?.Invoke(instance, null);
         }
        

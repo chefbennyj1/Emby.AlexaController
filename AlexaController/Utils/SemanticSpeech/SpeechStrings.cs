@@ -34,7 +34,7 @@ namespace AlexaController.Utils.SemanticSpeech
         VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS
     }
 
-    public class SemanticSpeechStrings : SemanticSpeechUtility
+    public class SpeechStrings : SpeechSemantics
     {
 
         public static readonly List<string> HelpStrings = new List<string>()
@@ -79,11 +79,11 @@ namespace AlexaController.Utils.SemanticSpeech
             "Remember that as long as the echo show, or spot is displaying an image, you are in an open session. This means you don't have to use the \"Ask home theater\" phrases to access media",
             "This concludes the help section. Good luck!",
         };
+        
 
         public static string GetPhrase
         (SpeechResponseType type, IAlexaSession session, List<BaseItem> items = null, string[] args = null)
         {
-
             switch (type)
             {
                 case SpeechResponseType.NO_SEASON_ITEM_EXIST:
@@ -99,9 +99,11 @@ namespace AlexaController.Utils.SemanticSpeech
 
                 case SpeechResponseType.BROWSE_NEXT_UP_EPISODE:
                     
-                    return $"Here is the next up episode for {items?[0].Parent.Parent.Name}. " +
-                           $"{items?[0].Name}." +
-                           (session.room != null ? $" Showing in the {session.room}." : string.Empty);
+                    return string.Join(" ",
+                        "Here is the next up episode for",
+                        items?[0].Parent.Parent.Name,
+                        items?[0].Name + ".",
+                        (session.room != null ? $"Showing in the {session.room}." : string.Empty));
                 
                 case SpeechResponseType.DISPLAY_MOVIE_COLLECTION:
 
@@ -109,18 +111,26 @@ namespace AlexaController.Utils.SemanticSpeech
 
                 case SpeechResponseType.BROWSE_LIBRARY:
 
-                    return $"Here is the {items?[0].Name} Library.";
+                    return string.Join(" ",
+                        "Here is the",
+                        items?[0].Name, 
+                        "Library.");
 
                 case SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED:
 
-                    return GetSemanticSpeechResponse(SemanticSpeechType.NON_COMPLIANT) + " " + SayInDomain(Domain.news,
-                               $"Are you sure you are allowed access to {(!(items is null) ? items[0].Name : " this item ")}, " +
-                               $"{(!(session.person is null) ? SayName(session.person) : "")}?");
+                    return string.Join(" ", 
+                        SpeechResponse(SpeechType.NON_COMPLIANT), 
+                        SayInDomain(Domain.news, $"Are you sure you are allowed access to {(!(items is null) ? items[0].Name : " this item ")}, "), 
+                        $"{(!(session.person is null) ? SayName(session.person) : "")}?");
                 
                 case SpeechResponseType.PLAY_MEDIA_ITEM:
 
-                    return $"Now playing the {items?[0].ProductionYear} {items?[0].GetType().Name} " +
-                           $"{InsertStrengthBreak(StrengthBreak.weak)} {items?[0].Name}.";
+                    return string.Join(" ",
+                        "Now playing the", 
+                        items?[0].ProductionYear, 
+                        items?[0].GetType().Name,
+                        InsertStrengthBreak(StrengthBreak.weak), 
+                        items?[0].Name);
 
                 case SpeechResponseType.ROOM_CONTEXT:
 
@@ -128,7 +138,11 @@ namespace AlexaController.Utils.SemanticSpeech
                     
                 case SpeechResponseType.PLAY_NEXT_UP_EPISODE:
 
-                    return $"Playing the next up episode for {items?[0].Parent.Parent.Name}. Showing in the {session.room}";
+                    return string.Join(" ",
+                        "Playing the next up episode for",
+                        items?[0].Parent.Parent.Name, 
+                        "Showing in the", 
+                        session.room);
 
                 case SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY:
 
@@ -141,9 +155,10 @@ namespace AlexaController.Utils.SemanticSpeech
 
                 case SpeechResponseType.DEVICE_UNAVAILABLE:
 
-                    return $"{SayWithEmotion("I was currently unable to access that device.", Emotion.disappointed,Intensity.high)}" + 
-                           InsertStrengthBreak(StrengthBreak.weak) +
-                           "Please make sure it is available on the network, so I can stream to it";
+                    return string.Join(" ", 
+                        SayWithEmotion($"I was unable to access the device in the {args?[0]}", Emotion.disappointed, Intensity.medium),
+                        InsertStrengthBreak(StrengthBreak.weak), 
+                        "make sure it is available to stream to.");
 
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS:
 

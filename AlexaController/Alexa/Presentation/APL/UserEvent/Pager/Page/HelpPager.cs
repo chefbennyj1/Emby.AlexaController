@@ -39,7 +39,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
                 shouldEndSession = null,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SemanticSpeechStrings.HelpStrings.ElementAt(helpListIndex)
+                    phrase = SpeechStrings.HelpStrings.ElementAt(helpListIndex)
                 },
 
             }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);

@@ -26,7 +26,7 @@ namespace AlexaController.Alexa.IntentRequest
                 {
                     phrase = $"I misunderstood what you said. {OutputSpeech.InsertStrengthBreak(StrengthBreak.weak)} " +
                              $"{OutputSpeech.SayWithEmotion("Can you say that again?", Emotion.excited, Intensity.low)}",
-                    semanticSpeechType = SemanticSpeechType.APOLOGETIC,
+                    speechType = SpeechType.APOLOGETIC,
                 },
                 
                 directives = new List<IDirective>()

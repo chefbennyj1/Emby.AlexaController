@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
 using AlexaController.Session;
-using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
@@ -28,8 +28,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Room room = null;
             try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
-            
+            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            Session.room = room;
+
             var request = AlexaRequest.request;
             var intent = request.intent;
             var slots = intent.slots;
@@ -40,8 +41,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var requestId = request.requestId;
 
             var progressiveSpeech = "";
-            progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
-            progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
+            progressiveSpeech += $"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} ";
+            progressiveSpeech += $"{SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}";
             ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
 
             var result = EmbyServerEntryPoint.Instance.GetItemsByActor(Session.User, searchName);
@@ -53,7 +54,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     outputSpeech = new OutputSpeech()
                     {
                         phrase = "I was unable to find that actor.",
-                        semanticSpeechType = SemanticSpeechType.APOLOGETIC,
+                        speechType = SpeechType.APOLOGETIC,
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
@@ -69,16 +70,18 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }, Session.alexaSessionDisplayType);
             }
 
-            if (!(room is null))
+            if (!(Session.room is null))
                 try
                 {
-                    EmbyServerEntryPoint.Instance.BrowseItemAsync(room.Name, Session.User, result.Keys.FirstOrDefault());
+                    EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault());
                 }
                 catch (Exception exception)
                 {
                     ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
-                    room = null;
+                    Session.room = null;
                 }
+
+            Task.Delay(1200);
 
             var actor = result.Keys.FirstOrDefault();
             var actorCollection = result.Values.FirstOrDefault();
@@ -90,6 +93,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 HeaderTitle = $"Staring {actor?.Name}",
                 HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
+
+            //Update Session
+            Session.NowViewingBaseItem = actor;
+            AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {

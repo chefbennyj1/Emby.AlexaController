@@ -52,15 +52,15 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(session, baseItem, session.User));
+            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(session, baseItem));
 
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 person = session.person,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase         = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, session, new List<BaseItem>() {baseItem}),
-                    semanticSpeechType = SemanticSpeechType.COMPLIANCE
+                    phrase         = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, session, new List<BaseItem>() {baseItem}),
+                    speechType = SpeechType.COMPLIANCE
                 },
                 shouldEndSession = null,
                 directives = new List<IDirective>()

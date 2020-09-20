@@ -49,13 +49,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             //if the user has requested an Emby client/room display during the session - display both if possible
             if (room != null)
-                try { EmbyServerEntryPoint.Instance.BrowseItemAsync(room.Name, session.User, baseItem); } catch { }
+                try { EmbyServerEntryPoint.Instance.BrowseItemAsync(session, baseItem); } catch { }
             
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.BROWSE_ITEM, session, new List<BaseItem>() { baseItem }),
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_ITEM, session, new List<BaseItem>() { baseItem }),
                 },
                 shouldEndSession = null,
                 directives     = new List<IDirective>()

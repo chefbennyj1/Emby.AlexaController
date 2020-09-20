@@ -70,7 +70,7 @@ namespace AlexaController.Alexa.ResponseData.Model
         string type { get; }
         string ssml { get; set; }
         string phrase { get; set; }
-        SemanticSpeechType semanticSpeechType { get; set; }
+        SpeechType speechType { get; set; }
         string sound { get; set; }
     }
 
@@ -79,7 +79,7 @@ namespace AlexaController.Alexa.ResponseData.Model
         public string type => "SSML";
         public string ssml                                                 { get; set; }
         public string phrase                                               { get; set; }
-        public SemanticSpeechType semanticSpeechType                       { get; set; } = SemanticSpeechType.NONE;
+        public SpeechType speechType                       { get; set; } = SpeechType.NONE;
         public string sound                                                { get; set; } = string.Empty;
 
         public static string SayName(IPerson person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";

@@ -19,22 +19,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
     [Intent]
     public class PlayItemIntent : IIntentResponse
     {
-        /*         
-            If no room is requested in the PlayItemIntent intent, we follow up immediately to get a room value from 'RoomName' intent. 
-            We hold the requested baseItem intent name value in 'sessions.RepromptIntent' to search for later.
-
-            If a room is requested then we search for a baseItem value to play.                
-         
-            If a user has been browsing the library on an AMAZON screen device the 'session.NowViewingItem' 
-            will contain the baseItem to play, and no library search will be needed.
-
-            If no value is stored in 'session.NowViewingItem', the device is most likely 'non-screen' device from AMAZON.
-                     
-            We'll search the library using the 'request.intent.slots.Movie.value' or 'request.intent.slots.TvSeries.value', respectively.
-
-            Play back is sent to the Emby device.         
-                                
-         */
+        //If no room is requested in the PlayItemIntent intent, we follow up immediately to get a room value from 'RoomName' intent. 
 
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session      { get; }
@@ -50,20 +35,38 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //we need a room object
             Room room = null;
             try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
+            if (room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            Session.room = room;
+
+            EmbyServerEntryPoint.Instance.Log.Info("ALEXA REQUESTED ROOM " + room.Name + " TO PLAY ITEMS");
 
             var request        = AlexaRequest.request;
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-            ResponseClient.Instance.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
+            var intent         = request.intent;
+            var slots          = intent.slots;
 
+            ResponseClient.Instance.PostProgressiveResponse($"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} {SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}", apiAccessToken, requestId);
 
-            var result = Session.NowViewingBaseItem ??
-                         (!(request.intent.slots.Movie.value is null)
-                             ? EmbyServerEntryPoint.Instance.QuerySpeechResultItem(request.intent.slots.Movie.value, new[] { "Movie" }, Session.User)
-                             : !(request.intent.slots.Series.value is null)
-                                ? EmbyServerEntryPoint.Instance.QuerySpeechResultItem(request.intent.slots.Series.value, new[] { "Series" }, Session.User) : null);
+            BaseItem result = null;
+            if (Session.NowViewingBaseItem is null)
+            {
+                var type = slots.Movie.value is null ? "Series" : "Movie";
+                result = EmbyServerEntryPoint.Instance.QuerySpeechResultItem(
+                    type == "Movie" 
+                        ? slots.Movie.value 
+                        : slots.Series.value, new[] {type}, Session.User);
+            }
+            else
+            {
+                result = Session.NowViewingBaseItem;
+            }
+            //var result = Session.NowViewingBaseItem ??
+            //             (!(request.intent.slots.Movie.value is null)
+            //                 ? EmbyServerEntryPoint.Instance.QuerySpeechResultItem(request.intent.slots.Movie.value, new[] { "Movie" }, Session.User)
+            //                 : !(request.intent.slots.Series.value is null)
+            //                    ? EmbyServerEntryPoint.Instance.QuerySpeechResultItem(request.intent.slots.Series.value, new[] { "Series" }, Session.User) : null);
 
             //If result is null here, then the item doesn't exist in the library
             if (result is null)
@@ -73,12 +76,12 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase    = SemanticSpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
-                        semanticSpeechType = SemanticSpeechType.APOLOGETIC
+                        phrase    = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
+                        speechType = SpeechType.APOLOGETIC
                     }
                 });
             }
-
+            
             //Parental Control check for baseItem
             if (!result.IsParentalAllowed(Session.User))
             {
@@ -87,21 +90,24 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>() { result }),
+                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>() { result }),
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>",
-                        semanticSpeechType = SemanticSpeechType.APOLOGETIC
+                        speechType = SpeechType.APOLOGETIC
                     }
                 });
             }
 
+            
+
             try
             {
-                EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, result, Session.User);
+                EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, result);
             }
             catch (Exception exception)
             {
+                EmbyServerEntryPoint.Instance.Log.Error("ALEXA ERROR!! : " + exception.Message);
                 //TODO: Add progressive response with error, but show template on screen device is possible
-                return new ErrorHandler().OnError(exception, AlexaRequest, Session, ResponseClient.Instance);
+                return new ErrorHandler().OnError(exception, AlexaRequest, Session);
             }
 
             Session.PlaybackStarted = true;
@@ -111,7 +117,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, Session, new List<BaseItem>() { result })
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, Session, new List<BaseItem>() { result })
 
                 },
                 shouldEndSession = null,
@@ -125,7 +131,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         }, Session)
                     }
 
-            }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+            }, Session.alexaSessionDisplayType);
 
         }
     }

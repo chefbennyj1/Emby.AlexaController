@@ -29,23 +29,30 @@ namespace AlexaController
 {
     public interface IEmbyServerEntryPoint
     {
+        ILogger Log { get; }
         List<BaseItem> GetBaseItems(BaseItem parent, string[] types, User user);
         IEnumerable<SessionInfo> GetCurrentSessions();
         BaseItem GetNextUpEpisode(Intent intent, User user);
         string GetLibraryId(string name);
         BaseItem GetItemById<T>(T id);
         void SendMessageToConfiguration<T>(string name, T data);
-        CollectionInfo GetCollectionItems(User userName, string collectionName);
+        ICollectionInfo GetCollectionItems(User userName, string collectionName);
         List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user);
         IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration );
         IEnumerable<BaseItem> GetLatestTv(User user, DateTime duration);
-        void BrowseItemAsync(string room, User user, BaseItem request);
-        void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item, User user);
+        void BrowseItemAsync(IAlexaSession alexaSession, BaseItem request);
+        void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item);
         BaseItem QuerySpeechResultItem(string searchName, string[] type, User user);
         IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName);
     }
 
-    public class CollectionInfo
+    public interface ICollectionInfo
+    {
+        long Id { get; set; }
+        List<BaseItem> Items { get; set; }
+    }
+
+    public class CollectionInfo : ICollectionInfo
     {
         public long Id              { get; set; }
         public List<BaseItem> Items { get; set; }
@@ -56,7 +63,7 @@ namespace AlexaController
         private ILibraryManager LibraryManager        { get; }
         private ITVSeriesManager TvSeriesManager      { get; }
         private ISessionManager SessionManager        { get; }
-        private ILogger Log                           { get; }
+        public ILogger Log                           { get; }
         public static IEmbyServerEntryPoint Instance { get; private set; }
 
         public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)
@@ -131,7 +138,7 @@ namespace AlexaController
             return LibraryManager.GetVirtualFolders().FirstOrDefault(r => r.Name == name)?.ItemId;
         }
         
-        public CollectionInfo GetCollectionItems(User user, string collectionName)
+        public ICollectionInfo GetCollectionItems(User user, string collectionName)
         {
             var result = QuerySpeechResultItem(collectionName, new[] { "collections", "Boxset" }, user);
 
@@ -203,7 +210,7 @@ namespace AlexaController
             return SessionManager.Sessions.FirstOrDefault(i => i.DeviceId == deviceId);
         }
 
-        private void BrowseHome(string room, User user, string deviceId = null, SessionInfo session = null)
+        private async void BrowseHome(string room, User user, string deviceId = null, SessionInfo session = null)
         {
             try
             {
@@ -211,7 +218,7 @@ namespace AlexaController
                 session = session ?? GetSession(deviceId);
 
                 //DO NOT AWAIT THIS! ALEXA HATES YOU FOR IT
-                SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
+                await SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
                 {
                     Name              = "GoHome",
                     ControllingUserId = user.Id.ToString(),
@@ -224,23 +231,22 @@ namespace AlexaController
             }
         }
 
-        public void BrowseItemAsync(string room, User user, BaseItem request)
+        public void BrowseItemAsync(IAlexaSession alexaSession, BaseItem request)
         {
-            var deviceId = GetDeviceIdFromRoomName(room);
+            var deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
 
             if (string.IsNullOrEmpty(deviceId))
             {
-                throw new Exception(SemanticSpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, null));
+                throw new Exception(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, null, null, new []{alexaSession.room.Name}));
             }
 
             var session = GetSession(deviceId);
-
             var type = request.GetType().Name;
-           
-            if (!type.Equals("Season") || !type.Equals("Series")) BrowseHome(room, user, deviceId, session);
+            
 
-            Task.Delay(1500).Wait();
-
+            if (!type.Equals("Season") || !type.Equals("Series"))
+                BrowseHome(alexaSession.room.Name, alexaSession.User, deviceId, session);
+            Task.Delay(1000).Wait();
             try
             {
                 SessionManager.SendBrowseCommand(null, session.Id, new BrowseRequest()
@@ -251,39 +257,40 @@ namespace AlexaController
 
                 }, CancellationToken.None);
             }
-            catch 
+            catch
             {
                 throw new Exception($"I was unable to browse to {request.Name}.");
             }
         }
 
-        public async void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item, User user)
+        public void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item)
         {
             var deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
             
             if (string.IsNullOrEmpty(deviceId))
             {
-                throw new Exception(SemanticSpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, alexaSession));
+                throw new Exception(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE,null,null, new []{alexaSession.room.Name}));
             }
 
             var session  = GetSession(deviceId);
 
-            if (session is null) throw new Exception(SemanticSpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, alexaSession));
-
+            if (session is null) throw new Exception(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, null, null, new[] { alexaSession.room.Name }));
             
             // ReSharper disable once TooManyChainedReferences
             long startTicks = item.SupportsPositionTicksResume ? item.PlaybackPositionTicks : 0;
 
-
-            await SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
+            try
             {
-                StartPositionTicks = startTicks,
-                PlayCommand        = PlayCommand.PlayNow,
-                ItemIds            = new[] { item.InternalId },
-                ControllingUserId  = user.Id.ToString()
+                SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
+                {
+                    StartPositionTicks = startTicks,
+                    PlayCommand = PlayCommand.PlayNow,
+                    ItemIds = new[] {item.InternalId},
+                    ControllingUserId = alexaSession.User.Id.ToString()
 
-            }, CancellationToken.None);
-
+                }, CancellationToken.None);
+            }
+            catch { }
         }
 
         public IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName)

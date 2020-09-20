@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -33,8 +34,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Room room = null;
             try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
-            
+            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            Session.room = room;
+
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
@@ -43,7 +45,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            ResponseClient.Instance.PostProgressiveResponse($"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} {SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}", apiAccessToken, requestId);
+
+            ResponseClient.Instance.PostProgressiveResponse($"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} {SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}", apiAccessToken, requestId);
 
 
             var result = EmbyServerEntryPoint.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
@@ -56,8 +59,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.NO_SEASON_ITEM_EXIST, Session, null, new[] {seasonNumber}),
-                        semanticSpeechType = SemanticSpeechType.APOLOGETIC,
+                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.NO_SEASON_ITEM_EXIST, Session, null, new[] {seasonNumber}),
+                        speechType = SpeechType.APOLOGETIC,
                     },
                     shouldEndSession = null,
                     person           = null,
@@ -67,16 +70,18 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var seasonId = result[0].Parent.InternalId;
             var season = EmbyServerEntryPoint.Instance.GetItemById(seasonId);
 
-            if (!(room is null))
+            if (!(Session.room is null))
                 try
                 {
-                    EmbyServerEntryPoint.Instance.BrowseItemAsync(room.Name, Session.User, season);
+                    EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, season);
                 }
                 catch (Exception exception)
                 {
                     ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
-                    room = null;
+                    Session.room = null;
                 }
+
+            Task.Delay(1200);
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
@@ -87,7 +92,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             };
 
             Session.NowViewingBaseItem = season;
-            Session.room = room; 
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
             return ResponseClient.Instance.BuildAlexaResponse(new Response()

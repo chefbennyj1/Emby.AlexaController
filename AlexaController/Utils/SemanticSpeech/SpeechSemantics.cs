@@ -6,25 +6,24 @@ using AlexaController.Alexa.ResponseData.Model;
 
 namespace AlexaController.Utils.SemanticSpeech
 {
-    public enum SemanticSpeechType
+    public enum SpeechType
     {
         REPOSE,
         APOLOGETIC,
         COMPLIANCE,
         NONE,
         GREETINGS,
-        NON_COMPLIANT,
-        
+        NON_COMPLIANT
     }
 
-    public class SemanticSpeechUtility : OutputSpeech
+    public class SpeechSemantics : OutputSpeech
     {
         /*
          * Add empty strings to each Semantic Phrase list so that, sometimes, Alexa says nothing.
          */
 
 
-        public static string GetSemanticSpeechResponse(SemanticSpeechType type)
+        public static string SpeechResponse(SpeechType type)
         {
             switch (type.ToString())
             {

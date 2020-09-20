@@ -199,7 +199,6 @@ namespace AlexaController
             var IsTrailer = type.Equals("Trailer");
             var IsSeason  = type.Equals("Season");
             var IsEpisode = type.Equals("Episode");
-            //var collectionRoot = type == "Season" ? baseItems[0].Parent : type == "Episode" ? baseItems[0].Parent.Parent : template.collectionRoot;
             
             // Wrap each media items Primary Image in a touch element for display
             baseItems.ForEach(i => touchWrapperLayout.Add(new TouchWrapper()
@@ -1308,7 +1307,7 @@ namespace AlexaController
         {
             var helpItems = new List<IItem>();
             
-            SemanticSpeechStrings.HelpStrings.ForEach(s => helpItems.Add(new Text()
+            SpeechStrings.HelpStrings.ForEach(s => helpItems.Add(new Text()
             {
                 text = s,
                 textAlign = "center",

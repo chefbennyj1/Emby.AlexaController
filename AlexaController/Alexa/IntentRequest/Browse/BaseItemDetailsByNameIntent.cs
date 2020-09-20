@@ -36,8 +36,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Room room = null;
             try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
-            
+            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            Session.room = room;
+
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
@@ -46,10 +47,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-            
-            var progressiveSpeech = "";
-            progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.COMPLIANCE)} ";
-            progressiveSpeech += $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
+
+            var compliance = SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE);
+            var repose = SpeechSemantics.SpeechResponse(SpeechType.REPOSE);
+            var progressiveSpeech = string.Join(" ", compliance, repose);
             ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
 
             //Clean up search term
@@ -66,7 +67,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
+                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
                     }
                 });
             }
@@ -77,23 +78,23 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>() { result }),
+                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>() { result }),
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     }
                 });
 
-            if (!(room is null))
+            if (!(Session.room is null))
                 try
                 {
-                    var r = room;
-                    Task.Factory.StartNew(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(r.Name, Session.User, result));
+                    EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, result);
                 }
                 catch (Exception exception)
                 {
                     ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
-                    room = null;
+                    Session.room = null;
                 }
 
+            Task.Delay(1200); //Yep...
             
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
@@ -104,7 +105,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             //Update Session
             Session.NowViewingBaseItem = result;
-            Session.room = room;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
             
             try
@@ -113,7 +113,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.BROWSE_ITEM, Session, new List<BaseItem> { result }),
+                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_ITEM, Session, new List<BaseItem> { result }),
                         sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                     },
                     shouldEndSession = null,
@@ -127,7 +127,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(exception.InnerException, AlexaRequest, Session, ResponseClient.Instance);
+                return new ErrorHandler().OnError(exception.InnerException, AlexaRequest, Session);
             }
         }
     }

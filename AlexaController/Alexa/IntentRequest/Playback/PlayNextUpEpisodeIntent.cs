@@ -33,7 +33,8 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //we need a room object
             Room room = null;
             try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
+            if (room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            Session.room = room;
 
             var request = AlexaRequest.request;
             var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(request.intent, Session?.User);
@@ -45,24 +46,23 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
-                        semanticSpeechType = SemanticSpeechType.APOLOGETIC,
+                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
+                        speechType = SpeechType.APOLOGETIC,
                     },
                 });
             }
 
-            EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode, Session?.User);
+            EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode);
 
             Session.NowViewingBaseItem = nextUpEpisode;
-            Session.room = room;
             AlexaSessionManager.Instance.UpdateSession(Session);
 
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PLAY_NEXT_UP_EPISODE, Session, new List<BaseItem>() { nextUpEpisode }),
-                    semanticSpeechType = SemanticSpeechType.COMPLIANCE,
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_NEXT_UP_EPISODE, Session, new List<BaseItem>() { nextUpEpisode }),
+                    speechType = SpeechType.COMPLIANCE,
                 },
                 shouldEndSession = true,
                 directives = new List<IDirective>()

@@ -56,9 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             
             session.room = room;
             AlexaSessionManager.Instance.UpdateSession(session);
-
-            var requestHandlerParams = new object[] { session.PersistedRequestData, session };
-
+            
             //Use Reflection to load the proper Intent class - AlexaController.Alexa.IntentRequest.{intent.Name}
             var type = Type.GetType($"AlexaController.Alexa.IntentRequest.{ rePromptIntentName }");
 
@@ -66,21 +64,23 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             try
             {
-                return GetAlexaResponseResult(type, requestHandlerParams);
+                return GetResponseResult(type, session.PersistedRequestData, session);
             }
             catch 
             {
-                return new ErrorHandler().OnError(new Exception("Room Name Error"), alexaRequest, session, ResponseClient.Instance);
+                return new ErrorHandler().OnError(new Exception("Room Name Error"), alexaRequest, session);
             }
 
         }
 
-        private string GetAlexaResponseResult(Type @namespace, object[] requestHandlerParams)
+        private static string GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var instance = Activator.CreateInstance(@namespace ?? throw new Exception("Error getting response"), session.PersistedRequestData, session);
-            var method   = @namespace.GetMethod("Response");
-            var response = method?.Invoke(instance, null);//, requestHandlerParams);
-            return (string)response;
+            var paramArgs = session is null
+                ? new object[] { alexaRequest }
+                : new object[] { alexaRequest, session };
+
+            var instance = Activator.CreateInstance(@namespace, paramArgs);
+            return (string)@namespace.GetMethod("Response")?.Invoke(instance, null);
         }
     }
 }

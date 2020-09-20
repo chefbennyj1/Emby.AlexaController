@@ -44,7 +44,7 @@ namespace AlexaController
                 var speech       = string.Empty;
 
                 speech += outputSpeech.sound;
-                speech += SemanticSpeechUtility.GetSemanticSpeechResponse(outputSpeech.semanticSpeechType);
+                speech += SpeechSemantics.SpeechResponse(outputSpeech.speechType);
                 speech += person;
                 speech += OutputSpeech.InsertStrengthBreak(StrengthBreak.strong);
                 speech += outputSpeech.phrase;

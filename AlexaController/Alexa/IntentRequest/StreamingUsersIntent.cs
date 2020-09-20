@@ -38,7 +38,7 @@ namespace AlexaController.Alexa.IntentRequest
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = speechString,
-                    semanticSpeechType = SemanticSpeechType.COMPLIANCE
+                    speechType = SpeechType.COMPLIANCE
                 }
             }, Session.alexaSessionDisplayType);
         }

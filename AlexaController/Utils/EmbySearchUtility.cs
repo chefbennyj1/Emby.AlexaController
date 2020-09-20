@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 
@@ -61,10 +62,12 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     User             = user
-                }); 
+                });
 
-                if(queryResult.Items.Any())
-                    foreach (var item in queryResult.Items)
+                if (queryResult.Items.Any())
+                {
+                    BaseItem resultItem = null;
+                    Parallel.ForEach(queryResult.Items, (item, state) => //).foreach (var item in queryResult.Items)
                     {
                         //If the item starts with "The"
                         if (item.Name.ToLower().StartsWith("the "))
@@ -75,21 +78,33 @@ namespace AlexaController.Utils
                             if (string.Equals(query, (searchName), StringComparison.CurrentCultureIgnoreCase))
                             {
                                 //Logger.Info($"Search 3: found Comparison {searchName} and {query}");
-                                return item;
+                                resultItem = item;
+                                state.Break();
+                                //return item;
                             }
-                        
+
                             //Maybe "The" should be there
-                            if (string.Equals(NormalizeQueryString(item.Name).ToLowerInvariant(), NormalizeQueryString(searchName).ToLower(), StringComparison.CurrentCultureIgnoreCase))
+                            if (string.Equals(NormalizeQueryString(item.Name).ToLowerInvariant(),
+                                NormalizeQueryString(searchName).ToLower(), StringComparison.CurrentCultureIgnoreCase))
                             {
-                                return item;
+                                resultItem = item;
+                                state.Break();
+                                //return item;
                             }
                         }
+
                         //Maybe search name can perfectly compare
-                        if (string.Equals(NormalizeQueryString(item.Name.ToLowerInvariant()), NormalizeQueryString(searchName.ToLowerInvariant()), StringComparison.CurrentCultureIgnoreCase))
+                        if (string.Equals(NormalizeQueryString(item.Name.ToLowerInvariant()),
+                            NormalizeQueryString(searchName.ToLowerInvariant()),
+                            StringComparison.CurrentCultureIgnoreCase))
                         {
-                            return item;
+                            resultItem = item;
+                            state.Break();
+                            //return item;
                         }
-                    }
+                    });
+                    if (!(resultItem is null)) return resultItem;
+                }
             }
             
             //Return items that start with the first two letters of search term, removing proceeding  "the"
@@ -106,59 +121,86 @@ namespace AlexaController.Utils
 
                 if (queryResult.Items.Any())
                 {
-                    foreach (var item in queryResult.Items)
+                    BaseItem resultItem = null;
+
+                    Parallel.ForEach(queryResult.Items, (item, state) =>
                     {
-                        if (item.Name.ToLower().Replace("part ii", "2").Equals(searchName))
-                        {
-                            return item;
-                        }
-
-                        if (item.Name.ToLower().Replace("part iii", "3").Equals(searchName))
-                        {
-                            return item;
-                        }
-
-                        if (item.Name.ToLower().Replace("part iv", "4").Equals(searchName))
-                        {
-                            return item;
-                        }
-
-                        if (item.Name.ToLower().Replace("part v", "5").Equals(searchName))
-                        {
-                            return item;
-                        }
-
+                        // The user may have used the phrase "part 2", the movie name is "part ii"
                         if (item.Name.ToLower().Replace(" ii", " 2").Equals(searchName))
                         {
-                            return item;
+                            state.Break();
+                            resultItem = item;
+                            //return item;
                         }
 
                         if (item.Name.ToLower().Replace(" iii", " 3").Equals(searchName))
                         {
-                            return item;
+                            state.Break();
+                            resultItem = item;
+                            //return item;
                         }
 
                         if (item.Name.ToLower().Replace(" iv", " 4").Equals(searchName))
                         {
-                            return item;
+                            state.Break();
+                            resultItem = item;
+                            //return item;
                         }
 
                         if (item.Name.ToLower().Replace(" v", " 5").Equals(searchName))
                         {
-                            return item;
+                            state.Break();
+                            resultItem = item;
+                            //return item;
+                        }
+                        if (item.Name.ToLower().Replace("part ii", "2").Equals(searchName))
+                        {
+                            state.Break();
+                            resultItem = item;
+                            //return item;
+                        }
+                        if (item.Name.ToLower().Replace("part iii", "3").Equals(searchName))
+                        {
+                            state.Break();
+                            resultItem = item;
+                            //return item;
                         }
 
+                        if (item.Name.ToLower().Replace("part iv", "4").Equals(searchName))
+                        {
+                            state.Break();
+                            resultItem = item;
+                            //return item;
+                        }
+
+                        if (item.Name.ToLower().Replace("part v", "5").Equals(searchName))
+                        {
+                            state.Break();
+                            resultItem = item;
+                            //return item;
+                        }
+
+
+
                         if (item.Name.ToLower().Replace("vol.", string.Empty)
-                            .Equals(searchName.ToLowerInvariant().Replace("volume", string.Empty), 
+                            .Equals(searchName.ToLowerInvariant().Replace("volume", string.Empty),
                                 StringComparison.InvariantCultureIgnoreCase))
                         {
-                            return item;
+                            state.Break();
+                            resultItem = item;
+                            //return item;
                         }
+
                         if (NormalizeQueryString(item.Name).Contains(NormalizeQueryString(searchName)))
                         {
-                            return item;
+                            state.Break();
+                            resultItem = item;
+                            //return item;
                         }
-                    }
+
+                    });
+
+                    if (!(resultItem is null)) return resultItem;
                 }
             }
             

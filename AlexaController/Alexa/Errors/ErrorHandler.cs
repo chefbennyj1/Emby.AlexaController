@@ -12,20 +12,20 @@ namespace AlexaController.Alexa.Errors
     
     public interface IErrorHandler
     {
-        string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient);
+        string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session);
     }
 
     public class ErrorHandler : IErrorHandler
     {
-        public string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session, IResponseClient responseClient)
+        public string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            return responseClient.BuildAlexaResponse(new Response()
+            return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = $"{OutputSpeech.SayWithEmotion(exception.Message, Emotion.excited, Intensity.low)}",
-                    semanticSpeechType = SemanticSpeechType.APOLOGETIC,
+                    speechType = SpeechType.APOLOGETIC,
                 },
 
                 directives = new List<IDirective>()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -33,17 +34,17 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         public CollectionIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
+            
         }
         public string Response()
         {
             Room room = null;
             try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session, ResponseClient.Instance);
-            
+            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            Session.room = room;
+
             var request           = AlexaRequest.request;
             var intent            = request.intent;
             var slots             = intent.slots;
@@ -52,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
             
-            var progressiveSpeech = $"{SemanticSpeechUtility.GetSemanticSpeechResponse(SemanticSpeechType.REPOSE)}";
+            var progressiveSpeech = $"{SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}";
             ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
             
             collectionRequest       = StringNormalization.ValidateSpeechQueryString(collectionRequest);
@@ -71,23 +72,25 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SemanticSpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>(){ collectionBaseItem }),
+                            phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>(){ collectionBaseItem }),
                             sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                         }
                     });
                 }
             }
 
-            if (!(room is null))
+            if (!(Session.room is null))
                 try
                 {
-                    EmbyServerEntryPoint.Instance.BrowseItemAsync(room.Name, Session.User, collectionBaseItem);
+                    EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, collectionBaseItem);
                 }
                 catch (Exception exception)
                 {
                     ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
-                    room = null;
+                    Session.room = null;
                 }
+
+            Task.Delay(1200);
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
@@ -99,7 +102,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             //Update Session
             Session.NowViewingBaseItem = collectionBaseItem;
-            Session.room = room;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
