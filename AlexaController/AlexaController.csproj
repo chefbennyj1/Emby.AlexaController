@@ -38,4 +38,8 @@
 
 <ItemGroup> <PackageReference Include="mediabrowser.server.core" Version="4.2.0.40" /> <PackageReference Include="Newtonsoft.Json" Version="12.0.2" /> <PackageReference Include="System.Memory" Version="4.5.3" /> </ItemGroup>
 
+<ItemGroup>
+  <Folder Include="Alexa\Presentation\APL\UserEvent\TouchWrapper\DoublePress\" />
+</ItemGroup>
+
 </Project>

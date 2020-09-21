@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using MediaBrowser.Model.Services;
 using System.IO;
-using AlexaController.Alexa.Errors;
+using AlexaController.Alexa;
+using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;

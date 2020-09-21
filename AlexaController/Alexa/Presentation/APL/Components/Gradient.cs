@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class OverlayGradient
+    public class Gradient
     {
-        public object type => GetType().Name;
+        public string type => "linear";
         public List<string> colorRange { get; set; }
         public List<double> inputRange { get; set; }
+        public int angle               { get; set; }
     }
 }

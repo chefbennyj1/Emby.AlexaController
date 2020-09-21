@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using AlexaController.Alexa.Errors;
+using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
@@ -48,7 +48,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }
             else
             {
-                EmbyServerEntryPoint.Instance.SendMessageToConfiguration("RoomAndDeviceUtility", roomName);
+                EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("RoomAndDeviceUtility", roomName);
                 //Give a Room object with the Setup Name back to the RoomSetupIntent Class through the Session object.
                 //Leave it to the  configuration JavaScript to finish saving the new room set up device information.
                 room = new Room(){ Name = roomName}; 

@@ -1,18 +1,11 @@
 ﻿using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Session;
 
-// ReSharper disable once TooManyChainedReferences
-// ReSharper disable once TooManyArguments
 
 namespace AlexaController.Alexa.IntentRequest
 {
@@ -25,13 +18,12 @@ namespace AlexaController.Alexa.IntentRequest
         public VoiceAuthenticationAccountLinkIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
         public string Response()
         {
-            var person        = AlexaRequest.context.System.person;
+            var context       = AlexaRequest.context;
+            var person        = context.System.person;
             var config        = Plugin.Instance.Configuration;
 
             if (person is null)
@@ -62,8 +54,7 @@ namespace AlexaController.Alexa.IntentRequest
                 }
             }
 
-            //Send Message to Emby plugin UI
-            Task.Factory.StartNew(() => EmbyServerEntryPoint.Instance.SendMessageToConfiguration("SpeechAuthentication", person.personId));
+            Task.Factory.StartNew(() => EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 
             return ResponseClient.Instance.BuildAlexaResponse(new Response
             {

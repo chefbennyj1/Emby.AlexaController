@@ -20,10 +20,9 @@ namespace AlexaController.Alexa.IntentRequest
         public NewItemsIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
+
         public  string Response()
         {
             var request        = AlexaRequest.request;

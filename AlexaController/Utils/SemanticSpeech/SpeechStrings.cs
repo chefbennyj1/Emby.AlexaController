@@ -36,7 +36,6 @@ namespace AlexaController.Utils.SemanticSpeech
 
     public class SpeechStrings : SpeechSemantics
     {
-
         public static readonly List<string> HelpStrings = new List<string>()
         {
             "Welcome to help! Let's get started. Swipe left to continue...",
@@ -80,7 +79,6 @@ namespace AlexaController.Utils.SemanticSpeech
             "This concludes the help section. Good luck!",
         };
         
-
         public static string GetPhrase
         (SpeechResponseType type, IAlexaSession session, List<BaseItem> items = null, string[] args = null)
         {
@@ -201,7 +199,6 @@ namespace AlexaController.Utils.SemanticSpeech
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-            
         }
     }
 }

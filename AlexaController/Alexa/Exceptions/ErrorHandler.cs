@@ -7,9 +7,8 @@ using AlexaController.Utils.SemanticSpeech;
 
 // ReSharper disable TooManyArguments
 
-namespace AlexaController.Alexa.Errors
+namespace AlexaController.Alexa.Exceptions
 {
-    
     public interface IErrorHandler
     {
         string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session);

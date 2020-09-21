@@ -31,8 +31,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string display            { get; set; }
         public string content            { get; set; }
         public HandleTick handleTick     { get; set; }
-
-
+        public string data { get; set; }
     }
 
     

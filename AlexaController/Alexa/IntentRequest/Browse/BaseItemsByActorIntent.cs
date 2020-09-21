@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
@@ -25,11 +24,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public string Response()
         {
-            Room room = null;
-            try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+            try
+            {
+                Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+            }
+            catch { }
+
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
-            Session.room = room;
+            if (Session.room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+
 
             var request = AlexaRequest.request;
             var intent = request.intent;

@@ -7,11 +7,13 @@ namespace AlexaController.Alexa.Presentation.APL
     {
         List<string> parameters { get; }
         List<IItem> items       { get; }
+        
     }
 
     public class MainTemplate : IMainTemplate
     {
         public List<string> parameters { get; set; }
         public List<IItem> items       { get; set; }
+        
     }
 }

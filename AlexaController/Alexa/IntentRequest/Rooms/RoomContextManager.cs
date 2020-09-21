@@ -17,7 +17,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
     public class RoomContextManager : IRoomContextManager
     {
-        public static IRoomContextManager Instance { get; set; }
+        public static IRoomContextManager Instance { get; private set; }
         public RoomContextManager()
         {
             Instance = this;
@@ -55,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             string room = (slots.Room.value ?? session.room?.Name) ?? request.arguments[1];
 
-            if (string.IsNullOrEmpty(room)) return null;
+            if (string.IsNullOrEmpty(room)) throw new Exception("No room found");
 
             return ValidateRoomConfiguration(room, config)
                 ? config.Rooms.FirstOrDefault(r =>

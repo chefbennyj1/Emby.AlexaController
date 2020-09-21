@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -35,7 +36,7 @@ namespace AlexaController
         BaseItem GetNextUpEpisode(Intent intent, User user);
         string GetLibraryId(string name);
         BaseItem GetItemById<T>(T id);
-        void SendMessageToConfiguration<T>(string name, T data);
+        void SendMessageToPluginConfigurationPage<T>(string name, T data);
         ICollectionInfo GetCollectionItems(User userName, string collectionName);
         List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user);
         IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration );
@@ -75,7 +76,7 @@ namespace AlexaController
             Instance        = this;
         }
 
-        public void SendMessageToConfiguration<T>(string name, T data)
+        public void SendMessageToPluginConfigurationPage<T>(string name, T data)
         {
             SessionManager.SendMessageToAdminSessions(name, data, CancellationToken.None);
         }
@@ -166,6 +167,7 @@ namespace AlexaController
                 EnableAutoSort   = true,
                 OrderBy          = new[] { ItemSortBy.DateCreated }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Descending)).ToArray()
             });
+
             
             return results.Select(id => LibraryManager.GetItemById(id)).ToList();
         }
@@ -189,7 +191,10 @@ namespace AlexaController
         private string GetDeviceIdFromRoomName(string room)
         {
             var config = Plugin.Instance.Configuration;
-            if (!config.Rooms.Any()) return string.Empty;
+            if (!config.Rooms.Any())
+            {
+                throw new DeviceUnavailableException($"{room}'s device is currently unavailable.");
+            }
 
             var device = config.Rooms.FirstOrDefault(r => string.Equals(r.Name, room, StringComparison.CurrentCultureIgnoreCase))?.Device;
 
@@ -202,7 +207,7 @@ namespace AlexaController
                 return SessionManager.Sessions.FirstOrDefault(d => d.Client == device)?.DeviceId;
             }
 
-            return string.Empty;
+            throw new DeviceUnavailableException($"{room}'s device is currently unavailable.");
         }
 
         private SessionInfo GetSession(string deviceId)
@@ -237,7 +242,7 @@ namespace AlexaController
 
             if (string.IsNullOrEmpty(deviceId))
             {
-                throw new Exception(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, null, null, new []{alexaSession.room.Name}));
+                throw new DeviceUnavailableException($"{alexaSession.room.Name}'s device is currently unavailable." );
             }
 
             var session = GetSession(deviceId);
@@ -259,7 +264,7 @@ namespace AlexaController
             }
             catch
             {
-                throw new Exception($"I was unable to browse to {request.Name}.");
+                throw new BrowseCommandException($"I was unable to browse to {request.Name}.");
             }
         }
 
@@ -269,12 +274,15 @@ namespace AlexaController
             
             if (string.IsNullOrEmpty(deviceId))
             {
-                throw new Exception(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE,null,null, new []{alexaSession.room.Name}));
+                throw new DeviceUnavailableException(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE,null,null, new []{alexaSession.room.Name}));
             }
 
             var session  = GetSession(deviceId);
 
-            if (session is null) throw new Exception(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, null, null, new[] { alexaSession.room.Name }));
+            if (session is null)
+            {
+                throw new DeviceUnavailableException(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, null, null, new[] { alexaSession.room.Name }));
+            }
             
             // ReSharper disable once TooManyChainedReferences
             long startTicks = item.SupportsPositionTicksResume ? item.PlaybackPositionTicks : 0;
@@ -290,7 +298,10 @@ namespace AlexaController
 
                 }, CancellationToken.None);
             }
-            catch { }
+            catch (Exception)
+            {
+                throw new PlaybackCommandException($"I had a problem playing {item.Name}.");
+            }
         }
 
         public IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName)

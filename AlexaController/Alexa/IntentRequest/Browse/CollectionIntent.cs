@@ -6,21 +6,12 @@ using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable TooManyArguments
-// ReSharper disable once ComplexConditionExpression
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -39,11 +30,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public string Response()
         {
-            Room room = null;
-            try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+            try
+            {
+                Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+            }
+            catch { }
+
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
-            Session.room = room;
+            if (Session.room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+
 
             var request           = AlexaRequest.request;
             var intent            = request.intent;

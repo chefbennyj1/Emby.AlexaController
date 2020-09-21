@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AlexaController.Alexa.Errors;
+using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;

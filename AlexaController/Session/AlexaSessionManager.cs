@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AlexaController.Alexa;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using AlexaController.Configuration;
