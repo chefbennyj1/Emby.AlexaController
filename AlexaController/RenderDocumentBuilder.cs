@@ -251,7 +251,7 @@ namespace AlexaController
         {
             var baseItem = template.baseItems[0];
             var type     = baseItem.GetType().Name;
-            var item     = type.Equals("Season") ? template.baseItems[0].Parent : template.baseItems[0];
+            var item     = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
             
             var layout = new List<IItem>();
             const string token = "mediaItemDetails";
@@ -319,10 +319,14 @@ namespace AlexaController
                 }
             };
 
+            var logo = item.HasImage(ImageType.Logo)
+                ? $"{Url}/Items/{item.InternalId}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;"
+                : "";
+
             layout.Add(new AlexaHeader()
             {
                 headerTitle            = template.HeaderTitle != "" ? template.HeaderTitle : template.baseItems[0].Name,
-                headerAttributionImage = template.baseItems[0].HasImage(ImageType.Logo) ? $"{Url}/Items/{item.InternalId}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : "",
+                headerAttributionImage = logo,
                 headerBackButton       = session.paging.canGoBack,
                 headerDivider          = true,
             });
@@ -404,7 +408,7 @@ namespace AlexaController
                 opacity = 0,
                 item    = new Text()
                 {
-                    text = $"{template.baseItems[0].Overview}",
+                    text = $"{baseItem.Overview}",
                     style = "textStyleBody",
                     width = "55vw",
                     fontSize = "20dp"
@@ -471,7 +475,7 @@ namespace AlexaController
                 {
                     new Image()
                     {
-                        source = $"{Url}/Items/{template.baseItems[0].InternalId}/Images/primary?maxWidth=400&amp;maxHeight=708&amp;quality=90",
+                        source = $"{Url}/Items/{baseItem.InternalId}/Images/primary?maxWidth=400&amp;maxHeight=708&amp;quality=90",
                         scale  = "best-fit",
                         height = "63vh",
                         width  = "100%",
