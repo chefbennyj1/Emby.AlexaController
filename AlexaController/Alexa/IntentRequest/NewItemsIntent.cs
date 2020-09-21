@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -33,17 +34,18 @@ namespace AlexaController.Alexa.IntentRequest
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
             
-            // Default will be 25 days ago unless given a time period duration
+            // Default will be 25 days ago unless given a time duration
             var d = duration is null ? DateTime.Now.AddDays(-25)
                 : DateTimeDurationNormalization
                     .GetMinDateCreation(DateTimeDurationNormalization.DeserializeDurationFromIso8601(duration));
 
-            //TODO: Respond with the time frame the user request: "Looking for new movies from the last thrity days"
             ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId);
 
-            var results = type == "New TV Shows" ? EmbyServerEntryPoint.Instance.GetLatestTv(Session.User, d).ToList()
-                : EmbyServerEntryPoint.Instance.GetLatestMovies(Session.User, d)
-                    .Where(movie => movie.IsParentalAllowed(Session.User)).ToList();
+            var query = type == "New TV Shows"
+                ? EmbyServerEntryPoint.Instance.GetLatestTv(Session.User, d)
+                : EmbyServerEntryPoint.Instance.GetLatestMovies(Session.User, d);
+
+            var results = query.Where(item => item.IsParentalAllowed(Session.User)).ToList();
 
             if (!results.Any())
             {
@@ -51,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = $"No { type } have been added during that time.",
+                        phrase = $"No { type } have been added.",
                         speechType = SpeechType.APOLOGETIC,
                     },
                     person = Session.person,

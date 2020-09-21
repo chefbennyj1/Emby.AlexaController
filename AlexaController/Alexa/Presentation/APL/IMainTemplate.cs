@@ -14,6 +14,5 @@ namespace AlexaController.Alexa.Presentation.APL
     {
         public List<string> parameters { get; set; }
         public List<IItem> items       { get; set; }
-        
     }
 }

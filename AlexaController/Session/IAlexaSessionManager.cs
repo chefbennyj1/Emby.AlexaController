@@ -2,14 +2,11 @@
 using System.Linq;
 using AlexaController.Alexa;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
-using AlexaController.Configuration;
-using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
-//using MediaBrowser.Model.Logging;
 using User = MediaBrowser.Controller.Entities.User;
-
 
 namespace AlexaController.Session
 {
@@ -20,7 +17,7 @@ namespace AlexaController.Session
         void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template = null, bool? isBack = null);
     }
 
-    public class AlexaSessionManager : IAlexaSessionManager, IServerEntryPoint
+    public class AlexaSessionManager : IAlexaSessionManager
     {
         public static IAlexaSessionManager Instance { get; private set; }
 
@@ -32,6 +29,7 @@ namespace AlexaController.Session
         {
             Instance = this;
             SessionManager = sessionManager;
+            SessionManager.PlaybackStopped += SessionManager_PlaybackStopped;
         }
 
         private static AlexaSessionDisplayType GetCurrentViewport(IAlexaRequest alexaRequest)
@@ -46,8 +44,7 @@ namespace AlexaController.Session
                     ? alexaRequest.context.Viewports[0].type == "APL"
                         ? AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE : AlexaSessionDisplayType.NONE : AlexaSessionDisplayType.NONE : AlexaSessionDisplayType.NONE;
         }
-
-
+        
         public void EndSession(IAlexaRequest alexaRequest)
         {
             OpenSessions.RemoveAll(s => s.SessionId.Equals(alexaRequest.session.sessionId));
@@ -72,8 +69,6 @@ namespace AlexaController.Session
 
             if (OpenSessions.Exists(s => s.SessionId.Equals(amazonSession.sessionId)))
             {
-                // Not a new session with AMAZON, we should have a corresponding session
-                // already registered in the "OpenSessions" list
                 sessionInfo = OpenSessions.FirstOrDefault(s => s.SessionId == amazonSession.sessionId);
 
                 /*
@@ -167,18 +162,7 @@ namespace AlexaController.Session
             return session;
 
         }
-
-        public void Dispose()
-        {
-
-        }
-
-        // ReSharper disable once MethodNameNotMeaningful
-        public void Run()
-        {
-            SessionManager.PlaybackStopped += SessionManager_PlaybackStopped;
-        }
-
+        
         private void SessionManager_PlaybackStopped(object sender, MediaBrowser.Controller.Library.PlaybackStopEventArgs e)
         {
             var deviceName = e.DeviceName;
@@ -197,7 +181,6 @@ namespace AlexaController.Session
             sessionToUpdate.PlaybackStarted = false;
             UpdateSession(sessionToUpdate);
         }
-        
         
     }
 }

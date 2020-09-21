@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using AlexaController.Alexa;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
@@ -330,6 +330,7 @@ namespace AlexaController
                 headerBackButton       = session.paging.canGoBack,
                 headerDivider          = true,
             });
+
             //Room - Rating
             layout.Add(new Text()
             {
@@ -338,6 +339,7 @@ namespace AlexaController
                 left = "42%",
                 top = "3vh"
             });
+
             //Genres
             layout.Add(new Text()
             {
@@ -346,10 +348,12 @@ namespace AlexaController
                 left = "42%",
                 top = "6vh",
                 width = "40vw",
-                height = "12dp",
+                height = "22dp",
                 fontSize = "18dp",
+                opacity = 0,
                 id = "genre"
             });
+
             //TagLines
             layout.Add(new Text()
             {
@@ -363,12 +367,14 @@ namespace AlexaController
                 id = "tag",
                 display = !string.IsNullOrEmpty(item.Tagline) ? "normal" : "none"
             });
+
             //Watched check-mark
             layout.Add(new VectorGraphic()
             {
                 source = "CheckMark",
                 left = "87vw"
             });
+
             //Runtime span
             if(string.Equals(type, "Movie")) { 
                 var runTimeTicks = template.baseItems[0].RunTimeTicks;
@@ -534,6 +540,7 @@ namespace AlexaController
                             commands = new List<ICommand>()
                             {
                                 Animations.ScaleFadeInItem("primaryButton", 800),
+                                Animations.ScaleFadeInItem("genre", 1000),
                                 Animations.FadeInItem("overview", 800),
                                 Animations.FadeInItem("showing", 2000),
                                 new Parallel()

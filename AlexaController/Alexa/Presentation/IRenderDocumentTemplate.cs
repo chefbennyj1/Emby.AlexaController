@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using MediaBrowser.Controller.Entities;
 
-namespace AlexaController.Alexa
+namespace AlexaController.Alexa.Presentation
 {
     public enum RenderDocumentType
     {

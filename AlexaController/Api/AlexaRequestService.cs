@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using MediaBrowser.Model.Services;
 using System.IO;
-using AlexaController.Alexa;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
@@ -60,6 +60,9 @@ namespace AlexaController.Api
             if (ResponseClient.Instance is null)
                 Activator.CreateInstance(typeof(ResponseClient), json, client);
 
+            if (AlexaSessionManager.Instance is null)
+                Activator.CreateInstance(typeof(AlexaSessionManager), sessionManager);
+
             if (RoomContextManager.Instance is null)
                 Activator.CreateInstance<RoomContextManager>();
             
@@ -88,7 +91,6 @@ namespace AlexaController.Api
             var context = alexaRequest.context;
             var system  = context.System;
             var person  = system.person;
-            
 
             if (!IsVoiceAuthenticationAccountLinkRequest(intent)) //is not voice training, create a session
             {
@@ -110,11 +112,9 @@ namespace AlexaController.Api
 
                 session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
                 
-                //The "RoomName" intent will always be used during follow up communication with Alexa.
-                //If Alexa thinks she has heard a "RoomName" intent request, without the session having any PersistedRequestData
-                //There has been a mistake, end the session.
                 if (session.PersistedRequestData is null && IsRoomNameIntentRequest(intent))
                 {
+                    //There has been a speech recognition mistake, end the session.
                     return new NotUnderstood(alexaRequest, session).Response(); 
                 }
 
@@ -128,7 +128,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(new Exception($"I was unable to do that. Please try again. {exception.Message}"), alexaRequest, session);
+                return new ErrorHandler().OnError(new Exception($"I was unable to do that. {exception.Message}"), alexaRequest, session);
             }
         }
 
@@ -137,7 +137,6 @@ namespace AlexaController.Api
             AlexaSessionManager.Instance.EndSession(alexaRequest);
             return null;
         }
-
         
         private string OnUserEvent(IAlexaRequest alexaRequest)
         {
