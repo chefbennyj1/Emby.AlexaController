@@ -48,8 +48,10 @@ namespace AlexaController.Api
         private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent => intent.name == "VoiceAuthenticationAccountLink";
         private readonly Func<Intent, bool> IsRoomNameIntentRequest = intent => intent.name == "Rooms_RoomNameIntent";
 
-        private readonly Func<Request, string> IntentNamespace    = request => $"AlexaController.Alexa.IntentRequest.{request.intent.name.Replace("_", ".")}";
-        private readonly Func<Request, string> UserEventNamespace = request => $"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}";
+        private readonly Func<Request, string> IntentNamespace    = request 
+            => $"AlexaController.Alexa.IntentRequest.{request.intent.name.Replace("_", ".")}";
+        private readonly Func<Request, string> UserEventNamespace = request 
+            => $"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}";
         
         public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager sessionManager)
         {
