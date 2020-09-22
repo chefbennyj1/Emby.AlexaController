@@ -5,7 +5,6 @@ using System.IO;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
@@ -65,7 +64,9 @@ namespace AlexaController.Api
 
             if (RoomContextManager.Instance is null)
                 Activator.CreateInstance<RoomContextManager>();
-            
+
+            if (SpeechAuthorization.Instance is null)
+                Activator.CreateInstance(typeof(SpeechAuthorization), UserManager);
         }
 
         public object Post(AlexaRequest data)
@@ -92,7 +93,7 @@ namespace AlexaController.Api
             var system  = context.System;
             var person  = system.person;
 
-            if (!IsVoiceAuthenticationAccountLinkRequest(intent)) //is not voice training, create a session
+            if (!IsVoiceAuthenticationAccountLinkRequest(intent)) // create a session
             {
                 if (!(person is null))
                 {

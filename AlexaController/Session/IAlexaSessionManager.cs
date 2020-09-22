@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using AlexaController.Alexa;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using MediaBrowser.Controller.Session;

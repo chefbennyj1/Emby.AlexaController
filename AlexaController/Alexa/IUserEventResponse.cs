@@ -1,5 +1,4 @@
 ﻿using AlexaController.Api;
-using AlexaController.Session;
 
 namespace AlexaController.Alexa
 {

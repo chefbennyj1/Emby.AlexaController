@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
@@ -18,9 +17,9 @@ using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
-using Parallel   = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
-using Source     = AlexaController.Alexa.Presentation.APL.Components.Source;
-using Video      = AlexaController.Alexa.Presentation.APL.Components.Video;
+using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
+using Source   = AlexaController.Alexa.Presentation.APL.Components.Source;
+using Video    = AlexaController.Alexa.Presentation.APL.Components.Video;
 
 // ReSharper disable twice InconsistentNaming
 
@@ -39,7 +38,7 @@ namespace AlexaController
         private IServerApplicationHost Host          { get; }
         private ILogger Log                          { get; }
         public static RenderDocumentBuilder Instance { get; private set; }
-        private static string LanAddress             { get; set; }
+        private static string LocalAddress           { get; set; }
         
         // ReSharper disable once TooManyDependencies
         public RenderDocumentBuilder(ILogManager logManager, ILibraryManager libraryManager, ISessionManager sessionManager, IServerApplicationHost host)
@@ -48,11 +47,11 @@ namespace AlexaController
             SessionManager = sessionManager;
             Host           = host;
             Log            = logManager.GetLogger(Plugin.Instance.Name);
-            LanAddress     = Host.GetSystemInfo(CancellationToken.None).Result.LocalAddress;
+            LocalAddress    = Host.GetSystemInfo(CancellationToken.None).Result.LocalAddress;
             Instance       = this;
         }
 
-        private static string Url => $"{LanAddress}/emby";
+        private static string Url => $"{LocalAddress}/emby";
 
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(2);
 
@@ -125,18 +124,6 @@ namespace AlexaController
             }
         };
         
-        // ReSharper disable twice UnusedMember.Local
-        private static string CastIcon        => "M1,10V12A9,9 0 0,1 10,21H12C12,14.92 7.07,10 1,10M1,14V16A5,5 0 0,1 6,21H8A7,7 0 0,0 1,14M1,18V21H4A3,3 0 0,0 1,18M21,3H3C1.89,3 1,3.89 1,5V8H3V5H21V19H14V21H21A2,2 0 0,0 23,19V5C23,3.89 22.1,3 21,3Z";
-        private static string EmbyIcon        => "M11,2L6,7L7,8L2,13L7,18L8,17L13,22L18,17L17,16L22,11L17,6L16,7L11,2M10,8.5L16,12L10,15.5V8.5Z";
-        private static string PlayOutlineIcon => "M8.5,8.64L13.77,12L8.5,15.36V8.64M6.5,5V19L17.5,12";
-        private static string CheckMark       => "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z";
-        private static string More_Horizontal => "M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z";
-        private static string ListIcon        => "M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z";
-        private static string Left            => "M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z";
-        private static string Right           => "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z";
-        private static string Carousel        => "M18,6V17H22V6M2,17H6V6H2M7,19H17V4H7V19Z";
-        private static string ArrayIcon       => "M8,18H17V5H8M18,5V18H21V5M4,18H7V5H4V18Z";
-        
         public IDirective GetRenderDocumentTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             Log.Info("Building Render Document");
@@ -147,7 +134,6 @@ namespace AlexaController
                 case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return RenderItemListSequenceTemplate(template, session);
                 case RenderDocumentType.QUESTION_TEMPLATE           : return RenderQuestionRequestTemplate(template);
                 case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return RenderRoomSelectionTemplate(template, session);
-                case RenderDocumentType.VIDEO                       : return RenderVideo(template);
                 case RenderDocumentType.NOT_UNDERSTOOD              : return RenderNotUnderstoodTemplate();
                 case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE : return RenderVerticalTextListTemplate(template, session);
                 case RenderDocumentType.HELP                        : return RenderHelpTemplate();
@@ -271,7 +257,7 @@ namespace AlexaController
                         {
                             new Path()
                             {
-                                pathData = CheckMark,
+                                pathData = MaterialVectorIcons.CheckMark,
                                 stroke = "none",
                                 strokeWidth = "1px",
                                 fill = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
@@ -290,7 +276,7 @@ namespace AlexaController
                         {
                             new Path()
                             {
-                                pathData = Carousel,
+                                pathData =  MaterialVectorIcons.Carousel,
                                 stroke = "none",
                                 strokeWidth = "1px",
                                 fill = "rgba(255,250,0,1)" 
@@ -309,7 +295,7 @@ namespace AlexaController
                         {
                             new Path()
                             {
-                                pathData = ArrayIcon,
+                                pathData =  MaterialVectorIcons.ArrayIcon,
                                 stroke = "none",
                                 strokeWidth = "1px",
                                 fill = "rgba(255,250,0,1)" 
@@ -511,7 +497,7 @@ namespace AlexaController
                         : GetButtonFrame(args : type == "Movie" || type == "Episode" 
                                 ? new List<object>() { "UserEventPlaybackStart", session.room != null ? session.room.Name : "" } 
                                 : new List<object>() { "UserEventShowItemListSequenceTemplate" },
-                                   icon : item.GetType().Name == "Series" ? ListIcon : PlayOutlineIcon,
+                                   icon : item.GetType().Name == "Series" ?  MaterialVectorIcons.ListIcon :  MaterialVectorIcons.PlayOutlineIcon,
                                    id   : template.baseItems[0].InternalId.ToString())
                 }
             });
@@ -614,8 +600,7 @@ namespace AlexaController
             
             return view;
         }
-
-        // ReSharper disable once UnusedParameter.Local
+        
         private IDirective RenderVerticalTextListTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout          = new List<IItem>();
@@ -633,7 +618,7 @@ namespace AlexaController
                     {
                         new SendEvent()
                         {
-                            arguments =  new List<object>() { "UserEventShowBaseItemDetailsTemplate" }
+                            arguments =  new List<object>() { "UserEventShowBaseItemDetailsTemplate", session.room.Name }
                         }
                     }
                 },
@@ -701,7 +686,7 @@ namespace AlexaController
                                 position = "absolute",
                                 items = new List<IItem>()
                                 {
-                                    GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"}, Right, "ScrollNext" )
+                                    GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Right, "ScrollNext" )
                                 }
                             },
                             new Container()
@@ -709,7 +694,7 @@ namespace AlexaController
                                 position = "absolute",
                                 items = new List<IItem>()
                                 {
-                                    GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"}, Left, "ScrollPrev" )
+                                    GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Left, "ScrollPrev" )
                                 }
                             },
                         }
@@ -722,39 +707,6 @@ namespace AlexaController
 
         private static Frame GetButtonFrame(List<object> args, string icon, string id = "")
         {
-            //var buttonPressAnimation = new Sequential()
-            //{
-            //    commands = new List<ICommand>()
-            //    {
-            //        new AnimateItem()
-            //        {
-            //            easing = "ease",
-            //            duration = 250,
-            //            value = new List<IValue>()
-            //            {
-            //                new TransitionValue()
-            //                {
-            //                    from = new List<From>() { new From() { scaleX = 1, scaleY  = 1 } },
-            //                    to    = new List<To>()   { new To()   { scaleX = 0.9, scaleY = 0.9} }
-            //                }
-            //            }
-            //        },
-            //        new AnimateItem()
-            //        {
-            //            easing = "ease",
-            //            duration = 250,
-            //            value = new List<IValue>()
-            //            {
-            //                new TransitionValue()
-            //                {
-            //                    from = new List<From>() { new From() { scaleX = 0.9, scaleY = 0.9 } },
-            //                    to = new List<To>()      { new To()   { scaleX = 1,   scaleY = 1 } }
-            //                }
-            //            }
-            //        }
-            //    }
-            //};
-
             return new Frame()
             {
                 position        = "absolute",
@@ -1140,25 +1092,6 @@ namespace AlexaController
             return view;
         }
         
-        private static IDirective RenderVideo(IRenderDocumentTemplate template)
-        {
-            //Not currently used
-            var videoUrl = "https://theater.unityhome.online/emby/videos/stream.mp4";
-
-            var view = new VideoApp()
-            {
-                videoItem = new VideoItem()
-                {
-                    source = $"{videoUrl}",
-                    metadata = new Metadata()
-                    {
-                        title = template.baseItems[0].Name
-                    }
-                }
-            };
-            return view;
-        }
-        
         private IDirective RenderHelpTemplate()
         {
             var helpItems = new List<IItem>();
@@ -1233,8 +1166,7 @@ namespace AlexaController
 
             return view;
         }
-
-
+        
         private static TouchWrapper RenderItemPrimaryImageTouchWrapper(IAlexaSession session, BaseItem i, string type)
         {
             var IsMovie = type.Equals("Movie");
@@ -1334,7 +1266,7 @@ namespace AlexaController
                         {
                             id            = template.baseItems[0].InternalId.ToString(),
                             buttonSize    = "72dp",
-                            vectorSource  = CastIcon,
+                            vectorSource  =  MaterialVectorIcons.CastIcon,
                             disabled      = disabled,
                             primaryAction = new Sequential()
                             {
@@ -1505,7 +1437,7 @@ namespace AlexaController
                     }
                 });
         }
-
+        
         public void Dispose()
         {
 
@@ -1516,5 +1448,38 @@ namespace AlexaController
         {
 
         }
+    }
+
+    public enum RenderDocumentType
+    {
+        NONE,
+        ITEM_DETAILS_TEMPLATE,
+        ITEM_LIST_SEQUENCE_TEMPLATE,
+        BROWSE_LIBRARY_TEMPLATE,
+        QUESTION_TEMPLATE,
+        VIDEO,
+        NOT_UNDERSTOOD,
+        HELP,
+        GENERIC_HEADLINE_TEMPLATE,
+        ROOM_SELECTION_TEMPLATE,
+        VERTICAL_TEXT_LIST_TEMPLATE
+    }
+
+    public interface IRenderDocumentTemplate
+    {
+        RenderDocumentType renderDocumentType { get; }
+        string HeaderTitle { get; }
+        List<BaseItem> baseItems { get; }
+        string HeadlinePrimaryText { get; }
+        string HeaderAttributionImage { get; }
+    }
+
+    public class RenderDocumentTemplate : IRenderDocumentTemplate
+    {
+        public RenderDocumentType renderDocumentType { get; set; }
+        public string HeaderTitle { get; set; } = "";
+        public List<BaseItem> baseItems { get; set; }
+        public string HeadlinePrimaryText { get; set; } = "";
+        public string HeaderAttributionImage { get; set; }
     }
 }
