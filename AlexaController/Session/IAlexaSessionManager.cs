@@ -69,20 +69,9 @@ namespace AlexaController.Session
             {
                 sessionInfo = OpenSessions.FirstOrDefault(s => s.SessionId == amazonSession.sessionId);
 
-                /*
-                    We need this persist data so we can follow up if Alexa needs more information, 
-                    and have context for the conversation.
-                    for example, requesting a "Room Name/Device" to access media on, without request the media name again
-                    from the first request.
-                */
                 persistedRequestData = sessionInfo?.PersistedRequestData;
                 room = sessionInfo?.room;
-                /*
-                    Check to see if the person object has changed in the Alexa Session.
-                    Someone else may have taken control of the open session by speaking with Alexa.
-                    We may need to update the person object if they are new, so we don't display media outside
-                    the scope of parental controls.
-                */
+               
                 // ReSharper disable once ComplexConditionExpression
                 if (!(person is null) && !(sessionInfo?.person is null))
                 {
@@ -97,9 +86,8 @@ namespace AlexaController.Session
                 OpenSessions.RemoveAll(s => s.SessionId.Equals(alexaRequest.session.sessionId));
 
             }
-
-            // New session data.
-            // We sync the AMAZON session Id with our own.
+            
+            // Sync AMAZON session Id with our own.
             sessionInfo = new AlexaSession()
             {
                 SessionId               = amazonSession.sessionId,

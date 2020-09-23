@@ -151,7 +151,8 @@ namespace AlexaController
             var type               = baseItems[0].GetType().Name;
             
             baseItems.ForEach(i => touchWrapperLayout.Add(RenderItemPrimaryImageTouchWrapper(session, i, type)));
-            
+
+            var scrollPosition = 0;
             layout.Add(new Container()
             {
                 id     = "primary",
@@ -173,7 +174,14 @@ namespace AlexaController
                         top                    = "4vh",
                         left                   = "5vw",
                         scrollDirection        = "horizontal",
-                        items                  = touchWrapperLayout
+                        items                  = touchWrapperLayout,
+                        onScroll = new List<ICommand>()
+                        {
+                            new SetValue()
+                            {
+                                when = "${event.source.position} > "
+                            }
+                        }
                     },
                     new AlexaFooter()
                     {
@@ -1167,6 +1175,7 @@ namespace AlexaController
             return view;
         }
         
+
         private static TouchWrapper RenderItemPrimaryImageTouchWrapper(IAlexaSession session, BaseItem i, string type)
         {
             var IsMovie = type.Equals("Movie");
@@ -1237,7 +1246,7 @@ namespace AlexaController
                     }
             };
         }
-
+        
         private List<IItem> GetRoomButtonLayout(IRenderDocumentTemplate template)
         {
             var config = Plugin.Instance.Configuration;

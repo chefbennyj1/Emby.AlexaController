@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
-using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
 
@@ -21,22 +18,21 @@ namespace AlexaController.Alexa.IntentRequest.Playback
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
-
         public PlayNextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
-            Session = session;
-            ;
+            Session      = session;
         }
         public string Response()
         {
             //we need a room object
-            Room room = null;
-            try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
-            Session.room = room;
 
+            try
+            {
+                Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+            } catch { }
+            if (Session.room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            
             var request = AlexaRequest.request;
             var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(request.intent, Session?.User);
 

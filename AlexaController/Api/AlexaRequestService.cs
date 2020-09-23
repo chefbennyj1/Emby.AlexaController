@@ -48,7 +48,7 @@ namespace AlexaController.Api
         private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent => intent.name == "VoiceAuthenticationAccountLink";
         private readonly Func<Intent, bool> IsRoomNameIntentRequest = intent => intent.name == "Rooms_RoomNameIntent";
 
-        private readonly Func<Request, string> IntentNamespace    = request 
+        private readonly Func<Request, string> IntentNamespace = request 
             => $"AlexaController.Alexa.IntentRequest.{request.intent.name.Replace("_", ".")}";
         private readonly Func<Request, string> UserEventNamespace = request 
             => $"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}";
@@ -212,13 +212,11 @@ namespace AlexaController.Api
         private static string GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var paramArgs = session is null
-                ?  new object[] { alexaRequest }
-                :  new object[] { alexaRequest, session };
+                ?  new object[] { alexaRequest } : new object[] { alexaRequest, session };
 
             var instance = Activator.CreateInstance(@namespace, paramArgs);
             return (string)@namespace.GetMethod("Response")?.Invoke(instance, null);
         }
-       
     }
 }
 

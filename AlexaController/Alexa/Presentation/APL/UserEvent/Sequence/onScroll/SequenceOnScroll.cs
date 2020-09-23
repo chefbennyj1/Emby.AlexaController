@@ -14,7 +14,6 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Sequence.onScroll
         public SequenceOnScroll(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-            ;
         }
         public string Response()
         {

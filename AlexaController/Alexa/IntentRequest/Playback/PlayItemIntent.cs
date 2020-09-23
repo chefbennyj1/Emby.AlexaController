@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
-using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
 
@@ -34,12 +31,11 @@ namespace AlexaController.Alexa.IntentRequest.Playback
         public string Response()
         {
             //we need a room object
-            Room room = null;
-            try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
-            Session.room = room;
-
-            EmbyServerEntryPoint.Instance.Log.Info("ALEXA REQUESTED ROOM " + room.Name + " TO PLAY ITEMS");
+            //Room room = null;
+            try { Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+            if (Session.room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            
+            EmbyServerEntryPoint.Instance.Log.Info("ALEXA REQUESTED ROOM " + Session.room.Name + " TO PLAY ITEMS");
 
             var request        = AlexaRequest.request;
             var context        = AlexaRequest.context;
