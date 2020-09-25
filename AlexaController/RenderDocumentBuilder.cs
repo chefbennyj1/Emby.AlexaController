@@ -741,7 +741,6 @@ namespace AlexaController
 
         private IDirective RenderRoomSelectionTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
-            EmbyServerEntryPoint.Instance.Log.Info("Beginning Room selection template");
             
             var endpoint = $"/Items/{template.baseItems[0].InternalId}/Images";
             var layout = new List<IItem>();
@@ -777,8 +776,6 @@ namespace AlexaController
 
             var roomButtons = GetRoomButtonLayout(template);
             roomButtons.ForEach(b => layout.Add(b));
-
-            EmbyServerEntryPoint.Instance.Log.Info(roomButtons.Count +  " Room buttons found");
             
             var view = new Directive()
             {

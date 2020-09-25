@@ -32,20 +32,20 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             
             if (room is null)
             {
+                var documentTemplateInfo = new RenderDocumentTemplate()
+                {
+                    renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
+                    baseItems = new List<BaseItem>() {baseItem},
+
+                };
+
                 session.NowViewingBaseItem = baseItem;
-                AlexaSessionManager.Instance.UpdateSession(session);
-
-                EmbyServerEntryPoint.Instance.Log.Info("Playback endpoint needs a room! for " + baseItem.Name);
-
+                AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
+                
                 responseData.shouldEndSession = null;
                 responseData.directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
-                    {
-                        renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
-                        baseItems          = new List<BaseItem>() { baseItem },
-                        
-                    }, session)
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
                 };
 
                 var t = await ResponseClient.Instance.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);

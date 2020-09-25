@@ -26,8 +26,11 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
         }
         public async Task<string> Response()
         {
+            EmbyServerEntryPoint.Instance.Log.Info("Go Back requested.");
+
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
 
+            EmbyServerEntryPoint.Instance.Log.Info("Go Back request Session: " + session.SessionId);
             var previousPage = session.paging.pages[session.paging.currentPage - 1];
             var currentPage = session.paging.pages[session.paging.currentPage];
 
