@@ -121,7 +121,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
                             baseItems          = new List<BaseItem>() { result },

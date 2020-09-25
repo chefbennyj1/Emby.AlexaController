@@ -74,7 +74,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() { result },
                         renderDocumentType = RenderDocumentType.BROWSE_LIBRARY_TEMPLATE

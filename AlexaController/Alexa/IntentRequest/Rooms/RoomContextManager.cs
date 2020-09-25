@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
@@ -29,7 +28,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             session.PersistedRequestData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -38,14 +37,14 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         renderDocumentType  = RenderDocumentType.QUESTION_TEMPLATE,
                         HeadlinePrimaryText = "Which room did you want?"
 
                     }, session)
                 }
-            }, session.alexaSessionDisplayType).Result;
+            }, session.alexaSessionDisplayType);
         }
         
         public Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)

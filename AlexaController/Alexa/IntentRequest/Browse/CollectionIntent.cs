@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -86,7 +85,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     Session.room = null;
                 }
 
-            Task.Delay(1200);
+            await Task.Delay(1200);
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
@@ -100,7 +99,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = collectionBaseItem;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 person       = Session.person,
                 outputSpeech = new OutputSpeech()
@@ -110,10 +109,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                 },
 
-            }, Session.alexaSessionDisplayType).Result;
+            }, Session.alexaSessionDisplayType);
         }
     }
 }

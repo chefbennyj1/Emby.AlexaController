@@ -76,7 +76,7 @@ namespace AlexaController.Alexa.IntentRequest
 
                         AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-                        return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                        return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {
@@ -87,14 +87,14 @@ namespace AlexaController.Alexa.IntentRequest
                             shouldEndSession = null,
                             directives       = new List<IDirective>()
                             {
-                                await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
+                                RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                             }
 
-                        }, Session.alexaSessionDisplayType).Result;
+                        }, Session.alexaSessionDisplayType);
                     }
                 default: //Voice only
                     {
-                        return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                        return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {
@@ -104,7 +104,7 @@ namespace AlexaController.Alexa.IntentRequest
                             person           = Session.person,
                             shouldEndSession = true,
 
-                        }, Session.alexaSessionDisplayType).Result;
+                        }, Session.alexaSessionDisplayType);
                     }
             }
         }

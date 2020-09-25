@@ -23,10 +23,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
         public goBack(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-           
         }
         public async Task<string> Response()
-        //(IAlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
         {
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
 
@@ -44,7 +42,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, session)
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, session)
                 }
 
             }, session.alexaSessionDisplayType);

@@ -33,7 +33,7 @@ namespace AlexaController.Alexa.IntentRequest
         {
             var speechString = GetUserSessionSpeechString(EmbyServerEntryPoint.Instance.GetCurrentSessions());
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
@@ -41,7 +41,7 @@ namespace AlexaController.Alexa.IntentRequest
                     phrase = speechString,
                     speechType = SpeechType.COMPLIANCE
                 }
-            }, Session.alexaSessionDisplayType).Result;
+            }, Session.alexaSessionDisplayType);
         }
 
         private static string GetUserSessionSpeechString(IEnumerable<SessionInfo> sessions)

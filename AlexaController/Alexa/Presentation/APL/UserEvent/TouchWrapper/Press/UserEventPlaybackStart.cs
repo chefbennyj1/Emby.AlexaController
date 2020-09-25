@@ -19,10 +19,10 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
         public UserEventPlaybackStart(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-            ;
         }
         public async Task<string> Response()
         { 
+            EmbyServerEntryPoint.Instance.Log.Info("Playback endpoint hit!");
             var source = AlexaRequest.request.source;
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var baseItem = EmbyServerEntryPoint.Instance.GetItemById(source.id);
@@ -35,18 +35,21 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 session.NowViewingBaseItem = baseItem;
                 AlexaSessionManager.Instance.UpdateSession(session);
 
+                EmbyServerEntryPoint.Instance.Log.Info("Playback endpoint needs a room! for " + baseItem.Name);
+
                 responseData.shouldEndSession = null;
                 responseData.directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
-                        baseItems          = new List<BaseItem>() { baseItem }
-
+                        baseItems          = new List<BaseItem>() { baseItem },
+                        
                     }, session)
                 };
 
-                return await ResponseClient.Instance.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+                var t = await ResponseClient.Instance.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+                return t;
             }
 
             session.PlaybackStarted = true;
@@ -65,7 +68,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() {baseItem},
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
@@ -73,34 +76,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     }, session)
                 }
             }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);   
-
             
-
-            //return responseClient.BuildAlexaResponse(new Response()
-            //{
-            //    person = session.person,
-            //    outputSpeech = new OutputSpeech()
-            //    {
-            //        phrase = SpeechResponseStrings.GetPhrase(ResponseType.PLAY_MEDIA_ITEM, room, new List<BaseItem>() { baseItem }, session.person),
-            //        semanticSpeech = SpeechUtility.SemanticSpeech.Compliance,
-            //        emotion = Emotion.excited,
-            //        intensity = Intensity.low
-            //    },
-            //    shouldEndSession = null,
-            //    directives = new List<Directive>()
-            //    {
-            //        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplateInfo()
-            //        {
-            //            baseItems          = new List<BaseItem>() { baseItem },
-            //            displayBackButton  = false,
-            //            HeaderTitle        = $"Now Playing {baseItem.Name}",
-            //            renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
-
-            //        }, session)
-            //    }
-
-            //}, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
-
         }
     }
 }

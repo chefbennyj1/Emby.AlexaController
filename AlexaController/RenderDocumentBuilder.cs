@@ -126,27 +126,25 @@ namespace AlexaController
             }
         };
         
-        public async Task<IDirective> GetRenderDocumentTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        public IDirective GetRenderDocumentTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
-            EmbyServerEntryPoint.Instance.Log.Info(LocalApiUrl);
-
             switch (template.renderDocumentType)
             {
-                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return await RenderBrowseLibraryTemplate(template, session);
-                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return await RenderItemDetailsTemplate(template, session);
-                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return await RenderItemListSequenceTemplate(template, session);
-                case RenderDocumentType.QUESTION_TEMPLATE           : return await RenderQuestionRequestTemplate(template);
-                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return await RenderRoomSelectionTemplate(template, session);
-                case RenderDocumentType.NOT_UNDERSTOOD              : return await RenderNotUnderstoodTemplate();
-                case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE : return await RenderVerticalTextListTemplate(template, session);
-                case RenderDocumentType.HELP                        : return await RenderHelpTemplate();
-                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE   : return await RenderGenericHeadlineRequestTemplate(template);
+                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return  RenderBrowseLibraryTemplate(template, session);
+                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return  RenderItemDetailsTemplate(template, session);
+                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return  RenderItemListSequenceTemplate(template, session);
+                case RenderDocumentType.QUESTION_TEMPLATE           : return  RenderQuestionRequestTemplate(template);
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return  RenderRoomSelectionTemplate(template, session);
+                case RenderDocumentType.NOT_UNDERSTOOD              : return  RenderNotUnderstoodTemplate();
+                case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE : return  RenderVerticalTextListTemplate(template, session);
+                case RenderDocumentType.HELP                        : return  RenderHelpTemplate();
+                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE   : return  RenderGenericHeadlineRequestTemplate(template);
                 case RenderDocumentType.NONE                        : return null;
                 default                                             : return null;
             }
         }
 
-        private async Task<IDirective> RenderItemListSequenceTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private IDirective RenderItemListSequenceTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout             = new List<IItem>();
             var touchWrapperLayout = new List<IItem>();
@@ -177,14 +175,7 @@ namespace AlexaController
                         top                    = "4vh",
                         left                   = "5vw",
                         scrollDirection        = "horizontal",
-                        items                  = touchWrapperLayout,
-                        onScroll = new List<ICommand>()
-                        {
-                            new SetValue()
-                            {
-                                when = "${event.source.position} > "
-                            }
-                        }
+                        items                  = touchWrapperLayout
                     },
                     new AlexaFooter()
                     {
@@ -244,7 +235,7 @@ namespace AlexaController
             return view;
         }
         
-        private async Task<IDirective> RenderItemDetailsTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private IDirective RenderItemDetailsTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var baseItem = template.baseItems[0];
             var type     = baseItem.GetType().Name;
@@ -253,7 +244,8 @@ namespace AlexaController
             var layout = new List<IItem>();
             const string token = "mediaItemDetails";
 
-            GetVideoBackdropLayout(item, token).ForEach(i => layout.Add(i));
+            var videoBackdropLayout = GetVideoBackdropLayout(item, token);
+            videoBackdropLayout.ForEach(i => layout.Add(i));
 
             var graphicsDictionary = new Dictionary<string, Graphic>
             {
@@ -317,7 +309,7 @@ namespace AlexaController
             };
 
             var logo = item.HasImage(ImageType.Logo)
-                ? $"{Url}/Items/{item.InternalId}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;"
+                ? $"{Url}/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200"
                 : "";
 
             layout.Add(new AlexaHeader()
@@ -478,7 +470,7 @@ namespace AlexaController
                 {
                     new Image()
                     {
-                        source = $"{Url}/Items/{baseItem.InternalId}/Images/primary?maxWidth=400&amp;maxHeight=708&amp;quality=90",
+                        source = $"{Url}/Items/{baseItem.InternalId}/Images/primary?maxHeight=508&quality=90",
                         scale  = "best-fit",
                         height = "63vh",
                         width  = "100%",
@@ -612,7 +604,7 @@ namespace AlexaController
             return view;
         }
         
-        private async Task<IDirective> RenderVerticalTextListTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private IDirective RenderVerticalTextListTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout          = new List<IItem>();
             var layoutBaseItems = new List<IItem>();
@@ -747,13 +739,24 @@ namespace AlexaController
             };
         }
 
-        private async Task<IDirective> RenderRoomSelectionTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private IDirective RenderRoomSelectionTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
+            EmbyServerEntryPoint.Instance.Log.Info("Beginning Room selection template");
+            
             var endpoint = $"/Items/{template.baseItems[0].InternalId}/Images";
             var layout = new List<IItem>();
             const string token = "roomSelection";
 
-            GetVideoBackdropLayout(template.baseItems[0], token).ForEach(b => layout.Add(b));
+            try
+            {
+                var videoBackdrop = GetVideoBackdropLayout(template.baseItems[0], token);
+                videoBackdrop.ForEach(b => layout.Add(b));
+            }
+            catch (Exception exception)
+            {
+                EmbyServerEntryPoint.Instance.Log.Info("Video backdrop exception " + exception.Message);
+
+            }
 
             layout.Add(new AlexaHeader()
             {
@@ -765,15 +768,18 @@ namespace AlexaController
             layout.Add(new Image()
             {
                 position = "absolute",
-                source = endpoint + "/logo?quality=90",
+                source = Url + endpoint + "/logo?quality=90",
                 width = "25vw",
                 height = "10vh",
                 right = "5vw",
                 bottom = "5vh"
             });
 
-            GetRoomButtonLayout(template).ForEach(b => layout.Add(b));
+            var roomButtons = GetRoomButtonLayout(template);
+            roomButtons.ForEach(b => layout.Add(b));
 
+            EmbyServerEntryPoint.Instance.Log.Info(roomButtons.Count +  " Room buttons found");
+            
             var view = new Directive()
             {
                 type = "Alexa.Presentation.APL.RenderDocument",
@@ -801,11 +807,10 @@ namespace AlexaController
                 }
             };
 
-            //AlexaSessionManager.Instance.UpdateSessionRenderDocumentPages(session, templateInfo);
-            return view;
+            return  view;
         }
 
-        private async Task<IDirective> RenderBrowseLibraryTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private IDirective RenderBrowseLibraryTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout = new List<IItem>();
             const string token = "browseLibrary";
@@ -887,7 +892,7 @@ namespace AlexaController
             return view;
         }
 
-        private async Task<IDirective> RenderQuestionRequestTemplate(IRenderDocumentTemplate template)
+        private IDirective RenderQuestionRequestTemplate(IRenderDocumentTemplate template)
         {
             var layout = new List<IItem>();
 
@@ -955,7 +960,7 @@ namespace AlexaController
             return view;
         }
 
-        private async Task<IDirective> RenderNotUnderstoodTemplate()
+        private IDirective RenderNotUnderstoodTemplate()
         {
             var layout = new List<IItem>();
 
@@ -1029,7 +1034,7 @@ namespace AlexaController
             return view;
         }
 
-        private async Task<IDirective> RenderGenericHeadlineRequestTemplate(IRenderDocumentTemplate template)
+        private IDirective RenderGenericHeadlineRequestTemplate(IRenderDocumentTemplate template)
         {
             var layout = new List<IItem>();
 
@@ -1103,7 +1108,7 @@ namespace AlexaController
             return view;
         }
         
-        private async Task<IDirective> RenderHelpTemplate()
+        private IDirective RenderHelpTemplate()
         {
             var helpItems = new List<IItem>();
             
@@ -1252,6 +1257,7 @@ namespace AlexaController
         
         private List<IItem> GetRoomButtonLayout(IRenderDocumentTemplate template)
         {
+            EmbyServerEntryPoint.Instance.Log.Info("Getting Room buttons");
             var config = Plugin.Instance.Configuration;
             var roomButtons = new List<IItem>();
 
@@ -1345,10 +1351,9 @@ namespace AlexaController
             var videoBackdropIds = baseItem.ThemeVideoIds;
             // ReSharper disable once TooManyChainedReferences
             var videoBackdropId = videoBackdropIds.Length > 0 ? LibraryManager.GetItemById(videoBackdropIds[0]).InternalId.ToString() : string.Empty;
-
-
-            var backdropImageUrl = $"{Url}/Items/{baseItem.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
-            var videoBackdropUrl = $"{Url}/videos/{videoBackdropId}/stream.mp4";
+            
+            var backdropImageUrl     = $"{Url}/Items/{baseItem.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
+            var videoBackdropUrl     = $"{Url}/videos/{videoBackdropId}/stream.mp4";
             var videoBackdropOverlay = $"{Url}/EmptyPng?quality=90";
 
             var layout = new List<IItem>();
@@ -1469,7 +1474,7 @@ namespace AlexaController
         ITEM_LIST_SEQUENCE_TEMPLATE,
         BROWSE_LIBRARY_TEMPLATE,
         QUESTION_TEMPLATE,
-        VIDEO,
+        //VIDEO,
         NOT_UNDERSTOOD,
         HELP,
         GENERIC_HEADLINE_TEMPLATE,

@@ -74,20 +74,21 @@ namespace AlexaController.Api
 
         public async Task<object> Post(AlexaRequest data)
         {
-            EmbyServerEntryPoint.Instance.Log.Info("Alexa incoming request");
-
+            
             using (var sr = new StreamReader(data.RequestStream))
             {
                 var s = sr.ReadToEndAsync();
                 var alexaRequest = JsonSerializer.DeserializeFromString<AlexaRequest>(s.Result);
-                
+
+                EmbyServerEntryPoint.Instance.Log.Info("Alexa incoming request: " + alexaRequest.request.type);
+
                 switch (alexaRequest.request.type)
                 {
-                    case "Alexa.Presentation.APL.UserEvent" : return OnUserEvent(alexaRequest);
+                    case "Alexa.Presentation.APL.UserEvent" : return await OnUserEvent(alexaRequest);
                     case "IntentRequest"                    : return await OnIntentRequest(alexaRequest);
-                    case "SessionEndedRequest"              : return OnSessionEndRequest(alexaRequest);
-                    case "LaunchRequest"                    : return OnLaunchRequest(alexaRequest);
-                    default                                 : return OnDefault();
+                    case "SessionEndedRequest"              : return await OnSessionEndRequest(alexaRequest);
+                    case "LaunchRequest"                    : return await OnLaunchRequest(alexaRequest);
+                    default                                 : return await OnDefault();
                 }
             }
         }
@@ -142,7 +143,7 @@ namespace AlexaController.Api
             }
         }
 
-        private static string OnSessionEndRequest(IAlexaRequest alexaRequest)
+        private static async Task<string> OnSessionEndRequest(IAlexaRequest alexaRequest)
         {
             AlexaSessionManager.Instance.EndSession(alexaRequest);
             return null;
@@ -152,7 +153,8 @@ namespace AlexaController.Api
         {
             var request = alexaRequest.request;
             var type = Type.GetType(UserEventNamespace(request));
-            return await GetResponseResult(type, alexaRequest, null); 
+            var t = await GetResponseResult(type, alexaRequest, null);
+            return t;
         }
 
         private async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)
@@ -191,7 +193,7 @@ namespace AlexaController.Api
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         HeadlinePrimaryText = "Welcome to Home Theater Emby Controller",
                         renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
@@ -204,16 +206,16 @@ namespace AlexaController.Api
 
         }
 
-        private static string OnDefault()
+        private static async Task<string> OnDefault()
         {
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = "Unknown"
                 }
-            }).Result;
+            });
         }
 
         private static async Task<string> GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)

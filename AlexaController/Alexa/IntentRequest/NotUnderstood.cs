@@ -20,7 +20,7 @@ namespace AlexaController.Alexa.IntentRequest
         }
         public async Task<string> Response()
         {
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = false,
                 outputSpeech = new OutputSpeech()
@@ -32,13 +32,13 @@ namespace AlexaController.Alexa.IntentRequest
                 
                 directives = new List<IDirective>()
                 {
-                     await RenderDocumentBuilder.Instance
+                     RenderDocumentBuilder.Instance
                         .GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
                         }, Session)
                 }
-            }, Session.alexaSessionDisplayType).Result;
+            }, Session.alexaSessionDisplayType);
         }
     }
 }

@@ -53,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             
             if (nextUpEpisode is null)
             {
-                return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -64,20 +64,20 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = true,
                     directives       = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             HeadlinePrimaryText = "There doesn't seem to be a new episode available.",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
 
                         }, Session)
                     }
-                }, Session.alexaSessionDisplayType).Result;
+                }, Session.alexaSessionDisplayType);
             }
             
             //Parental Control check for baseItem
             if (!nextUpEpisode.IsParentalAllowed(Session.User))
             {
-                return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -86,7 +86,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
                     },
                     shouldEndSession = true
-                }).Result;
+                });
             }
 
             if (!(Session.room is null))
@@ -100,7 +100,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     Session.room = null;
                 }
 
-            Task.Delay(1200);
+            await Task.Delay(1200);
 
             var series = nextUpEpisode.Parent.Parent;
             var documentTemplateInfo = new RenderDocumentTemplate()
@@ -113,7 +113,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -123,10 +123,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
+                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                 }
 
-            }, Session.alexaSessionDisplayType).Result;
+            }, Session.alexaSessionDisplayType);
            
         }
     }

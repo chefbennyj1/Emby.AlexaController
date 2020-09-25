@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using MediaBrowser.Controller.Net;
 using MediaBrowser.Model.Services;
 
@@ -54,19 +55,31 @@ namespace AlexaController.Api
             ResultFactory = resultFactory;
         }
 
-        public object Get(NowShowingImage request) => GetEmbeddedResourceStream("nowShowing.png", "image/png");
+        public async Task<object> Get(NowShowingImage request) => 
+            await Task.Factory.StartNew(() => 
+                GetEmbeddedResourceStream("nowShowing.png", "image/png"));
 
-        public object Get(EmptyPngImage request) => GetEmbeddedResourceStream("empty.png", "image/png");
-        
-        public object Get(FiberOptic request) => GetEmbeddedResourceStream("fiberOptics.mp4", "video/mp4");
-        
-        public object Get(Question request) => GetEmbeddedResourceStream("ICON_VERSION6.mp4", "video/mp4");
-        
-        public object Get(MovieLibrary request) => GetEmbeddedResourceStream("MoviesLibrary.mp4", "video/mp4");
-        
-        public object Get(Particles request) => GetEmbeddedResourceStream("particles.mp4", "video/mp4");
-        
-        
+        public async Task<object> Get(EmptyPngImage request) => 
+            await Task.Factory.StartNew(() => 
+                GetEmbeddedResourceStream("empty.png", "image/png"));
+
+        public async Task<object> Get(FiberOptic request) => 
+            await Task.Factory.StartNew(() => 
+                GetEmbeddedResourceStream("fiberOptics.mp4", "video/mp4"));
+
+        public async Task<object> Get(Question request) => 
+            await Task.Factory.StartNew(() => 
+                GetEmbeddedResourceStream("ICON_VERSION6.mp4", "video/mp4"));
+
+        public async Task<object> Get(MovieLibrary request) => 
+            await Task.Factory.StartNew(() => 
+                GetEmbeddedResourceStream("MoviesLibrary.mp4", "video/mp4"));
+
+        public async Task<object> Get(Particles request) => 
+            await Task.Factory.StartNew(() => 
+                GetEmbeddedResourceStream("particles.mp4", "video/mp4"));
+
+
         private object GetEmbeddedResourceStream(string resourceName, string contentType)
         {
             var assembly = Assembly.GetExecutingAssembly();

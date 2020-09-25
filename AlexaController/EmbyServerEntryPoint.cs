@@ -64,8 +64,8 @@ namespace AlexaController
         private ILibraryManager LibraryManager        { get; }
         private ITVSeriesManager TvSeriesManager      { get; }
         private ISessionManager SessionManager        { get; }
-        public ILogger Log                           { get; }
-        public static IEmbyServerEntryPoint Instance { get; private set; }
+        public ILogger Log                            { get; }
+        public static IEmbyServerEntryPoint Instance  { get; private set; }
 
         public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)
         {
@@ -76,9 +76,9 @@ namespace AlexaController
             Instance        = this;
         }
 
-        public void SendMessageToPluginConfigurationPage<T>(string name, T data)
+        public async void SendMessageToPluginConfigurationPage<T>(string name, T data)
         {
-            SessionManager.SendMessageToAdminSessions(name, data, CancellationToken.None);
+            await SessionManager.SendMessageToAdminSessions(name, data, CancellationToken.None);
         }
 
         public IEnumerable<SessionInfo> GetCurrentSessions()
@@ -248,7 +248,6 @@ namespace AlexaController
             var session = GetSession(deviceId);
             var type = request.GetType().Name;
             
-
             if (!type.Equals("Season") || !type.Equals("Series"))
                 BrowseHome(alexaSession.room.Name, alexaSession.User, deviceId, session);
             Task.Delay(1000).Wait();

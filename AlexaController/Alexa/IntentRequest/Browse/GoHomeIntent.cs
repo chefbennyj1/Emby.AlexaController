@@ -14,13 +14,11 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         public GoHomeIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
         public async Task<string> Response()
         {
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
@@ -28,7 +26,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     phrase = "OK"
                 },
 
-            }).Result;
+            });
         }
     }
 }

@@ -27,7 +27,6 @@ namespace AlexaController.Alexa.Presentation.APL
         public List<IResource> resources            { get; set; }
         public List<ICommand> onMount               { get; set; }
         public IMainTemplate mainTemplate           { get; set; }
-        public List<IExtensions> extensions         { get; set; }
         public Dictionary<string, Graphic> graphics { get; set; }
     }
     

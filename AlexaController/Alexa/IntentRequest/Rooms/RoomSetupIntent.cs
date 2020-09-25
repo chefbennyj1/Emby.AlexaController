@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -37,7 +36,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                             HeadlinePrimaryText = "Please say the name of the room you want to setup.",
@@ -48,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 }, Session.alexaSessionDisplayType);
             }
             
-            var response = ResponseClient.Instance.BuildAlexaResponse(new Response()
+            var response = await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
@@ -61,7 +60,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             Session.room = null;
             AlexaSessionManager.Instance.UpdateSession(Session);
 
-            return response.Result;
+            return response;
         }
     }
 }

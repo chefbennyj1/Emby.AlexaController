@@ -28,7 +28,7 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (person is null)
             {
-                return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -36,7 +36,7 @@ namespace AlexaController.Alexa.IntentRequest
                         phrase             = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, Session),
                         speechType = SpeechType.APOLOGETIC,
                     },
-                }).Result;
+                });
             }
 
             if (config.UserCorrelations.Any())
@@ -56,14 +56,14 @@ namespace AlexaController.Alexa.IntentRequest
 
             Task.Factory.StartNew(() => EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, Session),
                 },
-            }).Result;
+            });
         }
     }
 }
