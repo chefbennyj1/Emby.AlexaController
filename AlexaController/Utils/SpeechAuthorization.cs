@@ -1,12 +1,11 @@
 ﻿using System.Linq;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Plugins;
 using IPerson = AlexaController.Alexa.RequestData.Model.IPerson;
 
 namespace AlexaController.Utils
 {
-    public class SpeechAuthorization : IServerEntryPoint
+    public class SpeechAuthorization //: IServerEntryPoint
     {
         private IUserManager UserManager           { get; }
         public static SpeechAuthorization Instance { get; private set; }
@@ -25,12 +24,10 @@ namespace AlexaController.Utils
 
         public User GetRecognizedPersonalizationProfileResult(IPerson person)
         {
-
             var users       = UserManager.Users;
             var defaultUser = users.FirstOrDefault(user => user.Policy.IsAdministrator);
             var config      = Plugin.Instance.Configuration;
             
-
             if (!config.EnableParentalControlVoiceRecognition) return defaultUser;
 
             try
@@ -44,16 +41,6 @@ namespace AlexaController.Utils
                 return defaultUser;
             }
             
-        }
-
-        public void Dispose()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Run()
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

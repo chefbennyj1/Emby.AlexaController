@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest;
-using AlexaController.Alexa.IntentRequest.Browse;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -16,10 +15,9 @@ using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Serialization;
-using Newtonsoft.Json;
-
 
 // ReSharper disable once TooManyDependencies
+// ReSharper disable once PossibleNullReferenceException
 
 namespace AlexaController.Api
 {
@@ -58,7 +56,6 @@ namespace AlexaController.Api
         
         public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager sessionManager)
         {
-            
             JsonSerializer = json;
             UserManager    = user;
 
@@ -71,28 +68,26 @@ namespace AlexaController.Api
             if (RoomContextManager.Instance is null)
                 Activator.CreateInstance<RoomContextManager>();
 
-            //if (SpeechAuthorization.Instance is null)
-            //    Activator.CreateInstance(typeof(SpeechAuthorization), user);
+            if (SpeechAuthorization.Instance is null)
+                Activator.CreateInstance(typeof(SpeechAuthorization), user);
         }
 
         public async Task<object> Post(AlexaRequest data)
         {
             EmbyServerEntryPoint.Instance.Log.Info("Alexa incoming request");
 
-            AlexaRequest alexaRequest = null;
-
             using (var sr = new StreamReader(data.RequestStream))
             {
                 var s = sr.ReadToEndAsync();
-                alexaRequest = JsonSerializer.DeserializeFromString<AlexaRequest>(s.Result);
+                var alexaRequest = JsonSerializer.DeserializeFromString<AlexaRequest>(s.Result);
                 
                 switch (alexaRequest.request.type)
                 {
-                    case "Alexa.Presentation.APL.UserEvent": return OnUserEvent(alexaRequest);
-                    case "IntentRequest": return await OnIntentRequest(alexaRequest);
-                    case "SessionEndedRequest": return OnSessionEndRequest(alexaRequest);
-                    case "LaunchRequest": return OnLaunchRequest(alexaRequest);
-                    default: return OnDefault();
+                    case "Alexa.Presentation.APL.UserEvent" : return OnUserEvent(alexaRequest);
+                    case "IntentRequest"                    : return await OnIntentRequest(alexaRequest);
+                    case "SessionEndedRequest"              : return OnSessionEndRequest(alexaRequest);
+                    case "LaunchRequest"                    : return OnLaunchRequest(alexaRequest);
+                    default                                 : return OnDefault();
                 }
             }
         }

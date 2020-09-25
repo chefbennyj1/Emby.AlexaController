@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
-using AlexaController.Utils;
 
 // ReSharper disable once TooManyChainedReferences
 // ReSharper disable once PossibleNullReferenceException
@@ -27,7 +23,6 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
            
         }
         public async Task<string> Response()
-        //(IAlexaRequest alexaRequest, IAlexaSession session)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             var request = alexaRequest.request;
             var intent = request.intent;
@@ -65,23 +60,23 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             try
             {
-                return GetResponseResult(type, session.PersistedRequestData, session);
+                return await GetResponseResult(type, session.PersistedRequestData, session);
             }
             catch 
             {
-                return new ErrorHandler().OnError(new Exception("Room Name Error"), alexaRequest, session).Result;
+                throw new Exception("Room Name Error");
             }
 
         }
 
-        private static string GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
+        private static async Task<string> GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var paramArgs = session is null
-                ? new object[] { alexaRequest }
-                : new object[] { alexaRequest, session };
+                ? new object[] { alexaRequest } : new object[] { alexaRequest, session };
 
             var instance = Activator.CreateInstance(@namespace, paramArgs);
-            return (string)@namespace.GetMethod("Response")?.Invoke(instance, null);
+            return await (Task<string>)@namespace.GetMethod("Response")?.Invoke(instance, null);
+
         }
     }
 }

@@ -39,7 +39,7 @@ namespace AlexaController
         private IServerApplicationHost Host          { get; }
         private ILogger Log                          { get; }
         public static RenderDocumentBuilder Instance { get; private set; }
-        private static string LocalAddress           { get; set; }
+        private static string LocalApiUrl            { get; set; }
         
         // ReSharper disable once TooManyDependencies
         public RenderDocumentBuilder(ILogManager logManager, ILibraryManager libraryManager, ISessionManager sessionManager, IServerApplicationHost host)
@@ -49,10 +49,11 @@ namespace AlexaController
             SessionManager = sessionManager;
             Host           = host;
             Log            = logManager.GetLogger(Plugin.Instance.Name);
+            LocalApiUrl = Host.GetLocalApiUrl(CancellationToken.None).Result;
             Instance = this;
         }
 
-        private static string Url => "http://192.168.2.126:8096/emby";//$"{LocalAddress}/emby";
+        private static string Url => $"{LocalApiUrl}/emby";
 
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(2);
 
@@ -127,6 +128,8 @@ namespace AlexaController
         
         public async Task<IDirective> GetRenderDocumentTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
+            EmbyServerEntryPoint.Instance.Log.Info(LocalApiUrl);
+
             switch (template.renderDocumentType)
             {
                 case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return await RenderBrowseLibraryTemplate(template, session);
