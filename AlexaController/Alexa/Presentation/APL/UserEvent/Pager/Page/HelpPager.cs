@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -28,7 +29,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
             AlexaRequest = alexaRequest;
             ;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             var request       = AlexaRequest.request;
             var arguments     = request.arguments;
@@ -42,7 +43,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
                     phrase = SpeechStrings.HelpStrings.ElementAt(helpListIndex)
                 },
 
-            }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+            }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE).Result;
         }
     }
 }

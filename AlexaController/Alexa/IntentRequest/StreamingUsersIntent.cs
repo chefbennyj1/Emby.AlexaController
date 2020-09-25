@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -28,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest
             ;
         }
 
-        public string Response()
+        public async Task<string> Response()
         {
             var speechString = GetUserSessionSpeechString(EmbyServerEntryPoint.Instance.GetCurrentSessions());
 
@@ -40,7 +41,7 @@ namespace AlexaController.Alexa.IntentRequest
                     phrase = speechString,
                     speechType = SpeechType.COMPLIANCE
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType).Result;
         }
 
         private static string GetUserSessionSpeechString(IEnumerable<SessionInfo> sessions)

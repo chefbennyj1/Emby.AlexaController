@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -26,7 +27,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             AlexaRequest = alexaRequest;
             ;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             var request        = AlexaRequest.request;
             var source         = request.source;
@@ -51,7 +52,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             if (room != null)
                 try { EmbyServerEntryPoint.Instance.BrowseItemAsync(session, baseItem); } catch { }
             
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -60,7 +61,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives     = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
                 }
             }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
 

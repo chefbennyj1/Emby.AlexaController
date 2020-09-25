@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -15,11 +16,11 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Sequence.onScroll
         {
             AlexaRequest = alexaRequest;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             var arguments = AlexaRequest.request.arguments;
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()

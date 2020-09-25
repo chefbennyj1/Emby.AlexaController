@@ -20,7 +20,7 @@ namespace AlexaController.Alexa.IntentRequest
             AlexaRequest = alexaRequest;
             Session = session;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             var context       = AlexaRequest.context;
             var person        = context.System.person;
@@ -36,14 +36,14 @@ namespace AlexaController.Alexa.IntentRequest
                         phrase             = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, Session),
                         speechType = SpeechType.APOLOGETIC,
                     },
-                });
+                }).Result;
             }
 
             if (config.UserCorrelations.Any())
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
-                    return ResponseClient.Instance.BuildAlexaResponse(new Response
+                    return await ResponseClient.Instance.BuildAlexaResponse(new Response
                     {
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
@@ -63,7 +63,7 @@ namespace AlexaController.Alexa.IntentRequest
                 {
                     phrase = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, Session),
                 },
-            });
+            }).Result;
         }
     }
 }

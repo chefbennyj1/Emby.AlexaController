@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
@@ -28,12 +29,12 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session      = session;
             
         }
-        public string Response()
+        public async Task<string> Response()
         {
             //we need a room object
             //Room room = null;
             try { Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (Session.room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             
             EmbyServerEntryPoint.Instance.Log.Info("ALEXA REQUESTED ROOM " + Session.room.Name + " TO PLAY ITEMS");
 
@@ -76,7 +77,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         phrase    = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
                         speechType = SpeechType.APOLOGETIC
                     }
-                });
+                }).Result;
             }
             
             //Parental Control check for baseItem
@@ -91,7 +92,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>",
                         speechType = SpeechType.APOLOGETIC
                     }
-                });
+                }).Result;
             }
 
             
@@ -104,7 +105,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             {
                 EmbyServerEntryPoint.Instance.Log.Error("ALEXA ERROR!! : " + exception.Message);
                 //TODO: Add progressive response with error, but show template on screen device is possible
-                return new ErrorHandler().OnError(exception, AlexaRequest, Session);
+                return new ErrorHandler().OnError(exception, AlexaRequest, Session).Result;
             }
 
             Session.PlaybackStarted = true;
@@ -120,7 +121,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                     {
-                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
                             baseItems          = new List<BaseItem>() { result },
@@ -128,7 +129,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         }, Session)
                     }
 
-            }, Session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType).Result;
 
         }
     }

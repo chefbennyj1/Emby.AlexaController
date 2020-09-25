@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using MediaBrowser.Model.Services;
 using System.IO;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest;
+using AlexaController.Alexa.IntentRequest.Browse;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -14,6 +16,7 @@ using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Serialization;
+using Newtonsoft.Json;
 
 
 // ReSharper disable once TooManyDependencies
@@ -55,6 +58,7 @@ namespace AlexaController.Api
         
         public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager sessionManager)
         {
+            
             JsonSerializer = json;
             UserManager    = user;
 
@@ -67,25 +71,33 @@ namespace AlexaController.Api
             if (RoomContextManager.Instance is null)
                 Activator.CreateInstance<RoomContextManager>();
 
-            if (SpeechAuthorization.Instance is null)
-                Activator.CreateInstance(typeof(SpeechAuthorization), UserManager);
+            //if (SpeechAuthorization.Instance is null)
+            //    Activator.CreateInstance(typeof(SpeechAuthorization), user);
         }
 
-        public object Post(AlexaRequest data)
+        public async Task<object> Post(AlexaRequest data)
         {
-            var alexaRequest = JsonSerializer.DeserializeFromStream<AlexaRequest>(data.RequestStream);
+            EmbyServerEntryPoint.Instance.Log.Info("Alexa incoming request");
 
-            switch (alexaRequest.request.type)
+            AlexaRequest alexaRequest = null;
+
+            using (var sr = new StreamReader(data.RequestStream))
             {
-                case "Alexa.Presentation.APL.UserEvent" : return OnUserEvent(alexaRequest);
-                case "IntentRequest"                    : return OnIntentRequest(alexaRequest);
-                case "SessionEndedRequest"              : return OnSessionEndRequest(alexaRequest);
-                case "LaunchRequest"                    : return OnLaunchRequest(alexaRequest);
-                default                                 : return OnDefault();
+                var s = sr.ReadToEndAsync();
+                alexaRequest = JsonSerializer.DeserializeFromString<AlexaRequest>(s.Result);
+                
+                switch (alexaRequest.request.type)
+                {
+                    case "Alexa.Presentation.APL.UserEvent": return OnUserEvent(alexaRequest);
+                    case "IntentRequest": return await OnIntentRequest(alexaRequest);
+                    case "SessionEndedRequest": return OnSessionEndRequest(alexaRequest);
+                    case "LaunchRequest": return OnLaunchRequest(alexaRequest);
+                    default: return OnDefault();
+                }
             }
         }
 
-        private string OnIntentRequest(IAlexaRequest alexaRequest)
+        private async Task<string> OnIntentRequest(IAlexaRequest alexaRequest)
         {
             IAlexaSession session = null;
             
@@ -100,7 +112,7 @@ namespace AlexaController.Api
                 if (!(person is null))
                 {
                     if (!SpeechAuthorization.Instance.UserPersonalizationProfileExists(person))
-                        return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                        return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
                             shouldEndSession = true,
                             outputSpeech = new OutputSpeech()
@@ -118,20 +130,20 @@ namespace AlexaController.Api
                 if (session.PersistedRequestData is null && IsRoomNameIntentRequest(intent))
                 {
                     //There has been a speech recognition mistake, end the session.
-                    return new NotUnderstood(alexaRequest, session).Response(); 
+                    return await new NotUnderstood(alexaRequest, session).Response(); 
                 }
 
             }
             
-            var type = Type.GetType(IntentNamespace(request));
-
             try
             {
-                return GetResponseResult(type, alexaRequest, session); 
+                var type = Type.GetType(IntentNamespace(request));
+                var t = await GetResponseResult(type, alexaRequest, session);
+                return t;
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(new Exception($"I was unable to do that. {exception.Message}"), alexaRequest, session);
+                return await new ErrorHandler().OnError(new Exception($"I was unable to do that. {exception.Message}"), alexaRequest, session);
             }
         }
 
@@ -141,14 +153,14 @@ namespace AlexaController.Api
             return null;
         }
         
-        private string OnUserEvent(IAlexaRequest alexaRequest)
+        private async Task<string> OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request = alexaRequest.request;
             var type = Type.GetType(UserEventNamespace(request));
-            return GetResponseResult(type, alexaRequest, null); 
+            return await GetResponseResult(type, alexaRequest, null); 
         }
 
-        private string OnLaunchRequest(IAlexaRequest alexaRequest)
+        private async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)
         {
             var context             = alexaRequest.context;
 
@@ -159,7 +171,7 @@ namespace AlexaController.Api
             var person = !ReferenceEquals(null, context.System.person) ? OutputSpeech.SayName(context.System.person) : "";
 
             if (user is null)
-                return ResponseClient.Instance.BuildAlexaResponse(
+                return await ResponseClient.Instance.BuildAlexaResponse(
                     new Response()
                     {
                         shouldEndSession = true,
@@ -172,7 +184,7 @@ namespace AlexaController.Api
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -184,7 +196,7 @@ namespace AlexaController.Api
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         HeadlinePrimaryText = "Welcome to Home Theater Emby Controller",
                         renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
@@ -197,7 +209,7 @@ namespace AlexaController.Api
 
         }
 
-        private string OnDefault()
+        private static string OnDefault()
         {
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -206,16 +218,17 @@ namespace AlexaController.Api
                 {
                     phrase = "Unknown"
                 }
-            });
+            }).Result;
         }
 
-        private static string GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
+        private static async Task<string> GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var paramArgs = session is null
                 ?  new object[] { alexaRequest } : new object[] { alexaRequest, session };
 
             var instance = Activator.CreateInstance(@namespace, paramArgs);
-            return (string)@namespace.GetMethod("Response")?.Invoke(instance, null);
+            return await (Task<string>)@namespace.GetMethod("Response")?.Invoke(instance, null);
+           
         }
     }
 }

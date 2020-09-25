@@ -7,6 +7,7 @@
 // ReSharper disable TooManyArguments
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -29,7 +30,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
             Session = session;
             ;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             
             var previousPage = Session.paging.pages[Session.paging.currentPage - 1];
@@ -41,12 +42,12 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
             if (Session.room != null)
                 try { EmbyServerEntryPoint.Instance.BrowseItemAsync(Session,EmbyServerEntryPoint.Instance.GetItemById(Session.NowViewingBaseItem.Parent.InternalId)); } catch { }
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, Session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, Session)
                 }
 
             }, Session.alexaSessionDisplayType);

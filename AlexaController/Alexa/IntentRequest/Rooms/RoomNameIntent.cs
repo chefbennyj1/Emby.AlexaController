@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
@@ -25,7 +26,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             session = s;
            
         }
-        public string Response()
+        public async Task<string> Response()
         //(IAlexaRequest alexaRequest, IAlexaSession session)//, IResponseClient responseClient, ILibraryManager libraryManager, ISessionManager sessionManager, IUserManager userManager, IRoomContextManager roomContextManager)
         {
             var request = alexaRequest.request;
@@ -68,7 +69,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }
             catch 
             {
-                return new ErrorHandler().OnError(new Exception("Room Name Error"), alexaRequest, session);
+                return new ErrorHandler().OnError(new Exception("Room Name Error"), alexaRequest, session).Result;
             }
 
         }

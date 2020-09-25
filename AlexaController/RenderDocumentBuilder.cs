@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
@@ -43,15 +44,15 @@ namespace AlexaController
         // ReSharper disable once TooManyDependencies
         public RenderDocumentBuilder(ILogManager logManager, ILibraryManager libraryManager, ISessionManager sessionManager, IServerApplicationHost host)
         {
+           
             LibraryManager = libraryManager;
             SessionManager = sessionManager;
             Host           = host;
             Log            = logManager.GetLogger(Plugin.Instance.Name);
-            LocalAddress    = Host.GetSystemInfo(CancellationToken.None).Result.LocalAddress;
-            Instance       = this;
+            Instance = this;
         }
 
-        private static string Url => $"{LocalAddress}/emby";
+        private static string Url => "http://192.168.2.126:8096/emby";//$"{LocalAddress}/emby";
 
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(2);
 
@@ -124,26 +125,25 @@ namespace AlexaController
             }
         };
         
-        public IDirective GetRenderDocumentTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        public async Task<IDirective> GetRenderDocumentTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
-            Log.Info("Building Render Document");
             switch (template.renderDocumentType)
             {
-                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return RenderBrowseLibraryTemplate(template, session);
-                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return RenderItemDetailsTemplate(template, session);
-                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return RenderItemListSequenceTemplate(template, session);
-                case RenderDocumentType.QUESTION_TEMPLATE           : return RenderQuestionRequestTemplate(template);
-                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return RenderRoomSelectionTemplate(template, session);
-                case RenderDocumentType.NOT_UNDERSTOOD              : return RenderNotUnderstoodTemplate();
-                case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE : return RenderVerticalTextListTemplate(template, session);
-                case RenderDocumentType.HELP                        : return RenderHelpTemplate();
-                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE   : return RenderGenericHeadlineRequestTemplate(template);
+                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return await RenderBrowseLibraryTemplate(template, session);
+                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return await RenderItemDetailsTemplate(template, session);
+                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return await RenderItemListSequenceTemplate(template, session);
+                case RenderDocumentType.QUESTION_TEMPLATE           : return await RenderQuestionRequestTemplate(template);
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return await RenderRoomSelectionTemplate(template, session);
+                case RenderDocumentType.NOT_UNDERSTOOD              : return await RenderNotUnderstoodTemplate();
+                case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE : return await RenderVerticalTextListTemplate(template, session);
+                case RenderDocumentType.HELP                        : return await RenderHelpTemplate();
+                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE   : return await RenderGenericHeadlineRequestTemplate(template);
                 case RenderDocumentType.NONE                        : return null;
                 default                                             : return null;
             }
         }
 
-        private IDirective RenderItemListSequenceTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private async Task<IDirective> RenderItemListSequenceTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout             = new List<IItem>();
             var touchWrapperLayout = new List<IItem>();
@@ -241,7 +241,7 @@ namespace AlexaController
             return view;
         }
         
-        private IDirective RenderItemDetailsTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private async Task<IDirective> RenderItemDetailsTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var baseItem = template.baseItems[0];
             var type     = baseItem.GetType().Name;
@@ -609,7 +609,7 @@ namespace AlexaController
             return view;
         }
         
-        private IDirective RenderVerticalTextListTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private async Task<IDirective> RenderVerticalTextListTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout          = new List<IItem>();
             var layoutBaseItems = new List<IItem>();
@@ -744,7 +744,7 @@ namespace AlexaController
             };
         }
 
-        private IDirective RenderRoomSelectionTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private async Task<IDirective> RenderRoomSelectionTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var endpoint = $"/Items/{template.baseItems[0].InternalId}/Images";
             var layout = new List<IItem>();
@@ -802,7 +802,7 @@ namespace AlexaController
             return view;
         }
 
-        private IDirective RenderBrowseLibraryTemplate(IRenderDocumentTemplate template, IAlexaSession session)
+        private async Task<IDirective> RenderBrowseLibraryTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             var layout = new List<IItem>();
             const string token = "browseLibrary";
@@ -884,7 +884,7 @@ namespace AlexaController
             return view;
         }
 
-        private IDirective RenderQuestionRequestTemplate(IRenderDocumentTemplate template)
+        private async Task<IDirective> RenderQuestionRequestTemplate(IRenderDocumentTemplate template)
         {
             var layout = new List<IItem>();
 
@@ -952,7 +952,7 @@ namespace AlexaController
             return view;
         }
 
-        private IDirective RenderNotUnderstoodTemplate()
+        private async Task<IDirective> RenderNotUnderstoodTemplate()
         {
             var layout = new List<IItem>();
 
@@ -1026,7 +1026,7 @@ namespace AlexaController
             return view;
         }
 
-        private IDirective RenderGenericHeadlineRequestTemplate(IRenderDocumentTemplate template)
+        private async Task<IDirective> RenderGenericHeadlineRequestTemplate(IRenderDocumentTemplate template)
         {
             var layout = new List<IItem>();
 
@@ -1100,7 +1100,7 @@ namespace AlexaController
             return view;
         }
         
-        private IDirective RenderHelpTemplate()
+        private async Task<IDirective> RenderHelpTemplate()
         {
             var helpItems = new List<IItem>();
             

@@ -30,7 +30,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             ;
         }
 
-        public string Response()
+        public async Task<string> Response()
         {
             try
             {
@@ -39,7 +39,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             catch { }
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null && displayNone) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
 
 
             var request        = AlexaRequest.request;
@@ -69,7 +69,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     },
                     shouldEndSession = null,
                     person           = null,
-                }, Session.alexaSessionDisplayType);
+                }, Session.alexaSessionDisplayType).Result;
             }
 
             var seasonId = result[0].Parent.InternalId;
@@ -108,9 +108,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType).Result;
 
         }
     }

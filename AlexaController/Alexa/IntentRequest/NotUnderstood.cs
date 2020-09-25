@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -17,7 +18,7 @@ namespace AlexaController.Alexa.IntentRequest
             AlexaRequest = alexaRequest;
             Session = session;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -31,13 +32,13 @@ namespace AlexaController.Alexa.IntentRequest
                 
                 directives = new List<IDirective>()
                 {
-                     RenderDocumentBuilder.Instance
+                     await RenderDocumentBuilder.Instance
                         .GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
                         }, Session)
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType).Result;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -24,7 +25,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             AlexaRequest = alexaRequest;
            
         }
-        public string Response()
+        public async Task<string> Response()
         //(IAlexaRequest alexaRequest, ILibraryManager libraryManager, IResponseClient responseClient, ISessionManager sessionManager)
         {
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
@@ -38,12 +39,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             if (session.room != null)
                 try { EmbyServerEntryPoint.Instance.BrowseItemAsync(session, EmbyServerEntryPoint.Instance.GetItemById(previousPage.baseItems[0].InternalId)); } catch { }
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, session)
                 }
 
             }, session.alexaSessionDisplayType);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
@@ -23,7 +24,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             LibraryName = libraryName;
         }
 
-        public string Response(IAlexaRequest alexaRequest, IAlexaSession session)
+        public async Task<string> Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             
             Room room = null;
@@ -37,7 +38,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             {
                 session.PersistedRequestData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session);
-                return RoomContextManager.Instance.RequestRoom(alexaRequest, session);
+                return await RoomContextManager.Instance.RequestRoom(alexaRequest, session);
             }
 
             var request = alexaRequest.request;
@@ -54,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             }
             catch (Exception exception)
             {
-                return new ErrorHandler().OnError(exception, alexaRequest, session);
+                return new ErrorHandler().OnError(exception, alexaRequest, session).Result;
             }
 
             session.NowViewingBaseItem = result;
@@ -62,7 +63,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             session.PersistedRequestData = null;
             AlexaSessionManager.Instance.UpdateSession(session);
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -73,7 +74,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() { result },
                         renderDocumentType = RenderDocumentType.BROWSE_LIBRARY_TEMPLATE

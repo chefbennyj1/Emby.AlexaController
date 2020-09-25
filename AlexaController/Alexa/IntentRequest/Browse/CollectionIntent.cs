@@ -29,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session = session;
             
         }
-        public string Response()
+        public async Task<string> Response()
         {
             try
             {
@@ -38,7 +38,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             catch { }
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null && displayNone) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
 
 
             var request           = AlexaRequest.request;
@@ -71,7 +71,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>(){ collectionBaseItem }),
                             sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                         }
-                    });
+                    }).Result;
                 }
             }
 
@@ -110,10 +110,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                 },
 
-            }, Session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType).Result;
         }
     }
 }

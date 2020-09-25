@@ -1,4 +1,5 @@
-﻿using AlexaController.Api;
+﻿using System.Threading.Tasks;
+using AlexaController.Api;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa
@@ -7,6 +8,6 @@ namespace AlexaController.Alexa
     {
         IAlexaRequest AlexaRequest { get; }
         IAlexaSession Session      { get; }
-        string Response(); 
+        Task<string> Response(); 
     }
 }

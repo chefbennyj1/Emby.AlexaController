@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -12,14 +13,14 @@ namespace AlexaController.Alexa.Exceptions
 {
     public interface IErrorHandler
     {
-        string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session);
+        Task<string> OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session);
     }
 
     public class ErrorHandler : IErrorHandler
     {
-        public string OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session)
+        public async Task<string> OnError(Exception exception, IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
@@ -30,7 +31,7 @@ namespace AlexaController.Alexa.Exceptions
 
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance
+                    await RenderDocumentBuilder.Instance
                         .GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,

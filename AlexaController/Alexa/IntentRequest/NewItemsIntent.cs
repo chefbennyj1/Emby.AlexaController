@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -24,7 +25,7 @@ namespace AlexaController.Alexa.IntentRequest
             Session = session;
         }
 
-        public  string Response()
+        public async Task<string> Response()
         {
             var request        = AlexaRequest.request;
             var slots          = request.intent.slots;
@@ -59,7 +60,7 @@ namespace AlexaController.Alexa.IntentRequest
                     person = Session.person,
                     shouldEndSession = true,
 
-                }, Session.alexaSessionDisplayType);
+                }, Session.alexaSessionDisplayType).Result;
             }
            
             switch (Session.alexaSessionDisplayType)
@@ -86,10 +87,10 @@ namespace AlexaController.Alexa.IntentRequest
                             shouldEndSession = null,
                             directives       = new List<IDirective>()
                             {
-                                RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
+                                await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                             }
 
-                        }, Session.alexaSessionDisplayType);
+                        }, Session.alexaSessionDisplayType).Result;
                     }
                 default: //Voice only
                     {
@@ -103,7 +104,7 @@ namespace AlexaController.Alexa.IntentRequest
                             person           = Session.person,
                             shouldEndSession = true,
 
-                        }, Session.alexaSessionDisplayType);
+                        }, Session.alexaSessionDisplayType).Result;
                     }
             }
         }

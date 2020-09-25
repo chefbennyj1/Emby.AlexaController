@@ -7,6 +7,7 @@
 // ReSharper disable PossibleNullReferenceException
 // ReSharper disable TooManyArguments
 
+using System.Threading.Tasks;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -26,7 +27,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
             AlexaRequest = alexaRequest;
             Session      = session;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -36,7 +37,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                     phrase = "Canceling."
                 },
 
-            });
+            }).Result;
         }
     }
 }

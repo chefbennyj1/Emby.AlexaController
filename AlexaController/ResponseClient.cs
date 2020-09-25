@@ -1,4 +1,5 @@
-﻿using AlexaController.Alexa.ResponseData.Model;
+﻿using System.Threading.Tasks;
+using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Common.Net;
@@ -17,7 +18,7 @@ namespace AlexaController
 
     public interface IResponseClient
     {
-        string BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE);
+        Task<string> BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE);
         void PostProgressiveResponse(string speechOutput, string accessToken, string requestId, string dialog = "");
     }
 
@@ -33,7 +34,7 @@ namespace AlexaController
             Instance = this;
         }
 
-        public string BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)
+        public async Task<string> BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)
         {
             var person = !(response.person is null) ? OutputSpeech.SayName(response.person) : "";
             

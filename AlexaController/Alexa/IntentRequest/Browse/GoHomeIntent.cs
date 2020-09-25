@@ -1,4 +1,5 @@
-﻿using AlexaController.Alexa.ResponseData.Model;
+﻿using System.Threading.Tasks;
+using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -17,7 +18,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session = session;
             ;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -27,7 +28,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     phrase = "OK"
                 },
 
-            });
+            }).Result;
         }
     }
 }

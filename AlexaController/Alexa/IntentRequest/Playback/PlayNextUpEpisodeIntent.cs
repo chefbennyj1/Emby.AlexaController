@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -23,7 +24,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             AlexaRequest = alexaRequest;
             Session      = session;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             //we need a room object
 
@@ -31,7 +32,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             {
                 Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
             } catch { }
-            if (Session.room is null) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             
             var request = AlexaRequest.request;
             var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(request.intent, Session?.User);
@@ -46,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         phrase = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
                         speechType = SpeechType.APOLOGETIC,
                     },
-                });
+                }).Result;
             }
 
             EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode);
@@ -64,14 +65,14 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() { nextUpEpisode },
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
 
                     }, Session)
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType).Result;
         }
     }
 }

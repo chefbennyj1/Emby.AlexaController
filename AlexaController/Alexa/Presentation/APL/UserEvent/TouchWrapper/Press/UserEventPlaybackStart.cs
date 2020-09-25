@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             AlexaRequest = alexaRequest;
             ;
         }
-        public string Response()
+        public async Task<string> Response()
         { 
             var source = AlexaRequest.request.source;
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
@@ -38,7 +38,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 responseData.shouldEndSession = null;
                 responseData.directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
                         baseItems          = new List<BaseItem>() { baseItem }
@@ -46,7 +46,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     }, session)
                 };
 
-                return ResponseClient.Instance.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+                return await ResponseClient.Instance.BuildAlexaResponse(responseData, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
             }
 
             session.PlaybackStarted = true;
@@ -54,7 +54,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(session, baseItem));
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 person = session.person,
                 outputSpeech = new OutputSpeech()
@@ -65,7 +65,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() {baseItem},
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE

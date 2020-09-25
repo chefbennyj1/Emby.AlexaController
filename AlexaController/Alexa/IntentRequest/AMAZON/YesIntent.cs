@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
@@ -30,7 +31,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
             Session = session;
            
         }
-        public string Response()
+        public async Task<string> Response()
         {
             throw new NotImplementedException();
         }

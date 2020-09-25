@@ -23,7 +23,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             AlexaRequest = alexaRequest;
             Session = session;
         }
-        public string Response()
+        public async Task<string> Response()
         {
             try
             {
@@ -32,7 +32,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             catch { }
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null && displayNone) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
 
 
             var request = AlexaRequest.request;
@@ -64,14 +64,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = true,
                     directives = new List<IDirective>()
                     {
-                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
                         {
                             HeadlinePrimaryText = "I was unable to find that actor.",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
 
                         }, Session)
                     }
-                }, Session.alexaSessionDisplayType);
+                }, Session.alexaSessionDisplayType).Result;
             }
 
             if (!(Session.room is null))
@@ -112,10 +112,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
                 }
 
-            }, Session.alexaSessionDisplayType);
+            }, Session.alexaSessionDisplayType).Result;
         }
     }
 }

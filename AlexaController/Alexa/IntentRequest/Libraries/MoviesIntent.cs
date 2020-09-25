@@ -1,4 +1,5 @@
-﻿using AlexaController.Alexa.RequestData.Model;
+﻿using System.Threading.Tasks;
+using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -15,9 +16,9 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             AlexaRequest = alexaRequest;
             Session = session;
         }
-        public string Response()
+        public async Task<string> Response()
         {
-            return new LibraryIntentResponseManager("Movies").Response(AlexaRequest, Session); 
+            return await new LibraryIntentResponseManager("Movies").Response(AlexaRequest, Session); 
         }
     }
 }
