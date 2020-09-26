@@ -47,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(previousPage, Session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(previousPage, Session)
                 }
 
             }, Session.alexaSessionDisplayType);

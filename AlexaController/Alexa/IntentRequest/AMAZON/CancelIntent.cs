@@ -29,15 +29,14 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = "Canceling."
-                },
-
-            }).Result;
+                }
+            });
         }
     }
 }

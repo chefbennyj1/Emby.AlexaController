@@ -65,8 +65,8 @@ namespace AlexaController.Api
             if (AlexaSessionManager.Instance is null)
                 Activator.CreateInstance(typeof(AlexaSessionManager), sessionManager);
 
-            if (RoomContextManager.Instance is null)
-                Activator.CreateInstance<RoomContextManager>();
+            if (RoomManager.Instance is null)
+                Activator.CreateInstance<RoomManager>();
 
             if (SpeechAuthorization.Instance is null)
                 Activator.CreateInstance(typeof(SpeechAuthorization), user);
@@ -200,7 +200,7 @@ namespace AlexaController.Api
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                     {
                         HeadlinePrimaryText = "Welcome to Home Theater Emby Controller",
                         renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,

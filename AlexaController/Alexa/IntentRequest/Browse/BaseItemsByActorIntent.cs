@@ -27,12 +27,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         {
             try
             {
-                Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             }
             catch { }
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
 
             var request = AlexaRequest.request;
@@ -64,7 +64,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                         {
                             HeadlinePrimaryText = "I was unable to find that actor.",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
@@ -77,16 +77,20 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (!(Session.room is null))
                 try
                 {
-                    EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault());
+#pragma warning disable 4014
+                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault())).ConfigureAwait(false);
+#pragma warning restore 4014
                 }
                 catch (Exception exception)
                 {
-                    ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+#pragma warning disable 4014
+                    Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
+                    await Task.Delay(1200); //Yep...
                     Session.room = null;
                 }
 
-            await Task.Delay(1200);
-
+            
             var actor = result.Keys.FirstOrDefault();
             var actorCollection = result.Values.FirstOrDefault();
 
@@ -102,6 +106,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = actor;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
+            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
@@ -112,7 +118,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(documentTemplateInfo, Session)
+                    renderDocumentDirective
                 }
 
             }, Session.alexaSessionDisplayType);

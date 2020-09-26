@@ -17,10 +17,10 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         Room GetRoomByName(string name);
     }
 
-    public class RoomContextManager : IRoomContextManager
+    public class RoomManager : IRoomContextManager
     {
         public static IRoomContextManager Instance { get; private set; }
-        public RoomContextManager()
+        public RoomManager()
         {
             Instance = this;
         }
@@ -38,7 +38,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                     {
                         renderDocumentType  = RenderDocumentType.QUESTION_TEMPLATE,
                         HeadlinePrimaryText = "Which room did you want?"

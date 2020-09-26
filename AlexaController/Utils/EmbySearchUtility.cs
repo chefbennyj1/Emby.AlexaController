@@ -19,7 +19,6 @@ namespace AlexaController.Utils
                 
         public BaseItem QuerySpeechResultItem(string searchName, string[] type, User user)
         {
-            
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 Name             = searchName,
@@ -27,7 +26,6 @@ namespace AlexaController.Utils
                 User             = user
                
             });
-
 
             //Remove "The" from search Term
             if (!result.Any())
@@ -56,7 +54,6 @@ namespace AlexaController.Utils
             //Remove "The" from BaseItem Name
             if (!result.Any())
             {
-                
                 //Remove "The" from query and check against request
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {

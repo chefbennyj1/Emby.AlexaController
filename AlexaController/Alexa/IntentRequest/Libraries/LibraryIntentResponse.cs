@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
@@ -15,21 +12,20 @@ using MediaBrowser.Controller.Entities;
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
-    public class LibraryIntentResponseManager 
+    public class LibraryIntentResponse 
     {
         private string LibraryName { get; }
 
-        public LibraryIntentResponseManager(string libraryName)
+        public LibraryIntentResponse(string libraryName)
         {
             LibraryName = libraryName;
         }
 
         public async Task<string> Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            
-            Room room = null;
-            try { room = RoomContextManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
-            session.room = room;
+           
+            try { session.room = RoomManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
+            session.room = session.room;
 
             var context = alexaRequest.context;
             // we need the room object to proceed because we will only show libraries on emby devices
@@ -38,30 +34,42 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             {
                 session.PersistedRequestData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session, null);
-                return await RoomContextManager.Instance.RequestRoom(alexaRequest, session);
+                return await RoomManager.Instance.RequestRoom(alexaRequest, session);
             }
 
             var request = alexaRequest.request;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId = request.requestId;
 
-            ResponseClient.Instance.PostProgressiveResponse($"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} {SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}", apiAccessToken, requestId);
+#pragma warning disable 4014
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} {SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}", apiAccessToken, requestId));
+#pragma warning restore 4014
 
             var result = EmbyServerEntryPoint.Instance.GetItemById(EmbyServerEntryPoint.Instance.GetLibraryId(LibraryName));
 
             try
             {
-                EmbyServerEntryPoint.Instance.BrowseItemAsync(session, result);
+#pragma warning disable 4014
+                Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(session, result)).ConfigureAwait(false);
+#pragma warning restore 4014
             }
-            catch (Exception exception)
+            catch (BrowseCommandException)
             {
-                return new ErrorHandler().OnError(exception, alexaRequest, session).Result;
+                throw new BrowseCommandException($"Couldn't browse to {result.Name}");
             }
 
             session.NowViewingBaseItem = result;
             //reset rePrompt data because we have fulfilled the request
             session.PersistedRequestData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
+
+            var documentTemplateInfo = new RenderDocumentTemplate()
+            {
+                baseItems = new List<BaseItem>() {result},
+                renderDocumentType = RenderDocumentType.BROWSE_LIBRARY_TEMPLATE
+            };
+
+            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -70,17 +78,13 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                     phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_LIBRARY, session, new List<BaseItem>() { result }),
                     speechType = SpeechType.COMPLIANCE,
                 },
-                person = session.person,
+                person           = session.person,
                 shouldEndSession = null,
-                directives = new List<IDirective>()
+                directives       = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
-                    {
-                        baseItems          = new List<BaseItem>() { result },
-                        renderDocumentType = RenderDocumentType.BROWSE_LIBRARY_TEMPLATE
-
-                    }, session)
+                    renderDocumentDirective
                 }
+
             }, session.alexaSessionDisplayType);
         }
     }

@@ -34,7 +34,6 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session        = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room           = session.room;
             
-
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 baseItems = new List<BaseItem>() {baseItem},
@@ -48,9 +47,20 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             
 
             //if the user has requested an Emby client/room display during the session - display both if possible
-            if (room != null)
-                try { EmbyServerEntryPoint.Instance.BrowseItemAsync(session, baseItem); } catch { }
-            
+            if (!(room is null))
+            {
+                try
+                {
+#pragma warning disable 4014
+                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(session, baseItem))
+                        .ConfigureAwait(false);
+#pragma warning restore 4014
+                }
+                catch
+                {
+                }
+            }
+
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
@@ -60,8 +70,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives     = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(documentTemplateInfo, session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session)
                 }
+
             }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
 
         }

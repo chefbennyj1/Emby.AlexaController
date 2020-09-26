@@ -50,7 +50,7 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (!results.Any())
             {
-                return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -60,7 +60,7 @@ namespace AlexaController.Alexa.IntentRequest
                     person = Session.person,
                     shouldEndSession = true,
 
-                }, Session.alexaSessionDisplayType).Result;
+                }, Session.alexaSessionDisplayType);
             }
            
             switch (Session.alexaSessionDisplayType)
@@ -87,7 +87,7 @@ namespace AlexaController.Alexa.IntentRequest
                             shouldEndSession = null,
                             directives       = new List<IDirective>()
                             {
-                                await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(documentTemplateInfo, Session)
+                                await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session)
                             }
 
                         }, Session.alexaSessionDisplayType);

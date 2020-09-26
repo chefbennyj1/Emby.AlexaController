@@ -36,7 +36,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {
-                try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+                try { room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
                 if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
                      throw new Exception("That room is currently not configured to show media.");

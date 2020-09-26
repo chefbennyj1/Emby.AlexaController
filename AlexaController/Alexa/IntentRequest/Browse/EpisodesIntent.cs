@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
-using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
@@ -25,23 +23,21 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         public EpisodesIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
 
         public async Task<string> Response()
         {
             try
             {
-                Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             }
             catch { }
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
 
-
+            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+            
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
@@ -49,18 +45,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-
-
+            
             ResponseClient.Instance.PostProgressiveResponse($"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} {SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}", apiAccessToken, requestId);
-
-
+            
             var result = EmbyServerEntryPoint.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
                 Session.NowViewingBaseItem, Session.User);
             
             // User requested season/episode data that doesn't exist
             if (!result.Any())
             {
-                return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -69,37 +63,49 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     },
                     shouldEndSession = null,
                     person           = null,
-                }, Session.alexaSessionDisplayType).Result;
+                }, Session.alexaSessionDisplayType);
             }
 
             var seasonId = result[0].Parent.InternalId;
             var season = EmbyServerEntryPoint.Instance.GetItemById(seasonId);
 
             if (!(Session.room is null))
+            {
                 try
                 {
-                    EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, season);
+#pragma warning disable 4014
+                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, season))
+                        .ConfigureAwait(false);
+#pragma warning restore 4014
                 }
-                catch (Exception exception)
+                catch (BrowseCommandException exception)
                 {
-                    ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+#pragma warning disable 4014
+                    Task.Run(() =>
+                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
+                                requestId))
+                        .ConfigureAwait(false);
+#pragma warning restore 4014
+                    await Task.Delay(1200);
                     Session.room = null;
                 }
-
-            Task.Delay(1200);
+                catch (Exception) { }
+            }
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
-                baseItems          = result,
-                renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle        = $"Season {seasonNumber}",
+                baseItems              = result,
+                renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
+                HeaderTitle            = $"Season {seasonNumber}",
                 HeaderAttributionImage = season.Parent.HasImage(ImageType.Logo) ? $"/Items/{season.Parent.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
             Session.NowViewingBaseItem = season;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -108,9 +114,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(documentTemplateInfo, Session)
+                    renderDocumentDirective
                 }
-            }, Session.alexaSessionDisplayType).Result;
+
+            }, Session.alexaSessionDisplayType);
 
         }
     }

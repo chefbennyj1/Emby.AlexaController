@@ -16,7 +16,6 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
         public VideoOnEnd(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
-            ;
         }
         public async Task<string> Response()
         {

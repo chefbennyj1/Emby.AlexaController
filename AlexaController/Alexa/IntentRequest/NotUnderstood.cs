@@ -33,7 +33,7 @@ namespace AlexaController.Alexa.IntentRequest
                 directives = new List<IDirective>()
                 {
                      await RenderDocumentBuilder.Instance
-                        .GetRenderDocumentAsync(new RenderDocumentTemplate()
+                        .GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
                         }, Session)

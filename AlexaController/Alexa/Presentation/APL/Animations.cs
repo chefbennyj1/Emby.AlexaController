@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APL.Commands;
+using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 
 namespace AlexaController.Alexa.Presentation.APL
 {
     public class Animations
     {
-        public static ICommand FadeOutItem(string componentId, int duration, int? delay = null)
+        public static async Task<ICommand> FadeOutItem(string componentId, int duration, int? delay = null)
         {
-            return new AnimateItem()
+            return await Task.FromResult(new AnimateItem()
             {
                 componentId = componentId,
                 easing = "ease-in",
@@ -21,12 +23,12 @@ namespace AlexaController.Alexa.Presentation.APL
                         to = 0
                     }
                 }
-            };
+            });
         }
 
-        public static ICommand FadeInItem(string componentId, int duration, int? delay = null)
+        public static async Task<ICommand> FadeInItem(string componentId, int duration, int? delay = null)
         {
-            return new AnimateItem()
+            return await Task.FromResult(new AnimateItem()
             {
                 componentId = componentId,
                 easing = "ease-in",
@@ -40,13 +42,13 @@ namespace AlexaController.Alexa.Presentation.APL
                         to = 1
                     }
                 }
-            };
+            });
         }
 
-        public static ICommand ScaleFadeInItem(string componentId, int duration, int? delay = null)
+        public static async Task<ICommand> ScaleFadeInItem(string componentId, int duration, int? delay = null)
         {
             // ReSharper disable once ComplexConditionExpression
-            return new Parallel()
+            return await Task.FromResult(new Parallel()
             {
                 commands = new List<ICommand>()
                 {
@@ -93,12 +95,12 @@ namespace AlexaController.Alexa.Presentation.APL
                         }
                     }
                 }
-            };
+            });
         }
 
-        public static ICommand ScaleInOutOnPress()
+        public static async Task<ICommand> ScaleInOutOnPress()
         {
-            return new Sequential()
+            return await Task.FromResult(new Sequential()
             {
                 commands = new List<ICommand>()
                 {
@@ -129,7 +131,7 @@ namespace AlexaController.Alexa.Presentation.APL
                         }
                     }
                 }
-            };
+            });
         }
         
     }

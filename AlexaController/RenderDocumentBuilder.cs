@@ -45,7 +45,6 @@ namespace AlexaController
             LibraryManager = libraryManager;
             SessionManager = sessionManager;
             Host           = host;
-            LocalApiUrl    = Host.GetLocalApiUrl(CancellationToken.None).Result;
             Instance       = this;
         }
 
@@ -122,8 +121,10 @@ namespace AlexaController
             }
         };
         
-        public async Task<IDirective> GetRenderDocumentAsync(IRenderDocumentTemplate template, IAlexaSession session)
+        public async Task<IDirective> GetRenderDocumentDirectiveAsync(IRenderDocumentTemplate template, IAlexaSession session)
         {
+            LocalApiUrl = await Host.GetLocalApiUrl(CancellationToken.None);
+
             switch (template.renderDocumentType)
             {
                 case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return  await RenderBrowseLibraryTemplate(template, session);
@@ -188,7 +189,7 @@ namespace AlexaController
             for (var i = 0; i < baseItems.Count; i++)
             {
                 await semaphore.WaitAsync();
-                scaleFadeInSequenceItems.Add(Animations.ScaleFadeInItem(baseItems[i].InternalId.ToString(), 250, i*100));
+                scaleFadeInSequenceItems.Add(await Animations.ScaleFadeInItem(baseItems[i].InternalId.ToString(), 250, i*100));
                 semaphore.Release();
             }
 
@@ -493,7 +494,7 @@ namespace AlexaController
                             }
                         }
                         // ReSharper disable once ComplexConditionExpression
-                        : GetButtonFrame(args : type == "Movie" || type == "Episode" 
+                        : await GetButtonFrame(args : type == "Movie" || type == "Episode" 
                                 ? new List<object>() { "UserEventPlaybackStart", session.room != null ? session.room.Name : "" } 
                                 : new List<object>() { "UserEventShowItemListSequenceTemplate" },
                                    icon : item.GetType().Name == "Series" ?  MaterialVectorIcons.ListIcon :  MaterialVectorIcons.PlayOutlineIcon,
@@ -524,17 +525,17 @@ namespace AlexaController
                         {
                             commands = new List<ICommand>()
                             {
-                                Animations.ScaleFadeInItem("primaryButton", 800),
-                                Animations.ScaleFadeInItem("genre", 1000),
-                                Animations.FadeInItem("overview", 800),
-                                Animations.FadeInItem("showing", 2000),
+                                await Animations.ScaleFadeInItem("primaryButton", 800),
+                                await Animations.ScaleFadeInItem("genre", 1000),
+                                await Animations.FadeInItem("overview", 800),
+                                await Animations.FadeInItem("showing", 2000),
                                 new Parallel()
                                 {
                                     delay = 2000,
                                     commands = new List<ICommand>()
                                     {
-                                        Animations.FadeInItem("SeasonCarouselIcon", 500),
-                                        Animations.FadeOutItem("SeasonCarouselArrayIcon", 500)
+                                        await Animations.FadeInItem("SeasonCarouselIcon", 500),
+                                        await Animations.FadeOutItem("SeasonCarouselArrayIcon", 500)
                                     }
                                 }
                             }
@@ -686,7 +687,7 @@ namespace AlexaController
                                 position = "absolute",
                                 items = new List<IItem>()
                                 {
-                                    GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Right, "ScrollNext" )
+                                    await GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Right, "ScrollNext" )
                                 }
                             },
                             new Container()
@@ -694,7 +695,7 @@ namespace AlexaController
                                 position = "absolute",
                                 items = new List<IItem>()
                                 {
-                                    GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Left, "ScrollPrev" )
+                                    await GetButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Left, "ScrollPrev" )
                                 }
                             },
                         }
@@ -705,9 +706,9 @@ namespace AlexaController
             return await Task.Factory.StartNew(() => view);
         }
 
-        private static Frame GetButtonFrame(List<object> args, string icon, string id = "")
+        private static async Task<Frame> GetButtonFrame(List<object> args, string icon, string id = "")
         {
-            return new Frame()
+            return await Task.FromResult(new Frame()
             {
                 position        = "absolute",
                 top             = "29vh",
@@ -727,13 +728,13 @@ namespace AlexaController
                         {
                             commands = new List<ICommand>()
                             {
-                                Animations.ScaleInOutOnPress(),
+                                await Animations.ScaleInOutOnPress(),
                                 new SendEvent() {arguments = args}
                             }
                         }
                     }
                 }
-            };
+            });
         }
 
         private async Task<IDirective> RenderRoomSelectionTemplate(IRenderDocumentTemplate template, IAlexaSession session)
@@ -1173,10 +1174,10 @@ namespace AlexaController
 
         private static async Task<TouchWrapper> RenderItemPrimaryImageTouchWrapper(IAlexaSession session, BaseItem i, string type)
         {
-            var IsMovie = type.Equals("Movie");
-            var IsTrailer = type.Equals("Trailer");
+            var IsMovie    = type.Equals("Movie");
+            var IsTrailer  = type.Equals("Trailer");
             //var IsSeason = type.Equals("Season");
-            var IsEpisode = type.Equals("Episode");
+            var IsEpisode  = type.Equals("Episode");
             return await Task.FromResult(new TouchWrapper()
             {
                 id = i.InternalId.ToString(),
@@ -1185,7 +1186,7 @@ namespace AlexaController
                 {
                     commands = new List<ICommand>()
                     {
-                        Animations.ScaleInOutOnPress(),
+                        await Animations.ScaleInOutOnPress(),
                         new SendEvent()
                         {
                             arguments = IsMovie || IsTrailer ? new List<object>() { "UserEventShowBaseItemDetailsTemplate" }

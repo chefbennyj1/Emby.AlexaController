@@ -30,16 +30,16 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
             try
             {
-                Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             } catch { }
-            if (Session.room is null) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             
             var request = AlexaRequest.request;
             var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(request.intent, Session?.User);
 
             if (nextUpEpisode is null)
             {
-                return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -47,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         phrase = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
                         speechType = SpeechType.APOLOGETIC,
                     },
-                }).Result;
+                });
             }
 
             EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode);
@@ -55,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -65,14 +65,14 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() { nextUpEpisode },
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
 
                     }, Session)
                 }
-            }, Session.alexaSessionDisplayType).Result;
+            }, Session.alexaSessionDisplayType);
         }
     }
 }

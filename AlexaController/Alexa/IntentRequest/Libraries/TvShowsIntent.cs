@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         }
         public async Task<string> Response()
         {
-            return await new LibraryIntentResponseManager("TV Shows").Response(AlexaRequest, Session);
+            return await new LibraryIntentResponse("TV Shows").Response(AlexaRequest, Session);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -27,17 +26,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
         {
             AlexaRequest = alexaRequest;
             Session      = session;
-            
         }
+
         public async Task<string> Response()
         {
-            //we need a room object
-            //Room room = null;
-            try { Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (Session.room is null) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            try { Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+            if (Session.room is null) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             
-            EmbyServerEntryPoint.Instance.Log.Info("ALEXA REQUESTED ROOM " + Session.room.Name + " TO PLAY ITEMS");
-
             var request        = AlexaRequest.request;
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
@@ -45,31 +40,30 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var intent         = request.intent;
             var slots          = intent.slots;
 
-            ResponseClient.Instance.PostProgressiveResponse($"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} {SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}", apiAccessToken, requestId);
+#pragma warning disable 4014
+            Task.Run(() => 
+                ResponseClient.Instance.PostProgressiveResponse(
+                    SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE) +
+                    OutputSpeech.InsertStrengthBreak(StrengthBreak.weak) +
+                    SpeechSemantics.SpeechResponse(SpeechType.REPOSE), apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
 
             BaseItem result = null;
             if (Session.NowViewingBaseItem is null)
             {
                 var type = slots.Movie.value is null ? "Series" : "Movie";
                 result = EmbyServerEntryPoint.Instance.QuerySpeechResultItem(
-                    type == "Movie" 
-                        ? slots.Movie.value 
-                        : slots.Series.value, new[] {type}, Session.User);
+                    type == "Movie" ? slots.Movie.value : slots.Series.value, new[] { type }, Session.User);
             }
             else
             {
                 result = Session.NowViewingBaseItem;
             }
-            //var result = Session.NowViewingBaseItem ??
-            //             (!(request.intent.slots.Movie.value is null)
-            //                 ? EmbyServerEntryPoint.Instance.QuerySpeechResultItem(request.intent.slots.Movie.value, new[] { "Movie" }, Session.User)
-            //                 : !(request.intent.slots.Series.value is null)
-            //                    ? EmbyServerEntryPoint.Instance.QuerySpeechResultItem(request.intent.slots.Series.value, new[] { "Series" }, Session.User) : null);
-
-            //If result is null here, then the item doesn't exist in the library
+            
+            //Item doesn't exist in the library
             if (result is null)
             {
-                return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -77,13 +71,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         phrase    = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
                         speechType = SpeechType.APOLOGETIC
                     }
-                }).Result;
+                });
             }
             
             //Parental Control check for baseItem
             if (!result.IsParentalAllowed(Session.User))
             {
-                return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -92,44 +86,47 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>",
                         speechType = SpeechType.APOLOGETIC
                     }
-                }).Result;
+                });
             }
-
-            
 
             try
             {
-                EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, result);
+#pragma warning disable 4014
+                Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, result)).ConfigureAwait(false);
+#pragma warning restore 4014
             }
             catch (Exception exception)
             {
-                EmbyServerEntryPoint.Instance.Log.Error("ALEXA ERROR!! : " + exception.Message);
-                //TODO: Add progressive response with error, but show template on screen device is possible
-                return new ErrorHandler().OnError(exception, AlexaRequest, Session).Result;
+#pragma warning disable 4014
+                Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
+                await Task.Delay(1200);
             }
 
             Session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            return ResponseClient.Instance.BuildAlexaResponse(new Response()
+            var documentTemplateInfo = new RenderDocumentTemplate()
+            {
+                renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
+                baseItems = new List<BaseItem>() {result}
+            };
+
+            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+
+            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, Session, new List<BaseItem>() { result })
-
                 },
                 shouldEndSession = null,
                 directives = new List<IDirective>()
-                    {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
-                        {
-                            renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
-                            baseItems          = new List<BaseItem>() { result },
-                            
-                        }, Session)
-                    }
+                {
+                    renderDocumentDirective
+                }
 
-            }, Session.alexaSessionDisplayType).Result;
+            }, Session.alexaSessionDisplayType);
 
         }
     }

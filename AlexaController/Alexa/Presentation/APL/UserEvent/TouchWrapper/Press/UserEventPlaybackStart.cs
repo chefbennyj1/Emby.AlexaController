@@ -10,6 +10,11 @@ using MediaBrowser.Controller.Entities;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
+    /// <summary>
+    /// request arguments[0] will be "UserEventPlaybackStart"
+    /// request arguments[1] will be the room name
+    /// </summary>
+    
     public class UserEventPlaybackStart : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -27,8 +32,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var baseItem = EmbyServerEntryPoint.Instance.GetItemById(source.id);
 
-            session.room = session.room ?? RoomContextManager.Instance.GetRoomByName(request.arguments[1]);
-            
+            session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
             
             if (session.room is null)
             {
@@ -46,7 +50,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(documentTemplateInfo, session)
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session)
                     }
 
                 }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
@@ -56,7 +60,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
 #pragma warning disable 4014
-            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(session, baseItem));
+            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(session, baseItem)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
@@ -70,7 +74,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() {baseItem},
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE

@@ -32,12 +32,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         {
             try
             {
-                Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             }
             catch { }
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
 
             var request           = AlexaRequest.request;
@@ -62,7 +62,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 if (!collectionBaseItem.IsParentalAllowed(Session.User))
                 {
-                    return ResponseClient.Instance.BuildAlexaResponse(new Response()
+                    return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                     {
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
@@ -70,22 +70,25 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>(){ collectionBaseItem }),
                             sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                         }
-                    }).Result;
+                    });
                 }
             }
 
             if (!(Session.room is null))
                 try
                 {
-                    EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, collectionBaseItem);
+#pragma warning disable 4014
+                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, collectionBaseItem)).ConfigureAwait(false);
+#pragma warning restore 4014
                 }
                 catch (Exception exception)
                 {
-                    ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
+#pragma warning disable 4014
+                    Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
+                    await Task.Delay(1200);
                     Session.room = null;
                 }
-
-            await Task.Delay(1200);
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
@@ -99,6 +102,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = collectionBaseItem;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
+            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 person       = Session.person,
@@ -109,7 +114,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(documentTemplateInfo, Session)
+                    renderDocumentDirective
                 },
 
             }, Session.alexaSessionDisplayType);
