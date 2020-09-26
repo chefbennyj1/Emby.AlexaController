@@ -109,7 +109,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             }
 
             Session.PlaybackStarted = true;
-            AlexaSessionManager.Instance.UpdateSession(Session);
+            AlexaSessionManager.Instance.UpdateSession(Session, null);
 
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -121,7 +121,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                     {
-                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
                             baseItems          = new List<BaseItem>() { result },

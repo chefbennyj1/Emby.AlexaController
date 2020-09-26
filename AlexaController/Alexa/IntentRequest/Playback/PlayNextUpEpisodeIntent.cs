@@ -53,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode);
 
             Session.NowViewingBaseItem = nextUpEpisode;
-            AlexaSessionManager.Instance.UpdateSession(Session);
+            AlexaSessionManager.Instance.UpdateSession(Session, null);
 
             return ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -65,7 +65,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
                     {
                         baseItems          = new List<BaseItem>() { nextUpEpisode },
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE

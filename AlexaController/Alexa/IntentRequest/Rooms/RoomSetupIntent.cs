@@ -25,7 +25,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             if (Session.room is null)
             {
                 Session.PersistedRequestData = AlexaRequest;
-                AlexaSessionManager.Instance.UpdateSession(Session);
+                AlexaSessionManager.Instance.UpdateSession(Session, null);
 
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
@@ -36,7 +36,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                             HeadlinePrimaryText = "Please say the name of the room you want to setup.",
@@ -58,7 +58,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }, Session.alexaSessionDisplayType);
 
             Session.room = null;
-            AlexaSessionManager.Instance.UpdateSession(Session);
+            AlexaSessionManager.Instance.UpdateSession(Session, null);
 
             return response;
         }

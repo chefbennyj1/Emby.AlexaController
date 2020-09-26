@@ -11,32 +11,32 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
-    public class RoomNameIntent //: IIntentResponse
+    public class RoomNameIntent : IIntentResponse
     {
-        private IAlexaRequest alexaRequest { get; }
-        private IAlexaSession session { get; }
-       
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+
         public RoomNameIntent(IAlexaRequest aR, IAlexaSession s)
         {
-            alexaRequest = aR;
-            session = s;
+            AlexaRequest = aR;
+            Session = s;
            
         }
+
         public async Task<string> Response()
         {
-            var request = alexaRequest.request;
+            var request = AlexaRequest.request;
             var intent = request.intent;
             var slots = intent.slots;
-            var roomName = slots.Room.value;
-
-            var rePromptIntent     = session.PersistedRequestData.request.intent;
+           
+            var rePromptIntent     = Session.PersistedRequestData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
             
             Room room = null;
             
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {
-                try { room = RoomContextManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
+                try { room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
                 if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
                      throw new Exception("That room is currently not configured to show media.");
@@ -44,14 +44,14 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }
             else
             {
-                EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("RoomAndDeviceUtility", roomName);
+                EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("RoomAndDeviceUtility", slots.Room.value);
                 //Give a Room object with the Setup Name back to the RoomSetupIntent Class through the Session object.
                 //Leave it to the  configuration JavaScript to finish saving the new room set up device information.
-                room = new Room(){ Name = roomName}; 
+                room = new Room(){ Name = slots.Room.value }; 
             }
             
-            session.room = room;
-            AlexaSessionManager.Instance.UpdateSession(session);
+            Session.room = room;
+            AlexaSessionManager.Instance.UpdateSession(Session, null);
             
             //Use Reflection to load the proper Intent class - AlexaController.Alexa.IntentRequest.{intent.Name}
             var type = Type.GetType($"AlexaController.Alexa.IntentRequest.{ rePromptIntentName }");
@@ -60,7 +60,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             try
             {
-                return await GetResponseResult(type, session.PersistedRequestData, session);
+                return await GetResponseResult(type, Session.PersistedRequestData, Session);
             }
             catch 
             {

@@ -14,6 +14,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
     {
         Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session);
         Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session);
+        Room GetRoomByName(string name);
     }
 
     public class RoomContextManager : IRoomContextManager
@@ -26,7 +27,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             session.PersistedRequestData = alexaRequest;
-            AlexaSessionManager.Instance.UpdateSession(session);
+            AlexaSessionManager.Instance.UpdateSession(session, null);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -37,7 +38,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(new RenderDocumentTemplate()
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(new RenderDocumentTemplate()
                     {
                         renderDocumentType  = RenderDocumentType.QUESTION_TEMPLATE,
                         HeadlinePrimaryText = "Which room did you want?"
@@ -46,7 +47,15 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 }
             }, session.alexaSessionDisplayType);
         }
-        
+
+        public Room GetRoomByName(string name)
+        {
+            var config = Plugin.Instance.Configuration;
+            return ValidateRoomConfiguration(name, config)
+                ? config.Rooms.FirstOrDefault(r =>
+                    string.Equals(r.Name, name, StringComparison.CurrentCultureIgnoreCase)) : null;
+        }
+
         public Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;

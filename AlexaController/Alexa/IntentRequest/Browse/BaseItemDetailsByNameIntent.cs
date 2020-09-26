@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
-using AlexaController.Configuration;
 using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
@@ -21,11 +18,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 {
     
     [Intent]
-    public class BaseItemDetailsByNameIntent //: IIntentResponse
+    public class BaseItemDetailsByNameIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session      { get; }
-        
 
         public BaseItemDetailsByNameIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
@@ -34,7 +30,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-
             try
             {
                 Session.room = RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
@@ -54,8 +49,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            var compliance = SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE);
-            var repose = SpeechSemantics.SpeechResponse(SpeechType.REPOSE);
+            var compliance        = SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE);
+            var repose            = SpeechSemantics.SpeechResponse(SpeechType.REPOSE);
             var progressiveSpeech = string.Join(" ", compliance, repose);
             ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
 
@@ -125,7 +120,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, Session)
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(documentTemplateInfo, Session)
                     }
 
                 }, Session.alexaSessionDisplayType);

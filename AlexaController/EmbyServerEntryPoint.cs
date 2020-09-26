@@ -36,13 +36,13 @@ namespace AlexaController
         BaseItem GetNextUpEpisode(Intent intent, User user);
         string GetLibraryId(string name);
         BaseItem GetItemById<T>(T id);
-        void SendMessageToPluginConfigurationPage<T>(string name, T data);
+        Task SendMessageToPluginConfigurationPage<T>(string name, T data);
         ICollectionInfo GetCollectionItems(User userName, string collectionName);
         List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user);
         IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration );
         IEnumerable<BaseItem> GetLatestTv(User user, DateTime duration);
-        void BrowseItemAsync(IAlexaSession alexaSession, BaseItem request);
-        void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item);
+        Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request);
+        Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item);
         BaseItem QuerySpeechResultItem(string searchName, string[] type, User user);
         IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName);
     }
@@ -76,7 +76,7 @@ namespace AlexaController
             Instance        = this;
         }
 
-        public async void SendMessageToPluginConfigurationPage<T>(string name, T data)
+        public async Task SendMessageToPluginConfigurationPage<T>(string name, T data)
         {
             await SessionManager.SendMessageToAdminSessions(name, data, CancellationToken.None);
         }
@@ -215,7 +215,7 @@ namespace AlexaController
             return SessionManager.Sessions.FirstOrDefault(i => i.DeviceId == deviceId);
         }
 
-        private async void BrowseHome(string room, User user, string deviceId = null, SessionInfo session = null)
+        private async Task BrowseHome(string room, User user, string deviceId = null, SessionInfo session = null)
         {
             try
             {
@@ -236,7 +236,7 @@ namespace AlexaController
             }
         }
 
-        public void BrowseItemAsync(IAlexaSession alexaSession, BaseItem request)
+        public async Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request)
         {
             var deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
 
@@ -249,11 +249,13 @@ namespace AlexaController
             var type = request.GetType().Name;
             
             if (!type.Equals("Season") || !type.Equals("Series"))
-                BrowseHome(alexaSession.room.Name, alexaSession.User, deviceId, session);
-            Task.Delay(1000).Wait();
+                await BrowseHome(alexaSession.room.Name, alexaSession.User, deviceId, session);
+            
             try
             {
+#pragma warning disable 4014
                 SessionManager.SendBrowseCommand(null, session.Id, new BrowseRequest()
+#pragma warning restore 4014
                 {
                     ItemId = request.Id.ToString(),
                     ItemName = request.Name,
@@ -267,7 +269,7 @@ namespace AlexaController
             }
         }
 
-        public void PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item)
+        public async Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item)
         {
             var deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
             
@@ -288,7 +290,7 @@ namespace AlexaController
 
             try
             {
-                SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
+                await SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
                 {
                     StartPositionTicks = startTicks,
                     PlayCommand = PlayCommand.PlayNow,

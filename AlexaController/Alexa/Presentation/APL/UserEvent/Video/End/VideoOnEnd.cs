@@ -20,7 +20,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
         }
         public async Task<string> Response()
         {
-            var arguments = AlexaRequest.request.arguments;
+            var request = AlexaRequest.request;
+            var arguments = request.arguments;
             
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {

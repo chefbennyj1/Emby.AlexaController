@@ -12,7 +12,7 @@ namespace AlexaController.Session
     {
         void EndSession(IAlexaRequest alexaRequest);
         IAlexaSession GetSession(IAlexaRequest alexaRequest, User user = null);
-        void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template = null, bool? isBack = null);
+        void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template, bool? isBack = null);
     }
 
     public class AlexaSessionManager : IAlexaSessionManager
@@ -105,7 +105,7 @@ namespace AlexaController.Session
             return sessionInfo;
         }
 
-        public void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template = null, bool? isBack = null)
+        public void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template, bool? isBack = null)
         {
             if (!(template is null))
                 session = UpdateSessionPaging(session, template, isBack);
@@ -165,7 +165,7 @@ namespace AlexaController.Session
 
             // ReSharper disable once PossibleNullReferenceException
             sessionToUpdate.PlaybackStarted = false;
-            UpdateSession(sessionToUpdate);
+            UpdateSession(sessionToUpdate, null);
         }
         
     }

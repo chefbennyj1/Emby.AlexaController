@@ -45,7 +45,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(previousPage, session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(previousPage, session)
                 }
 
             }, session.alexaSessionDisplayType);

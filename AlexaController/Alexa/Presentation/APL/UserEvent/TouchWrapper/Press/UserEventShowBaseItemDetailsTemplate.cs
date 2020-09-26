@@ -60,7 +60,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 shouldEndSession = null,
                 directives     = new List<IDirective>()
                 {
-                    RenderDocumentBuilder.Instance.GetRenderDocumentTemplate(documentTemplateInfo, session)
+                    await RenderDocumentBuilder.Instance.GetRenderDocumentAsync(documentTemplateInfo, session)
                 }
             }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
 
