@@ -25,9 +25,7 @@ namespace AlexaController.Alexa.IntentRequest
                 shouldEndSession = false,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"I misunderstood what you said. {OutputSpeech.InsertStrengthBreak(StrengthBreak.weak)} " +
-                             $"{OutputSpeech.SayWithEmotion("Can you say that again?", Emotion.excited, Intensity.low)}",
-                    speechType = SpeechType.APOLOGETIC,
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.NOT_UNDERSTOOD, Session)
                 },
                 
                 directives = new List<IDirective>()

@@ -34,7 +34,7 @@ namespace AlexaController.Alexa.IntentRequest
                     outputSpeech = new OutputSpeech()
                     {
                         phrase             = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, Session),
-                        speechType = SpeechType.APOLOGETIC,
+                        
                     },
                 });
             }

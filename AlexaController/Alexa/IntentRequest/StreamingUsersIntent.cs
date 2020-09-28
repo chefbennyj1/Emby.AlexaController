@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -39,7 +40,7 @@ namespace AlexaController.Alexa.IntentRequest
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = speechString,
-                    speechType = SpeechType.COMPLIANCE
+                    
                 }
             }, Session.alexaSessionDisplayType);
         }
@@ -53,14 +54,20 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (!sessionInfos.Any()) return "There is currently no one using unity home theater services at this time.";
 
-            var s = string.Empty;
-            s += $"There { (sessionInfos.Count() > 1 ? "are" : "is") } " +
-                 $" currently {sessionInfos.Count()} { (sessionInfos.Count() > 1 ? "sessions" : "session") } active on the server. ";
+            
+            var speech = new StringBuilder();
+            speech.Append("There ");
+            speech.Append(sessionInfos.Count() > 1 ? "are ": "is ");
+            speech.Append("currently ");
+            speech.Append(sessionInfos.Count());
+            speech.Append(sessionInfos.Count() > 1 ? "sessions" : "session");
+            speech.Append(" active on the server.");
 
-            return sessionInfos.Where(session => !string.IsNullOrEmpty(session.UserName))
-                .Aggregate(s, (current, session) => !current.Contains(session.UserName) //Don't duplicate the user message with two sessions
-                    ? current + $"{session.UserName} has {sessionInfos.Count(ses => ses.UserName == session.UserName)} open " +
-                      $"{ (sessionInfos.Count() > 1 ? "sessions" : "session") }. " : current + string.Empty);
+            return speech.ToString();
+            //return sessionInfos.Where(session => !string.IsNullOrEmpty(session.UserName))
+            //    .Aggregate(s, (current, session) => !current.Contains(session.UserName) //Don't duplicate the user message with two sessions
+            //        ? current + $"{session.UserName} has {sessionInfos.Count(ses => ses.UserName == session.UserName)} open " +
+            //          $"{ (sessionInfos.Count() > 1 ? "sessions" : "session") }. " : current + string.Empty);
         }
     }
 }

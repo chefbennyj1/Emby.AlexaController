@@ -35,19 +35,20 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
 
-            var request = AlexaRequest.request;
-            var intent = request.intent;
-            var slots = intent.slots;
-            var searchName = slots.ActorName.value;
+            var request        = AlexaRequest.request;
+            var intent         = request.intent;
+            var slots          = intent.slots;
+            var searchName     = slots.ActorName.value;
 
-            var context = AlexaRequest.context;
+            var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
-            var requestId = request.requestId;
+            var requestId      = request.requestId;
 
-            var progressiveSpeech = "";
-            progressiveSpeech += $"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} ";
-            progressiveSpeech += $"{SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}";
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
+            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, Session);
+
+#pragma warning disable 4014
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
 
             var result = EmbyServerEntryPoint.Instance.GetItemsByActor(Session.User, searchName);
 
@@ -58,7 +59,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     outputSpeech = new OutputSpeech()
                     {
                         phrase = "I was unable to find that actor.",
-                        speechType = SpeechType.APOLOGETIC,
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,

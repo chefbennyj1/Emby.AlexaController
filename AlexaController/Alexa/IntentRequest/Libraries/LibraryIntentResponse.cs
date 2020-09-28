@@ -41,8 +41,10 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             var apiAccessToken = context.System.apiAccessToken;
             var requestId = request.requestId;
 
+            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, session);
+
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} {SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}", apiAccessToken, requestId));
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var result = EmbyServerEntryPoint.Instance.GetItemById(EmbyServerEntryPoint.Instance.GetLibraryId(LibraryName));
@@ -75,8 +77,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_LIBRARY, session, new List<BaseItem>() { result }),
-                    speechType = SpeechType.COMPLIANCE,
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_LIBRARY, session, new List<BaseItem>() { result })
                 },
                 person           = session.person,
                 shouldEndSession = null,

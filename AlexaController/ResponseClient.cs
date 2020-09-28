@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text;
+using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Model.Serialization;
 
@@ -19,7 +19,7 @@ namespace AlexaController
     public interface IResponseClient
     {
         Task<string> BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE);
-        void PostProgressiveResponse(string speechOutput, string accessToken, string requestId, string dialog = "");
+        Task PostProgressiveResponse(string speechOutput, string accessToken, string requestId);
     }
 
     public class ResponseClient : IResponseClient
@@ -42,17 +42,15 @@ namespace AlexaController
             {
                 var outputSpeech = response.outputSpeech;
 
-                var speech       = string.Empty;
-
-                speech += outputSpeech.sound;
-                speech += SpeechSemantics.SpeechResponse(outputSpeech.speechType);
-                speech += person;
-                speech += OutputSpeech.InsertStrengthBreak(StrengthBreak.strong);
-                speech += outputSpeech.phrase;
-
-
+                var speech = new StringBuilder();
+               
+                speech.Append(outputSpeech.sound);
+                speech.Append(person);
+                speech.Append(OutputSpeech.InsertStrengthBreak(StrengthBreak.strong));
+                speech.Append(outputSpeech.phrase);
+                
                 outputSpeech.ssml = "<speak>";
-                outputSpeech.ssml += speech;
+                outputSpeech.ssml += speech.ToString();
                 outputSpeech.ssml += "</speak>";
 
             }
@@ -60,14 +58,14 @@ namespace AlexaController
             // Remove the directive if the device doesn't handle APL.
             if (!alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE)) response.directives = null;
             
-            return JsonSerializer.SerializeToString(new AlexaResponse()
+            return await Task.FromResult(JsonSerializer.SerializeToString(new AlexaResponse()
             {
                 version = "1.2",
                 response = response
-            });
+            }));
         }
 
-        public void PostProgressiveResponse(string speechOutput, string accessToken, string requestId, string dialog = "")
+        public async Task PostProgressiveResponse(string speechOutput, string accessToken, string requestId)
         {
             var response = new Response
             {
@@ -79,15 +77,18 @@ namespace AlexaController
                 }
             };
 
+            var json = JsonSerializer.SerializeToString(response);
             var options = new HttpRequestOptions
             {
                 Url                = "https://api.amazonalexa.com/v1/directives",
                 RequestContentType = "application/json",
-                RequestContent     = JsonSerializer.SerializeToString(response).ToCharArray(),
+                RequestContent     = json.ToCharArray(),
                 RequestHeaders     = { ["Authorization"] = "Bearer " + accessToken }
             };
             
+#pragma warning disable 4014
             HttpClient.SendAsync(options, "POST");
+#pragma warning restore 4014
 
         }
 

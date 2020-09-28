@@ -38,8 +38,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
-
-
+            
             var request           = AlexaRequest.request;
             var intent            = request.intent;
             var slots             = intent.slots;
@@ -47,11 +46,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var context           = AlexaRequest.context;
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
-            
-            var progressiveSpeech = $"{SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}";
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
-            
-            collectionRequest       = StringNormalization.ValidateSpeechQueryString(collectionRequest);
+
+            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, Session);
+
+#pragma warning disable 4014
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
+
+            collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
             
             var collection          = EmbyServerEntryPoint.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems     = collection.Items;
@@ -90,9 +92,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     Session.room = null;
                 }
 
+            var textInfo = CultureInfo.CurrentCulture.TextInfo;
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
-                HeaderTitle            = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(collectionBaseItem.Name.ToLower()),
+                HeaderTitle            = textInfo.ToTitleCase(collectionBaseItem?.Name.ToLower() ?? throw new Exception("no collection item")),
                 renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
                 baseItems              = collectionItems,
                 HeaderAttributionImage = collectionBaseItem.HasImage(ImageType.Logo) ? $"/Items/{collectionBaseItem.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null 

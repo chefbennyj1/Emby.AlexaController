@@ -15,9 +15,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         public TvShowsIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
         public async Task<string> Response()
         {

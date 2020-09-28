@@ -141,15 +141,21 @@ namespace AlexaController
             }
         }
 
+        //Create Render Document Directives below
         private async Task<IDirective> RenderItemListSequenceTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document Started");
             var layout             = new List<IItem>();
             var touchWrapperLayout = new List<IItem>();
             var baseItems          = template.baseItems;
             var type               = baseItems[0].GetType().Name;
-            
+
+            EmbyServerEntryPoint.Instance.Log.Info($"Render Document is RenderItemListSequenceTemplate for {type}");
+
             baseItems.ForEach(async i => touchWrapperLayout.Add(await RenderItemPrimaryImageTouchWrapper(session, i, type)));
-            
+
+            EmbyServerEntryPoint.Instance.Log.Info($"Render Document has {baseItems.Count} Primary Image Touch Wrappers");
+
             layout.Add(new Container()
             {
                 id     = "primary",
@@ -183,7 +189,11 @@ namespace AlexaController
                 }
             });
 
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Touch Wrapper Container");
+
             var sequenceItemsHintText = await GetSequenceItemsHintText(template.baseItems, session);
+
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Sequence Item Hint Texts");
 
             var scaleFadeInSequenceItems = new List<ICommand>();
             for (var i = 0; i < baseItems.Count; i++)
@@ -192,6 +202,8 @@ namespace AlexaController
                 scaleFadeInSequenceItems.Add(await Animations.ScaleFadeInItem(baseItems[i].InternalId.ToString(), 250, i*100));
                 semaphore.Release();
             }
+
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has primary image animations");
 
             var view = new Directive()
             {
@@ -229,12 +241,16 @@ namespace AlexaController
                     }
                 }
             };
-            
-            return view;
+
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document is creating view");
+
+            return await Task.FromResult(view);
         }
         
         private async Task<IDirective> RenderItemDetailsTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document Started");
+
             var baseItem = template.baseItems[0];
             var type     = baseItem.GetType().Name;
             var item     = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
@@ -242,8 +258,12 @@ namespace AlexaController
             var layout = new List<IItem>();
             const string token = "mediaItemDetails";
 
-            (await GetVideoBackdropLayout(item, token)).ForEach(i => layout.Add(i));
+            EmbyServerEntryPoint.Instance.Log.Info($"Render Document is {token} for {item.Name}");
             
+            (await GetVideoBackdropLayout(item, token)).ForEach(i => layout.Add(i));
+
+            EmbyServerEntryPoint.Instance.Log.Info($"Render Document has {layout.Count} video backdrops");
+
             var graphicsDictionary = new Dictionary<string, Graphic>
             {
                 {
@@ -316,7 +336,7 @@ namespace AlexaController
                 headerBackButton       = session.paging.canGoBack,
                 headerDivider          = true,
             });
-
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Header");
             //Room - Rating
             layout.Add(new Text()
             {
@@ -325,7 +345,7 @@ namespace AlexaController
                 left = "42%",
                 top = "3vh"
             });
-
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Rating");
             //Genres
             layout.Add(new Text()
             {
@@ -339,7 +359,7 @@ namespace AlexaController
                 opacity = 0,
                 id = "genre"
             });
-
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Genres");
             //TagLines
             layout.Add(new Text()
             {
@@ -353,16 +373,16 @@ namespace AlexaController
                 id = "tag",
                 display = !string.IsNullOrEmpty(item.Tagline) ? "normal" : "none"
             });
-
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Taglines");
             //Watched check-mark
             layout.Add(new VectorGraphic()
             {
                 source = "CheckMark",
                 left = "87vw"
             });
-
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Watch status");
             //Runtime span
-            if(string.Equals(type, "Movie")) { 
+            if (string.Equals(type, "Movie")) { 
                 var runTimeTicks = template.baseItems[0].RunTimeTicks;
                 if (!(runTimeTicks is null))
                     layout.Add(new Text()
@@ -389,7 +409,7 @@ namespace AlexaController
                     id = "endTime"
                 });
             }
-
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Runtime");
             //Overview
             layout.Add(new ScrollView()
             {
@@ -406,6 +426,7 @@ namespace AlexaController
                     fontSize = "20dp"
                 }
             });
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Overview");
             //Series - Season Count
             if (string.Equals(type, "Series"))
             {
@@ -501,13 +522,14 @@ namespace AlexaController
                                    id   : template.baseItems[0].InternalId.ToString())
                 }
             });
-
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Primary Image");
             layout.Add(new AlexaFooter()
             {
                 hintText = type == "Series" ? "Try \"Alexa, show season one...\"" : "Try \"Alexa, play that...\"",
                 position = "absolute",
                 bottom = "1vh"
             });
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Footer");
 
             var view = new Directive()
             {
@@ -598,8 +620,8 @@ namespace AlexaController
                     }
                 }
             };
-            
-            return await Task.Factory.StartNew(() => view).ConfigureAwait(false);
+            EmbyServerEntryPoint.Instance.Log.Info("Render Document is creating view");
+            return await Task.FromResult(view);
         }
         
         private async Task<IDirective> RenderVerticalTextListTemplate(IRenderDocumentTemplate template, IAlexaSession session)
@@ -705,38 +727,7 @@ namespace AlexaController
 
             return await Task.Factory.StartNew(() => view);
         }
-
-        private static async Task<Frame> GetButtonFrame(List<object> args, string icon, string id = "")
-        {
-            return await Task.FromResult(new Frame()
-            {
-                position        = "absolute",
-                top             = "29vh",
-                right           = "40%",
-                borderWidth     = "3px",
-                borderColor     = "white",
-                borderRadius    = "75px",
-                backgroundColor = "rgba(0,0,0,0.35)",
-                items = new List<IItem>()
-                {
-                    new AlexaIconButton()
-                    {
-                        vectorSource = icon,
-                        buttonSize = "13vh",
-                        id = id,
-                        primaryAction = new Parallel()
-                        {
-                            commands = new List<ICommand>()
-                            {
-                                await Animations.ScaleInOutOnPress(),
-                                new SendEvent() {arguments = args}
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
+        
         private async Task<IDirective> RenderRoomSelectionTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
             
@@ -765,7 +756,7 @@ namespace AlexaController
                 bottom = "5vh"
             });
 
-            var roomButtons = GetRoomButtonLayout(template);
+            var roomButtons = RenderRoomButtonLayout(template);
             roomButtons.ForEach(b => layout.Add(b));
             
             var view = new Directive()
@@ -795,7 +786,7 @@ namespace AlexaController
                 }
             };
 
-            return  await Task.Factory.StartNew(() => view);
+            return await Task.Factory.StartNew(() => view);
         }
 
         private async Task<IDirective> RenderBrowseLibraryTemplate(IRenderDocumentTemplate template, IAlexaSession session)
@@ -1170,17 +1161,49 @@ namespace AlexaController
 
             return await Task.Factory.StartNew(() => view);
         }
-        
 
-        private static async Task<TouchWrapper> RenderItemPrimaryImageTouchWrapper(IAlexaSession session, BaseItem i, string type)
+
+        //Create components below
+        private static async Task<Frame> GetButtonFrame(List<object> args, string icon, string id = "")
+        {
+            return await Task.FromResult(new Frame()
+            {
+                position = "absolute",
+                top = "29vh",
+                right = "40%",
+                borderWidth = "3px",
+                borderColor = "white",
+                borderRadius = "75px",
+                backgroundColor = "rgba(0,0,0,0.35)",
+                items = new List<IItem>()
+                {
+                    new AlexaIconButton()
+                    {
+                        vectorSource = icon,
+                        buttonSize = "13vh",
+                        id = id,
+                        primaryAction = new Parallel()
+                        {
+                            commands = new List<ICommand>()
+                            {
+                                await Animations.ScaleInOutOnPress(),
+                                new SendEvent() {arguments = args}
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        private static async Task<TouchWrapper> RenderItemPrimaryImageTouchWrapper(IAlexaSession session, BaseItem item, string type)
         {
             var IsMovie    = type.Equals("Movie");
             var IsTrailer  = type.Equals("Trailer");
-            //var IsSeason = type.Equals("Season");
             var IsEpisode  = type.Equals("Episode");
+
             return await Task.FromResult(new TouchWrapper()
             {
-                id = i.InternalId.ToString(),
+                id = item.InternalId.ToString(),
                 opacity = 1,
                 onPress = new Parallel()
                 {
@@ -1195,62 +1218,73 @@ namespace AlexaController
                         }
                     }
                 },
-
-                // Item types in the list are Episodes, place episode info text under each image
-                items = type == "Episode" ?
-                    new List<IItem>()
-                    {
-                        new Container()
-                        {
-                            height = "70vh",
-                            width  = "30vw",
-                            items  = new List<IItem>()
-                            {
-                                new Image()
-                                {
-                                    source       = $"{Url}/Items/{i.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;",
-                                    width        = "30vw",
-                                    height       = "62vh",
-                                    paddingRight = "12px",
-                                },
-                                new Text()
-                                {
-                                    text         = $"Episode {i.IndexNumber}",
-                                    style        = "textStyleBody",
-                                    top          = "-15vh",
-                                    fontSize     = "20dp"
-                                },
-                                new Text()
-                                {
-                                    text         = $"{i.Name}",
-                                    style        = "textStyleBody",
-                                    top          = "-15vh",
-                                    fontSize     = "20dp"
-                                }
-                            }
-                        }
-                    } : // Not an "Episode" - no need to place text under the image, just the primary image
-                    new List<IItem>()
-                    {
-                        new Image()
-                        {
-                            source       = $"{Url}/Items/{i.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;",
-                            width        = "30vw",
-                            height       = "62vh",
-                            paddingRight = "12px",
-                        }
-                    }
+                
+                items = new List<IItem>()
+                {
+                    type == "Episode" ? await RenderEpisodePrimaryImageContainer(item) : await RenderMoviePrimaryImageContainer(item)
+                }
+                    
             });
         }
-        
-        private List<IItem> GetRoomButtonLayout(IRenderDocumentTemplate template)
+
+        private static async Task<Container> RenderMoviePrimaryImageContainer(BaseItem item)
+        {
+            return await Task.FromResult(new Container()
+            {
+                items = new List<IItem>()
+                {
+                    new Image()
+                    {
+                        source       = $"{Url}/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;",
+                        width        = "30vw",
+                        height       = "62vh",
+                        paddingRight = "12px",
+                    }
+                }
+            });
+        }
+
+        private static async Task<Container> RenderEpisodePrimaryImageContainer(BaseItem item)
+        {
+            return await Task.FromResult(new Container()
+            {
+                height = "70vh",
+                width  = "30vw",
+                items  = new List<IItem>()
+                {
+                    new Image()
+                    {
+                        source       = $"{Url}/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;",
+                        width        = "30vw",
+                        height       = "62vh",
+                        paddingRight = "12px",
+                    },
+                    new Text()
+                    {
+                        text         = $"Episode {item.IndexNumber}",
+                        style        = "textStyleBody",
+                        top          = "-15vh",
+                        fontSize     = "20dp"
+                    },
+                    new Text()
+                    {
+                        text         = $"{item.Name}",
+                        style        = "textStyleBody",
+                        top          = "-15vh",
+                        fontSize     = "20dp"
+                    }
+                }
+            });
+        }
+
+        private List<IItem> RenderRoomButtonLayout(IRenderDocumentTemplate template)
         {
             var config = Plugin.Instance.Configuration;
             var roomButtons = new List<IItem>();
 
             if (config.Rooms is null) return roomButtons;
 
-            System.Threading.Tasks.Parallel.ForEach(config.Rooms, room =>
+            System.Threading.Tasks.Parallel.ForEach(config.Rooms, async room =>
             {
                 var disabled = true;
 
@@ -1277,44 +1311,7 @@ namespace AlexaController
                             {
                                 commands = new List<ICommand>()
                                 {
-                                    new AnimateItem()
-                                    {
-                                        easing = "ease",
-                                        duration = 250,
-                                        value = new List<IValue>()
-                                        {
-                                            new TransitionValue()
-                                            {
-                                                from = new List<From>()
-                                                {
-                                                    new From() {scaleX = 1, scaleY = 1}
-                                                },
-                                                to = new List<To>()
-                                                {
-                                                    new To() {scaleX = 0.9, scaleY = 0.9}
-                                                }
-                                            }
-                                        }
-                                    },
-                                    new AnimateItem()
-                                    {
-                                        easing = "ease",
-                                        duration = 250,
-                                        value = new List<IValue>()
-                                        {
-                                            new TransitionValue()
-                                            {
-                                                @from = new List<From>()
-                                                {
-                                                    new From() {scaleX = 0.9, scaleY = 0.9}
-                                                },
-                                                to = new List<To>()
-                                                {
-                                                    new To() {scaleX = 1, scaleY = 1}
-                                                }
-                                            }
-                                        }
-                                    },
+                                    await Animations.ScaleInOutOnPress(),
                                     new SendEvent() { arguments = new List<object>() { "UserEventPlaybackStart", room.Name } },
                                 }
                             }
@@ -1443,6 +1440,8 @@ namespace AlexaController
                 }));
         }
         
+
+
         public void Dispose()
         {
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -14,12 +15,12 @@ using MediaBrowser.Model.Entities;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
+    [Intent]
     public class EpisodesIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
-
         public EpisodesIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
@@ -35,7 +36,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             catch { }
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-
             if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             
             var request        = AlexaRequest.request;
@@ -45,8 +45,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-            
-            ResponseClient.Instance.PostProgressiveResponse($"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} {SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}", apiAccessToken, requestId);
+
+            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, Session);
+
+#pragma warning disable 4014
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
             
             var result = EmbyServerEntryPoint.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
                 Session.NowViewingBaseItem, Session.User);
@@ -59,7 +63,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     outputSpeech = new OutputSpeech()
                     {
                         phrase = SpeechStrings.GetPhrase(SpeechResponseType.NO_SEASON_ITEM_EXIST, Session, null, new[] {seasonNumber}),
-                        speechType = SpeechType.APOLOGETIC,
+                        
                     },
                     shouldEndSession = null,
                     person           = null,

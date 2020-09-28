@@ -44,13 +44,14 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
-                        speechType = SpeechType.APOLOGETIC,
+                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session)
                     },
                 });
             }
 
-            EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode);
+#pragma warning disable 4014
+            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode));
+#pragma warning restore 4014
 
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
@@ -60,7 +61,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_NEXT_UP_EPISODE, Session, new List<BaseItem>() { nextUpEpisode }),
-                    speechType = SpeechType.COMPLIANCE,
+                   
                 },
                 shouldEndSession = true,
                 directives = new List<IDirective>()

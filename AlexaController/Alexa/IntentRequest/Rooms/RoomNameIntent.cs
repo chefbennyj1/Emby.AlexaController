@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -20,14 +22,13 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         {
             AlexaRequest = aR;
             Session = s;
-           
         }
 
         public async Task<string> Response()
         {
             var request = AlexaRequest.request;
-            var intent = request.intent;
-            var slots = intent.slots;
+            var intent  = request.intent;
+            var slots   = intent.slots;
            
             var rePromptIntent     = Session.PersistedRequestData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
@@ -36,15 +37,30 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {
-                try { room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+                try
+                {
+                    room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+                }
+                catch
+                {
+                   
+                }
                 if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                     throw new Exception("That room is currently not configured to show media.");
+                    throw new Exception("That room is currently not configured to show media.");
+                }
+
+                if (!EmbyServerEntryPoint.Instance.GetCurrentSessions().ToList()
+                    .Exists(s => string.Equals(s.DeviceName,room?.Device, StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    throw new DeviceUnavailableException("That device is currently unavailable.");
                 }
             }
             else
             {
-                EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("RoomAndDeviceUtility", slots.Room.value);
+
+                await EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("RoomAndDeviceUtility", slots.Room.value);
+
                 //Give a Room object with the Setup Name back to the RoomSetupIntent Class through the Session object.
                 //Leave it to the  configuration JavaScript to finish saving the new room set up device information.
                 room = new Room(){ Name = slots.Room.value }; 

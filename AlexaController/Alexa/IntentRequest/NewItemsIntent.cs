@@ -54,8 +54,7 @@ namespace AlexaController.Alexa.IntentRequest
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = $"No { type } have been added.",
-                        speechType = SpeechType.APOLOGETIC,
+                        phrase = $"No { type } have been added."
                     },
                     person = Session.person,
                     shouldEndSession = true,
@@ -80,8 +79,7 @@ namespace AlexaController.Alexa.IntentRequest
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase             = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, Session, results),
-                                speechType = SpeechType.COMPLIANCE,
+                                phrase             = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, Session, results)
                             },
                             person           = Session.person,
                             shouldEndSession = null,
@@ -98,8 +96,7 @@ namespace AlexaController.Alexa.IntentRequest
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase             = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, Session, results),
-                                speechType = SpeechType.COMPLIANCE,
+                                phrase = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, Session, results)
                             },
                             person           = Session.person,
                             shouldEndSession = true,

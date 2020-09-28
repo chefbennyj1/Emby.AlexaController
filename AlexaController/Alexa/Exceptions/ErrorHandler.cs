@@ -26,7 +26,6 @@ namespace AlexaController.Alexa.Exceptions
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = $"{OutputSpeech.SayWithEmotion(exception.Message, Emotion.excited, Intensity.low)}",
-                    speechType = SpeechType.APOLOGETIC,
                 },
 
                 directives = new List<IDirective>()

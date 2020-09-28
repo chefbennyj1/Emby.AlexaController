@@ -35,19 +35,18 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
-
-
-            var request        = AlexaRequest.request;
-            var context        = AlexaRequest.context;
-            var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
-
-            var progressiveSpeech = "";
-            progressiveSpeech += $"{SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE)} ";
-            progressiveSpeech += $"{SpeechSemantics.SpeechResponse(SpeechType.REPOSE)}";
-
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
             
+            var request           = AlexaRequest.request;
+            var context           = AlexaRequest.context;
+            var apiAccessToken    = context.System.apiAccessToken;
+            var requestId         = request.requestId;
+
+            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, Session);
+
+#pragma warning disable 4014
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
+
             var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(request.intent, Session.User);
             
             if (nextUpEpisode is null)
@@ -57,7 +56,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     outputSpeech = new OutputSpeech()
                     {
                         phrase         = SpeechStrings.GetPhrase(SpeechResponseType.NO_NEXT_UP_EPISODE_AVAILABLE, Session),
-                        speechType = SpeechType.APOLOGETIC,
                         sound          = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
@@ -115,19 +113,19 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase         = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_NEXT_UP_EPISODE, Session , new List<BaseItem>() {nextUpEpisode}),
-                    sound          = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_NEXT_UP_EPISODE, Session , new List<BaseItem>() {nextUpEpisode}),
+                    sound  = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                 },
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    renderDocumentDirective
+                    await renderDocumentDirective
                 }
 
             }, Session.alexaSessionDisplayType);

@@ -45,6 +45,7 @@ namespace AlexaController
         Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item);
         BaseItem QuerySpeechResultItem(string searchName, string[] type, User user);
         IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName);
+        Task GoBack(string room, User user);
     }
 
     public interface ICollectionInfo
@@ -72,7 +73,7 @@ namespace AlexaController
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
             SessionManager  = sesMan;
-            Log = logMan.GetLogger(Plugin.Instance.Name);
+            Log             = logMan.GetLogger(Plugin.Instance.Name);
             Instance        = this;
         }
 
@@ -233,6 +234,27 @@ namespace AlexaController
             catch (Exception)
             {
                 throw new Exception("I was unable to browse to the home page.");
+            }
+        }
+
+
+        public async Task GoBack(string room, User user)
+        {
+            try
+            {
+                var deviceId = GetDeviceIdFromRoomName(room);
+                var session = GetSession(deviceId);
+
+                await SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
+                {
+                    Name = "Back",
+                    ControllingUserId = user.Id.ToString(),
+
+                }, CancellationToken.None);
+            }
+            catch 
+            {
+                
             }
         }
 

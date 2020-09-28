@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -11,9 +10,6 @@ using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
-
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyArguments
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -44,16 +40,18 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
-            var type           = request.intent.slots.Movie.value is null ? "Series" : "Movie";
+            var type           = slots.Movie.value is null ? "Series" : "Movie";
             var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            var compliance        = SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE);
-            var repose            = SpeechSemantics.SpeechResponse(SpeechType.REPOSE);
-            var progressiveSpeech = string.Join(" ", compliance, repose);
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId);
+
+            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, Session);
+
+#pragma warning disable 4014
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
 
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
@@ -94,19 +92,17 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         .ConfigureAwait(false);
 #pragma warning restore 4014
                 }
-                catch (BrowseCommandException exception)
+                catch (Exception exception)
                 {
 #pragma warning disable 4014
-                    //Fire and forget
                     Task.Run(() =>
                             ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
                                 requestId))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
-                    await Task.Delay(1200); //Yep...
+                    await Task.Delay(1200); 
                     Session.room = null;
                 }
-                catch (Exception) { }
             }
 
             var documentTemplateInfo = new RenderDocumentTemplate()

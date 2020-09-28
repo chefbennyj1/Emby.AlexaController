@@ -69,7 +69,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 outputSpeech = new OutputSpeech()
                 {
                     phrase         = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, session, new List<BaseItem>() {baseItem}),
-                    speechType = SpeechType.COMPLIANCE
+                   
                 },
                 shouldEndSession = null,
                 directives = new List<IDirective>()

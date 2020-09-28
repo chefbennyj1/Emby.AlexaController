@@ -123,7 +123,7 @@ namespace AlexaController.Api
                             outputSpeech = new OutputSpeech()
                             {
                                 phrase = "You are not a recognized user. Please take moment to register your voice profile.",
-                                speechType = SpeechType.APOLOGETIC
+                                
                             },
                         });
                 }
@@ -164,16 +164,12 @@ namespace AlexaController.Api
             return await GetResponseResult(type, alexaRequest, null);
         }
 
-        private async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)
+        private static async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)
         {
-            var context             = alexaRequest.context;
-
-            //check the person speaking and get their Emby account UserName
-            var speechAuthorization = new SpeechAuthorization(UserManager);
-
-            var user   = speechAuthorization.GetRecognizedPersonalizationProfileResult(context.System.person);
-            var person = !ReferenceEquals(null, context.System.person) ? OutputSpeech.SayName(context.System.person) : "";
-
+            var context = alexaRequest.context;
+            
+            var user = SpeechAuthorization.Instance.GetRecognizedPersonalizationProfileResult(context.System.person);
+            
             if (user is null)
                 return await ResponseClient.Instance.BuildAlexaResponse(
                     new Response()
@@ -182,7 +178,7 @@ namespace AlexaController.Api
                         outputSpeech = new OutputSpeech()
                         {
                             phrase = "I don't recognize the current user. Please go to the plugin configuration and link emby account personalization. Or ask for help.",
-                            speechType = SpeechType.APOLOGETIC
+                            
                         },
                     });
 
@@ -192,10 +188,9 @@ namespace AlexaController.Api
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = "<audio src=\"soundbank://soundlibrary/alarms/beeps_and_bloops/intro_02\"/>" +
-                             person + $"{OutputSpeech.InsertStrengthBreak(StrengthBreak.strong)} " +
-                             "What media can I help you find.",
-                    speechType = SpeechType.GREETINGS
+                    sound = "<audio src=\"soundbank://soundlibrary/alarms/beeps_and_bloops/intro_02\"/>",
+                    phrase= SpeechStrings.GetPhrase(SpeechResponseType.ON_LAUNCH, session)
+                   
                 },
                 shouldEndSession = false,
                 directives = new List<IDirective>()
@@ -209,7 +204,7 @@ namespace AlexaController.Api
 
                 }
 
-            }, session.alexaSessionDisplayType).ConfigureAwait(false);
+            }, session.alexaSessionDisplayType);
 
         }
 

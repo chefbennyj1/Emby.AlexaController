@@ -416,7 +416,7 @@
             var html = '';
             for (var i = 0; i <= rooms.length -1; i++) { //rooms.forEach(room => {
                 html += '<tr class="detailTableBodyRow detailTableBodyRow-shaded" id="' + rooms[i].Name.replace(" ", "_") + '">';
-                html += '<td data-title="Name" class="detailTableBodyCell fileCell"><i class="md-icon navMenuOptionIcon" style=" transform: rotate(' + i*90 +'deg);">picture_in_picture</i></td>';
+                html += '<td data-title="Name" class="detailTableBodyCell fileCell"><i class="md-icon navMenuOptionIcon">location_on</i></td>';
 
                 html += '<td data-title="Name" class="detailTableBodyCell fileCell">' + rooms[i].Name + '</td>';
                 html += '<td data-title="Name" class="detailTableBodyCell fileCell-shaded">' + rooms[i].Device + '</td>';

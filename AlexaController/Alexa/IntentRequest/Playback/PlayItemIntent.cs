@@ -40,12 +40,10 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var intent         = request.intent;
             var slots          = intent.slots;
 
+            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, Session);
+
 #pragma warning disable 4014
-            Task.Run(() => 
-                ResponseClient.Instance.PostProgressiveResponse(
-                    SpeechSemantics.SpeechResponse(SpeechType.COMPLIANCE) +
-                    OutputSpeech.InsertStrengthBreak(StrengthBreak.weak) +
-                    SpeechSemantics.SpeechResponse(SpeechType.REPOSE), apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             BaseItem result = null;
@@ -69,7 +67,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     outputSpeech = new OutputSpeech()
                     {
                         phrase    = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
-                        speechType = SpeechType.APOLOGETIC
+                       
                     }
                 });
             }
@@ -84,7 +82,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     {
                         phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>() { result }),
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>",
-                        speechType = SpeechType.APOLOGETIC
+                       
                     }
                 });
             }

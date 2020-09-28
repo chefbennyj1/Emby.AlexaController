@@ -16,14 +16,14 @@ namespace AlexaController.Utils.SemanticSpeech
         NON_COMPLIANT
     }
 
-    public class SpeechSemantics : OutputSpeech
+    public class Semantics : OutputSpeech
     {
         /*
          * Add empty strings to each Semantic Phrase list so that, sometimes, Alexa says nothing.
          */
 
 
-        public static string SpeechResponse(SpeechType type)
+        public static string GetRandomSpeechResponse(SpeechType type)
         {
             switch (type.ToString())
             {
@@ -59,8 +59,8 @@ namespace AlexaController.Utils.SemanticSpeech
 
         private static readonly List<string> Apologetic2 = new List<string>()
         {
-            "hoh... ya know what?",
-            "hmm... ya know what?",
+            "hoh...",
+            "hmm...",
             ""
         };
 
@@ -96,17 +96,17 @@ namespace AlexaController.Utils.SemanticSpeech
 
         private static string GetSpeechDysfluency(Emotion emotion, Rate rate = Rate.slow)
         {
-            var text = Dysfluency[Plugin.RandomIndex.Next(1, Dysfluency.Count)];
+            var text = Dysfluency[Plugin.RandomIndex.Next(1, Dysfluency.Count + 1)];
             return $"{SayWithEmotion(SpeechRate(rate, text), emotion, Intensity.medium)} {InsertStrengthBreak(StrengthBreak.strong)}";
         }
 
         private static string GetSpeechApology()
         {
-            var i = Plugin.RandomIndex.Next(1, 2);
+            var i = Plugin.RandomIndex.Next(1, 3);
             switch (i)
             {
                 case 1:
-                    return $"{SpeechRate(Rate.slow, SayWithEmotion(Apologetic2[Plugin.RandomIndex.Next(1, Apologetic2.Count)], Emotion.disappointed, Intensity.low))} {InsertStrengthBreak(StrengthBreak.weak)}";
+                    return $"{SpeechRate(Rate.slow, SayWithEmotion(Apologetic2[Plugin.RandomIndex.Next(1, Apologetic2.Count)], Emotion.disappointed, Intensity.low))} {SayWithEmotion("ya know what?", Emotion.disappointed, Intensity.medium)} {InsertStrengthBreak(StrengthBreak.weak)}";
                 case 2:
                     return $"{GetSpeechDysfluency(Emotion.disappointed)}, {SayWithEmotion(Apologetic[Plugin.RandomIndex.Next(1, Apologetic.Count)], Emotion.disappointed, Intensity.medium)} {InsertStrengthBreak(StrengthBreak.weak)}";
 
