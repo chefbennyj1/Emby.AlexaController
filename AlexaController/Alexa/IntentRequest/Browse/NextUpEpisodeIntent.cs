@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -87,21 +87,22 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             if (!(Session.room is null))
+            {
                 try
                 {
-#pragma warning disable 4014
-                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, nextUpEpisode)).ConfigureAwait(false);
-#pragma warning restore 4014
+                    await EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, nextUpEpisode);
                 }
-                catch (BrowseCommandException exception)
+                catch (Exception exception)
                 {
-#pragma warning disable 4014
-                    Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
+                    await Task.Run(() =>
+                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
+                                requestId))
+                        .ConfigureAwait(false);
                     await Task.Delay(1200);
                     Session.room = null;
                 }
-            
+            }
+
             var series = nextUpEpisode.Parent.Parent;
             var documentTemplateInfo = new RenderDocumentTemplate()
             {

@@ -77,23 +77,17 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 try
                 {
-#pragma warning disable 4014
-                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, season))
-                        .ConfigureAwait(false);
-#pragma warning restore 4014
+                    await EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, season);
                 }
-                catch (BrowseCommandException exception)
+                catch (Exception exception)
                 {
-#pragma warning disable 4014
-                    Task.Run(() =>
+                    await Task.Run(() =>
                             ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
                                 requestId))
                         .ConfigureAwait(false);
-#pragma warning restore 4014
                     await Task.Delay(1200);
                     Session.room = null;
                 }
-                catch (Exception) { }
             }
 
             var documentTemplateInfo = new RenderDocumentTemplate()

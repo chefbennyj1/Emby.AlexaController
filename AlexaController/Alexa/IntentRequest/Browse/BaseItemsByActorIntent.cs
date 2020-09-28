@@ -77,16 +77,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (!(Session.room is null))
                 try
                 {
-#pragma warning disable 4014
-                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault())).ConfigureAwait(false);
-#pragma warning restore 4014
+                    await EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault());
                 }
                 catch (Exception exception)
                 {
-#pragma warning disable 4014
-                    Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
-                    await Task.Delay(1200); //Yep...
+                    await Task.Run(() => 
+                        ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, 
+                            requestId))
+                        .ConfigureAwait(false);
+                    await Task.Delay(1200);
                     Session.room = null;
                 }
 

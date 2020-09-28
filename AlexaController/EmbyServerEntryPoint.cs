@@ -194,7 +194,7 @@ namespace AlexaController
             var config = Plugin.Instance.Configuration;
             if (!config.Rooms.Any())
             {
-                throw new DeviceUnavailableException($"{room}'s device is currently unavailable.");
+                throw new Exception("There are no rooms setup in configuration.");
             }
 
             var device = config.Rooms.FirstOrDefault(r => string.Equals(r.Name, room, StringComparison.CurrentCultureIgnoreCase))?.Device;
@@ -208,7 +208,7 @@ namespace AlexaController
                 return SessionManager.Sessions.FirstOrDefault(d => d.Client == device)?.DeviceId;
             }
 
-            throw new DeviceUnavailableException($"{room}'s device is currently unavailable.");
+            throw new Exception($"{room}'s device is currently unavailable.");
         }
 
         private SessionInfo GetSession(string deviceId)
@@ -222,8 +222,7 @@ namespace AlexaController
             {
                 deviceId = deviceId ?? GetDeviceIdFromRoomName(room);
                 session = session ?? GetSession(deviceId);
-
-                //DO NOT AWAIT THIS! ALEXA HATES YOU FOR IT
+                
                 await SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
                 {
                     Name              = "GoHome",
@@ -236,8 +235,7 @@ namespace AlexaController
                 throw new Exception("I was unable to browse to the home page.");
             }
         }
-
-
+        
         public async Task GoBack(string room, User user)
         {
             try
@@ -260,13 +258,16 @@ namespace AlexaController
 
         public async Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request)
         {
-            var deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
-
-            if (string.IsNullOrEmpty(deviceId))
+            var deviceId = string.Empty;
+            try
             {
-                throw new DeviceUnavailableException($"{alexaSession.room.Name}'s device is currently unavailable." );
+                deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
             }
-
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            
             var session = GetSession(deviceId);
             var type = request.GetType().Name;
             
