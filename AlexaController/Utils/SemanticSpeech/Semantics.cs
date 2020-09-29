@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using AlexaController.Alexa.ResponseData.Model;
 
-// ReSharper disable ComplexConditionExpression
-
 namespace AlexaController.Utils.SemanticSpeech
 {
     public enum SpeechType
@@ -22,8 +20,7 @@ namespace AlexaController.Utils.SemanticSpeech
          * Add empty strings to each Semantic Phrase list so that, sometimes, Alexa says nothing.
          */
 
-
-        public static string GetRandomSpeechResponse(SpeechType type)
+        protected static string GetRandomSpeechResponse(SpeechType type)
         {
             switch (type.ToString())
             {
@@ -37,7 +34,7 @@ namespace AlexaController.Utils.SemanticSpeech
             }
         }
 
-        private static readonly List<string> Repose = new List<string>
+        private static readonly List<string> Repose       = new List<string>
         {
             "One moment...",
             "One moment please...",
@@ -47,7 +44,7 @@ namespace AlexaController.Utils.SemanticSpeech
             ""
         };
 
-        private static readonly List<string> Apologetic = new List<string>
+        private static readonly List<string> Apologetic   = new List<string>
         {
             "I'm Sorry about this.",
             "Apologies.",
@@ -57,18 +54,19 @@ namespace AlexaController.Utils.SemanticSpeech
             ""
         };
 
-        private static readonly List<string> Apologetic2 = new List<string>()
+        private static readonly List<string> Apologetic2  = new List<string>()
         {
             "hoh...",
             "hmm...",
             ""
         };
 
-        private static readonly List<string> Compliance = new List<string>
+        private static readonly List<string> Compliance   = new List<string>
         {
             "OK, ",
             "Alright, ",
-            ""
+            "Yes, ",
+            "Yep, "
         };
 
         private static readonly List<string> NonCompliant = new List<string>
@@ -79,14 +77,14 @@ namespace AlexaController.Utils.SemanticSpeech
             ""
         };
 
-        private static readonly List<string> Dysfluency = new List<string>()
+        private static readonly List<string> Dysfluency   = new List<string>()
         {
             "oh...",
             "um... ",
             ""
         };
 
-        private static readonly List<string> Greetings  = new List<string>()
+        private static readonly List<string> Greetings    = new List<string>()
         {
             "Hey",
             "Hi",
@@ -96,7 +94,7 @@ namespace AlexaController.Utils.SemanticSpeech
 
         private static string GetSpeechDysfluency(Emotion emotion, Rate rate = Rate.slow)
         {
-            var text = Dysfluency[Plugin.RandomIndex.Next(1, Dysfluency.Count + 1)];
+            var text = Dysfluency[Plugin.RandomIndex.Next(1, Dysfluency.Count)];
             return $"{SayWithEmotion(SpeechRate(rate, text), emotion, Intensity.medium)} {InsertStrengthBreak(StrengthBreak.strong)}";
         }
 
@@ -117,6 +115,7 @@ namespace AlexaController.Utils.SemanticSpeech
         private static string GetTimeOfDayResponse()
         {
             var hour = DateTime.Now.Hour;
+            // ReSharper disable twice ComplexConditionExpression
             return hour < 12 && hour > 4 ? "Good morning" : hour > 12 && hour < 17 ? "Good afternoon" : "Good evening";
         }
 

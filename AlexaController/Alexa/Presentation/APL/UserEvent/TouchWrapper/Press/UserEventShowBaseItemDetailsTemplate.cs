@@ -3,17 +3,8 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Entities;
-
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
@@ -21,7 +12,6 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
     {
         public IAlexaRequest AlexaRequest { get; }
         
-
         public UserEventShowBaseItemDetailsTemplate(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
@@ -45,7 +35,6 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             session.room               = room;
             AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
             
-
             //if the user has requested an Emby client/room display during the session - display both if possible
             if (!(room is null))
             {
@@ -61,6 +50,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
+            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
@@ -68,13 +59,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_ITEM, session, new List<BaseItem>() { baseItem }),
                 },
                 shouldEndSession = null,
-                directives     = new List<IDirective>()
+                directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session)
+                    renderDocumentDirective
                 }
 
             }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
-
         }
     }
 }

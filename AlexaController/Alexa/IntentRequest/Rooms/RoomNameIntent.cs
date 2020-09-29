@@ -6,10 +6,6 @@ using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
-// ReSharper disable once TooManyChainedReferences
-// ReSharper disable once PossibleNullReferenceException
-// ReSharper disable once TooManyArguments
-
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
@@ -30,6 +26,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             var intent  = request.intent;
             var slots   = intent.slots;
            
+            // ReSharper disable once TooManyChainedReferences
             var rePromptIntent     = Session.PersistedRequestData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
             
@@ -45,7 +42,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 {
                    
                 }
-                if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room.Name, StringComparison.InvariantCultureIgnoreCase)))
+                if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room?.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     throw new Exception("That room is currently not configured to show media.");
                 }
@@ -91,7 +88,8 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 ? new object[] { alexaRequest } : new object[] { alexaRequest, session };
 
             var instance = Activator.CreateInstance(@namespace, paramArgs);
-            return await (Task<string>)@namespace.GetMethod("Response")?.Invoke(instance, null);
+            // ReSharper disable once PossibleNullReferenceException
+            return await (Task<string>) @namespace.GetMethod("Response")?.Invoke(instance, null);
 
         }
     }

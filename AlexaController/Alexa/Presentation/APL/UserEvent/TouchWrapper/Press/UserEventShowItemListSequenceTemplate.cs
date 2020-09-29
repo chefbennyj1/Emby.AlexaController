@@ -24,8 +24,6 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var type     = baseItem.GetType().Name;
            
-            var phrase = "";
-            
             var results = EmbyServerEntryPoint.Instance.GetBaseItems(baseItem,
                 new[] {type == "Series" ? "Season" : "Episode"}, session.User);
 
@@ -54,16 +52,18 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
+            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = phrase
+                    phrase = ""
                 },
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session)
+                    renderDocumentDirective
                 }
 
             }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);

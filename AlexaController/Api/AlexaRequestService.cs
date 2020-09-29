@@ -44,7 +44,6 @@ namespace AlexaController.Api
     public class AlexaRequestService : IService
     {
         private IJsonSerializer JsonSerializer { get; }
-        private IUserManager UserManager       { get; }
         
         private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent => intent.name == "VoiceAuthenticationAccountLink";
         private readonly Func<Intent, bool> IsRoomNameIntentRequest = intent => intent.name == "Rooms_RoomNameIntent";
@@ -57,8 +56,7 @@ namespace AlexaController.Api
         public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager sessionManager)
         {
             JsonSerializer = json;
-            UserManager    = user;
-
+            
             if (ResponseClient.Instance is null)
                 Activator.CreateInstance(typeof(ResponseClient), json, client);
 

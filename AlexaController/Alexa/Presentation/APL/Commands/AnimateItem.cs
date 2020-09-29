@@ -6,7 +6,7 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
     {
         public List<From> from { get; set; }
         public List<To> to { get; set; }
-        public new string property => "transform";
+        public string property => "transform";
         public string type { get; set; }
     }
 
@@ -44,12 +44,12 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
 
     public interface IValue
     {
-        //string type { get; set; }
+        
     }
 
     public class Value : IValue
     {
-        //public string type { get; set; }
+       
        
     }
 

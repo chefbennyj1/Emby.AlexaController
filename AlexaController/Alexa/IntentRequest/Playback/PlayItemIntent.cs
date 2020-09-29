@@ -66,8 +66,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase    = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session),
-                       
+                        phrase    = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session)
                     }
                 });
             }
@@ -81,8 +80,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     outputSpeech = new OutputSpeech()
                     {
                         phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>() { result }),
-                        sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>",
-                       
+                        sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     }
                 });
             }
@@ -90,7 +88,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             try
             {
 #pragma warning disable 4014
-                Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, result)).ConfigureAwait(false);
+                await EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, result);
 #pragma warning restore 4014
             }
             catch (Exception exception)

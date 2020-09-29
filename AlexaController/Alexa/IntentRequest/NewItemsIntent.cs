@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -40,7 +39,7 @@ namespace AlexaController.Alexa.IntentRequest
                 : DateTimeDurationNormalization
                     .GetMinDateCreation(DateTimeDurationNormalization.DeserializeDurationFromIso8601(duration));
 
-            ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId);
+            await ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId).ConfigureAwait(false);
 
             var query = type == "New TV Shows"
                 ? EmbyServerEntryPoint.Instance.GetLatestTv(Session.User, d)
@@ -75,17 +74,20 @@ namespace AlexaController.Alexa.IntentRequest
 
                         AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
+                        var renderDocumentDirective =
+                            await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+
                         return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase             = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, Session, results)
+                                phrase = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, Session, results)
                             },
                             person           = Session.person,
                             shouldEndSession = null,
                             directives       = new List<IDirective>()
                             {
-                                await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session)
+                                renderDocumentDirective
                             }
 
                         }, Session.alexaSessionDisplayType);

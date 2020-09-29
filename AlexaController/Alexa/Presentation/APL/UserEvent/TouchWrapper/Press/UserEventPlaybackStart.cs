@@ -33,10 +33,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var baseItem = EmbyServerEntryPoint.Instance.GetItemById(source.id);
 
             session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
-            
+
+            RenderDocumentTemplate documentTemplateInfo = null;
+
             if (session.room is null)
             {
-                var documentTemplateInfo = new RenderDocumentTemplate()
+                documentTemplateInfo = new RenderDocumentTemplate()
                 {
                     renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
                     baseItems = new List<BaseItem>() {baseItem}
@@ -63,24 +65,29 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(session, baseItem)).ConfigureAwait(false);
 #pragma warning restore 4014
 
+            documentTemplateInfo = new RenderDocumentTemplate()
+            {
+                baseItems = new List<BaseItem>() {baseItem},
+                renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
+            };
+
+            var renderDocumentDirective =
+                await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 person = session.person,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase         = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, session, new List<BaseItem>() {baseItem}),
+                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, session, new List<BaseItem>() { baseItem }),
                    
                 },
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
-                    {
-                        baseItems          = new List<BaseItem>() {baseItem},
-                        renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
-
-                    }, session)
+                    renderDocumentDirective
                 }
+
             }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);   
             
         }

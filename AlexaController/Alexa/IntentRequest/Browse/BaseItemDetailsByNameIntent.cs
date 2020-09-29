@@ -13,7 +13,6 @@ using MediaBrowser.Model.Entities;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-    
     [Intent]
     public class BaseItemDetailsByNameIntent : IIntentResponse
     {
@@ -91,10 +90,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch (Exception exception)
                 {
-                    await Task.Run(() =>
-                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
+#pragma warning disable 4014
+                    Task.Run(() => 
+                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, 
                                 requestId))
                         .ConfigureAwait(false);
+#pragma warning restore 4014
                     await Task.Delay(1200);
                     Session.room = null;
                 }

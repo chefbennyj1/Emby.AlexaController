@@ -19,14 +19,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     public class CollectionIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaSession Session { get; }
-        
+        public IAlexaSession Session      { get; }
 
         public CollectionIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Session = session;
-            
+            Session      = session;
         }
         public async Task<string> Response()
         {
@@ -88,6 +86,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
                                 requestId))
                         .ConfigureAwait(false);
+
                     await Task.Delay(1200);
                     Session.room = null;
                 }
@@ -110,13 +109,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                person       = Session.person,
+                person = Session.person,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase         = $"{collectionBaseItem.Name}",
+                    phrase = $"{collectionBaseItem.Name}",
                 },
                 shouldEndSession = null,
-                directives       = new List<IDirective>()
+                directives = new List<IDirective>()
                 {
                     renderDocumentDirective
                 },
