@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             else
             {
 
-                await EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("RoomAndDeviceUtility", slots.Room.value);
+                await EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("RoomSetupIntent", slots.Room.value);
 
                 //Give a Room object with the Setup Name back to the RoomSetupIntent Class through the Session object.
                 //Leave it to the  configuration JavaScript to finish saving the new room set up device information.

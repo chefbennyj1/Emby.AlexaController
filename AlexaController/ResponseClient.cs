@@ -2,13 +2,12 @@
 using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
+using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Model.Serialization;
 
-
 namespace AlexaController
 {
-
     public class AlexaResponse
     { 
         public string version                                              { get; set; }
@@ -27,6 +26,7 @@ namespace AlexaController
         private IJsonSerializer JsonSerializer { get; }
         private IHttpClient HttpClient         { get; }
         public static IResponseClient Instance { get; private set; }
+
         public ResponseClient(IJsonSerializer jsonSerializer, IHttpClient client)
         {
             JsonSerializer = jsonSerializer;
@@ -36,7 +36,7 @@ namespace AlexaController
 
         public async Task<string> BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)
         {
-            var person = !(response.person is null) ? OutputSpeech.SayName(response.person) : "";
+            var person = !(response.person is null) ? Semantics.SayName(response.person) : "";
             
             if (!(response.outputSpeech is null))
             {
@@ -46,7 +46,7 @@ namespace AlexaController
                
                 speech.Append(outputSpeech.sound);
                 speech.Append(person);
-                speech.Append(OutputSpeech.InsertStrengthBreak(StrengthBreak.strong));
+                speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
                 speech.Append(outputSpeech.phrase);
                 
                 outputSpeech.ssml = "<speak>";

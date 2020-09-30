@@ -25,7 +25,7 @@ namespace AlexaController.Alexa.Exceptions
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"{OutputSpeech.SayWithEmotion(exception.Message, Emotion.excited, Intensity.low)}",
+                    phrase = $"{SpeechStyle.SayWithEmotion(exception.Message, Emotion.excited, Intensity.low)}",
                 },
 
                 directives = new List<IDirective>()

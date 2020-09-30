@@ -334,7 +334,7 @@
 
             ApiClient._webSocket.addEventListener('message', function (message) {
                 var json = JSON.parse(message.data);
-                if (json.MessageType === "RoomAndDeviceUtility") {
+                if (json.MessageType === "RoomSetupIntent") {
                     dlg.querySelector('#roomName').value = json.Data;
                 }
             });

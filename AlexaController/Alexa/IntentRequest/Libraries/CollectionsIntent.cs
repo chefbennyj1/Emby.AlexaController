@@ -11,13 +11,10 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
-
         public CollectionsIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
         public async Task<string> Response()
         {
