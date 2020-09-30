@@ -68,6 +68,9 @@ namespace AlexaController.Api
 
             if (SpeechAuthorization.Instance is null)
                 Activator.CreateInstance(typeof(SpeechAuthorization), user);
+
+            if (RenderDocumentBuilder.Instance is null)
+                Activator.CreateInstance<RenderDocumentBuilder>();
         }
 
         public async Task<object> Post(AlexaRequest data)
@@ -135,7 +138,6 @@ namespace AlexaController.Api
                     //There has been a speech recognition mistake, end the session.
                     return await new NotUnderstood(alexaRequest, session).Response(); 
                 }
-
             }
             
             try
@@ -151,7 +153,7 @@ namespace AlexaController.Api
 
         private static async Task<string> OnSessionEndRequest(IAlexaRequest alexaRequest)
         {
-            await Task.Factory.StartNew(() => AlexaSessionManager.Instance.EndSession(alexaRequest));
+            await Task.Run(() => AlexaSessionManager.Instance.EndSession(alexaRequest));
             return null;
         }
         
@@ -175,9 +177,11 @@ namespace AlexaController.Api
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = "I don't recognize the current user. Please go to the plugin configuration and link emby account personalization. Or ask for help.",
-                            
-                        },
+                            phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                            {
+                                type = SpeechResponseType.PERSON_NOT_RECOGNIZED
+                            })
+                        }
                     });
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
@@ -187,7 +191,11 @@ namespace AlexaController.Api
                 outputSpeech = new OutputSpeech()
                 {
                     sound = "<audio src=\"soundbank://soundlibrary/alarms/beeps_and_bloops/intro_02\"/>",
-                    phrase= SpeechStrings.GetPhrase(SpeechResponseType.ON_LAUNCH, session)
+                    phrase= SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    {
+                        type = SpeechResponseType.ON_LAUNCH, 
+                        session = session
+                    })
                    
                 },
                 shouldEndSession = false,
@@ -225,7 +233,6 @@ namespace AlexaController.Api
 
             var instance = Activator.CreateInstance(@namespace, paramArgs);
             return await (Task<string>)@namespace.GetMethod("Response")?.Invoke(instance, null);
-           
         }
     }
 }

@@ -45,7 +45,11 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
 
-            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, Session);
+            var progressiveSpeech = SpeechStrings.GetPhrase(new SpeechStringQuery()
+            {
+                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+                session = Session
+            });
 
 #pragma warning disable 4014
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
@@ -67,7 +71,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>(){ collectionBaseItem }),
+                            phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                            {
+                                type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
+                                session = Session, 
+                                items =  new List<BaseItem>(){ collectionBaseItem }
+                            }),
                             sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                         }
                     });
@@ -82,11 +91,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch (Exception exception)
                 {
-                    await Task.Run(() =>
+#pragma warning disable 4014
+                    Task.Run(() => 
                             ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
                                 requestId))
                         .ConfigureAwait(false);
-
+#pragma warning restore 4014
                     await Task.Delay(1200);
                     Session.room = null;
                 }

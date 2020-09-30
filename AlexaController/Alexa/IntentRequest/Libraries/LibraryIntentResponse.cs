@@ -41,7 +41,11 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             var apiAccessToken = context.System.apiAccessToken;
             var requestId = request.requestId;
 
-            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, session);
+            var progressiveSpeech = SpeechStrings.GetPhrase(new SpeechStringQuery()
+            {
+                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+                session = session
+            });
 
 #pragma warning disable 4014
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
@@ -77,7 +81,12 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_LIBRARY, session, new List<BaseItem>() { result })
+                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    {
+                        type = SpeechResponseType.BROWSE_LIBRARY, 
+                        session = session, 
+                        items = new List<BaseItem>() { result }
+                    })
                 },
                 person           = session.person,
                 shouldEndSession = null,

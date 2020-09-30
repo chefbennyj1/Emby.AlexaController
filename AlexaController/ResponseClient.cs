@@ -26,7 +26,7 @@ namespace AlexaController
     {
         private IJsonSerializer JsonSerializer { get; }
         private IHttpClient HttpClient         { get; }
-        public static IResponseClient Instance { get; set; }
+        public static IResponseClient Instance { get; private set; }
         public ResponseClient(IJsonSerializer jsonSerializer, IHttpClient client)
         {
             JsonSerializer = jsonSerializer;
@@ -86,10 +86,7 @@ namespace AlexaController
                 RequestHeaders     = { ["Authorization"] = "Bearer " + accessToken }
             };
             
-#pragma warning disable 4014
-            HttpClient.SendAsync(options, "POST");
-#pragma warning restore 4014
-
+            await HttpClient.SendAsync(options, "POST").ConfigureAwait(false);
         }
 
     }

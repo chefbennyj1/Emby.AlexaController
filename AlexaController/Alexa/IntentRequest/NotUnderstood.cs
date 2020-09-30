@@ -25,7 +25,11 @@ namespace AlexaController.Alexa.IntentRequest
                 shouldEndSession = false,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.NOT_UNDERSTOOD, Session)
+                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    {
+                        type = SpeechResponseType.NOT_UNDERSTOOD, 
+                        session = Session
+                    })
                 },
                 
                 directives = new List<IDirective>()

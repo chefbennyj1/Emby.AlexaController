@@ -56,7 +56,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.BROWSE_ITEM, session, new List<BaseItem>() { baseItem }),
+                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    {
+                        type = SpeechResponseType.BROWSE_ITEM, 
+                        session = session, 
+                        items =  new List<BaseItem>() { baseItem }
+                    }),
                 },
                 shouldEndSession = null,
                 directives = new List<IDirective>()

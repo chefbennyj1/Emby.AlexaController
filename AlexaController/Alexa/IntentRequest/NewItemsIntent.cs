@@ -81,7 +81,12 @@ namespace AlexaController.Alexa.IntentRequest
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_APL, Session, results)
+                                phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                                {
+                                    type = SpeechResponseType.NEW_ITEMS_APL, 
+                                    session = Session, 
+                                    items = results
+                                })
                             },
                             person           = Session.person,
                             shouldEndSession = null,
@@ -98,7 +103,12 @@ namespace AlexaController.Alexa.IntentRequest
                         {
                             outputSpeech = new OutputSpeech()
                             {
-                                phrase = SpeechStrings.GetPhrase(SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, Session, results)
+                                phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                                {
+                                    type = SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, 
+                                    session = Session, 
+                                    items = results
+                                })
                             },
                             person           = Session.person,
                             shouldEndSession = true,

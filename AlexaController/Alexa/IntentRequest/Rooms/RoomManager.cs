@@ -33,7 +33,11 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.ROOM_CONTEXT, session)
+                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    {
+                        type = SpeechResponseType.ROOM_CONTEXT, 
+                        session = session
+                    })
                 },
                 shouldEndSession = false,
                 directives       = new List<IDirective>()

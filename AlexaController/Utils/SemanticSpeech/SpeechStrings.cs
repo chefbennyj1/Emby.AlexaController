@@ -29,11 +29,20 @@ namespace AlexaController.Utils.SemanticSpeech
         VOICE_AUTHENTICATION_ACCOUNT_EXISTS,
         VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR,
         VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS,
+        PERSON_NOT_RECOGNIZED,
         NOT_UNDERSTOOD,
         ON_LAUNCH,
         PROGRESSIVE_RESPONSE
     }
 
+    public class SpeechStringQuery
+    {
+        public SpeechResponseType type { get; set; }
+        public IAlexaSession session   { get; set; }
+        public List<BaseItem> items    { get; set; }
+        public string[] args           { get; set; }
+
+    }
     public class SpeechStrings : Semantics
     {
         public static readonly List<string> HelpStrings = new List<string>()
@@ -80,12 +89,19 @@ namespace AlexaController.Utils.SemanticSpeech
         };
         
         // ReSharper disable once TooManyArguments
-        public static string GetPhrase(SpeechResponseType type, IAlexaSession session, List<BaseItem> items = null, string[] args = null)
+        public static string GetPhrase(SpeechStringQuery speechQuery)
         {
             var speech = new StringBuilder();
             var name = string.Empty;
-            switch (type)
+            switch (speechQuery.type)
             {
+                case SpeechResponseType.PERSON_NOT_RECOGNIZED:
+
+                    speech.Append("I don't recognize the current user.");
+                    speech.Append("Please go to the plugin configuration and link emby account personalization.");
+                    speech.Append("Or ask for help.");
+                    return speech.ToString();
+
                 case SpeechResponseType.PROGRESSIVE_RESPONSE:
                 {
                     speech.Append(GetRandomSpeechResponse(SpeechType.COMPLIANCE));
@@ -97,9 +113,9 @@ namespace AlexaController.Utils.SemanticSpeech
                 case SpeechResponseType.ON_LAUNCH:
                 {
                     speech.Append(GetRandomSpeechResponse(SpeechType.GREETINGS));
-                    if (session.person != null)
+                    if (speechQuery.session.person != null)
                     {
-                        speech.Append(SayName(session.person));
+                        speech.Append(SayName(speechQuery.session.person));
                     }  
                     speech.Append(InsertStrengthBreak(StrengthBreak.strong));
                     speech.Append("What media can I help you find.");
@@ -118,18 +134,18 @@ namespace AlexaController.Utils.SemanticSpeech
                 case SpeechResponseType.NO_SEASON_ITEM_EXIST:
                 {
                     speech.Append(GetRandomSpeechResponse(SpeechType.APOLOGETIC));
-                    name = StringNormalization.ValidateSpeechQueryString(session?.NowViewingBaseItem.Name);
+                    name = StringNormalization.ValidateSpeechQueryString(speechQuery.session?.NowViewingBaseItem.Name);
                     speech.Append(SpeechRate(Rate.fast, SayWithEmotion(name, Emotion.disappointed, Intensity.high)));
                     speech.Append(ExpressiveInterjection(" doesn't contain "));
                     speech.Append(" season ");
-                    speech.Append(args?[0]);
+                    speech.Append(speechQuery.args?[0]);
                     return speech.ToString();
                 }
 
                 case SpeechResponseType.BROWSE_ITEM:
                 {
-                    name = StringNormalization.ValidateSpeechQueryString(items?[0].Name);
-                    var rating = items?[0].OfficialRating;
+                    name = StringNormalization.ValidateSpeechQueryString(speechQuery.items?[0].Name);
+                    var rating = speechQuery.items?[0].OfficialRating;
                     speech.Append(name);
                     speech.Append(", ");
                     if (string.IsNullOrEmpty(rating))
@@ -142,45 +158,45 @@ namespace AlexaController.Utils.SemanticSpeech
                         speech.Append(rating);
                     }
 
-                    if (session.room is null)
+                    if (speechQuery.session.room is null)
                     {
                         return speech.ToString();
                     }
                     speech.Append(InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append("Showing in the ");
-                    speech.Append(session.room.Name);
+                    speech.Append(speechQuery.session.room.Name);
                     return speech.ToString();
                 }
 
                 case SpeechResponseType.BROWSE_NEXT_UP_EPISODE:
                 {
-                    var season = items?[0].Parent;
+                    var season = speechQuery.items?[0].Parent;
                     var seriesName = season?.Parent.Name;
                     speech.Append("Here is the next up episode for ");
                     speech.Append(seriesName);
                     speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-                    speech.Append(items?[0].Name);
-                    if (session.room is null)
+                    speech.Append(speechQuery.items?[0].Name);
+                    if (speechQuery.session.room is null)
                     {
                         return speech.ToString();
                     }
                     speech.Append(InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append("Showing in the ");
-                    speech.Append(session.room.Name);
+                    speech.Append(speechQuery.session.room.Name);
                     return speech.ToString();
                 }
 
                 case SpeechResponseType.DISPLAY_MOVIE_COLLECTION:
                 {
                     speech.Append("The ");
-                    speech.Append(items?[0].Name);
+                    speech.Append(speechQuery.items?[0].Name);
                     return speech.ToString();
                 }
 
                 case SpeechResponseType.BROWSE_LIBRARY:
                 {
                     speech.Append("Here is the ");
-                    speech.Append(items?[0].Name);
+                    speech.Append(speechQuery.items?[0].Name);
                     speech.Append(" library.");
                     return speech.ToString();
                 }
@@ -189,9 +205,9 @@ namespace AlexaController.Utils.SemanticSpeech
                 {
                     speech.Append(GetRandomSpeechResponse(SpeechType.NON_COMPLIANT));
                     speech.Append("Are you sure you are allowed access to ");
-                    speech.Append(items is null ? "this item" : items[0].Name);
+                    speech.Append(speechQuery.items is null ? "this item" : speechQuery.items[0].Name);
                     speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-                    speech.Append(SayName(session.person));
+                    speech.Append(SayName(speechQuery.session.person));
                     speech.Append("?");
                     return speech.ToString();
                 }
@@ -199,11 +215,11 @@ namespace AlexaController.Utils.SemanticSpeech
                 case SpeechResponseType.PLAY_MEDIA_ITEM:
                 {
                     speech.Append("Now playing the ");
-                    speech.Append(items?[0].ProductionYear);
+                    speech.Append(speechQuery.items?[0].ProductionYear);
                     speech.Append(" ");
-                    speech.Append(items?[0].GetType().Name);
+                    speech.Append(speechQuery.items?[0].GetType().Name);
                     speech.Append(InsertStrengthBreak(StrengthBreak.weak)); 
-                    speech.Append(items?[0].Name);
+                    speech.Append(speechQuery.items?[0].Name);
                     return speech.ToString();
                 }
 
@@ -219,9 +235,9 @@ namespace AlexaController.Utils.SemanticSpeech
                 case SpeechResponseType.PLAY_NEXT_UP_EPISODE:
                 {
                     speech.Append("Playing the next up episode for ");
-                    speech.Append(items?[0].Parent.Parent.Name);
+                    speech.Append(speechQuery.items?[0].Parent.Parent.Name);
                     speech.Append("Showing in the ");
-                    speech.Append(session.room.Name);
+                    speech.Append(speechQuery.session.room.Name);
                     return speech.ToString();
                 }
 
@@ -239,7 +255,7 @@ namespace AlexaController.Utils.SemanticSpeech
                 {
                     speech.Append(GetRandomSpeechResponse(SpeechType.APOLOGETIC));
                     speech.Append("There is no device configuration for ");
-                    speech.Append(session.room);
+                    speech.Append(speechQuery.session.room);
                     speech.Append("Please look in the plugin configuration to map rooms to emby ready devices.");
                     return speech.ToString();
                 }
@@ -249,7 +265,7 @@ namespace AlexaController.Utils.SemanticSpeech
                     speech.Append(GetRandomSpeechResponse(SpeechType.APOLOGETIC));
                     speech.Append(SayWithEmotion("I was unable to access ", Emotion.disappointed, Intensity.medium));
                     speech.Append(SayWithEmotion("the device in the ", Emotion.disappointed, Intensity.medium));
-                    speech.Append(SayWithEmotion(args?[0], Emotion.disappointed, Intensity.medium));
+                    speech.Append(SayWithEmotion(speechQuery.args?[0], Emotion.disappointed, Intensity.medium));
                     speech.Append(InsertStrengthBreak(StrengthBreak.weak));
                     return speech.ToString();
                 }
@@ -257,7 +273,7 @@ namespace AlexaController.Utils.SemanticSpeech
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS:
                 {
                     speech.Append("This profile is already linked to ");
-                    speech.Append(SayName(session.person));
+                    speech.Append(SayName(speechQuery.session.person));
                     speech.Append("'s account");
                     return speech.ToString();
                 }
@@ -272,7 +288,7 @@ namespace AlexaController.Utils.SemanticSpeech
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS:
                 {
                     speech.Append("Success ");
-                    speech.Append(SayName(session.person));
+                    speech.Append(SayName(speechQuery.session.person));
                     speech.Append("!");
                     speech.Append("Please look at the plugin configuration.");
                     speech.Append("You should now see the I.D. linked to your voice.");
@@ -284,23 +300,23 @@ namespace AlexaController.Utils.SemanticSpeech
                 case SpeechResponseType.NEW_ITEMS_DISPLAY_NONE:
                 {
                     speech.Append("There ");
-                    speech.Append(items?.Count > 1 ? "are" : "is");
-                    speech.Append(SayAsCardinal(items?.Count.ToString()));
+                    speech.Append(speechQuery.items?.Count > 1 ? "are" : "is");
+                    speech.Append(SayAsCardinal(speechQuery.items?.Count.ToString()));
                     speech.Append(" new ");
-                    speech.Append(items?.Count > 1 ? items[0].GetType().Name + "s" : items?[0].GetType().Name);
+                    speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
                     speech.Append(string.Join($", {InsertStrengthBreak(StrengthBreak.weak)}",
                         // ReSharper disable once AssignNullToNotNullAttribute
-                        items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
+                        speechQuery.items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
                     return speech.ToString();
                 }
 
                 case SpeechResponseType.NEW_ITEMS_APL:
                 {
                     speech.Append("There ");
-                    speech.Append(items?.Count > 1 ? "are" : "is");
-                    speech.Append(SayAsCardinal(items?.Count.ToString()));
+                    speech.Append(speechQuery.items?.Count > 1 ? "are" : "is");
+                    speech.Append(SayAsCardinal(speechQuery.items?.Count.ToString()));
                     speech.Append(" new ");
-                    speech.Append(items?.Count > 1 ? items[0].GetType().Name + "s" : items?[0].GetType().Name);
+                    speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
                     return speech.ToString();
                 }
 
@@ -312,7 +328,7 @@ namespace AlexaController.Utils.SemanticSpeech
                 }
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                    throw new ArgumentOutOfRangeException(nameof(type), speechQuery.type, null);
             }
         }
     }

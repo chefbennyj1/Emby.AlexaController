@@ -1,5 +1,4 @@
 ﻿using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Utils.SemanticSpeech;
 
 // ReSharper disable ComplexConditionExpression
 // ReSharper disable InconsistentNaming
@@ -67,10 +66,10 @@ namespace AlexaController.Alexa.ResponseData.Model
 
     public interface IOutputSpeech
     {
-        string type { get; }
-        string ssml { get; set; }
+        string type   { get; }
+        string ssml   { get; set; }
         string phrase { get; set; }
-        string sound { get; set; }
+        string sound  { get; set; }
     }
 
     public class OutputSpeech : IOutputSpeech
@@ -101,7 +100,5 @@ namespace AlexaController.Alexa.ResponseData.Model
         public static string SpeechRate(Rate rate, string text) => $"<prosody rate='{rate}'>{text}</prosody>";
 
         public static string ExpressiveInterjection(string text) => $"<say-as interpret-as='interjection'>{text}</say-as>";
-
-
     }
 }

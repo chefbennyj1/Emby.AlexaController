@@ -40,7 +40,11 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var intent         = request.intent;
             var slots          = intent.slots;
 
-            var progressiveSpeech = SpeechStrings.GetPhrase(SpeechResponseType.PROGRESSIVE_RESPONSE, Session);
+            var progressiveSpeech = SpeechStrings.GetPhrase(new SpeechStringQuery()
+            {
+                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+                session = Session
+            });
 
 #pragma warning disable 4014
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
@@ -66,7 +70,11 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase    = SpeechStrings.GetPhrase(SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, Session)
+                        phrase    = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        {
+                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, 
+                            session = Session
+                        })
                     }
                 });
             }
@@ -79,7 +87,12 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SpeechStrings.GetPhrase(SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, Session, new List<BaseItem>() { result }),
+                        phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        {
+                            type    = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
+                            session = Session, 
+                            items   = new List<BaseItem>() { result }
+                        }),
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     }
                 });
@@ -114,7 +127,12 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, Session, new List<BaseItem>() { result })
+                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    {
+                        type = SpeechResponseType.PLAY_MEDIA_ITEM, 
+                        session = Session, 
+                        items = new List<BaseItem>() { result }
+                    })
                 },
                 shouldEndSession = null,
                 directives = new List<IDirective>()

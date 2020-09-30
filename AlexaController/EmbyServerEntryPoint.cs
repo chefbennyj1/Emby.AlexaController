@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
-using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.SemanticSpeech;
+using MediaBrowser.Controller;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
@@ -20,20 +20,16 @@ using MediaBrowser.Model.Querying;
 using MediaBrowser.Model.Session;
 using User = MediaBrowser.Controller.Entities.User;
 
-// ReSharper disable once TooManyDependencies
-// ReSharper disable once TooManyArguments
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable once MethodNameNotMeaningful
-// ReSharper disable once ComplexConditionExpression
 
 namespace AlexaController
 {
     public interface IEmbyServerEntryPoint
     {
+        Task<string> GetLocalApiUrlAsync();
         ILogger Log { get; }
-        List<BaseItem> GetBaseItems(BaseItem parent, string[] types, User user);
+        QueryResult<BaseItem> GetItemsResult(BaseItem parent, string[] types, User user);
         IEnumerable<SessionInfo> GetCurrentSessions();
-        BaseItem GetNextUpEpisode(Intent intent, User user);
+        BaseItem GetNextUpEpisode(string seriesName, User user);
         string GetLibraryId(string name);
         BaseItem GetItemById<T>(T id);
         Task SendMessageToPluginConfigurationPage<T>(string name, T data);
@@ -62,14 +58,17 @@ namespace AlexaController
 
     public class EmbyServerEntryPoint : EmbySearchUtility, IServerEntryPoint, IEmbyServerEntryPoint
     {
+        private IServerApplicationHost Host           { get; }
         private ILibraryManager LibraryManager        { get; }
         private ITVSeriesManager TvSeriesManager      { get; }
         private ISessionManager SessionManager        { get; }
         public ILogger Log                            { get; }
         public static IEmbyServerEntryPoint Instance  { get; private set; }
 
-        public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan) : base(libMan)
+        // ReSharper disable once TooManyDependencies
+        public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host) : base(libMan)
         {
+            Host            = host;
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
             SessionManager  = sesMan;
@@ -87,7 +86,7 @@ namespace AlexaController
             return SessionManager.Sessions;
         }
 
-        public List<BaseItem> GetBaseItems(BaseItem parent, string[] types, User user)
+        public QueryResult<BaseItem> GetItemsResult(BaseItem parent, string[] types, User user)
         {
             var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
             {
@@ -95,7 +94,12 @@ namespace AlexaController
                 IncludeItemTypes = types,
                 Recursive = true
             });
-            return result.Items.ToList();
+            return result;
+        }
+
+        public async Task<string> GetLocalApiUrlAsync()
+        {
+            return await Host.GetLocalApiUrl(CancellationToken.None);
         }
 
         public List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user)
@@ -109,18 +113,17 @@ namespace AlexaController
             });
             return result.Items.ToList();
         }
-
+        
         public BaseItem GetItemById<T>(T id)
         {
             return LibraryManager.GetItemById(id.ToString());
         }
 
-        public BaseItem GetNextUpEpisode(Intent intent, User user)
+        public BaseItem GetNextUpEpisode(string seriesName, User user)
         {
             try
             {
-                var series = intent.slots.Series;
-                var id     = QuerySpeechResultItem(series.value, new[] { "Series" }, user).InternalId;
+                var id     = QuerySpeechResultItem(seriesName, new[] { "Series" }, user).InternalId;
                 var nextUp = TvSeriesManager.GetNextUp(new NextUpQuery()
                 {
                     SeriesId = id,
@@ -189,7 +192,7 @@ namespace AlexaController
             return results.Select(id => LibraryManager.GetItemById(id).Parent.Parent).Distinct().ToList();
         }
 
-        private string GetDeviceIdFromRoomName(string room)
+        private string GetDeviceIdFromRoomName(string roomName)
         {
             var config = Plugin.Instance.Configuration;
             if (!config.Rooms.Any())
@@ -197,8 +200,13 @@ namespace AlexaController
                 throw new Exception("There are no rooms setup in configuration.");
             }
 
-            var device = config.Rooms.FirstOrDefault(r => string.Equals(r.Name, room, StringComparison.CurrentCultureIgnoreCase))?.Device;
+            var room = config.Rooms.FirstOrDefault(r => string.Equals(r.Name, roomName, StringComparison.CurrentCultureIgnoreCase));
+            if (room is null)
+            {
+                throw new Exception("That room doesn't exist in the plugin configuration.");
+            }
 
+            var device = room.Device;
             if (!ReferenceEquals(null, SessionManager.Sessions.FirstOrDefault(d => d.DeviceName == device)))
             {
                 return SessionManager.Sessions.FirstOrDefault(d => d.DeviceName == device)?.DeviceId;
@@ -216,6 +224,7 @@ namespace AlexaController
             return SessionManager.Sessions.FirstOrDefault(i => i.DeviceId == deviceId);
         }
 
+        // ReSharper disable once TooManyArguments
         private async Task BrowseHome(string room, User user, string deviceId = null, SessionInfo session = null)
         {
             try
@@ -271,6 +280,7 @@ namespace AlexaController
             var session = GetSession(deviceId);
             var type = request.GetType().Name;
             
+            // ReSharper disable once ComplexConditionExpression
             if (!type.Equals("Season") || !type.Equals("Series"))
                 await BrowseHome(alexaSession.room.Name, alexaSession.User, deviceId, session);
             
@@ -298,14 +308,22 @@ namespace AlexaController
             
             if (string.IsNullOrEmpty(deviceId))
             {
-                throw new DeviceUnavailableException(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE,null,null, new []{alexaSession.room.Name}));
+                throw new DeviceUnavailableException(SpeechStrings.GetPhrase(new SpeechStringQuery()
+                {
+                    type = SpeechResponseType.DEVICE_UNAVAILABLE, 
+                    args = new []{alexaSession.room.Name}
+                }));
             }
 
             var session  = GetSession(deviceId);
 
             if (session is null)
             {
-                throw new DeviceUnavailableException(SpeechStrings.GetPhrase(SpeechResponseType.DEVICE_UNAVAILABLE, null, null, new[] { alexaSession.room.Name }));
+                throw new DeviceUnavailableException(SpeechStrings.GetPhrase(new SpeechStringQuery()
+                {
+                    type = SpeechResponseType.DEVICE_UNAVAILABLE, 
+                    args = new[] { alexaSession.room.Name }
+                }));
             }
             
             // ReSharper disable once TooManyChainedReferences
@@ -356,6 +374,7 @@ namespace AlexaController
             
         }
 
+        // ReSharper disable once MethodNameNotMeaningful
         public void Run()
         {
             

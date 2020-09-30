@@ -27,9 +27,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
         public async Task<string> Response()
         {
-            var request = AlexaRequest.request;
-            var source = request.source;
-            var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
+            var request  = AlexaRequest.request;
+            var source   = request.source;
+            var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var baseItem = EmbyServerEntryPoint.Instance.GetItemById(source.id);
 
             session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
@@ -79,7 +79,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 person = session.person,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.PLAY_MEDIA_ITEM, session, new List<BaseItem>() { baseItem }),
+                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    {
+                        type = SpeechResponseType.PLAY_MEDIA_ITEM, 
+                        session = session, 
+                        items = new List<BaseItem>() { baseItem }
+                    }),
                    
                 },
                 shouldEndSession = null,

@@ -33,7 +33,11 @@ namespace AlexaController.Alexa.IntentRequest
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase             = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, Session),
+                        phrase             = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        {
+                            type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, 
+                            session = Session
+                        }),
                         
                     },
                 });
@@ -48,7 +52,11 @@ namespace AlexaController.Alexa.IntentRequest
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, Session),
+                            phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                            {
+                                type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, 
+                                session = Session
+                            }),
                         }
                     });
                 }
@@ -63,7 +71,11 @@ namespace AlexaController.Alexa.IntentRequest
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, Session),
+                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    {
+                        type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, 
+                        session  = Session
+                    }),
                 },
             });
         }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -24,14 +25,14 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var type     = baseItem.GetType().Name;
            
-            var results = EmbyServerEntryPoint.Instance.GetBaseItems(baseItem,
-                new[] {type == "Series" ? "Season" : "Episode"}, session.User);
+            var results = EmbyServerEntryPoint.Instance.GetItemsResult(baseItem,
+                new[] { type == "Series" ? "Season" : "Episode" }, session.User);
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
-                baseItems          = results,
+                baseItems          = results.Items.ToList(),
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle        = type == "Season" ? $"{baseItem.Parent.Name} > {baseItem.Name}" : baseItem.Name
+                HeaderTitle        = type == "Season" ? $"{ baseItem.Parent.Name } > { baseItem.Name }" : baseItem.Name
             };
            
             session.NowViewingBaseItem = baseItem;
