@@ -12,7 +12,7 @@ using AlexaController.Alexa.Presentation.APL.UserEvent.Video.End;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
@@ -27,7 +27,7 @@ using Video    = AlexaController.Alexa.Presentation.APL.Components.Video;
  * https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-image.html
  */
 
-namespace AlexaController
+namespace AlexaController.Alexa.Presentation
 {
     public class RenderDocumentBuilder 
     {
@@ -848,6 +848,7 @@ namespace AlexaController
 
         private async Task<IDirective> RenderQuestionRequestTemplate(IRenderDocumentTemplate template)
         {
+            // ReSharper disable once UseObjectOrCollectionInitializer
             var layout = new List<IItem>();
 
             layout.Add(new Video()
@@ -916,6 +917,7 @@ namespace AlexaController
 
         private async Task<IDirective> RenderNotUnderstoodTemplate()
         {
+            // ReSharper disable once UseObjectOrCollectionInitializer
             var layout = new List<IItem>();
 
             layout.Add(new Video()
@@ -990,6 +992,7 @@ namespace AlexaController
 
         private async Task<IDirective> RenderGenericHeadlineRequestTemplate(IRenderDocumentTemplate template)
         {
+            // ReSharper disable once UseObjectOrCollectionInitializer
             var layout = new List<IItem>();
 
             layout.Add(new Video()
@@ -1193,7 +1196,6 @@ namespace AlexaController
                         }
                     }
                 },
-                
                 items = new List<IItem>()
                 {
                     type == "Episode" ? await RenderEpisodePrimaryImageContainer(item) : await RenderMoviePrimaryImageContainer(item)
@@ -1221,6 +1223,21 @@ namespace AlexaController
 
         private static async Task<Container> RenderEpisodePrimaryImageContainer(BaseItem item)
         {
+            var primaryId = 0L;
+            var imageType = string.Empty;	
+            switch (item.HasImage(ImageType.Primary))
+            {
+                case true:
+                    primaryId = item.InternalId;
+                    imageType = "primary";
+                    break;
+
+                case false:
+                    primaryId = item.Parent.Parent.InternalId;
+                    imageType = "thumb";
+                    break;
+            } 
+
             return await Task.FromResult(new Container()
             {
                 height = "70vh",
@@ -1229,10 +1246,17 @@ namespace AlexaController
                 {
                     new Image()
                     {
-                        source       = $"{Url}/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;",
+                        source       = $"{Url}/Items/{primaryId}/Images/{imageType}?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;",
                         width        = "30vw",
                         height       = "62vh",
                         paddingRight = "12px",
+                    },
+                    new Text()
+                    {
+                        text         = $"{item.Name}",
+                        style        = "textStyleBody",
+                        top          = "-15vh",
+                        fontSize     = "20dp"
                     },
                     new Text()
                     {
@@ -1243,10 +1267,10 @@ namespace AlexaController
                     },
                     new Text()
                     {
-                        text         = $"{item.Name}",
+                        text = item.PremiereDate?.ToString("D"),
                         style        = "textStyleBody",
                         top          = "-15vh",
-                        fontSize     = "20dp"
+                        fontSize     = "15dp"
                     }
                 }
             });
@@ -1389,7 +1413,7 @@ namespace AlexaController
                         easing      = "ease-in",
                         value       = new List<IValue>()
                         {
-                            new OpacityValue() {from = 1, to = 0}
+                            new OpacityValue() {@from = 1, to = 0}
                         },
                         delay = 5000
                     },
@@ -1408,7 +1432,7 @@ namespace AlexaController
                         easing      = "ease-out",
                         value       = new List<IValue>()
                         {
-                            new OpacityValue() {from = 0, to = 1}
+                            new OpacityValue() {@from = 0, to = 1}
                         },
                         delay = 2500
                     }
@@ -1417,36 +1441,5 @@ namespace AlexaController
         
     }
 
-    public enum RenderDocumentType
-    {
-        NONE,
-        ITEM_DETAILS_TEMPLATE,
-        ITEM_LIST_SEQUENCE_TEMPLATE,
-        BROWSE_LIBRARY_TEMPLATE,
-        QUESTION_TEMPLATE,
-        //VIDEO,
-        NOT_UNDERSTOOD,
-        HELP,
-        GENERIC_HEADLINE_TEMPLATE,
-        ROOM_SELECTION_TEMPLATE,
-        VERTICAL_TEXT_LIST_TEMPLATE
-    }
-
-    public interface IRenderDocumentTemplate
-    {
-        RenderDocumentType renderDocumentType { get; }
-        string HeaderTitle { get; }
-        List<BaseItem> baseItems { get; }
-        string HeadlinePrimaryText { get; }
-        string HeaderAttributionImage { get; }
-    }
-
-    public class RenderDocumentTemplate : IRenderDocumentTemplate
-    {
-        public RenderDocumentType renderDocumentType { get; set; }
-        public string HeaderTitle                    { get; set; } = "";
-        public List<BaseItem> baseItems              { get; set; }
-        public string HeadlinePrimaryText            { get; set; } = "";
-        public string HeaderAttributionImage         { get; set; }
-    }
+    
 }

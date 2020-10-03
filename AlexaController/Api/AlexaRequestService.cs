@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
 using AlexaController.Utils;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
@@ -45,13 +46,10 @@ namespace AlexaController.Api
     {
         private IJsonSerializer JsonSerializer { get; }
         
-        private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent => intent.name == "VoiceAuthenticationAccountLink";
-        private readonly Func<Intent, bool> IsRoomNameIntentRequest = intent => intent.name == "Rooms_RoomNameIntent";
-
-        private readonly Func<Request, string> IntentNamespace = request 
-            => $"AlexaController.Alexa.IntentRequest.{request.intent.name.Replace("_", ".")}";
-        private readonly Func<Request, string> UserEventNamespace = request 
-            => $"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}";
+        private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent  => intent.name == "VoiceAuthenticationAccountLink";
+        private readonly Func<Intent, bool> IsRoomNameIntentRequest                 = intent  => intent.name == "Rooms_RoomNameIntent";
+        private readonly Func<Request, string> IntentNamespace                      = request => $"AlexaController.Alexa.IntentRequest.{request.intent.name.Replace("_", ".")}";
+        private readonly Func<Request, string> UserEventNamespace                   = request => $"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}";
         
         public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager sessionManager)
         {
@@ -177,7 +175,7 @@ namespace AlexaController.Api
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                            phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                             {
                                 type = SpeechResponseType.PERSON_NOT_RECOGNIZED
                             })
@@ -191,7 +189,7 @@ namespace AlexaController.Api
                 outputSpeech = new OutputSpeech()
                 {
                     sound = "<audio src=\"soundbank://soundlibrary/alarms/beeps_and_bloops/intro_02\"/>",
-                    phrase= SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    phrase= await SpeechStrings.GetPhrase(new SpeechStringQuery()
                     {
                         type = SpeechResponseType.ON_LAUNCH, 
                         session = session

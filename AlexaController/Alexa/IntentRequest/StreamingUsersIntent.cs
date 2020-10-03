@@ -7,7 +7,6 @@ using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
-using AlexaController.Utils.SemanticSpeech;
 using MediaBrowser.Controller.Session;
 
 // ReSharper disable once ComplexConditionExpression
@@ -25,9 +24,7 @@ namespace AlexaController.Alexa.IntentRequest
         public StreamingUsersIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
 
         public async Task<string> Response()
@@ -57,10 +54,10 @@ namespace AlexaController.Alexa.IntentRequest
             
             var speech = new StringBuilder();
             speech.Append("There ");
-            speech.Append(sessionInfos.Count() > 1 ? "are ": "is ");
+            speech.Append(sessionInfos.Count > 1 ? "are ": "is ");
             speech.Append("currently ");
-            speech.Append(sessionInfos.Count());
-            speech.Append(sessionInfos.Count() > 1 ? "sessions" : "session");
+            speech.Append(sessionInfos.Count);
+            speech.Append(sessionInfos.Count > 1 ? "sessions" : "session");
             speech.Append(" active on the server.");
 
             return speech.ToString();

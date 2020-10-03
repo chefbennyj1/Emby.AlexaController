@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -22,7 +23,9 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
         public async Task<string> Response()
         {
-            if (Session.room is null)
+            var room = Session.room;
+
+            if (room is null)
             {
                 Session.PersistedRequestData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
@@ -52,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"Thank you. Please see the plugin configuration to choose the emby device that is in the { Session.room.Name }, and press the \"Create Room button\".",
+                    phrase = $"Thank you. Please see the plugin configuration to choose the emby device that is in the { room.Name }, and press the \"Create Room button\".",
 
                 }
             }, Session.alexaSessionDisplayType);

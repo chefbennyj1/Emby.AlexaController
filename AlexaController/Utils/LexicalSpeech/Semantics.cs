@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
+using AlexaController.Alexa.Speech;
 
 // ReSharper disable ComplexConditionExpression
 // ReSharper disable InconsistentNaming
 
-namespace AlexaController.Utils.SemanticSpeech
+namespace AlexaController.Utils.LexicalSpeech
 {
    
 

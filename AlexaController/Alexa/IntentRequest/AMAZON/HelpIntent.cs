@@ -5,14 +5,6 @@ using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable TooManyArguments
-
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     public class HelpIntent : IIntentResponse
@@ -24,9 +16,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         public HelpIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
         public async Task<string> Response()
         {
@@ -42,6 +32,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                     await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                     {
                         renderDocumentType = RenderDocumentType.HELP
+
                     }, Session)
                 }
             }, Session.alexaSessionDisplayType);

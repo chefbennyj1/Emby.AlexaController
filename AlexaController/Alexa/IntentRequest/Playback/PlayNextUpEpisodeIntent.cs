@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 
 
@@ -43,7 +45,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
                             type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, 
                             session = Session
@@ -63,7 +65,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                     {
                         type = SpeechResponseType.PLAY_NEXT_UP_EPISODE, 
                         session = Session, 

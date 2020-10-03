@@ -3,7 +3,7 @@
 // ReSharper disable ComplexConditionExpression
 // ReSharper disable InconsistentNaming
 
-namespace AlexaController.Utils.SemanticSpeech
+namespace AlexaController.Alexa.Speech
 {
     public enum Domain
     {
@@ -79,7 +79,7 @@ namespace AlexaController.Utils.SemanticSpeech
 
         public static string SayWithEmphasis(string text, Emphasis emphasis)                   => $"<emphasis level='{emphasis}'>{text}</emphasis>";
 
-        public static string SayWithEmotion(string text, Emotion emotion, Intensity intensity) => $"<amazon:emotion name='{emotion}' intensity='{intensity}'>{text} </amazon:emotion>";
+        public static string SayWithEmotion(string text, Emotion emotion, Intensity intensity) => $"<amazon:emotion name='{emotion}' intensity='{intensity}'>{text}</amazon:emotion>";
 
         public static string SpeechRate(Rate rate, string text)                                => $"<prosody rate='{rate}'>{text}</prosody>";
 

@@ -1,5 +1,6 @@
 ﻿namespace AlexaController.Alexa.RequestData.Model
 {
+    // ReSharper disable once InconsistentNaming
     public class slotData
     {
         public string name { get; set; }

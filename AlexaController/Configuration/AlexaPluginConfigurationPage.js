@@ -497,76 +497,115 @@
             dlg.classList.add("ui-body-a");
             dlg.classList.add("background-theme-a");
             dlg.classList.add("colorChooser");
-            dlg.style = "max-width: 25%;max-height: 87%;";
+            dlg.style = "max-width: 40%;max-height: 87%;";
 
             var html = '';
-
             html += '<div class="formDialogHeader" style="display:flex">'; 
             html += '<button is="paper-icon-button-light" class="btnCloseDialog autoSize paper-icon-button-light" tabindex="-1"><i class="md-icon"></i></button>';
             html += '<h3 id="headerContent" class="formDialogHeaderTitle">Try this!</h3>';
             html += '</div>';
-            html += '<h2 class="sectionTitle sectionTitle-cards">ask home theater...</h2>';
-            html += '<div class="scrollY" style="height:75%; width:90%; margin:2em">';
-            html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Movies:</h2>';
-            html += '<p>...to show the movie {movie_name}</p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Television:</h2>';
-            html += '<p>...to show the series {series_name}</p>';
-            html += '<p style="font-weight: bold">(When the series is displayed, you may ask)</p>';
-            html += '<p>...to show Season {season_number}</p>';
-            html += '<p style="font-weight: bold">(When the episode list is displayed for the season, you may ask)</p>';
-            html += '<p>...play episode {episode_number}.</p>';
-            html += '<p> </p>';
-            html += '<p style="font-weight: bold">(ask for a specific series, next up episode)</p>';
-            html += '<p>...to show the next up episode for {series_name}</p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<h2 class="sectionTitle sectionTitle-cards">Requesting New Media:</h2>';
-            html += '<p>...to show new movies</p>';
-            html += '<p>...to show new movies from the last {time_period}</p>';
-            html += '<p>...to show new movies added in the last {time_period}</p>';
-            html += '<p>...to show new tv shows/series</p>';
-            html += '<p>...to show new tv shows/series from the last {time_period}</p>';
-            html += '<p>...to show new tv shows/series added in the last {time_period}</p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Collections:</h2>';
-            html += '<p>...to show the {movie_collection_name} collection</p>';
-            html += '<p>...to show all the {movie_name} movies</p>';
-            html += '<p>...to show the {movie_collection_name} saga</p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>';
-            html += '<p></p>'; 
+
+            html += '<div style="margin:2em">';
+            html += '<p><b>VisualModeTrigger</b>: Captures words that indicate a visual response, such as "show" or "display".</p>';
+            html += '<p><b>Anaphor</b>: Captures words that are anaphors representing an item, such as "this", "that", and "it".</p>';
+            html += '<p><b>Duration</b>: Words that indicate durations "2 hours", "last four days" , " past weeks" , " the last month"</p>';
+            html += '<p><b>Room</b>: Room names setup in the configuration.</p>';
             html += '</div>';
 
+            html += '<div style="margin:2em">'
+            html += '<h2 class="sectionTitle sectionTitle-cards">ask home theater...</h2>';
+            html += '</div>';
 
-            dlg.innerHTML = html;
-
-            dlg.querySelector('.btnCloseDialog').addEventListener('click',
-                () => {
-                    dialogHelper.close(dlg);
-                });
+            html += '<div class="scrollY" style="height:75%; width:90%; margin: 1em 2em 3em;">'; 
             
-            dialogHelper.open(dlg);
+            ApiClient.getJSON(ApiClient.getUrl("InteractionModel")).then(result => {
+                var interactionModel = JSON.parse(result.InteractionModel);
+                interactionModel.interactionModel.languageModel.intents.sort(function (a, b) {
+                    return a < b ? -1 : 1;
+                }).forEach(intent => {
+                    //We are ignoring HELP. fix it!
+                    if (!(intent.name.indexOf("AMAZON") > -1)) {
+                        html += '<h2 class="sectionTitle sectionTitle-cards">' + intent.name.replace("_", ": ").replace("Intent", "") + '</h2>';
+                        var samples = intent.samples;
+                        samples.forEach(sample => {
+                            html += '<p>...' + sample + '</p>';
+                        });
+                    }
+                });  
+
+                html += '</div>';
+                
+
+                dlg.innerHTML = html;
+
+                dlg.querySelector('.btnCloseDialog').addEventListener('click',
+                    () => {
+                        dialogHelper.close(dlg);
+                    });
+            
+                dialogHelper.open(dlg);
+
+                console.log(interactionModel);
+            });
+
+
+            //var html = '';
+
+            
+            
+            //html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Movies:</h2>';
+            //html += '<p>...to show the movie {movie_name}</p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Television:</h2>';
+            //html += '<p>...to show the series {series_name}</p>';
+            //html += '<p style="font-weight: bold">(When the series is displayed, you may ask)</p>';
+            //html += '<p>...to show Season {season_number}</p>';
+            //html += '<p style="font-weight: bold">(When the episode list is displayed for the season, you may ask)</p>';
+            //html += '<p>...play episode {episode_number}.</p>';
+            //html += '<p> </p>';
+            //html += '<p style="font-weight: bold">(ask for a specific series, next up episode)</p>';
+            //html += '<p>...to show the next up episode for {series_name}</p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<h2 class="sectionTitle sectionTitle-cards">Requesting New Media:</h2>';
+            //html += '<p>...to show new movies</p>';
+            //html += '<p>...to show new movies from the last {time_period}</p>';
+            //html += '<p>...to show new movies added in the last {time_period}</p>';
+            //html += '<p>...to show new tv shows/series</p>';
+            //html += '<p>...to show new tv shows/series from the last {time_period}</p>';
+            //html += '<p>...to show new tv shows/series added in the last {time_period}</p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Collections:</h2>';
+            //html += '<p>...to show the {movie_collection_name} collection</p>';
+            //html += '<p>...to show all the {movie_name} movies</p>';
+            //html += '<p>...to show the {movie_collection_name} saga</p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>';
+            //html += '<p></p>'; 
+            //html += '</div>';
+
+
+           
         }
                
         return function(view) {

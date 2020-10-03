@@ -4,7 +4,7 @@ using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 
 
 namespace AlexaController.Alexa.IntentRequest
@@ -33,7 +33,7 @@ namespace AlexaController.Alexa.IntentRequest
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase             = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        phrase             = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
                             type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, 
                             session = Session
@@ -52,7 +52,7 @@ namespace AlexaController.Alexa.IntentRequest
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                            phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                             {
                                 type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, 
                                 session = Session
@@ -71,7 +71,7 @@ namespace AlexaController.Alexa.IntentRequest
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                     {
                         type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, 
                         session  = Session

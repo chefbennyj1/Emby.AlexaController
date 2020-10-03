@@ -26,6 +26,7 @@ namespace AlexaController.Api
         {
             JsonSerializer = json;
         }
+        // ReSharper disable once MethodNameNotMeaningful
         public string Get(FlashBriefingRequest request)
         {
             var d = new FlashBriefingRequest()

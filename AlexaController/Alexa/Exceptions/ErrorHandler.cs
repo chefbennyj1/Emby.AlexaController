@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.ResponseData.Model;
+using AlexaController.Alexa.Speech;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
 
 // ReSharper disable TooManyArguments
 

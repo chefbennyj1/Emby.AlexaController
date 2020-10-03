@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 
@@ -46,7 +46,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            var progressiveSpeech = SpeechStrings.GetPhrase(new SpeechStringQuery()
+            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
                 type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
                 session = Session
@@ -66,7 +66,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
                             type = SpeechResponseType.NO_SEASON_ITEM_EXIST, 
                             session = Session, 

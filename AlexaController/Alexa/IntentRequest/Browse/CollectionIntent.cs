@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 
@@ -45,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
 
-            var progressiveSpeech = SpeechStrings.GetPhrase(new SpeechStringQuery()
+            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
                 type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
                 session = Session
@@ -58,8 +60,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
             
             var collection          = EmbyServerEntryPoint.Instance.GetCollectionItems(Session.User, collectionRequest);
-            var collectionItems     = collection.Items;
-            var collectionBaseItem  = EmbyServerEntryPoint.Instance.GetItemById(collection.Id);
+            var collectionItems     = collection.Values.FirstOrDefault();
+            var collectionBaseItem  = collection.Keys.FirstOrDefault();
             
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
@@ -71,7 +73,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         shouldEndSession = true,
                         outputSpeech = new OutputSpeech()
                         {
-                            phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                            phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                             {
                                 type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
                                 session = Session, 

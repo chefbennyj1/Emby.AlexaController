@@ -7,7 +7,7 @@ using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 
@@ -44,7 +44,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            var progressiveSpeech = SpeechStrings.GetPhrase(new SpeechStringQuery()
+            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
                 type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
                 session = Session

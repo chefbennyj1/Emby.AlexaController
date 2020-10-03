@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Session;
 using AlexaController.Utils;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
@@ -33,10 +33,11 @@ namespace AlexaController
         string GetLibraryId(string name);
         BaseItem GetItemById<T>(T id);
         Task SendMessageToPluginConfigurationPage<T>(string name, T data);
-        ICollectionInfo GetCollectionItems(User userName, string collectionName);
+        Dictionary<BaseItem, List<BaseItem>> GetCollectionItems(User userName, string collectionName);
         List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user);
         IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration );
         IEnumerable<BaseItem> GetLatestTv(User user, DateTime duration);
+        Task<List<BaseItem>> GetUpComingTvAsync(DateTime duration);
         Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request);
         Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item);
         BaseItem QuerySpeechResultItem(string searchName, string[] type, User user);
@@ -44,18 +45,7 @@ namespace AlexaController
         Task GoBack(string room, User user);
     }
 
-    public interface ICollectionInfo
-    {
-        long Id { get; set; }
-        List<BaseItem> Items { get; set; }
-    }
-
-    public class CollectionInfo : ICollectionInfo
-    {
-        public long Id              { get; set; }
-        public List<BaseItem> Items { get; set; }
-    }
-
+   
     public class EmbyServerEntryPoint : EmbySearchUtility, IServerEntryPoint, IEmbyServerEntryPoint
     {
         private IServerApplicationHost Host           { get; }
@@ -143,24 +133,23 @@ namespace AlexaController
             return LibraryManager.GetVirtualFolders().FirstOrDefault(r => r.Name == name)?.ItemId;
         }
         
-        public ICollectionInfo GetCollectionItems(User user, string collectionName)
+        public Dictionary<BaseItem, List<BaseItem>> GetCollectionItems(User user, string collectionName)
         {
             var result = QuerySpeechResultItem(collectionName, new[] { "collections", "Boxset" }, user);
 
-            var collectionItem = LibraryManager.QueryItems(new InternalItemsQuery()
+            var collection = LibraryManager.QueryItems(new InternalItemsQuery()
             {
                 ListIds        = new[] { result.InternalId },
                 EnableAutoSort = true,
                 OrderBy        = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray(),
             });
             
-            return new CollectionInfo(){ Id = result.InternalId, Items = collectionItem.Items.ToList() };
+            return new Dictionary<BaseItem, List<BaseItem>>() { { result, collection.Items.ToList() } };
 
         }
 
         public IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration)
         {
-
             // Duration can be request from the user, but will default to anything add in the last 25 days.
             var results = LibraryManager.GetItemIds(new InternalItemsQuery
             {
@@ -171,7 +160,6 @@ namespace AlexaController
                 EnableAutoSort   = true,
                 OrderBy          = new[] { ItemSortBy.DateCreated }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Descending)).ToArray()
             });
-
             
             return results.Select(id => LibraryManager.GetItemById(id)).ToList();
         }
@@ -308,10 +296,10 @@ namespace AlexaController
             
             if (string.IsNullOrEmpty(deviceId))
             {
-                throw new DeviceUnavailableException(SpeechStrings.GetPhrase(new SpeechStringQuery()
+                throw new DeviceUnavailableException(await SpeechStrings.GetPhrase(new SpeechStringQuery()
                 {
                     type = SpeechResponseType.DEVICE_UNAVAILABLE, 
-                    args = new []{alexaSession.room.Name}
+                    args = new []{ alexaSession.room.Name }
                 }));
             }
 
@@ -319,7 +307,7 @@ namespace AlexaController
 
             if (session is null)
             {
-                throw new DeviceUnavailableException(SpeechStrings.GetPhrase(new SpeechStringQuery()
+                throw new DeviceUnavailableException(await SpeechStrings.GetPhrase(new SpeechStringQuery()
                 {
                     type = SpeechResponseType.DEVICE_UNAVAILABLE, 
                     args = new[] { alexaSession.room.Name }
@@ -334,9 +322,9 @@ namespace AlexaController
                 await SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
                 {
                     StartPositionTicks = startTicks,
-                    PlayCommand = PlayCommand.PlayNow,
-                    ItemIds = new[] {item.InternalId},
-                    ControllingUserId = alexaSession.User.Id.ToString()
+                    PlayCommand        = PlayCommand.PlayNow,
+                    ItemIds            = new[] {item.InternalId},
+                    ControllingUserId  = alexaSession.User.Id.ToString()
 
                 }, CancellationToken.None);
             }
@@ -367,6 +355,19 @@ namespace AlexaController
 
             return new Dictionary<BaseItem, List<BaseItem>>() {{ actorQuery.Items[0], query.Items.ToList() }};
 
+        }
+
+        public async Task<List<BaseItem>> GetUpComingTvAsync(DateTime duration)
+        {
+            var upComing = LibraryManager.GetItemsResult(new InternalItemsQuery()
+            {
+                MinPremiereDate  = DateTime.Now.AddDays(-1),
+                IncludeItemTypes = new[] {"Episode"},
+                MaxPremiereDate  = duration,
+                OrderBy          = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray()
+            });
+
+            return await Task.FromResult(upComing.Items.ToList());
         }
 
         public void Dispose()

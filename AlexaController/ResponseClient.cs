@@ -1,8 +1,9 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
+using AlexaController.Alexa.Speech;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Model.Serialization;
 
@@ -34,6 +35,7 @@ namespace AlexaController
             Instance = this;
         }
 
+        // ReSharper disable once FlagArgument
         public async Task<string> BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)
         {
             var person = !(response.person is null) ? Semantics.SayName(response.person) : "";

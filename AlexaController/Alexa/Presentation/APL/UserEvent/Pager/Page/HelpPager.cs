@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page

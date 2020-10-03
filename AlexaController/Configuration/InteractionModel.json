@@ -2,6 +2,11 @@
     "interactionModel": {
         "languageModel": {
             "invocationName": "home theater",
+            "modelConfiguration": {
+                "fallbackIntentSensitivity": {
+                    "level": "LOW"
+                }
+            },
             "intents": [
                 {
                     "name": "Libraries_MoviesIntent",
@@ -425,6 +430,24 @@
                         "to {VisualModeTrigger} movies with {ActorName}",
                         "to {VisualModeTrigger}  {ActorName}"
                     ]
+                },
+                {
+                    "name": "Libraries_UpComingTv",
+                    "slots": [
+                        {
+                            "name": "Duration",
+                            "type": "AMAZON.DURATION"
+                        }
+                    ],
+                    "samples": [
+                        "to show up coming TV series",
+                        "what's on TV this {Duration}",
+                        "to show upcoming tv shows"
+                    ]
+                },
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
                 }
             ],
             "types": [

@@ -20,6 +20,7 @@
         public slotData ComicBook { get; set; }
         public slotData @object { get; set; }
         public slotData MovieAlternatives { get; set; }
+        // ReSharper disable once InconsistentNaming
         public slotData TVAlternatives { get; set; }
     }
 }

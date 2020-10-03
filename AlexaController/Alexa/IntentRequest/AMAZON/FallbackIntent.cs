@@ -1,21 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils.LexicalSpeech;
 
-namespace AlexaController.Alexa.IntentRequest
+namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
-    public class NotUnderstood : IIntentResponse
+    public class FallbackIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
 
-        public NotUnderstood(IAlexaRequest alexaRequest, IAlexaSession session)
+        public FallbackIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
             Session = session;
@@ -36,7 +34,7 @@ namespace AlexaController.Alexa.IntentRequest
                 
                 directives = new List<IDirective>()
                 {
-                     await RenderDocumentBuilder.Instance
+                    await RenderDocumentBuilder.Instance
                         .GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD

@@ -2,10 +2,12 @@
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 
 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -41,7 +43,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             var apiAccessToken = context.System.apiAccessToken;
             var requestId = request.requestId;
 
-            var progressiveSpeech = SpeechStrings.GetPhrase(new SpeechStringQuery()
+            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
                 type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
                 session = session
@@ -81,7 +83,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                     {
                         type = SpeechResponseType.BROWSE_LIBRARY, 
                         session = session, 

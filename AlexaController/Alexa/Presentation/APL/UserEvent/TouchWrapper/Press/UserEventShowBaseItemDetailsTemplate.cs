@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                     {
                         type = SpeechResponseType.BROWSE_ITEM, 
                         session = session, 

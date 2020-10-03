@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 
 namespace AlexaController.Utils
 {
-    public class DateTimeDurationNormalization
+    public class DateTimeDurationSerializer
     {
         public class Duration
         {
@@ -25,8 +25,9 @@ namespace AlexaController.Utils
             public int second { get; set; }
         }
 
-        public static DateTime GetMinDateCreation(Duration duration)
+        public static DateTime GetMinDateCreation(string iso8601)
         {
+            var duration = DeserializeDurationFromIso8601(iso8601);
             return DateTime.Now
                 .AddYears(-duration.year)
                 .AddMonths(-duration.month)
@@ -37,7 +38,20 @@ namespace AlexaController.Utils
                 .AddSeconds(-duration.second);
         }
 
-        public static Duration DeserializeDurationFromIso8601(string iso8601)
+        public static DateTime GetMaxPremiereDate(string iso8601)
+        {
+            var duration = DeserializeDurationFromIso8601(iso8601);
+            return DateTime.Now  
+                .AddYears(duration.year)
+                .AddMonths(duration.month)
+                .AddDays((duration.week*7))
+                .AddDays(duration.day)
+                .AddHours(duration.hour)
+                .AddMinutes(duration.minute)
+                .AddSeconds(duration.second);
+        }
+
+        private static Duration DeserializeDurationFromIso8601(string iso8601)
         {
             const string pattern = @"^P(?!$)(\d+(?:\.\d+)?Y)?(\d+(?:\.\d+)?M)?(\d+(?:\.\d+)?W)?(\d+(?:\.\d+)?D)?(T(?=\d)(\d+(?:\.\d+)?H)?(\d+(?:\.\d+)?M)?(\d+(?:\.\d+)?S)?)?$";
             var regex            = new Regex(pattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Configuration;
 using AlexaController.Session;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
@@ -33,7 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                     {
                         type = SpeechResponseType.ROOM_CONTEXT, 
                         session = session

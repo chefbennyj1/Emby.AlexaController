@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
-using AlexaController.Utils.SemanticSpeech;
+using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 
@@ -46,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var requestId      = request.requestId;
 
 
-            var progressiveSpeech = SpeechStrings.GetPhrase(new SpeechStringQuery()
+            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
                 type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
                 session = Session
@@ -70,7 +71,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
                             type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, 
                             session = Session
@@ -85,7 +86,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
                             type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
                             session = Session, 
@@ -133,7 +134,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
                             type = SpeechResponseType.BROWSE_ITEM, 
                             session = Session, 

@@ -24,9 +24,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         public StopIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            ;
             Session = session;
-            ;
         }
         public async Task<string> Response()
         {

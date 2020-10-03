@@ -1,80 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.LexicalSpeech;
 
-namespace AlexaController.Alexa.IntentRequest
+namespace AlexaController.Alexa.IntentRequest.Libraries
 {
-    [Intent]
-    public class NewItemsIntent : IIntentResponse
+    public class UpComingTv : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
 
-        public NewItemsIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public UpComingTv(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
             Session = session;
         }
-
         public async Task<string> Response()
         {
+            try
+            {
+                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            }
+            catch { }
+
+            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
+            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+            
             var request        = AlexaRequest.request;
-            var slots          = request.intent.slots;
-            var duration       = slots.Duration.value;
-            var type           = slots.MovieAlternatives.value is null ? "New TV Shows" : "New Movies";
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-            
-            // Default will be 25 days ago unless given a time duration
-            var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);
-
-            await ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId).ConfigureAwait(false);
-
-            var query = type == "New TV Shows"
-                ? EmbyServerEntryPoint.Instance.GetLatestTv(Session.User, d)
-                : EmbyServerEntryPoint.Instance.GetLatestMovies(Session.User, d);
-
-            var results = query.Where(item => item.IsParentalAllowed(Session.User)).ToList();
-
-            if (!results.Any())
-            {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
-                {
-                    outputSpeech = new OutputSpeech()
-                    {
-                        phrase = $"No { type } have been added."
-                    },
-                    person = Session.person,
-                    shouldEndSession = true,
-
-                }, Session.alexaSessionDisplayType);
-            }
            
+            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+            {
+                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+                session = Session
+            });
+
+#pragma warning disable 4014
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
+
+            var slots          = request.intent.slots;
+            var durationValue  = slots.Duration.value;
+            var duration       = durationValue is null ? DateTime.Now.AddDays(7) : DateTimeDurationSerializer.GetMaxPremiereDate(durationValue);
+            
+            var results = await EmbyServerEntryPoint.Instance.GetUpComingTvAsync(duration);
+
             switch (Session.alexaSessionDisplayType)
             {
                 case AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE:
-                {
+                    {
                         var documentTemplateInfo = new RenderDocumentTemplate()
                         {
-                            baseItems          = results,
+                            baseItems = results,
                             renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                            HeaderTitle        = type
+                            HeaderTitle = "Upcoming Episode"
                         };
 
                         AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-                        var renderDocumentDirective =
-                            await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+                        var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
 
                         return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
@@ -82,14 +74,14 @@ namespace AlexaController.Alexa.IntentRequest
                             {
                                 phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                                 {
-                                    type = SpeechResponseType.NEW_ITEMS_APL, 
-                                    session = Session, 
+                                    type = SpeechResponseType.UP_COMING_EPISODES,
+                                    session = Session,
                                     items = results
                                 })
                             },
-                            person           = Session.person,
+                            person = Session.person,
                             shouldEndSession = null,
-                            directives       = new List<IDirective>()
+                            directives = new List<IDirective>()
                             {
                                 renderDocumentDirective
                             }
@@ -104,12 +96,12 @@ namespace AlexaController.Alexa.IntentRequest
                             {
                                 phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                                 {
-                                    type = SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, 
-                                    session = Session, 
+                                    type = SpeechResponseType.UP_COMING_EPISODES,
+                                    session = Session,
                                     items = results
                                 })
                             },
-                            person           = Session.person,
+                            person = Session.person,
                             shouldEndSession = true,
 
                         }, Session.alexaSessionDisplayType);

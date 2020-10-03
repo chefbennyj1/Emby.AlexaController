@@ -27,12 +27,11 @@
                         <div style="padding: 1em;">
                             <div class="detailSectionHeader personalizationConfiguration">
                                 <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">Personalization</h2>
-                                <button is="emby-button" type="button" class="fab btnPersonalization submit emby-button" style="margin-left: 1em;">
-                                    <i class="md-icon">add</i>
-                                </button>
                                 <p>Link Emby account users with Alexa's personalization account data</p>
                             </div>
-
+                            <div class="flex align-items-center justify-content-center focuscontainer-x itemsViewSettingsContainer padded-top padded-bottom">
+                                <button is="emby-button" type="button" class="raised raised-mini btnPersonalization submit emby-button" style="margin-left:.5em;" title="New Voice Authentication Account Link"><i class="md-icon button-icon button-icon-left"></i><span>New Voice Authentication Account Link</span></button>
+                            </div>
                             <div class="paperList" style="padding: 2em;">
                                 <table class="tblPersonalizationResults table detailTable" style="width: 100%; margin-top: 3em; padding-bottom: 3em;">
                                     <thead>
@@ -54,7 +53,7 @@
                                 </div>
                             </div>
 
-                            <div style="padding: 0 1em 1em;">
+                            <div style="padding: 4em 2em 0">
                                 <div class="infoBanner flex align-items-center" style="margin: 1em 0;">
                                     Parental controls using voice recognition allows Alexa's personalization voice profiles to be used with Emby accounts parental controls to handle media requests based on rating.
                                     If turned off, Alexa will use the first Emby Administrator account to access media.
@@ -75,12 +74,12 @@
                         <hr />
 
                         <div style="padding: 1em;">
-                            <div class="detailSectionHeader" style="padding-bottom: 2em">
+                            <div class="detailSectionHeader">
                                 <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">Rooms</h2>
-                                <button is="emby-button" type="button" class="fab btnRoomsDevices submit emby-button" style="margin-left: 1em;">
-                                    <i class="md-icon">add</i>
-                                </button>
                                 <p>Create room names with emby devices.</p>
+                            </div>
+                            <div class="flex align-items-center justify-content-center focuscontainer-x itemsViewSettingsContainer padded-top padded-bottom">
+                                <button is="emby-button" type="button" class="raised raised-mini btnRoomsDevices submit emby-button" style="margin-left:.5em;" title="New Room"><i class="md-icon button-icon button-icon-left"></i><span>New Room</span></button>
                             </div>
 
                             <div class="paperList" style="padding: 1em;">
@@ -105,7 +104,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        <hr />                
                         <button is="emby-button" class="btnTry raised button-submit block emby-button" style="margin: 2em auto; width: 50%;" id="saveButton">Things to try!</button>
 
                     </div>
