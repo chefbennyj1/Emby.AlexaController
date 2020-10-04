@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
+using AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page;
 using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.UserEvent.Video.End;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
@@ -912,7 +913,7 @@ namespace AlexaController.Alexa.Presentation
                 }
             };
 
-            return await Task.FromResult(view);
+            return await Task.FromResult<IDirective>(view);
         }
 
         private async Task<IDirective> RenderNotUnderstoodTemplate()
@@ -987,7 +988,7 @@ namespace AlexaController.Alexa.Presentation
                 }
             };
 
-            return await Task.FromResult(view);
+            return await Task.FromResult<IDirective>(view);
         }
 
         private async Task<IDirective> RenderGenericHeadlineRequestTemplate(IRenderDocumentTemplate template)
@@ -1062,7 +1063,7 @@ namespace AlexaController.Alexa.Presentation
                 }
             };
 
-            return await Task.FromResult(view);
+            return await Task.FromResult<IDirective>(view);
         }
         
         private async Task<IDirective> RenderHelpTemplate()
@@ -1126,7 +1127,7 @@ namespace AlexaController.Alexa.Presentation
                                         id          = "HelpPager",
                                         onPageChanged = new List<object>()
                                         {
-                                            new SendEvent() { arguments = new List<object>() {"HelpPager", "Help", "${event.source.value}" } }
+                                            new SendEvent() { arguments = new List<object>() { nameof(HelpPager), "Help", "${event.source.value}" } }
                                         }
                                     }
                                 }
@@ -1137,7 +1138,7 @@ namespace AlexaController.Alexa.Presentation
                 }
             };
 
-            return await Task.FromResult(view);
+            return await Task.FromResult<IDirective>(view);
         }
 
 
@@ -1246,7 +1247,7 @@ namespace AlexaController.Alexa.Presentation
                 {
                     new Image()
                     {
-                        source       = $"{Url}/Items/{primaryId}/Images/{imageType}?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;",
+                        source       = $"{Url}/Items/{primaryId}/Images/{imageType}?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;",
                         width        = "30vw",
                         height       = "62vh",
                         paddingRight = "12px",

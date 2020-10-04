@@ -235,8 +235,8 @@
             html += '</div>';
 
             html += '<div style="margin:2em; text-align:center;width:100%">';
-            html += '<h2 class="learningPhrase" style="font-weight: bold">Alexa, ask home theater to set up a new room.</h2>';
-            html += '<h2 class="learningPhrase" style="font-weight: bold">Alexa, ask home theater to add a new room.</h2>';
+            html += '<h2 class="learningPhrase" style="font-weight: bold"><b>Alexa, ask home theater to set up a new room.</b></h2>';
+            html += '<h2 class="learningPhrase" style="font-weight: bold"><b>Alexa, ask home theater to add a new room.<b/></h2>';
             html += '</div>';
 
             html += '<!--Room Name-->';
