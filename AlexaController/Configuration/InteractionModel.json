@@ -432,7 +432,7 @@
                     ]
                 },
                 {
-                    "name": "Libraries_UpComingTv",
+                    "name": "Browse_UpComingTv",
                     "slots": [
                         {
                             "name": "Duration",
@@ -440,9 +440,14 @@
                         }
                     ],
                     "samples": [
-                        "to show up coming TV series",
-                        "what's on TV this {Duration}",
-                        "to show upcoming tv shows"
+                        "about upcoming TV episodes",
+                        "up coming TV episodes",
+                        "up coming Espiodes",
+                        "about up coming Episodes",
+                        "about up coming TV Episodes",
+                        "about up coming TV episodes for the next {Duration}",
+                        "about up coming episode for the next {Duration}",
+                        "what's on TV this {Duration}"
                     ]
                 },
                 {

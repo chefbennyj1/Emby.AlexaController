@@ -38,7 +38,7 @@ namespace AlexaController
         // ReSharper disable once FlagArgument
         public async Task<string> BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)
         {
-            var person = !(response.person is null) ? Semantics.SayName(response.person) : "";
+            var person = !(response.person is null) ? Lexicons.SayName(response.person) : "";
             
             if (!(response.outputSpeech is null))
             {

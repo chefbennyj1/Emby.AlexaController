@@ -21,11 +21,13 @@ namespace AlexaController.Utils.LexicalSpeech
         NON_COMPLIANT
     }
 
-    public class Semantics : OutputSpeech
+    public class Lexicons : OutputSpeech
     {
         /*
          * Add empty strings to each Semantic Phrase list so that, sometimes, Alexa says nothing.
          */
+
+        private static readonly Random RandomIndex = new Random();
 
         protected static string GetRandomSemanticSpeechResponse(SpeechType type)
         {
@@ -98,48 +100,32 @@ namespace AlexaController.Utils.LexicalSpeech
             "Hello",
             ""
         };
-
         
-        private static string GetSpeechApology()
-        {
-            var i = Plugin.RandomIndex.Next(1, 2);
-            switch (i)
-            {
-                case 1:
-                    return string.Join(" ", SpeechStyle.SpeechRate(Rate.slow, SpeechStyle.SayWithEmotion(Apologetic2[Plugin.RandomIndex.Next(1, Apologetic2.Count)], Emotion.disappointed, Intensity.low)), SpeechStyle.SayWithEmotion("ya know what?", Emotion.disappointed, Intensity.medium), SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
-                case 2:
-                    return $"{GetSpeechDysfluency(Emotion.disappointed, Rate.slow)}, {SpeechStyle.SayWithEmotion(Apologetic[Plugin.RandomIndex.Next(1, Apologetic.Count)], Emotion.disappointed, Intensity.medium)} {SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)}";
-
-            }
-            return string.Empty;
-        }
-
-        private static string GetSpeechDysfluency(Emotion emotion, Rate rate) => SpeechStyle.SayWithEmotion(SpeechStyle.SpeechRate(rate, Dysfluency[Plugin.RandomIndex.Next(1, Dysfluency.Count)]), emotion, Intensity.medium);
+        private static string GetSpeechApology() => 
+            RandomIndex.NextDouble() < 0.5 
+                ? string.Join(" ", SpeechStyle.SpeechRate(Rate.slow, SpeechStyle.SayWithEmotion(Apologetic2[RandomIndex.Next(1, Apologetic2.Count)], Emotion.disappointed, Intensity.low)), 
+                    SpeechStyle.SayWithEmotion("ya know what?", Emotion.disappointed, Intensity.medium), 
+                    SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)) 
+                : string.Join(" ", GetSpeechDysfluency(Emotion.disappointed, Rate.slow), 
+                    SpeechStyle.SayWithEmotion(Apologetic[RandomIndex.Next(1, Apologetic.Count)], Emotion.disappointed, Intensity.medium), 
+                    SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
         
-        private static string GetTimeOfDayResponse()                          => DateTime.Now.Hour < 12 && DateTime.Now.Hour > 4 ? "Good morning" : DateTime.Now.Hour > 12 && DateTime.Now.Hour < 17 ? "Good afternoon" : "Good evening";
+        private static string GetSpeechDysfluency(Emotion emotion, Rate rate) => SpeechStyle.SayWithEmotion(SpeechStyle.SpeechRate(rate, Dysfluency[RandomIndex.Next(1, Dysfluency.Count)]), emotion, Intensity.medium);
         
-        private static string GetCompliance()                                 => Compliance[Plugin.RandomIndex.Next(1, Compliance.Count)];
+        private static string GetTimeOfDayResponse() => DateTime.Now.Hour < 12 && DateTime.Now.Hour > 4 ? "Good morning" : DateTime.Now.Hour > 12 && DateTime.Now.Hour < 17 ? "Good afternoon" : "Good evening";
         
-        private static string GetRepose()                                     => Repose[Plugin.RandomIndex.Next(1, Repose.Count)];
+        private static string GetCompliance() => Compliance[RandomIndex.Next(1, Compliance.Count)];
         
-        private static string GetNonCompliance()                              => SpeechStyle.SayWithEmotion(NonCompliant[Plugin.RandomIndex.Next(1, NonCompliant.Count)], Emotion.disappointed, Intensity.low);
+        private static string GetRepose() => Repose[RandomIndex.Next(1, Repose.Count)];
         
-        private static string GetGreeting()
-        {
-            var i = Plugin.RandomIndex.Next(1, 2);
-
-            switch (i)
-            {
-                case 1:
-                    return $"{SpeechStyle.SayWithEmotion(Greetings[Plugin.RandomIndex.Next(1, Greetings.Count)], Emotion.excited, Intensity.low)} {SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)}";
-                case 2:
-                    return GetTimeOfDayResponse();
-
-            }
-            return string.Empty;
-        }
-
-
+        private static string GetNonCompliance() => SpeechStyle.SayWithEmotion(NonCompliant[RandomIndex.Next(1, NonCompliant.Count)], Emotion.disappointed, Intensity.low);
+        
+        private static string GetGreeting() => 
+            RandomIndex.NextDouble() < 0.5 
+                ? string.Join(" ", SpeechStyle.SayWithEmotion(Greetings[RandomIndex.Next(1, Greetings.Count)], Emotion.excited, Intensity.low), 
+                SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)) 
+                : GetTimeOfDayResponse();
+        
         public static string SayName(IPerson person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
     }
 }

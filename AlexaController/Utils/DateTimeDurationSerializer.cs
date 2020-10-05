@@ -14,7 +14,7 @@ namespace AlexaController.Utils
 {
     public class DateTimeDurationSerializer
     {
-        public class Duration
+        private class Duration
         {
             public int year   { get; set; }
             public int month  { get; set; }
@@ -51,6 +51,7 @@ namespace AlexaController.Utils
                 .AddSeconds(duration.second);
         }
 
+        
         private static Duration DeserializeDurationFromIso8601(string iso8601)
         {
             const string pattern = @"^P(?!$)(\d+(?:\.\d+)?Y)?(\d+(?:\.\d+)?M)?(\d+(?:\.\d+)?W)?(\d+(?:\.\d+)?D)?(T(?=\d)(\d+(?:\.\d+)?H)?(\d+(?:\.\d+)?M)?(\d+(?:\.\d+)?S)?)?$";

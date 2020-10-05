@@ -84,7 +84,8 @@ namespace AlexaController.Alexa.IntentRequest
                                 {
                                     type = SpeechResponseType.NEW_ITEMS_APL, 
                                     session = Session, 
-                                    items = results
+                                    items = results,
+                                    args = new []{d.ToLongDateString()}
                                 })
                             },
                             person           = Session.person,

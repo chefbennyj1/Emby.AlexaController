@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,14 +45,16 @@ namespace AlexaController.Utils.LexicalSpeech
         public string[] args           { get; set; }
 
     }
-    public class SpeechStrings : Semantics
+    public class SpeechStrings : Lexicons
     {
         public static readonly List<string> HelpStrings = new List<string>()
         {
             "Welcome to help! Let's get started. Swipe left to continue...",
             "<b>Accessing Emby accounts based on your voice.</b>",
             "I have the ability to access specific emby user accounts, and library data based on the sound of your voice. If you have not yet turned on Personalization in your Alexa App, and enabled it for this skill, please do that now.",
-            "Next, open the plugin configuration in emby server. Select the Personalization button, and follow the instructions to add personalization.",
+            "You can enable Parental Controls, so media will be filtered based on who is speaking. This way, media items can not be accessed by people who shouldn't have access to them.",
+            "To enable this feature, toggle the button for \"Enable parental control using voice recognition\". If this feature is turned off, I will not filter media items, and will show media based on the Emby Administrators account, at all times.",
+            "Next, open the plugin configuration in emby server. Select the \"New Authorization Account Link\" button, and follow the instructions to add personalization.",
             "<b>Accessing media Items in rooms</b>",
             "The Emby plugin will allow you to create rooms, based on devices in your home.",
             "In the plugin configuration, map each Emby ready device to a specific room. You create the room name that I will understand.",
@@ -88,8 +91,8 @@ namespace AlexaController.Utils.LexicalSpeech
             "Remember that as long as the echo show, or spot is displaying an image, you are in an open session. This means you don't have to use the \"Ask home theater\" phrases to access media",
             "This concludes the help section. Good luck!",
         };
-        
-        // ReSharper disable once TooManyArguments
+        // ReSharper disable RedundantTypeArgumentsOfMethod
+        // ReSharper disable TooManyArguments
         public static async Task<string> GetPhrase(SpeechStringQuery speechQuery)
         {
             var speech = new StringBuilder();
@@ -97,18 +100,19 @@ namespace AlexaController.Utils.LexicalSpeech
             switch (speechQuery.type)
             {
                 case SpeechResponseType.PERSON_NOT_RECOGNIZED:
-
+                {
                     speech.Append("I don't recognize the current user.");
                     speech.Append("Please go to the plugin configuration and link emby account personalization.");
                     speech.Append("Or ask for help.");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
+                }
 
                 case SpeechResponseType.PROGRESSIVE_RESPONSE:
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.COMPLIANCE));
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.REPOSE));
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.ON_LAUNCH:
@@ -120,7 +124,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     }  
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
                     speech.Append("What media can I help you find.");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.NOT_UNDERSTOOD:
@@ -129,7 +133,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append("I misunderstood what you said.");
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append(SpeechStyle.SayWithEmotion("Can you say that again?", Emotion.excited, Intensity.low));
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.NO_SEASON_ITEM_EXIST:
@@ -140,7 +144,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(SpeechStyle.ExpressiveInterjection(" doesn't contain "));
                     speech.Append(" season ");
                     speech.Append(speechQuery.args?[0]);
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.BROWSE_ITEM:
@@ -166,7 +170,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append("Showing in the ");
                     speech.Append(speechQuery.session.room.Name);
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.BROWSE_NEXT_UP_EPISODE:
@@ -179,19 +183,19 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(speechQuery.items?[0].Name);
                     if (speechQuery.session.room is null)
                     {
-                        return await Task.FromResult(speech.ToString());
+                        return await Task.FromResult<string>(speech.ToString());
                     }
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append("Showing in the ");
                     speech.Append(speechQuery.session.room.Name);
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.DISPLAY_MOVIE_COLLECTION:
                 {
                     speech.Append("The ");
                     speech.Append(speechQuery.items?[0].Name);
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.BROWSE_LIBRARY:
@@ -199,7 +203,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append("Here is the ");
                     speech.Append(speechQuery.items?[0].Name);
                     speech.Append(" library.");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED:
@@ -210,7 +214,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append(SayName(speechQuery.session.person));
                     speech.Append("?");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.PLAY_MEDIA_ITEM:
@@ -221,7 +225,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(speechQuery.items?[0].GetType().Name);
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)); 
                     speech.Append(speechQuery.items?[0].Name);
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.ROOM_CONTEXT:
@@ -230,7 +234,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(SpeechStyle.SayInDomain(Domain.conversational, "I didn't get the room you wish to view that."));
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append(SpeechStyle.SayInDomain(Domain.music, "Which room did you want?"));
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.PLAY_NEXT_UP_EPISODE:
@@ -239,7 +243,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(speechQuery.items?[0].Parent.Parent.Name);
                     speech.Append("Showing in the ");
                     speech.Append(speechQuery.session.room.Name);
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY:
@@ -249,7 +253,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append(SpeechStyle.ExpressiveInterjection("doesn't exist "));
                     speech.Append("in the library!");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.NO_DEVICE_CONFIGURATION:
@@ -258,7 +262,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append("There is no device configuration for ");
                     speech.Append(speechQuery.session.room);
                     speech.Append("Please look in the plugin configuration to map rooms to emby ready devices.");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.DEVICE_UNAVAILABLE:
@@ -268,7 +272,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(SpeechStyle.SayWithEmotion("the device in the ", Emotion.disappointed, Intensity.medium));
                     speech.Append(SpeechStyle.SayWithEmotion(speechQuery.args?[0], Emotion.disappointed, Intensity.medium));
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS:
@@ -276,14 +280,14 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append("This profile is already linked to ");
                     speech.Append(SayName(speechQuery.session.person));
                     speech.Append("'s account");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR:
                 {
                     speech.Append("I was unable to learn your voice.");
                     speech.Append("Please make sure you have allowed personalization in the Alexa app.");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS:
@@ -295,9 +299,8 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append("You should now see the I.D. linked to your voice.");
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append("Choose your emby account name and press save.");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
-
 
                 case SpeechResponseType.UP_COMING_EPISODES:
                 {
@@ -305,11 +308,26 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(speechQuery.items?.Count > 1 ? "are" : "is");
                     speech.Append(SpeechStyle.SayAsCardinal(speechQuery.items?.Count.ToString()));
                     speech.Append(" upcoming ");
-                    speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
+                    speech.Append(speechQuery.items?.Count > 1 ? "Episodes" : "Episode");
+                    
+                    var date = DateTime.Parse(speechQuery.args[0]);
+                    
+                    speech.Append($" scheduled to air over the next {(date - DateTime.Now).Days} days.");
+
+                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+
+
+//TODO: This string join better
+
+
                     speech.Append(string.Join($", {SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)}",
                         // ReSharper disable once AssignNullToNotNullAttribute
-                        speechQuery.items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
-                    return await Task.FromResult(speech.ToString());
+                        // ReSharper disable once PossibleInvalidOperationException
+                        speechQuery.items?.ToArray().Select(item =>  
+                            $"{item.PremiereDate.Value.DayOfWeek} " +
+                            $"{(item.PremiereDate.Value.DayOfYear > (DateTime.Now.DayOfYear + (7 - (int)DateTime.Now.DayOfWeek)) ? item.PremiereDate.Value.ToString("MMMM dd",CultureInfo.CreateSpecificCulture("en-US")) : "")} " +
+                            $": { item.Parent.Parent.Name }, Episode {item.IndexNumber},  {StringNormalization.ValidateSpeechQueryString(item.Name)}")));
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.NEW_ITEMS_DISPLAY_NONE:
@@ -319,10 +337,14 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(SpeechStyle.SayAsCardinal(speechQuery.items?.Count.ToString()));
                     speech.Append(" new ");
                     speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
+
+                    var date = DateTime.Parse(speechQuery.args[0]);
+                    speech.Append($" added in the past {(date - DateTime.Now).Days} days.");
+
                     speech.Append(string.Join($", {SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)}",
                         // ReSharper disable once AssignNullToNotNullAttribute
                         speechQuery.items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.NEW_ITEMS_APL:
@@ -332,14 +354,18 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(SpeechStyle.SayAsCardinal(speechQuery.items?.Count.ToString()));
                     speech.Append(" new ");
                     speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
-                    return await Task.FromResult(speech.ToString());
+
+                    var date = DateTime.Parse(speechQuery.args[0]);
+                    speech.Append($" added in the past {(date - DateTime.Now).Days} days.");
+
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.NO_NEXT_UP_EPISODE_AVAILABLE:
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.APOLOGETIC));
                     speech.Append("There doesn't seem to be a new episode available for that series.");
-                    return await Task.FromResult(speech.ToString());
+                    return await Task.FromResult<string>(speech.ToString());
                 }
 
                 default:

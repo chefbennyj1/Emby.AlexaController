@@ -343,7 +343,7 @@ namespace AlexaController.Alexa.Presentation
             layout.Add(new Text()
             {
                 // ReSharper disable once TooManyChainedReferences
-                text = $"{(item.Genres.Any() ? item.Genres.Aggregate((i, j) => i + ", " + j) : "")}",
+                text = $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}",
                 left = "42%",
                 top = "6vh",
                 width = "40vw",
@@ -807,8 +807,8 @@ namespace AlexaController.Alexa.Presentation
                 height = "100vh",
                 position = "absolute",
                 videoAutoPlay = true
-
             });
+
             layout.Add(new AlexaHeadline()
             {
                 primaryText = $"Now showing {template.baseItems[0].Name}",
@@ -869,6 +869,7 @@ namespace AlexaController.Alexa.Presentation
                 autoplay = true,
                 audioTrack = "none"
             });
+
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
@@ -879,6 +880,7 @@ namespace AlexaController.Alexa.Presentation
                 source = $"{Url}/EmptyPng?quality=90",
                 opacity = 0.45
             });
+
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
@@ -938,6 +940,7 @@ namespace AlexaController.Alexa.Presentation
                 autoplay = true,
                 audioTrack = "none"
             });
+
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
@@ -948,11 +951,13 @@ namespace AlexaController.Alexa.Presentation
                 source = $"{Url}/EmptyPng?quality=90",
                 opacity = 0.35
             });
+
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
                 primaryText = "Could you say that again?"
             });
+
             layout.Add(new AlexaFooter()
             {
                 hintText = "Alexa, open help...",
@@ -1013,6 +1018,7 @@ namespace AlexaController.Alexa.Presentation
                 autoplay = true,
                 audioTrack = "none"
             });
+
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
@@ -1023,11 +1029,13 @@ namespace AlexaController.Alexa.Presentation
                 source = $"{Url}/EmptyPng?quality=90",
                 opacity = 0.35
             });
+
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
                 primaryText = template.HeadlinePrimaryText
             });
+
             layout.Add(new AlexaFooter()
             {
                 hintText = "Alexa, open help...",
@@ -1072,6 +1080,7 @@ namespace AlexaController.Alexa.Presentation
             
             SpeechStrings.HelpStrings.ForEach(s => helpItems.Add(new Text()
             {
+                id = "helpText",
                 text = s,
                 textAlign = "center",
                 textAlignVertical = "center",
@@ -1108,7 +1117,7 @@ namespace AlexaController.Alexa.Presentation
                                         {
                                             new Source()
                                             {
-                                                repeatCount = 10,
+                                                repeatCount = 15,
                                                 url         = $"{Url}/particles"
                                             }
                                         },

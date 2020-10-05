@@ -13,9 +13,7 @@ namespace AlexaController
     public class Plugin: BasePlugin<PluginConfiguration>, IHasThumbImage, IHasWebPages
     {
         public static Plugin Instance { get; private set; }
-
-        public static readonly Random RandomIndex = new Random();
-
+        
         public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer): base(applicationPaths, xmlSerializer)
         {
             Instance = this;

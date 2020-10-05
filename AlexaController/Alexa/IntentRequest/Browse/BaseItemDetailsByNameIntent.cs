@@ -79,8 +79,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     }
                 });
             }
-            
+
             if (!result.IsParentalAllowed(Session.User))
+            {
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
@@ -88,13 +89,23 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     {
                         phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
-                            type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
-                            session = Session, 
-                            items = new List<BaseItem>() { result }
+                            type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED,
+                            session = Session,
+                            items = new List<BaseItem>() {result}
                         }),
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
+                    },
+                    directives = new List<IDirective>()
+                    {
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(
+                            new RenderDocumentTemplate()
+                            {
+                                renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
+                                HeadlinePrimaryText = $"Stop! Rated {result.OfficialRating}"
+                            }, Session)
                     }
                 });
+            }
 
             if (!(Session.room is null))
             {

@@ -9,7 +9,7 @@ using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.LexicalSpeech;
 
-namespace AlexaController.Alexa.IntentRequest.Libraries
+namespace AlexaController.Alexa.IntentRequest.Browse
 {
     public class UpComingTv : IIntentResponse
     {
@@ -76,7 +76,8 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                                 {
                                     type = SpeechResponseType.UP_COMING_EPISODES,
                                     session = Session,
-                                    items = results
+                                    items = results,
+                                    args = new []{duration.ToLongDateString()}
                                 })
                             },
                             person = Session.person,
