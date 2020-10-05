@@ -316,18 +316,37 @@ namespace AlexaController.Utils.LexicalSpeech
 
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
 
+                    var schedule = new List<BaseItem>();
 
-//TODO: This string join better
+                    foreach (var item in speechQuery.items)
+                    {
+                        if (schedule.Exists(i => item.Parent.Parent.Id == i.Parent.Parent.Id))
+                        {
+                            continue;
+                        }
+                        schedule.Add(item);
+                    }
+                   
+                    foreach (var item in schedule)
+                    {
+                        speech.Append(StringNormalization.ValidateSpeechQueryString(item.Parent.Parent.Name));
+                        if (item.IndexNumber == 1)
+                        {
+                            speech.Append($" will premiere Season {SpeechStyle.SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
+                            speech.Append(item.PremiereDate.Value.ToString("MMMM dd", CultureInfo.CreateSpecificCulture("en-US")));
+                            speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                            speech.Append(" and ");
+                        }
+                        speech.Append(" will air on ");
+                        speech.Append($"{item.PremiereDate.Value.DayOfWeek}'s");
+                            
+                        speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
+                    }
+                    
+                    speech.Append(
+                        $"This completes the list of episodes scheduled for the next {(date - DateTime.Now).Days} days. ");
 
-
-                    speech.Append(string.Join($", {SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)}",
-                        // ReSharper disable once AssignNullToNotNullAttribute
-                        // ReSharper disable once PossibleInvalidOperationException
-                        speechQuery.items?.ToArray().Select(item =>  
-                            $"{item.PremiereDate.Value.DayOfWeek} " +
-                            $"{(item.PremiereDate.Value.DayOfYear > (DateTime.Now.DayOfYear + (7 - (int)DateTime.Now.DayOfWeek)) ? item.PremiereDate.Value.ToString("MMMM dd",CultureInfo.CreateSpecificCulture("en-US")) : "")} " +
-                            $": { item.Parent.Parent.Name }, Episode {item.IndexNumber},  {StringNormalization.ValidateSpeechQueryString(item.Name)}")));
-                    return await Task.FromResult<string>(speech.ToString());
+                    return await Task.FromResult<string>(SpeechStyle.SayInDomain(Domain.conversational, speech.ToString()));
                 }
 
                 case SpeechResponseType.NEW_ITEMS_DISPLAY_NONE:

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -23,15 +22,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            try
-            {
-                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-            }
-            catch { }
-
-            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
-            
             var request        = AlexaRequest.request;
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
@@ -99,7 +89,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                 {
                                     type = SpeechResponseType.UP_COMING_EPISODES,
                                     session = Session,
-                                    items = results
+                                    items = results,
+                                    args = new []{duration.ToLongDateString()}
                                 })
                             },
                             person = Session.person,
