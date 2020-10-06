@@ -53,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             });
 
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId).ConfigureAwait(false);
 #pragma warning restore 4014
             
             var result = EmbyServerEntryPoint.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),

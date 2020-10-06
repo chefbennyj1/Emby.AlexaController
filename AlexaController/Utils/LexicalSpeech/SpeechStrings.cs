@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Speech;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Model.Extensions;
 
 namespace AlexaController.Utils.LexicalSpeech
 {
@@ -43,8 +43,8 @@ namespace AlexaController.Utils.LexicalSpeech
         public IAlexaSession session   { get; set; }
         public List<BaseItem> items    { get; set; }
         public string[] args           { get; set; }
-
     }
+
     public class SpeechStrings : Lexicons
     {
         public static readonly List<string> HelpStrings = new List<string>()
@@ -91,12 +91,14 @@ namespace AlexaController.Utils.LexicalSpeech
             "Remember that as long as the echo show, or spot is displaying an image, you are in an open session. This means you don't have to use the \"Ask home theater\" phrases to access media",
             "This concludes the help section. Good luck!",
         };
+
         // ReSharper disable RedundantTypeArgumentsOfMethod
         // ReSharper disable TooManyArguments
+
         public static async Task<string> GetPhrase(SpeechStringQuery speechQuery)
         {
             var speech = new StringBuilder();
-            var name = string.Empty;
+            var name   = string.Empty;
             switch (speechQuery.type)
             {
                 case SpeechResponseType.PERSON_NOT_RECOGNIZED:
@@ -277,6 +279,8 @@ namespace AlexaController.Utils.LexicalSpeech
 
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS:
                 {
+                    speech.Append(GetSpeechDysfluency(Emotion.excited, Intensity.low, Rate.slow));
+                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
                     speech.Append("This profile is already linked to ");
                     speech.Append(SayName(speechQuery.session.person));
                     speech.Append("'s account");
@@ -292,8 +296,8 @@ namespace AlexaController.Utils.LexicalSpeech
 
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS:
                 {
-                    speech.Append("Success ");
-                    speech.Append(SayName(speechQuery.session.person));
+                    speech.Append(SpeechStyle.ExpressiveInterjection("Success "));
+                    speech.Append(SpeechStyle.ExpressiveInterjection(SayName(speechQuery.session.person)));
                     speech.Append("!");
                     speech.Append("Please look at the plugin configuration.");
                     speech.Append("You should now see the I.D. linked to your voice.");
@@ -307,33 +311,23 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append("There ");
                     speech.Append(speechQuery.items?.Count > 1 ? "are" : "is");
                     speech.Append(SpeechStyle.SayAsCardinal(speechQuery.items?.Count.ToString()));
-                    speech.Append(" upcoming ");
-                    speech.Append(speechQuery.items?.Count > 1 ? "Episodes" : "Episode");
+                    speech.Append(" upcoming episode");
+                    speech.Append(speechQuery.items?.Count > 1 ? "s" : "");
                     
                     var date = DateTime.Parse(speechQuery.args[0]);
                     
                     speech.Append($" scheduled to air over the next {(date - DateTime.Now).Days} days.");
-
                     speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
-
-                    var schedule = new List<BaseItem>();
-
-                    foreach (var item in speechQuery.items)
-                    {
-                        if (schedule.Exists(i => item.Parent.Parent.Id == i.Parent.Parent.Id))
-                        {
-                            continue;
-                        }
-                        schedule.Add(item);
-                    }
+                   
+                    var schedule = speechQuery.items.DistinctBy(item => item.Parent.ParentId);
                    
                     foreach (var item in schedule)
                     {
                         speech.Append(StringNormalization.ValidateSpeechQueryString(item.Parent.Parent.Name));
                         if (item.IndexNumber == 1)
                         {
-                            speech.Append($" will premiere Season {SpeechStyle.SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
-                            speech.Append(item.PremiereDate.Value.ToString("MMMM dd", CultureInfo.CreateSpecificCulture("en-US")));
+                            speech.Append($" will premiere season {SpeechStyle.SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
+                            speech.Append(SpeechStyle.SayAsDate(Date.md, item.PremiereDate.Value.ToString("M/d"))); //("MMMM dd", CultureInfo.CreateSpecificCulture("en-US")))); 
                             speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                             speech.Append(" and ");
                         }
@@ -358,7 +352,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
 
                     var date = DateTime.Parse(speechQuery.args[0]);
-                    speech.Append($" added in the past {(date - DateTime.Now).Days} days.");
+                    speech.Append($" added in the past {(date - DateTime.Now).Days} days. ");
 
                     speech.Append(string.Join($", {SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)}",
                         // ReSharper disable once AssignNullToNotNullAttribute
@@ -375,7 +369,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
 
                     var date = DateTime.Parse(speechQuery.args[0]);
-                    speech.Append($" added in the past {(date - DateTime.Now).Days} days.");
+                    speech.Append($" added in the past {(date - DateTime.Now).Days *-1} days.");
 
                     return await Task.FromResult<string>(speech.ToString());
                 }

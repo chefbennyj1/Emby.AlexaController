@@ -38,7 +38,9 @@ namespace AlexaController.Alexa.IntentRequest
             // Default will be 25 days ago unless given a time duration
             var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);
 
-            await ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId).ConfigureAwait(false);
+#pragma warning disable 4014
+            ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId).ConfigureAwait(false);
+#pragma warning restore 4014
 
             var query = type == "New TV Shows"
                 ? EmbyServerEntryPoint.Instance.GetLatestTv(Session.User, d)
@@ -107,7 +109,8 @@ namespace AlexaController.Alexa.IntentRequest
                                 {
                                     type = SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, 
                                     session = Session, 
-                                    items = results
+                                    items = results,
+                                    args = new []{d.ToLongDateString()}
                                 })
                             },
                             person           = Session.person,

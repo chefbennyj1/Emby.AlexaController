@@ -1,6 +1,4 @@
-﻿
-
-// ReSharper disable ComplexConditionExpression
+﻿// ReSharper disable ComplexConditionExpression
 // ReSharper disable InconsistentNaming
 
 namespace AlexaController.Alexa.Speech
@@ -52,8 +50,7 @@ namespace AlexaController.Alexa.Speech
     public enum Emotion
     {
         excited,
-        disappointed,
-        normal
+        disappointed
     }
 
     public enum Intensity
@@ -61,6 +58,20 @@ namespace AlexaController.Alexa.Speech
         low,
         medium,
         high
+    }
+
+    public enum Date
+    {
+        mdy,
+        dmy,
+        ymd,
+        md,
+        dm,
+        ym,
+        my,
+        d,
+        m,
+        y
     }
 
     public class SpeechStyle
@@ -73,7 +84,7 @@ namespace AlexaController.Alexa.Speech
 
         public static string SpellOut(string text)                                             => $"<say-as interpret-as='spell-out'>{text}</say-as>.";
 
-        public static string InsertTimedBreak(string intDurationSeconds)                       => $"<break time='{intDurationSeconds}s'/>";
+        public static string InsertTimedBreak(int intDurationSeconds)                          => $"<break time='{intDurationSeconds}s'/>";
 
         public static string InsertStrengthBreak(StrengthBreak strength)                       => $"<break strength='{strength}'/>";
 
@@ -84,5 +95,7 @@ namespace AlexaController.Alexa.Speech
         public static string SpeechRate(Rate rate, string text)                                => $"<prosody rate='{rate}'>{text}</prosody>";
 
         public static string ExpressiveInterjection(string text)                               => $"<say-as interpret-as='interjection'>{text}</say-as>";
+
+        public static string SayAsDate(Date date, string text)                                 => $"<say-as interpret-as='date' format='{date}'>{text}</say-as>";
     }
 }

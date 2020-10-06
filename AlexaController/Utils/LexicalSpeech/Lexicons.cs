@@ -9,8 +9,6 @@ using AlexaController.Alexa.Speech;
 
 namespace AlexaController.Utils.LexicalSpeech
 {
-   
-
     public enum SpeechType
     {
         REPOSE,
@@ -83,14 +81,14 @@ namespace AlexaController.Utils.LexicalSpeech
             "No way, Hosea!... ",
             "No can do... ",
             "I can't do that... ",
+            "now now... ",
             ""
         };
 
         private static readonly List<string> Dysfluency   = new List<string>()
         {
             "oh...",
-            "um... ",
-            ""
+            "umm... "
         };
 
         private static readonly List<string> Greetings    = new List<string>()
@@ -106,17 +104,17 @@ namespace AlexaController.Utils.LexicalSpeech
                 ? string.Join(" ", SpeechStyle.SpeechRate(Rate.slow, SpeechStyle.SayWithEmotion(Apologetic2[RandomIndex.Next(1, Apologetic2.Count)], Emotion.disappointed, Intensity.low)), 
                     SpeechStyle.SayWithEmotion("ya know what?", Emotion.disappointed, Intensity.medium), 
                     SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)) 
-                : string.Join(" ", GetSpeechDysfluency(Emotion.disappointed, Rate.slow), 
-                    SpeechStyle.SayWithEmotion(Apologetic[RandomIndex.Next(1, Apologetic.Count)], Emotion.disappointed, Intensity.medium), 
+                : string.Join(" ", GetSpeechDysfluency(Emotion.disappointed, Intensity.medium, Rate.slow), 
+                    SpeechStyle.SayWithEmotion(Apologetic[RandomIndex.Next(0, Apologetic.Count)], Emotion.disappointed, Intensity.medium), 
                     SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
         
-        private static string GetSpeechDysfluency(Emotion emotion, Rate rate) => SpeechStyle.SayWithEmotion(SpeechStyle.SpeechRate(rate, Dysfluency[RandomIndex.Next(1, Dysfluency.Count)]), emotion, Intensity.medium);
+        public static string GetSpeechDysfluency(Emotion emotion, Intensity intensity, Rate rate) => SpeechStyle.SayWithEmotion(SpeechStyle.SpeechRate(rate, Dysfluency[RandomIndex.Next(0, Dysfluency.Count)]), emotion, intensity);
         
         private static string GetTimeOfDayResponse() => DateTime.Now.Hour < 12 && DateTime.Now.Hour > 4 ? "Good morning" : DateTime.Now.Hour > 12 && DateTime.Now.Hour < 17 ? "Good afternoon" : "Good evening";
         
-        private static string GetCompliance() => Compliance[RandomIndex.Next(1, Compliance.Count)];
+        private static string GetCompliance() => Compliance[RandomIndex.Next(0, Compliance.Count)];
         
-        private static string GetRepose() => Repose[RandomIndex.Next(1, Repose.Count)];
+        private static string GetRepose() => Repose[RandomIndex.Next(0, Repose.Count)];
         
         private static string GetNonCompliance() => SpeechStyle.SayWithEmotion(NonCompliant[RandomIndex.Next(1, NonCompliant.Count)], Emotion.disappointed, Intensity.low);
         
