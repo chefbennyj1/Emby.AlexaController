@@ -327,7 +327,7 @@ namespace AlexaController.Utils.LexicalSpeech
                         if (item.IndexNumber == 1)
                         {
                             speech.Append($" will premiere season {SpeechStyle.SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
-                            speech.Append(SpeechStyle.SayAsDate(Date.md, item.PremiereDate.Value.ToString("M/d"))); //("MMMM dd", CultureInfo.CreateSpecificCulture("en-US")))); 
+                            speech.Append(SpeechStyle.SayAsDate(Date.md, item.PremiereDate.Value.ToString("M/d"))); 
                             speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                             speech.Append(" and ");
                         }

@@ -46,6 +46,7 @@ namespace AlexaController
     }
 
    
+    // ReSharper disable once ClassTooBig
     public class EmbyServerEntryPoint : EmbySearchUtility, IServerEntryPoint, IEmbyServerEntryPoint
     {
         private IServerApplicationHost Host           { get; }

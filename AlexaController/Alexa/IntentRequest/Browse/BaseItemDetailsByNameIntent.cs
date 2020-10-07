@@ -36,7 +36,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             
-
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
@@ -45,8 +44,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-
-
+            
             var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
                 type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
@@ -102,6 +100,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             {
                                 renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                                 HeadlinePrimaryText = $"Stop! Rated {result.OfficialRating}"
+
                             }, Session)
                     }
                 });

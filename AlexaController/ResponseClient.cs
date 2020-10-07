@@ -32,7 +32,7 @@ namespace AlexaController
         {
             JsonSerializer = jsonSerializer;
             HttpClient     = client;
-            Instance = this;
+            Instance       = this;
         }
 
         // ReSharper disable once FlagArgument
@@ -54,7 +54,6 @@ namespace AlexaController
                 outputSpeech.ssml = "<speak>";
                 outputSpeech.ssml += speech.ToString();
                 outputSpeech.ssml += "</speak>";
-
             }
 
             // Remove the directive if the device doesn't handle APL.

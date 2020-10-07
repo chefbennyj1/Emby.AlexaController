@@ -1450,6 +1450,4 @@ namespace AlexaController.Alexa.Presentation
         }
         
     }
-
-    
 }

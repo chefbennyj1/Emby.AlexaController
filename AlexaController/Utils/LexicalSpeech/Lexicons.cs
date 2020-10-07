@@ -107,8 +107,8 @@ namespace AlexaController.Utils.LexicalSpeech
                 : string.Join(" ", GetSpeechDysfluency(Emotion.disappointed, Intensity.medium, Rate.slow), 
                     SpeechStyle.SayWithEmotion(Apologetic[RandomIndex.Next(0, Apologetic.Count)], Emotion.disappointed, Intensity.medium), 
                     SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
-        
-        public static string GetSpeechDysfluency(Emotion emotion, Intensity intensity, Rate rate) => SpeechStyle.SayWithEmotion(SpeechStyle.SpeechRate(rate, Dysfluency[RandomIndex.Next(0, Dysfluency.Count)]), emotion, intensity);
+
+        protected static string GetSpeechDysfluency(Emotion emotion, Intensity intensity, Rate rate) => SpeechStyle.SayWithEmotion(SpeechStyle.SpeechRate(rate, Dysfluency[RandomIndex.Next(0, Dysfluency.Count)]), emotion, intensity);
         
         private static string GetTimeOfDayResponse() => DateTime.Now.Hour < 12 && DateTime.Now.Hour > 4 ? "Good morning" : DateTime.Now.Hour > 12 && DateTime.Now.Hour < 17 ? "Good afternoon" : "Good evening";
         
