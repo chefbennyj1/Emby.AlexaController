@@ -11,6 +11,7 @@ using AlexaController.Utils;
 using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
+using MediaBrowser.Model.Logging;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -18,7 +19,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     public class BaseItemDetailsByNameIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaSession Session      { get; }
+        public IAlexaSession Session { get; }
 
         public BaseItemDetailsByNameIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
@@ -35,30 +36,30 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
-            
-            var request        = AlexaRequest.request;
-            var intent         = request.intent;
-            var slots          = intent.slots;
-            var type           = slots.Movie.value is null ? "Series" : "Movie";
-            var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
-            var context        = AlexaRequest.context;
+
+            var request = AlexaRequest.request;
+            var intent = request.intent;
+            var slots = intent.slots;
+            var type = slots.Movie.value is null ? "Series" : "Movie";
+            var searchName = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
+            var context = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
-            
+            var requestId = request.requestId;
+
             var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+                type = SpeechResponseType.PROGRESSIVE_RESPONSE,
                 session = Session
             });
 
 #pragma warning disable 4014
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
 
-            if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response(); 
+            if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
 
             var result = EmbyServerEntryPoint.Instance.QuerySpeechResultItem(searchName, new[] { type }, Session.User);
 
@@ -71,7 +72,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     {
                         phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
-                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, 
+                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
                             session = Session
                         }),
                     }
@@ -80,6 +81,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (!result.IsParentalAllowed(Session.User))
             {
+                if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
+                {
+                    await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                        $"{Session.User} attempted to view a restricted item.",$"{Session.User} attempted to view {result.Name}.").ConfigureAwait(false);
+                }
+
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
@@ -89,7 +96,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         {
                             type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED,
                             session = Session,
-                            items = new List<BaseItem>() {result}
+                            items = new List<BaseItem>() { result }
                         }),
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
@@ -115,8 +122,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 catch (Exception exception)
                 {
 #pragma warning disable 4014
-                    Task.Run(() => 
-                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, 
+                    Task.Run(() =>
+                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
                                 requestId))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
@@ -146,8 +153,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     {
                         phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                         {
-                            type = SpeechResponseType.BROWSE_ITEM, 
-                            session = Session, 
+                            type = SpeechResponseType.BROWSE_ITEM,
+                            session = Session,
                             items = new List<BaseItem> { result }
                         }),
                         sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"

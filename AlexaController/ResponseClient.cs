@@ -56,6 +56,11 @@ namespace AlexaController
                 outputSpeech.ssml += "</speak>";
             }
 
+            response.reprompt = new Reprompt
+            {
+                outputSpeech = new OutputSpeech() { ssml = "<speak>Can I help you with anything else?</speak>" }
+            };
+
             // Remove the directive if the device doesn't handle APL.
             if (!alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE)) response.directives = null;
             
@@ -63,6 +68,7 @@ namespace AlexaController
             {
                 version = "1.2",
                 response = response
+
             }));
         }
 

@@ -14,6 +14,7 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.TV;
+using MediaBrowser.Model.Activity;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Querying;
@@ -33,6 +34,7 @@ namespace AlexaController
         string GetLibraryId(string name);
         BaseItem GetItemById<T>(T id);
         Task SendMessageToPluginConfigurationPage<T>(string name, T data);
+        Task CreateActivityEntry(LogSeverity logSeverity, string name, string overview);
         Dictionary<BaseItem, List<BaseItem>> GetCollectionItems(User userName, string collectionName);
         List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user);
         IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration );
@@ -50,21 +52,40 @@ namespace AlexaController
     public class EmbyServerEntryPoint : EmbySearchUtility, IServerEntryPoint, IEmbyServerEntryPoint
     {
         private IServerApplicationHost Host           { get; }
+        private IUserManager UserManager              { get; set; }
         private ILibraryManager LibraryManager        { get; }
         private ITVSeriesManager TvSeriesManager      { get; }
         private ISessionManager SessionManager        { get; }
+        private IActivityManager ActivityManager      { get; set; }
         public ILogger Log                            { get; }
         public static IEmbyServerEntryPoint Instance  { get; private set; }
 
         // ReSharper disable once TooManyDependencies
-        public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host) : base(libMan)
+        public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IActivityManager activityManager, IUserManager userManager) : base(libMan)
         {
             Host            = host;
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
             SessionManager  = sesMan;
+            ActivityManager = activityManager;
             Log             = logMan.GetLogger(Plugin.Instance.Name);
             Instance        = this;
+        }
+
+        // ReSharper disable once TooManyArguments
+        public async Task CreateActivityEntry(LogSeverity logSeverity, string name, string overview)
+        {
+            await Task.Run(() => ActivityManager.Create(new ActivityLogEntry()
+            {
+                Date     = DateTimeOffset.Now,
+                Id       = new Random().Next(1000, 9999),
+                Overview = overview,
+                UserId   = UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator).ToString(),
+                Name     = name,
+                Type     = "Alert",
+                ItemId   = "",
+                Severity = logSeverity
+            }));
         }
 
         public async Task SendMessageToPluginConfigurationPage<T>(string name, T data)
@@ -370,6 +391,8 @@ namespace AlexaController
 
             return await Task.FromResult(upComing.Items.ToList());
         }
+
+
 
         public void Dispose()
         {

@@ -331,9 +331,11 @@ namespace AlexaController.Utils.LexicalSpeech
                             speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
                             speech.Append(" and ");
                         }
+
+                        
                         speech.Append(" will air on ");
                         speech.Append($"{item.PremiereDate.Value.DayOfWeek}'s");
-                            
+                         
                         speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
                     }
                     

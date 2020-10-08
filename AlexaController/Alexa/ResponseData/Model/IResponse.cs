@@ -7,6 +7,7 @@ namespace AlexaController.Alexa.ResponseData.Model
     {
         IPerson person              { get; }
         IOutputSpeech outputSpeech  { get; }
+        IReprompt reprompt { get; set; } 
         ICard card                   { get; set; }
         object shouldEndSession     { get; }
         List<IDirective> directives { get; set; }
@@ -18,6 +19,7 @@ namespace AlexaController.Alexa.ResponseData.Model
     {
         public IPerson person              { get; set; }
         public IOutputSpeech outputSpeech  { get; set; }
+        public IReprompt reprompt { get; set; } 
         public ICard card                   { get; set; } = null;
         public object shouldEndSession     { get; set; }
         public List<IDirective> directives { get; set; }

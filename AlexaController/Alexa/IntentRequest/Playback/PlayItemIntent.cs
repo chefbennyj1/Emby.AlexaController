@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Model.Logging;
 
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable once ComplexConditionExpression
@@ -84,6 +84,12 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //Parental Control check for baseItem
             if (!result.IsParentalAllowed(Session.User))
             {
+                if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
+                {
+                    await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                        $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {result.Name}.").ConfigureAwait(false);
+                }
+
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,

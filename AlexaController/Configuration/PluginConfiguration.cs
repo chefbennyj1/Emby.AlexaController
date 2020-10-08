@@ -11,6 +11,7 @@ namespace AlexaController.Configuration
         public List<Room> Rooms                           { get; set; }
         public List<UserCorrelation> UserCorrelations     { get; set; }
         public bool EnableParentalControlVoiceRecognition { get; set; }
+        public bool EnableServerActivityLogNotifications  { get; set; }
     }
 
     public class UserCorrelation

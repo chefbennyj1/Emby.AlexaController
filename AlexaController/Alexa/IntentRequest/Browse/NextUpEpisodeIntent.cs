@@ -10,6 +10,7 @@ using AlexaController.Session;
 using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
+using MediaBrowser.Model.Logging;
 
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -51,7 +52,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             });
 
 #pragma warning disable 4014
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId).ConfigureAwait(false);
+            Task.Run( () => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(slots.Series.value, Session.User);
@@ -85,6 +86,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //Parental Control check for baseItem
             if (!nextUpEpisode.IsParentalAllowed(Session.User))
             {
+                if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
+                {
+                    await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                        $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {nextUpEpisode.Name}.").ConfigureAwait(false);
+                }
+
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()

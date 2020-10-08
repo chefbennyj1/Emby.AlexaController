@@ -15,6 +15,7 @@ using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
+using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
 
 // ReSharper disable once TooManyDependencies
@@ -116,6 +117,7 @@ namespace AlexaController.Api
                 if (!(person is null))
                 {
                     if (!SpeechAuthorization.Instance.UserPersonalizationProfileExists(person))
+                        
                         return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
                             shouldEndSession = true,
@@ -130,7 +132,7 @@ namespace AlexaController.Api
                 var user = SpeechAuthorization.Instance.GetRecognizedPersonalizationProfileResult(person);
 
                 session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-                
+               
                 if (session.PersistedRequestData is null && IsRoomNameIntentRequest(intent))
                 {
                     //There has been a speech recognition mistake, end the session.

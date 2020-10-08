@@ -34,7 +34,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             });
 
 #pragma warning disable 4014
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var slots          = request.intent.slots;

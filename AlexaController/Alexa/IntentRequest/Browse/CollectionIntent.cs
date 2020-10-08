@@ -13,6 +13,7 @@ using AlexaController.Utils;
 using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
+using MediaBrowser.Model.Logging;
 
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -54,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             });
 
 #pragma warning disable 4014
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
@@ -68,6 +69,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 if (!collectionBaseItem.IsParentalAllowed(Session.User))
                 {
+                    if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
+                    {
+                        await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                            $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
+                    }
+
                     return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                     {
                         shouldEndSession = true,

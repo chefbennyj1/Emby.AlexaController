@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -30,12 +29,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             try
             {
                 Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-            } catch { }
+            } 
+            catch { }
             if (Session.room is null) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             
-            var request = AlexaRequest.request;
-            var intent  = request.intent;
-            var slots   = intent.slots;
+            var request       = AlexaRequest.request;
+            var intent        = request.intent;
+            var slots         = intent.slots;
             var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(slots.Series.value, Session?.User);
 
             if (nextUpEpisode is null)
@@ -55,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             }
 
 #pragma warning disable 4014
-            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode));
+            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             Session.NowViewingBaseItem = nextUpEpisode;
