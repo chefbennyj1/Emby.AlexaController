@@ -41,7 +41,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Sequence.onScroll
                         }
                     }
                 }
-            }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+            }, null);
         }
     }
 }

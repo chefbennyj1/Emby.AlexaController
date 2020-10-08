@@ -90,14 +90,13 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                         items = new List<BaseItem>() { result }
                     })
                 },
-                person           = session.person,
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
                     renderDocumentDirective
                 }
 
-            }, session.alexaSessionDisplayType);
+            }, session);
         }
     }
 }

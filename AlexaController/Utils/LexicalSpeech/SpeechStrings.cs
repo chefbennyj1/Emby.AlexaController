@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Speech;
+using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Extensions;
@@ -112,7 +112,7 @@ namespace AlexaController.Utils.LexicalSpeech
                 case SpeechResponseType.PROGRESSIVE_RESPONSE:
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.COMPLIANCE));
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.REPOSE));
                     return await Task.FromResult<string>(speech.ToString());
                 }
@@ -122,9 +122,9 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.GREETINGS));
                     if (speechQuery.session.person != null)
                     {
-                        speech.Append(SayName(speechQuery.session.person));
+                        speech.Append(Ssml.SayName(speechQuery.session.person));
                     }  
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.strong));
                     speech.Append("What media can I help you find.");
                     return await Task.FromResult<string>(speech.ToString());
                 }
@@ -133,8 +133,8 @@ namespace AlexaController.Utils.LexicalSpeech
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.APOLOGETIC));
                     speech.Append("I misunderstood what you said.");
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
-                    speech.Append(SpeechStyle.SayWithEmotion("Can you say that again?", Emotion.excited, Intensity.low));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.SayWithEmotion("Can you say that again?", Emotion.excited, Intensity.low));
                     return await Task.FromResult<string>(speech.ToString());
                 }
 
@@ -142,8 +142,8 @@ namespace AlexaController.Utils.LexicalSpeech
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.APOLOGETIC));
                     name = StringNormalization.ValidateSpeechQueryString(speechQuery.session?.NowViewingBaseItem.Name);
-                    speech.Append(SpeechStyle.SpeechRate(Rate.fast, SpeechStyle.SayWithEmotion(name, Emotion.disappointed, Intensity.high)));
-                    speech.Append(SpeechStyle.ExpressiveInterjection(" doesn't contain "));
+                    speech.Append(Ssml.SpeechRate(Rate.fast, Ssml.SayWithEmotion(name, Emotion.disappointed, Intensity.high)));
+                    speech.Append(Ssml.ExpressiveInterjection(" doesn't contain "));
                     speech.Append(" season ");
                     speech.Append(speechQuery.args?[0]);
                     return await Task.FromResult<string>(speech.ToString());
@@ -169,7 +169,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     {
                         return speech.ToString();
                     }
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append("Showing in the ");
                     speech.Append(speechQuery.session.room.Name);
                     return await Task.FromResult<string>(speech.ToString());
@@ -181,13 +181,13 @@ namespace AlexaController.Utils.LexicalSpeech
                     var seriesName = season?.Parent.Name;
                     speech.Append("Here is the next up episode for ");
                     speech.Append(seriesName);
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append(speechQuery.items?[0].Name);
                     if (speechQuery.session.room is null)
                     {
                         return await Task.FromResult<string>(speech.ToString());
                     }
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append("Showing in the ");
                     speech.Append(speechQuery.session.room.Name);
                     return await Task.FromResult<string>(speech.ToString());
@@ -213,8 +213,8 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.NON_COMPLIANT));
                     speech.Append("Are you sure you are allowed access to ");
                     speech.Append(speechQuery.items is null ? "this item" : speechQuery.items[0].Name);
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
-                    speech.Append(SayName(speechQuery.session.person));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.SayName(speechQuery.session.person));
                     speech.Append("?");
                     return await Task.FromResult<string>(speech.ToString());
                 }
@@ -225,7 +225,7 @@ namespace AlexaController.Utils.LexicalSpeech
                     speech.Append(speechQuery.items?[0].ProductionYear);
                     speech.Append(" ");
                     speech.Append(speechQuery.items?[0].GetType().Name);
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)); 
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak)); 
                     speech.Append(speechQuery.items?[0].Name);
                     return await Task.FromResult<string>(speech.ToString());
                 }
@@ -233,9 +233,9 @@ namespace AlexaController.Utils.LexicalSpeech
                 case SpeechResponseType.ROOM_CONTEXT:
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.APOLOGETIC));
-                    speech.Append(SpeechStyle.SayInDomain(Domain.conversational, "I didn't get the room you wish to view that."));
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
-                    speech.Append(SpeechStyle.SayInDomain(Domain.music, "Which room did you want?"));
+                    speech.Append(Ssml.SayInDomain(Domain.conversational, "I didn't get the room you wish to view that."));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.SayInDomain(Domain.music, "Which room did you want?"));
                     return await Task.FromResult<string>(speech.ToString());
                 }
 
@@ -251,9 +251,9 @@ namespace AlexaController.Utils.LexicalSpeech
                 case SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY:
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.APOLOGETIC));
-                    speech.Append(SpeechStyle.SayWithEmotion("That item ", Emotion.disappointed, Intensity.high));
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
-                    speech.Append(SpeechStyle.ExpressiveInterjection("doesn't exist "));
+                    speech.Append(Ssml.SayWithEmotion("That item ", Emotion.disappointed, Intensity.high));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.ExpressiveInterjection("doesn't exist "));
                     speech.Append("in the library!");
                     return await Task.FromResult<string>(speech.ToString());
                 }
@@ -270,19 +270,19 @@ namespace AlexaController.Utils.LexicalSpeech
                 case SpeechResponseType.DEVICE_UNAVAILABLE:
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.APOLOGETIC));
-                    speech.Append(SpeechStyle.SayWithEmotion("I was unable to access ", Emotion.disappointed, Intensity.medium));
-                    speech.Append(SpeechStyle.SayWithEmotion("the device in the ", Emotion.disappointed, Intensity.medium));
-                    speech.Append(SpeechStyle.SayWithEmotion(speechQuery.args?[0], Emotion.disappointed, Intensity.medium));
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.SayWithEmotion("I was unable to access ", Emotion.disappointed, Intensity.medium));
+                    speech.Append(Ssml.SayWithEmotion("the device in the ", Emotion.disappointed, Intensity.medium));
+                    speech.Append(Ssml.SayWithEmotion(speechQuery.args?[0], Emotion.disappointed, Intensity.medium));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
                     return await Task.FromResult<string>(speech.ToString());
                 }
 
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS:
                 {
                     speech.Append(GetSpeechDysfluency(Emotion.excited, Intensity.low, Rate.slow));
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.strong));
                     speech.Append("This profile is already linked to ");
-                    speech.Append(SayName(speechQuery.session.person));
+                    speech.Append(Ssml.SayName(speechQuery.session.person));
                     speech.Append("'s account");
                     return await Task.FromResult<string>(speech.ToString());
                 }
@@ -296,12 +296,12 @@ namespace AlexaController.Utils.LexicalSpeech
 
                 case SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS:
                 {
-                    speech.Append(SpeechStyle.ExpressiveInterjection("Success "));
-                    speech.Append(SpeechStyle.ExpressiveInterjection(SayName(speechQuery.session.person)));
+                    speech.Append(Ssml.ExpressiveInterjection("Success "));
+                    speech.Append(Ssml.ExpressiveInterjection(Ssml.SayName(speechQuery.session.person)));
                     speech.Append("!");
                     speech.Append("Please look at the plugin configuration.");
                     speech.Append("You should now see the I.D. linked to your voice.");
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
                     speech.Append("Choose your emby account name and press save.");
                     return await Task.FromResult<string>(speech.ToString());
                 }
@@ -310,14 +310,14 @@ namespace AlexaController.Utils.LexicalSpeech
                 {
                     speech.Append("There ");
                     speech.Append(speechQuery.items?.Count > 1 ? "are" : "is");
-                    speech.Append(SpeechStyle.SayAsCardinal(speechQuery.items?.Count.ToString()));
+                    speech.Append(Ssml.SayAsCardinal(speechQuery.items?.Count.ToString()));
                     speech.Append(" upcoming episode");
                     speech.Append(speechQuery.items?.Count > 1 ? "s" : "");
                     
                     var date = DateTime.Parse(speechQuery.args[0]);
                     
                     speech.Append($" scheduled to air over the next {(date - DateTime.Now).Days} days.");
-                    speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                    speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
                    
                     var schedule = speechQuery.items.DistinctBy(item => item.Parent.ParentId);
                    
@@ -326,9 +326,9 @@ namespace AlexaController.Utils.LexicalSpeech
                         speech.Append(StringNormalization.ValidateSpeechQueryString(item.Parent.Parent.Name));
                         if (item.IndexNumber == 1)
                         {
-                            speech.Append($" will premiere season {SpeechStyle.SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
-                            speech.Append(SpeechStyle.SayAsDate(Date.md, item.PremiereDate.Value.ToString("M/d"))); 
-                            speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                            speech.Append($" will premiere season {Ssml.SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
+                            speech.Append(Ssml.SayAsDate(Date.md, item.PremiereDate.Value.ToString("M/d"))); 
+                            speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.weak));
                             speech.Append(" and ");
                         }
 
@@ -336,27 +336,27 @@ namespace AlexaController.Utils.LexicalSpeech
                         speech.Append(" will air on ");
                         speech.Append($"{item.PremiereDate.Value.DayOfWeek}'s");
                          
-                        speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
+                        speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.strong));
                     }
                     
                     speech.Append(
                         $"This completes the list of episodes scheduled for the next {(date - DateTime.Now).Days} days. ");
 
-                    return await Task.FromResult<string>(SpeechStyle.SayInDomain(Domain.conversational, speech.ToString()));
+                    return await Task.FromResult<string>(Ssml.SayInDomain(Domain.conversational, speech.ToString()));
                 }
 
                 case SpeechResponseType.NEW_ITEMS_DISPLAY_NONE:
                 {
                     speech.Append("There ");
                     speech.Append(speechQuery.items?.Count > 1 ? "are" : "is");
-                    speech.Append(SpeechStyle.SayAsCardinal(speechQuery.items?.Count.ToString()));
+                    speech.Append(Ssml.SayAsCardinal(speechQuery.items?.Count.ToString()));
                     speech.Append(" new ");
                     speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
 
                     var date = DateTime.Parse(speechQuery.args[0]);
                     speech.Append($" added in the past {(date - DateTime.Now).Days} days. ");
 
-                    speech.Append(string.Join($", {SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)}",
+                    speech.Append(string.Join($", {Ssml.InsertStrengthBreak(StrengthBreak.weak)}",
                         // ReSharper disable once AssignNullToNotNullAttribute
                         speechQuery.items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
                     return await Task.FromResult<string>(speech.ToString());
@@ -366,7 +366,7 @@ namespace AlexaController.Utils.LexicalSpeech
                 {
                     speech.Append("There ");
                     speech.Append(speechQuery.items?.Count > 1 ? "are" : "is");
-                    speech.Append(SpeechStyle.SayAsCardinal(speechQuery.items?.Count.ToString()));
+                    speech.Append(Ssml.SayAsCardinal(speechQuery.items?.Count.ToString()));
                     speech.Append(" new ");
                     speech.Append(speechQuery.items?.Count > 1 ? speechQuery.items[0].GetType().Name + "s" : speechQuery.items?[0].GetType().Name);
 

@@ -99,7 +99,7 @@ namespace AlexaController.Api
             {
                 outputSpeech = new OutputSpeech(){phrase = "I have encountered an error."},
                 shouldEndSession = true
-            });
+            }, null);
         }
 
         private async Task<string> OnIntentRequest(IAlexaRequest alexaRequest)
@@ -126,7 +126,7 @@ namespace AlexaController.Api
                                 phrase = "You are not a recognized user. Please take moment to register your voice profile.",
                                 
                             },
-                        });
+                        }, null);
                 }
 
                 var user = SpeechAuthorization.Instance.GetRecognizedPersonalizationProfileResult(person);
@@ -184,7 +184,7 @@ namespace AlexaController.Api
                                 type = SpeechResponseType.PERSON_NOT_RECOGNIZED
                             })
                         }
-                    });
+                    }, null);
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
 
@@ -206,13 +206,11 @@ namespace AlexaController.Api
                     await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                     {
                         HeadlinePrimaryText = "Welcome to Home Theater Emby Controller",
-                        renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
-
+                        renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE
                     }, session)
 
                 }
-
-            }, session.alexaSessionDisplayType);
+            }, session);
 
         }
 
@@ -225,7 +223,7 @@ namespace AlexaController.Api
                 {
                     phrase = "Unknown"
                 }
-            });
+            }, null);
         }
 
         private static async Task<string> GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)

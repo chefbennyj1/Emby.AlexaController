@@ -55,7 +55,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                         await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session)
                     }
 
-                }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+                }, session);
             }
 
             session.PlaybackStarted = true;
@@ -76,7 +76,6 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                person = session.person,
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
@@ -93,7 +92,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     renderDocumentDirective
                 }
 
-            }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);   
+            }, session);   
             
         }
     }

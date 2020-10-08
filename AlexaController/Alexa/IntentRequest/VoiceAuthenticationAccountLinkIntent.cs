@@ -40,7 +40,7 @@ namespace AlexaController.Alexa.IntentRequest
                         }),
                         
                     },
-                });
+                }, Session);
             }
 
             if (config.UserCorrelations.Any())
@@ -58,7 +58,7 @@ namespace AlexaController.Alexa.IntentRequest
                                 session = Session
                             }),
                         }
-                    });
+                    }, Session);
                 }
             }
 
@@ -77,7 +77,7 @@ namespace AlexaController.Alexa.IntentRequest
                         session  = Session
                     }),
                 },
-            });
+            }, Session);
         }
     }
 }

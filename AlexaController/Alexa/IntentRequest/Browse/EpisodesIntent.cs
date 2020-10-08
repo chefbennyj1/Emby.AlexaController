@@ -74,9 +74,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         }),
                         
                     },
-                    shouldEndSession = null,
-                    person           = null,
-                }, Session.alexaSessionDisplayType);
+                    shouldEndSession = null
+                }, Session);
             }
 
             var seasonId = result[0].Parent.InternalId;
@@ -124,7 +123,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     renderDocumentDirective
                 }
 
-            }, Session.alexaSessionDisplayType);
+            }, Session);
 
         }
     }

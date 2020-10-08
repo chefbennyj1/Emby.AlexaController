@@ -51,7 +51,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
                     }, session)
                 }
-            }, session.alexaSessionDisplayType);
+            }, session);
         }
 
         public Room GetRoomByName(string name)

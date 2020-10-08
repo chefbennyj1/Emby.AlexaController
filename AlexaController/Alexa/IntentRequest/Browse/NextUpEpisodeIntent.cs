@@ -80,7 +80,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
                         }, Session)
                     }
-                }, Session.alexaSessionDisplayType);
+                }, Session);
             }
             
             //Parental Control check for baseItem
@@ -106,7 +106,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
                     },
                     shouldEndSession = true
-                });
+                }, Session);
             }
 
             if (!(Session.room is null))
@@ -157,7 +157,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     await renderDocumentDirective
                 }
 
-            }, Session.alexaSessionDisplayType);
+            }, Session);
            
         }
     }

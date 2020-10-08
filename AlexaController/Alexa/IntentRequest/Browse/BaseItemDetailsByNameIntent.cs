@@ -76,7 +76,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             session = Session
                         }),
                     }
-                });
+                }, Session);
             }
 
             if (!result.IsParentalAllowed(Session.User))
@@ -110,7 +110,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
                             }, Session)
                     }
-                });
+                }, Session);
             }
 
             if (!(Session.room is null))
@@ -165,7 +165,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         renderDocumentDirective
                     }
 
-                }, Session.alexaSessionDisplayType);
+                }, Session);
 
             }
             catch (Exception exception)

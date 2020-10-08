@@ -39,7 +39,7 @@ namespace AlexaController.Alexa.IntentRequest
                     phrase = speechString,
                     
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session);
         }
 
         private static string GetUserSessionSpeechString(IEnumerable<SessionInfo> sessions)

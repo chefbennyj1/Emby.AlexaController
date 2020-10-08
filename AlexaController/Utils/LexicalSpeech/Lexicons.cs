@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
-using AlexaController.Alexa.Speech;
+using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
 
 // ReSharper disable ComplexConditionExpression
 // ReSharper disable InconsistentNaming
@@ -101,14 +101,14 @@ namespace AlexaController.Utils.LexicalSpeech
         
         private static string GetSpeechApology() => 
             RandomIndex.NextDouble() < 0.5 
-                ? string.Join(" ", SpeechStyle.SpeechRate(Rate.slow, SpeechStyle.SayWithEmotion(Apologetic2[RandomIndex.Next(1, Apologetic2.Count)], Emotion.disappointed, Intensity.low)), 
-                    SpeechStyle.SayWithEmotion("ya know what?", Emotion.disappointed, Intensity.medium), 
-                    SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)) 
+                ? string.Join(" ", Ssml.SpeechRate(Rate.slow, Ssml.SayWithEmotion(Apologetic2[RandomIndex.Next(1, Apologetic2.Count)], Emotion.disappointed, Intensity.low)), 
+                    Ssml.SayWithEmotion("ya know what?", Emotion.disappointed, Intensity.medium), 
+                    Ssml.InsertStrengthBreak(StrengthBreak.weak)) 
                 : string.Join(" ", GetSpeechDysfluency(Emotion.disappointed, Intensity.medium, Rate.slow), 
-                    SpeechStyle.SayWithEmotion(Apologetic[RandomIndex.Next(0, Apologetic.Count)], Emotion.disappointed, Intensity.medium), 
-                    SpeechStyle.InsertStrengthBreak(StrengthBreak.weak));
+                    Ssml.SayWithEmotion(Apologetic[RandomIndex.Next(0, Apologetic.Count)], Emotion.disappointed, Intensity.medium), 
+                    Ssml.InsertStrengthBreak(StrengthBreak.weak));
 
-        protected static string GetSpeechDysfluency(Emotion emotion, Intensity intensity, Rate rate) => SpeechStyle.SayWithEmotion(SpeechStyle.SpeechRate(rate, Dysfluency[RandomIndex.Next(0, Dysfluency.Count)]), emotion, intensity);
+        protected static string GetSpeechDysfluency(Emotion emotion, Intensity intensity, Rate rate) => Ssml.SayWithEmotion(Ssml.SpeechRate(rate, Dysfluency[RandomIndex.Next(0, Dysfluency.Count)]), emotion, intensity);
         
         private static string GetTimeOfDayResponse() => DateTime.Now.Hour < 12 && DateTime.Now.Hour > 4 ? "Good morning" : DateTime.Now.Hour > 12 && DateTime.Now.Hour < 17 ? "Good afternoon" : "Good evening";
         
@@ -116,14 +116,14 @@ namespace AlexaController.Utils.LexicalSpeech
         
         private static string GetRepose() => Repose[RandomIndex.Next(0, Repose.Count)];
         
-        private static string GetNonCompliance() => SpeechStyle.SayWithEmotion(NonCompliant[RandomIndex.Next(1, NonCompliant.Count)], Emotion.disappointed, Intensity.low);
+        private static string GetNonCompliance() => Ssml.SayWithEmotion(NonCompliant[RandomIndex.Next(1, NonCompliant.Count)], Emotion.disappointed, Intensity.low);
         
         private static string GetGreeting() => 
             RandomIndex.NextDouble() < 0.5 
-                ? string.Join(" ", SpeechStyle.SayWithEmotion(Greetings[RandomIndex.Next(1, Greetings.Count)], Emotion.excited, Intensity.low), 
-                SpeechStyle.InsertStrengthBreak(StrengthBreak.weak)) 
+                ? string.Join(" ", Ssml.SayWithEmotion(Greetings[RandomIndex.Next(1, Greetings.Count)], Emotion.excited, Intensity.low), 
+                Ssml.InsertStrengthBreak(StrengthBreak.weak)) 
                 : GetTimeOfDayResponse();
         
-        public static string SayName(IPerson person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
+        
     }
 }

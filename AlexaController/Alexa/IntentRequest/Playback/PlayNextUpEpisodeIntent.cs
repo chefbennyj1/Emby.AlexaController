@@ -51,7 +51,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                             session = Session
                         })
                     },
-                });
+                }, Session);
             }
 
 #pragma warning disable 4014
@@ -83,7 +83,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
                     }, Session)
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session);
         }
     }
 }

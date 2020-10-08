@@ -70,14 +70,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                     args = new []{duration.ToLongDateString()}
                                 })
                             },
-                            person = Session.person,
                             shouldEndSession = null,
                             directives = new List<IDirective>()
                             {
                                 renderDocumentDirective
                             }
 
-                        }, Session.alexaSessionDisplayType);
+                        }, Session);
                     }
                 default: //Voice only
                     {
@@ -93,10 +92,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                     args = new []{duration.ToLongDateString()}
                                 })
                             },
-                            person = Session.person,
                             shouldEndSession = true,
 
-                        }, Session.alexaSessionDisplayType);
+                        }, Session);
                     }
             }
         }

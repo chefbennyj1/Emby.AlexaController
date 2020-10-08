@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
-using AlexaController.Alexa.Speech;
+using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
 using AlexaController.Session;
 using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Common.Net;
@@ -18,7 +18,7 @@ namespace AlexaController
 
     public interface IResponseClient
     {
-        Task<string> BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE);
+        Task<string> BuildAlexaResponse(IResponse response,IAlexaSession session);
         Task PostProgressiveResponse(string speechOutput, string accessToken, string requestId);
     }
 
@@ -36,9 +36,9 @@ namespace AlexaController
         }
 
         // ReSharper disable once FlagArgument
-        public async Task<string> BuildAlexaResponse(IResponse response, AlexaSessionDisplayType alexaSessionDisplayType = AlexaSessionDisplayType.NONE)
+        public async Task<string> BuildAlexaResponse(IResponse response, IAlexaSession session)
         {
-            var person = !(response.person is null) ? Lexicons.SayName(response.person) : "";
+            var person = !(session.person is null) ? Ssml.SayName(session.person) : "";
             
             if (!(response.outputSpeech is null))
             {
@@ -48,7 +48,7 @@ namespace AlexaController
                
                 speech.Append(outputSpeech.sound);
                 speech.Append(person);
-                speech.Append(SpeechStyle.InsertStrengthBreak(StrengthBreak.strong));
+                speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.strong));
                 speech.Append(outputSpeech.phrase);
                 
                 outputSpeech.ssml = "<speak>";
@@ -62,7 +62,7 @@ namespace AlexaController
             };
 
             // Remove the directive if the device doesn't handle APL.
-            if (!alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE)) response.directives = null;
+            if (!session.alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE)) response.directives = null;
             
             return await Task.FromResult(JsonSerializer.SerializeToString(new AlexaResponse()
             {

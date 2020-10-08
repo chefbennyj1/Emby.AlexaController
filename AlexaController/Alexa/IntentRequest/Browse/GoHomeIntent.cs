@@ -26,7 +26,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     phrase = "OK"
                 },
 
-            });
+            }, Session);
         }
     }
 }

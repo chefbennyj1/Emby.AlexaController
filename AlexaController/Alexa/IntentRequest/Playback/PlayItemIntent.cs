@@ -78,7 +78,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                             session = Session
                         })
                     }
-                });
+                }, Session);
             }
             
             //Parental Control check for baseItem
@@ -103,7 +103,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         }),
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     }
-                });
+                }, Session);
             }
 
             try
@@ -148,7 +148,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     renderDocumentDirective
                 }
 
-            }, Session.alexaSessionDisplayType);
+            }, Session);
 
         }
     }

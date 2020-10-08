@@ -39,7 +39,7 @@ namespace AlexaController.Alexa.IntentRequest
             var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);
 
 #pragma warning disable 4014
-            ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var query = type == "New TV Shows"
@@ -56,12 +56,12 @@ namespace AlexaController.Alexa.IntentRequest
                     {
                         phrase = $"No { type } have been added."
                     },
-                    person = Session.person,
                     shouldEndSession = true,
 
-                }, Session.alexaSessionDisplayType);
+                }, Session);
             }
            
+
             switch (Session.alexaSessionDisplayType)
             {
                 case AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE:
@@ -90,14 +90,13 @@ namespace AlexaController.Alexa.IntentRequest
                                     args = new []{d.ToLongDateString()}
                                 })
                             },
-                            person           = Session.person,
                             shouldEndSession = null,
                             directives       = new List<IDirective>()
                             {
                                 renderDocumentDirective
                             }
 
-                        }, Session.alexaSessionDisplayType);
+                        }, Session);
                     }
                 default: //Voice only
                     {
@@ -113,10 +112,9 @@ namespace AlexaController.Alexa.IntentRequest
                                     args = new []{d.ToLongDateString()}
                                 })
                             },
-                            person           = Session.person,
                             shouldEndSession = true,
 
-                        }, Session.alexaSessionDisplayType);
+                        }, Session);
                     }
             }
         }

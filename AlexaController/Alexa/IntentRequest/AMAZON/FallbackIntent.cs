@@ -40,7 +40,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                             renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
                         }, Session)
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session);
         }
     }
 }

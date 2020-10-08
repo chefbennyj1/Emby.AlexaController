@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.ResponseData.Model;
-using AlexaController.Alexa.Speech;
+using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -25,7 +25,7 @@ namespace AlexaController.Alexa.Exceptions
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"{SpeechStyle.SayWithEmotion(exception.Message, Emotion.excited, Intensity.low)}",
+                    phrase = $"{Ssml.SayWithEmotion(exception.Message, Emotion.excited, Intensity.low)}",
                 },
 
                 directives = new List<IDirective>()
@@ -38,7 +38,7 @@ namespace AlexaController.Alexa.Exceptions
 
                         }, session)
                 }
-            }, session.alexaSessionDisplayType);
+            }, session);
         }
     }
 }

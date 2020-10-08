@@ -75,7 +75,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
                         }, Session)
                     }
-                }, Session.alexaSessionDisplayType);
+                }, Session);
             }
 
             if (!(Session.room is null))
@@ -124,7 +124,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     renderDocumentDirective
                 }
 
-            }, Session.alexaSessionDisplayType);
+            }, Session);
         }
     }
 }

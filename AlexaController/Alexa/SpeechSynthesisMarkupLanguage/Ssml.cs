@@ -1,7 +1,9 @@
 ﻿// ReSharper disable ComplexConditionExpression
 // ReSharper disable InconsistentNaming
 
-namespace AlexaController.Alexa.Speech
+using AlexaController.Alexa.RequestData.Model;
+
+namespace AlexaController.Alexa.SpeechSynthesisMarkupLanguage
 {
     public enum Domain
     {
@@ -74,7 +76,7 @@ namespace AlexaController.Alexa.Speech
         y
     }
 
-    public class SpeechStyle
+    public class Ssml
     {
         public static string SayInDomain(Domain domain, string text)                           => $"<amazon:domain name='{domain}'>{text}</amazon:domain>";
 
@@ -97,5 +99,7 @@ namespace AlexaController.Alexa.Speech
         public static string ExpressiveInterjection(string text)                               => $"<say-as interpret-as='interjection'>{text}</say-as>";
 
         public static string SayAsDate(Date date, string text)                                 => $"<say-as interpret-as='date' format='{date}'>{text}</say-as>";
+
+        public static string SayName(IPerson person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
     }
 }

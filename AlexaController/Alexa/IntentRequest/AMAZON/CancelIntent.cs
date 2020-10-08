@@ -36,7 +36,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 {
                     phrase = "Canceling."
                 }
-            });
+            }, Session);
         }
     }
 }

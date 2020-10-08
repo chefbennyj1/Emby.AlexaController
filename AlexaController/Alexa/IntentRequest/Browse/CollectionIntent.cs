@@ -88,7 +88,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             }),
                             sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                         }
-                    });
+                    }, Session);
                 }
             }
 
@@ -128,7 +128,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                person = Session.person,
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = $"{collectionBaseItem.Name}",
@@ -139,7 +138,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     renderDocumentDirective
                 },
 
-            }, Session.alexaSessionDisplayType);
+            }, Session);
         }
     }
 }

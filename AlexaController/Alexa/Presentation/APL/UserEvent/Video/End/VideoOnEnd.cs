@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
         {
             var request = AlexaRequest.request;
             var arguments = request.arguments;
-            
+            var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
@@ -54,7 +54,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
                         }
                     }
                 }
-            }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+            }, session);
         }
     }
 }

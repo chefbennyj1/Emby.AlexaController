@@ -67,7 +67,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     renderDocumentDirective
                 }
 
-            }, AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE);
+            }, session);
 
         }
     }

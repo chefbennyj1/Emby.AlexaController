@@ -35,7 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
 
                     }, Session)
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session);
         }
     }
 }

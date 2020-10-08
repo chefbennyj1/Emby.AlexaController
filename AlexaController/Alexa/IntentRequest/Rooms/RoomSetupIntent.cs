@@ -47,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                         }, Session)
                     }
 
-                }, Session.alexaSessionDisplayType);
+                }, Session);
             }
             
             var response = await ResponseClient.Instance.BuildAlexaResponse(new Response()
@@ -58,7 +58,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     phrase = $"Thank you. Please see the plugin configuration to choose the emby device that is in the { room.Name }, and press the \"Create Room button\".",
 
                 }
-            }, Session.alexaSessionDisplayType);
+            }, Session);
 
             Session.room = null;
             AlexaSessionManager.Instance.UpdateSession(Session, null);

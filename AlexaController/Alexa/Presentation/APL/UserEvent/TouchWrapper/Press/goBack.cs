@@ -50,7 +50,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     await renderDocumentDirective
                 }
 
-            }, session.alexaSessionDisplayType);
+            }, session);
         }
     }
 }

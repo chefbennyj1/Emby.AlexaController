@@ -45,7 +45,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                     await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(previousPage, Session)
                 }
 
-            }, Session.alexaSessionDisplayType);
+            }, Session);
         }
     }
 }

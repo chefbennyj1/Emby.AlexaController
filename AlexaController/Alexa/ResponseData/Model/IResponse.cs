@@ -5,7 +5,7 @@ namespace AlexaController.Alexa.ResponseData.Model
 {
     public interface IResponse 
     {
-        IPerson person              { get; }
+        //IPerson person              { get; }
         IOutputSpeech outputSpeech  { get; }
         IReprompt reprompt { get; set; } 
         ICard card                   { get; set; }
@@ -17,7 +17,7 @@ namespace AlexaController.Alexa.ResponseData.Model
 
     public class Response : IResponse
     {
-        public IPerson person              { get; set; }
+        //public IPerson person              { get; set; }
         public IOutputSpeech outputSpeech  { get; set; }
         public IReprompt reprompt { get; set; } 
         public ICard card                   { get; set; } = null;
