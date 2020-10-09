@@ -5,7 +5,6 @@ using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
-
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
 {
     public class VideoOnEnd : IUserEventResponse

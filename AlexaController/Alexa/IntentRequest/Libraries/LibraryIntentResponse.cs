@@ -3,14 +3,13 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 
-// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
@@ -25,13 +24,12 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
 
         public async Task<string> Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-           
             try { session.room = RoomManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
             session.room = session.room;
 
             var context = alexaRequest.context;
             // we need the room object to proceed because we will only show libraries on emby devices
-            
+
             if (session.room is null || (session.room is null && context.Viewport is null))
             {
                 session.PersistedRequestData = alexaRequest;
@@ -50,7 +48,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             });
 
 #pragma warning disable 4014
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var result = EmbyServerEntryPoint.Instance.GetItemById(EmbyServerEntryPoint.Instance.GetLibraryId(LibraryName));

@@ -1299,8 +1299,8 @@ namespace AlexaController.Alexa.Presentation
 
                 foreach (var session in EmbyServerEntryPoint.Instance.GetCurrentSessions())
                 {
-                    if (session.DeviceName == room.Device) disabled = false;
-                    if (session.Client     == room.Device) disabled = false;
+                    if (session.DeviceName == room.DeviceName) disabled = false;
+                    if (session.Client     == room.DeviceName) disabled = false;
                 }
 
                 roomButtons.Add(new Container()

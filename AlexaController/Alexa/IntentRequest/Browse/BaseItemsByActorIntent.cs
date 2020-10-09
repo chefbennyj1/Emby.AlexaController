@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -13,6 +14,7 @@ using MediaBrowser.Model.Entities;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
+    [Intent]
     public class BaseItemsByActorIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }

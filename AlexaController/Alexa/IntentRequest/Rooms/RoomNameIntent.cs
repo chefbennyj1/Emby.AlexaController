@@ -48,7 +48,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 }
 
                 if (!EmbyServerEntryPoint.Instance.GetCurrentSessions().ToList()
-                    .Exists(s => string.Equals(s.DeviceName,room?.Device, StringComparison.CurrentCultureIgnoreCase)))
+                    .Exists(s => string.Equals(s.DeviceName,room?.DeviceName, StringComparison.CurrentCultureIgnoreCase)))
                 {
                     throw new DeviceUnavailableException("That device is currently unavailable.");
                 }

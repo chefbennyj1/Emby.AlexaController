@@ -15,7 +15,6 @@ using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
-using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
 
 // ReSharper disable once TooManyDependencies
@@ -93,6 +92,8 @@ namespace AlexaController.Api
             }
         }
 
+      
+
         private async Task<string> OnExceptionEncountered()
         {
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
@@ -125,7 +126,8 @@ namespace AlexaController.Api
                             {
                                 phrase = "You are not a recognized user. Please take moment to register your voice profile.",
                                 
-                            },
+                            }
+
                         }, null);
                 }
 
@@ -142,8 +144,8 @@ namespace AlexaController.Api
             
             try
             {
-                var type = Type.GetType(IntentNamespace(request));
-                return await GetResponseResult(type, alexaRequest, session);
+                var @namespace = Type.GetType(IntentNamespace(request));
+                return await GetResponseResult(@namespace, alexaRequest, session);
             }
             catch (Exception exception)
             {
@@ -162,8 +164,8 @@ namespace AlexaController.Api
         private async Task<string> OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request    = alexaRequest.request;
-            var type       = Type.GetType(UserEventNamespace(request));
-            return await GetResponseResult(type, alexaRequest, null);
+            var @namespace = Type.GetType(UserEventNamespace(request));
+            return await GetResponseResult(@namespace, alexaRequest, null);
         }
 
         private static async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)

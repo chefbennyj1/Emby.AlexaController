@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -10,6 +11,7 @@ using AlexaController.Utils.LexicalSpeech;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
+    [Intent]
     public class UpComingTv : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }

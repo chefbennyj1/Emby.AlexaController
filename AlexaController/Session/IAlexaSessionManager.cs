@@ -157,9 +157,9 @@ namespace AlexaController.Session
             var config = Plugin.Instance.Configuration;
             var configRooms = config.Rooms;
 
-            if (!configRooms.Exists(r => r.Device == deviceName)) return;
+            if (!configRooms.Exists(r => r.DeviceName == deviceName)) return;
 
-            var room = configRooms.FirstOrDefault(r => r.Device == deviceName);
+            var room = configRooms.FirstOrDefault(r => r.DeviceName == deviceName);
 
             if (!OpenSessions.Exists(session => session.room.Name == room?.Name)) return;
 

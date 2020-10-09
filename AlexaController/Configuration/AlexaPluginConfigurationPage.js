@@ -306,31 +306,37 @@
                 (e) => {
                     e.preventDefault();
                     var name   = dlg.querySelector('#roomName').value;
-                    var device = dlg.querySelector('#selectEmbyDevice').value;
+                    var deviceNameSelect = dlg.querySelector('#selectEmbyDevice');
+                    var device = deviceNameSelect.value;
+                    var appName = deviceNameSelect.options[deviceNameSelect.selectedIndex >= 0 ? deviceNameSelect.selectedIndex : 0].dataset.app;
+                     
+                    ApiClient.getJSON(ApiClient.getUrl("EmbyDeviceSvg?AppName=" + appName)).then(result => {
 
-                    var room = {
-                        Name: name,
-                        Device: device
-                    }
+                        var room = {
+                            Name: name,
+                            DeviceName: device,
+                            AppName: appName,
+                            AppSvg: result.svg
+                        }
 
-                    ApiClient.getPluginConfiguration(pluginId).then((config) => {
-                        config.Rooms.push(room);
-                        ApiClient.updatePluginConfiguration(pluginId, config).then(
-                            (result) => {
-                                view.querySelector('.roomTableResultBody').innerHTML = getRoomTableHtml(config.Rooms);
-                                view.querySelectorAll('.removeRoom').forEach(button => {
-                                    button.addEventListener('click',
-                                        (ele) => {
-                                            ele.preventDefault();
-                                            removeRoomOnClick(ele, view);
-                                        });
+                        ApiClient.getPluginConfiguration(pluginId).then((config) => {
+                            config.Rooms.push(room);
+                            ApiClient.updatePluginConfiguration(pluginId, config).then(
+                                (result) => {
+                                    view.querySelector('.roomTableResultBody').innerHTML = getRoomTableHtml(config.Rooms);
+                                    view.querySelectorAll('.removeRoom').forEach(button => {
+                                        button.addEventListener('click',
+                                            (ele) => {
+                                                ele.preventDefault();
+                                                removeRoomOnClick(ele, view);
+                                            });
+                                    });
+                                    Dashboard.processPluginConfigurationUpdateResult(result);
+                                    dialogHelper.close(dlg);
                                 });
-                                Dashboard.processPluginConfigurationUpdateResult(result);
-                                dialogHelper.close(dlg);
-                            });
+                        });
                     });
-
-                }); 
+                });
 
             ApiClient._webSocket.addEventListener('message', function (message) {
                 var json = JSON.parse(message.data);
@@ -338,6 +344,7 @@
                     dlg.querySelector('#roomName').value = json.Data;
                 }
             });
+               
         }   
 
         function openInteractionModelDialog() {
@@ -416,10 +423,10 @@
             var html = '';
             for (var i = 0; i <= rooms.length -1; i++) { //rooms.forEach(room => {
                 html += '<tr class="detailTableBodyRow detailTableBodyRow-shaded" id="' + rooms[i].Name.replace(" ", "_") + '">';
-                html += '<td data-title="Name" class="detailTableBodyCell fileCell"><i class="md-icon navMenuOptionIcon">location_on</i></td>';
-
+                html += '<td data-title="Name" class="detailTableBodyCell fileCell"><svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="rgba(0,0,0,0.3)" d="' + rooms[i].AppSvg + '" /></svg></td>'; 
                 html += '<td data-title="Name" class="detailTableBodyCell fileCell">' + rooms[i].Name + '</td>';
-                html += '<td data-title="Name" class="detailTableBodyCell fileCell-shaded">' + rooms[i].Device + '</td>';
+                html += '<td data-title="Name" class="detailTableBodyCell fileCell-shaded">' + rooms[i].DeviceName + '</td>';
+                html += '<td data-title="Name" class="detailTableBodyCell fileCell-shaded">' + rooms[i].AppName + '</td>';
                 html += '<td class="detailTableBodyCell fileCell">';
                 html += '<button id="' + rooms[i].Name.replace(" ", "_") + '" class="fab removeRoom emby-button"><i class="md-icon">clear</i></button></td>';
                 html += '<td class="detailTableBodyCell" style="whitespace:no-wrap;"></td>';
@@ -432,10 +439,13 @@
             var html = '';
             userCorrelations.forEach(correlation => {
                 html += '<tr class="detailTableBodyRow detailTableBodyRow-shaded" id="' + correlation.EmbyUserId + '">';
-                html += '<td data-title="Name" class="detailTableBodyCell fileCell"><i class="md-icon navMenuOptionIcon">people_outline</i></td>';
+                html += '<td data-title="Name" class="detailTableBodyCell fileCell">';
+                html += '<svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="rgba(0,0,0,0.3)" d="M2,3H22C23.05,3 24,3.95 24,5V19C24,20.05 23.05,21 22,21H2C0.95,21 0,20.05 0,19V5C0,3.95 0.95,3 2,3M14,6V7H22V6H14M14,8V9H21.5L22,9V8H14M14,10V11H21V10H14M8,13.91C6,13.91 2,15 2,17V18H14V17C14,15 10,13.91 8,13.91M8,6A3,3 0 0,0 5,9A3,3 0 0,0 8,12A3,3 0 0,0 11,9A3,3 0 0,0 8,6Z" />';
+                html += '</svg>';
+                html += '</td>';
 
                 html += '<td data-title="EmbyUserName" class="detailTableBodyCell fileCell">' + correlation.EmbyUserName + '</td>';
-                html += '<td data-title="PersonId" class="detailTableBodyCell fileCell-shaded">' + correlation.AlexaPersonId.substring(0, 25) + '</td>';
+                html += '<td data-title="PersonId" class="detailTableBodyCell fileCell-shaded">' + correlation.AlexaPersonId.substring(0, 25) + '*****</td>';
                 html += '<td class="detailTableBodyCell fileCell">';
                 html += '<button id="' + correlation.EmbyUserId + '" class="fab removeUser emby-button"><i class="md-icon">clear</i></button></td>';
                 html += '<td class="detailTableBodyCell" style="whitespace:no-wrap;"></td>';
@@ -546,66 +556,7 @@
                 dialogHelper.open(dlg);
 
                 console.log(interactionModel);
-            });
-
-
-            //var html = '';
-
-            
-            
-            //html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Movies:</h2>';
-            //html += '<p>...to show the movie {movie_name}</p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Television:</h2>';
-            //html += '<p>...to show the series {series_name}</p>';
-            //html += '<p style="font-weight: bold">(When the series is displayed, you may ask)</p>';
-            //html += '<p>...to show Season {season_number}</p>';
-            //html += '<p style="font-weight: bold">(When the episode list is displayed for the season, you may ask)</p>';
-            //html += '<p>...play episode {episode_number}.</p>';
-            //html += '<p> </p>';
-            //html += '<p style="font-weight: bold">(ask for a specific series, next up episode)</p>';
-            //html += '<p>...to show the next up episode for {series_name}</p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<h2 class="sectionTitle sectionTitle-cards">Requesting New Media:</h2>';
-            //html += '<p>...to show new movies</p>';
-            //html += '<p>...to show new movies from the last {time_period}</p>';
-            //html += '<p>...to show new movies added in the last {time_period}</p>';
-            //html += '<p>...to show new tv shows/series</p>';
-            //html += '<p>...to show new tv shows/series from the last {time_period}</p>';
-            //html += '<p>...to show new tv shows/series added in the last {time_period}</p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<h2 class="sectionTitle sectionTitle-cards">Requesting Collections:</h2>';
-            //html += '<p>...to show the {movie_collection_name} collection</p>';
-            //html += '<p>...to show all the {movie_name} movies</p>';
-            //html += '<p>...to show the {movie_collection_name} saga</p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>';
-            //html += '<p></p>'; 
-            //html += '</div>';
-
-
-           
+            }); 
         }
                
         return function(view) {

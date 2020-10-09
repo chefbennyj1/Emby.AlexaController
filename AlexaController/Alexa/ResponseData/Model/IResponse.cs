@@ -23,7 +23,7 @@ namespace AlexaController.Alexa.ResponseData.Model
         public ICard card                   { get; set; } = null;
         public object shouldEndSession     { get; set; }
         public List<IDirective> directives { get; set; }
-
+       
         // Progressive Response elements
         public IHeader header               { get; set; }
         public IDirective directive        { get; set; }

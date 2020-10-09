@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
 using AlexaController.Session;
-using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Model.Serialization;
 
@@ -62,13 +61,13 @@ namespace AlexaController
             };
 
             // Remove the directive if the device doesn't handle APL.
-            if (!session.alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE)) response.directives = null;
+            if (!session.alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE)) 
+                response.directives = null;
             
             return await Task.FromResult(JsonSerializer.SerializeToString(new AlexaResponse()
             {
                 version = "1.2",
                 response = response
-
             }));
         }
 

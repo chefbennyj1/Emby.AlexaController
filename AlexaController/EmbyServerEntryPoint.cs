@@ -216,7 +216,7 @@ namespace AlexaController
                 throw new Exception("That room doesn't exist in the plugin configuration.");
             }
 
-            var device = room.Device;
+            var device = room.DeviceName;
             if (!ReferenceEquals(null, SessionManager.Sessions.FirstOrDefault(d => d.DeviceName == device)))
             {
                 return SessionManager.Sessions.FirstOrDefault(d => d.DeviceName == device)?.DeviceId;
