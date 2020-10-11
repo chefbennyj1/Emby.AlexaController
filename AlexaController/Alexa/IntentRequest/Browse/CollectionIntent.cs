@@ -57,9 +57,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 #pragma warning disable 4014
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
-
+            EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
-            
+            EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + " normalized request: " + collectionRequest);
             var collection          = EmbyServerEntryPoint.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems     = collection.Values.FirstOrDefault();
             var collectionBaseItem  = collection.Keys.FirstOrDefault();

@@ -84,7 +84,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
                 {
                     await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
-                        $"{Session.User} attempted to view a restricted item.",$"{Session.User} attempted to view {result.Name}.").ConfigureAwait(false);
+                        $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {result.Name}.");
                 }
 
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()

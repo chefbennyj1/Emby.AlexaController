@@ -10,7 +10,7 @@
                     <hr />
                     <div style="padding-top: 2em">
 
-                        <div class="" style="padding: 1em;">
+                        <div style="padding: 2em;">
                             <div class="detailSectionHeader" style="padding-bottom: 2em">
                                 <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">
                                     Interaction Model Dialog
@@ -24,7 +24,7 @@
 
                         <hr />
 
-                        <div style="padding: 1em;">
+                        <div style="padding: 2em;">
                             <div class="detailSectionHeader personalizationConfiguration">
                                 <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">Personalization</h2>
                                 <p>Link Emby account users with Alexa's personalization account data</p>
@@ -38,13 +38,13 @@
                             <div class="paperList" style="padding: 2em;">
                                 <table class="tblPersonalizationResults table detailTable" style="width: 100%; margin-top: 3em; padding-bottom: 3em;">
                                     <thead>
-                                        <tr style="text-align: left;">
-                                            <th class="detailTableHeaderCell" data-priority="1" style="width: 5%"></th>
-                                            <th class="detailTableHeaderCell" data-priority="2" style="width: 35%">Emby User Name</th>
-                                            <th class="detailTableHeaderCell" data-priority="3" style="width: 50%">Alexa Person Id</th>
-                                            <th class="detailTableHeaderCell" data-priority="4" style="width: 10%">Remove</th>
-                                            <th class="detailTableHeaderCell" data-priority="5"></th>
-                                        </tr>
+                                    <tr style="text-align: left;">
+                                        <th class="detailTableHeaderCell" data-priority="1" style="width: 5%"></th>
+                                        <th class="detailTableHeaderCell" data-priority="2" style="width: 35%">Emby User Name</th>
+                                        <th class="detailTableHeaderCell" data-priority="3" style="width: 50%">Alexa Person Id</th>
+                                        <th class="detailTableHeaderCell" data-priority="4" style="width: 10%">Remove</th>
+                                        <th class="detailTableHeaderCell" data-priority="5"></th>
+                                    </tr>
                                     </thead>
                                     <tbody class="personalizationTableResultBody"></tbody>
                                 </table>
@@ -55,33 +55,39 @@
                                     <h3 style="vertical-align: middle; display: inline-block;">Clear all</h3>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <hr/>
 
-                            <div style="padding: 4em 2em 0">
-                                <div class="infoBanner flex align-items-center" style="margin: 1em 0;">
-                                    Parental controls using voice recognition allows Alexa's personalization voice profiles to be used with Emby accounts parental controls to handle media requests based on rating.
-                                    If turned off, Alexa will use the first Emby Administrator account to access media.
-                                </div>
-                                <div class="inputContainer" style="display: flex">
-                                    <label style="width: auto;" class="emby-toggle-label">
-                                        <input is="emby-toggle" type="checkbox" class="chkEnableParentalControlSpeechRecognition noautofocus emby-toggle emby-toggle-focusring">
-                                        <span class="toggleLabel">Parental control voice recognition</span>
-                                    </label>
-                                </div>
-                                <div class="infoBanner flex align-items-center" style="margin: 1em 0;">
-                                    Places alerts in the emby dashboard Activity Log when a user attempts to access restricted media items with Alexa.
-                                </div>
-                                <div class="inputContainer" style="display: flex;">
-                                    <label style="width: auto;" class="emby-toggle-label">
-                                        <input is="emby-toggle" type="checkbox" class="chkEnableActivityLogNotifications noautofocus emby-toggle emby-toggle-focusring">
-                                        <span class="toggleLabel">Activity alerts when restricted media access is denied.</span>
-                                    </label>
-                                </div>
+                        <div style="padding: 2em">
+                            <div class="detailSectionHeader">
+                                <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">Parental Control</h2>
+                            </div>
+                            <div class="inputContainer" style="display: flex">
+                                <label style="width: auto;" class="emby-toggle-label">
+                                    <input is="emby-toggle" type="checkbox" class="chkEnableParentalControlSpeechRecognition noautofocus emby-toggle emby-toggle-focusring">
+                                    <span class="toggleLabel">Parental control voice recognition</span>
+                                </label>
+                            </div>
+                            <div class="fieldDescription" style="margin: 1em 0;">
+                                Parental controls using voice recognition allows Alexa's personalization voice profiles to be used with Emby accounts parental controls to handle media requests based on rating.
+                                If turned off, Alexa will use the first Emby Administrator account to access media.
+                            </div>
+                            <div class="inputContainer" style="display: flex;">
+                                <label style="width: auto;" class="emby-toggle-label">
+                                    <input is="emby-toggle" type="checkbox" class="chkEnableActivityLogNotifications noautofocus emby-toggle emby-toggle-focusring">
+                                    <span class="toggleLabel">Activity alerts when restricted media access is denied.</span>
+                                </label>
+                            </div>
+                            <div class="fieldDescription" style="margin: 1em 0;">
+                                Places alerts in the emby dashboard Activity Log when a user attempts to access restricted media items with Alexa.
                             </div>
                         </div>
+                      
 
                         <hr />
 
-                        <div style="padding: 1em;">
+                        <div style="padding: 2em;">
                             <div class="detailSectionHeader">
                                 <h2 style="margin: .6em 0; vertical-align: middle; display: inline-block;">Rooms</h2>
                                 <p>Create room names with emby devices.</p>

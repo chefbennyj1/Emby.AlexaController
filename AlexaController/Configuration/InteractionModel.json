@@ -122,7 +122,6 @@
                         "to {VisualModeTrigger} all the {Movie} movies",
                         "to {VisualModeTrigger} all the {Movie} movies in the {Room}",
                         "{VisualModeTrigger} the  {Movie} collection in the {Room}",
-                        "to {VisualModeTrigger} me all  {Movie} movies",
                         "to {VisualModeTrigger} {MovieCollection} ",
                         "to {VisualModeTrigger} me  {MovieCollection} "
                     ]

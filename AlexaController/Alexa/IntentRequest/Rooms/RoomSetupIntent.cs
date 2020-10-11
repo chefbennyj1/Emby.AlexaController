@@ -5,6 +5,7 @@ using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
+using AlexaController.Utils.LexicalSpeech;
 
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
@@ -23,6 +24,21 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
         public async Task<string> Response()
         {
+            var request           = AlexaRequest.request;
+            var context           = AlexaRequest.context;
+            var apiAccessToken    = context.System.apiAccessToken;
+            var requestId         = request.requestId;
+
+            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+            {
+                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+                session = Session
+            });
+
+#pragma warning disable 4014
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+#pragma warning restore 4014
+
             var room = Session.room;
 
             if (room is null)
