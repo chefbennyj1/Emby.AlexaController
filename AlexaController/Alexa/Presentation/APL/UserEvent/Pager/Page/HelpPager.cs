@@ -24,6 +24,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
             var arguments     = request.arguments;
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var helpListIndex = Convert.ToInt32(arguments[2]);
+            session.person = null;
             EmbyServerEntryPoint.Instance.Log.Info("ALEXA HELP PAGES " + helpListIndex);
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
@@ -31,8 +32,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = SpeechStrings.HelpStrings.ElementAt(helpListIndex)
-                },
-                directives = null
+                }
 
             }, session);
         }

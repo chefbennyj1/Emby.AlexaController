@@ -51,10 +51,11 @@ namespace AlexaController.Utils.LexicalSpeech
         {
             "Welcome to help! Let's get started. Swipe left to continue...",
             "<b>Accessing Emby accounts based on your voice.</b>",
+            "Open the plugin configuration in emby server.",
             "I have the ability to access specific emby user accounts, and library data based on the sound of your voice. If you have not yet turned on Personalization in your Alexa App, and enabled it for this skill, please do that now.",
             "You can enable Parental Controls, so media will be filtered based on who is speaking. This way, media items can not be accessed by people who shouldn't have access to them.",
             "To enable this feature, toggle the button for \"Enable parental control using voice recognition\". If this feature is turned off, I will not filter media items, and will show media based on the Emby Administrators account, at all times.",
-            "Next, open the plugin configuration in emby server. Select the \"New Authorization Account Link\" button, and follow the instructions to add personalization.",
+            "Select the \"New Authorization Account Link\" button, and follow the instructions to add personalization.",
             "<b>Accessing media Items in rooms</b>",
             "The Emby plugin will allow you to create rooms, based on devices in your home.",
             "In the plugin configuration, map each Emby ready device to a specific room. You create the room name that I will understand.",
