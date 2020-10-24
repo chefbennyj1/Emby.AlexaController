@@ -149,7 +149,6 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                
                 //TODO: Value can not be null - parameter(type) is no class to reflect on. Create the Intent Class to access. Example, yuo moved the class into another namespace.
                 return await new ErrorHandler().OnError(new Exception($"I was unable to do that. {exception.Message}"), alexaRequest, session);
             }
@@ -231,10 +230,10 @@ namespace AlexaController.Api
         private static async Task<string> GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var paramArgs = session is null
-                ?  new object[] { alexaRequest } : new object[] { alexaRequest, session };
+                ? new object[] { alexaRequest } : new object[] { alexaRequest, session };
 
             var instance = Activator.CreateInstance(@namespace, paramArgs);
-            return await (Task<string>)@namespace.GetMethod("Response")?.Invoke(instance, null);
+            return await (Task<string>)@namespace.GetMethod("Response").Invoke(instance, null);
         }
     }
 }

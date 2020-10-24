@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
+using AlexaController.Session;
 using AlexaController.Utils.LexicalSpeech;
 
 
@@ -21,8 +22,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
         {
             var request       = AlexaRequest.request;
             var arguments     = request.arguments;
+            var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var helpListIndex = Convert.ToInt32(arguments[2]);
-
+            EmbyServerEntryPoint.Instance.Log.Info("ALEXA HELP PAGES " + helpListIndex);
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,
@@ -30,8 +32,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
                 {
                     phrase = SpeechStrings.HelpStrings.ElementAt(helpListIndex)
                 },
+                directives = null
 
-            }, null);
+            }, session);
         }
     }
 }

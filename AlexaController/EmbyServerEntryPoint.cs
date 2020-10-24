@@ -24,7 +24,7 @@ using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController
 {
-    public interface IEmbyServerEntryPoint
+    public interface IEmbyServerEntryPoint 
     {
         Task<string> GetLocalApiUrlAsync();
         ILogger Log { get; }
@@ -80,7 +80,7 @@ namespace AlexaController
                 Date     = DateTimeOffset.Now,
                 Id       = new Random().Next(1000, 9999),
                 Overview = overview,
-                UserId   = UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator).ToString(),
+                UserId   = UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator)?.Id.ToString(),
                 Name     = name,
                 Type     = "Alert",
                 ItemId   = "",
@@ -241,10 +241,10 @@ namespace AlexaController
             {
                 deviceId = deviceId ?? GetDeviceIdFromRoomName(room);
                 session = session ?? GetSession(deviceId);
-                
+
                 await SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
                 {
-                    Name              = "GoHome",
+                    Name = "GoHome",
                     ControllingUserId = user.Id.ToString(),
 
                 }, CancellationToken.None);
@@ -254,7 +254,7 @@ namespace AlexaController
                 throw new Exception("I was unable to browse to the home page.");
             }
         }
-        
+
         public async Task GoBack(string room, User user)
         {
             try
@@ -269,9 +269,9 @@ namespace AlexaController
 
                 }, CancellationToken.None);
             }
-            catch 
+            catch
             {
-                
+
             }
         }
 
@@ -282,18 +282,18 @@ namespace AlexaController
             {
                 deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            
+
             var session = GetSession(deviceId);
             var type = request.GetType().Name;
-            
+
             // ReSharper disable once ComplexConditionExpression
             if (!type.Equals("Season") || !type.Equals("Series"))
                 await BrowseHome(alexaSession.room.Name, alexaSession.User, deviceId, session);
-            
+
             try
             {
 #pragma warning disable 4014
@@ -315,27 +315,27 @@ namespace AlexaController
         public async Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item)
         {
             var deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
-            
+
             if (string.IsNullOrEmpty(deviceId))
             {
                 throw new DeviceUnavailableException(await SpeechStrings.GetPhrase(new SpeechStringQuery()
                 {
-                    type = SpeechResponseType.DEVICE_UNAVAILABLE, 
-                    args = new []{ alexaSession.room.Name }
+                    type = SpeechResponseType.DEVICE_UNAVAILABLE,
+                    args = new[] { alexaSession.room.Name }
                 }));
             }
 
-            var session  = GetSession(deviceId);
+            var session = GetSession(deviceId);
 
             if (session is null)
             {
                 throw new DeviceUnavailableException(await SpeechStrings.GetPhrase(new SpeechStringQuery()
                 {
-                    type = SpeechResponseType.DEVICE_UNAVAILABLE, 
+                    type = SpeechResponseType.DEVICE_UNAVAILABLE,
                     args = new[] { alexaSession.room.Name }
                 }));
             }
-            
+
             // ReSharper disable once TooManyChainedReferences
             long startTicks = item.SupportsPositionTicksResume ? item.PlaybackPositionTicks : 0;
 
@@ -344,9 +344,9 @@ namespace AlexaController
                 await SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
                 {
                     StartPositionTicks = startTicks,
-                    PlayCommand        = PlayCommand.PlayNow,
-                    ItemIds            = new[] {item.InternalId},
-                    ControllingUserId  = alexaSession.User.Id.ToString()
+                    PlayCommand = PlayCommand.PlayNow,
+                    ItemIds = new[] { item.InternalId },
+                    ControllingUserId = alexaSession.User.Id.ToString()
 
                 }, CancellationToken.None);
             }
