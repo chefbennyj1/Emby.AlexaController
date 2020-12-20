@@ -28,6 +28,7 @@ namespace AlexaController
     {
         Task<string> GetLocalApiUrlAsync();
         ILogger Log { get; }
+        IUserManager UserManager { get; }
         QueryResult<BaseItem> GetItemsResult(BaseItem parent, string[] types, User user);
         IEnumerable<SessionInfo> GetCurrentSessions();
         BaseItem GetNextUpEpisode(string seriesName, User user);
@@ -42,7 +43,7 @@ namespace AlexaController
         Task<List<BaseItem>> GetUpComingTvAsync(DateTime duration);
         Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request);
         Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item);
-        BaseItem QuerySpeechResultItem(string searchName, string[] type, User user);
+        BaseItem QuerySpeechResultItem(string searchName, string[] type);
         IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName);
         Task GoBack(string room, User user);
     }
@@ -52,7 +53,7 @@ namespace AlexaController
     public class EmbyServerEntryPoint : EmbySearchUtility, IServerEntryPoint, IEmbyServerEntryPoint
     {
         private IServerApplicationHost Host           { get; }
-        private IUserManager UserManager              { get; set; }
+        public IUserManager UserManager               { get; }
         private ILibraryManager LibraryManager        { get; }
         private ITVSeriesManager TvSeriesManager      { get; }
         private ISessionManager SessionManager        { get; }
@@ -61,12 +62,13 @@ namespace AlexaController
         public static IEmbyServerEntryPoint Instance  { get; private set; }
 
         // ReSharper disable once TooManyDependencies
-        public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IActivityManager activityManager, IUserManager userManager) : base(libMan)
+        public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IActivityManager activityManager, IUserManager userManager) : base(libMan, userManager)
         {
             Host            = host;
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
             SessionManager  = sesMan;
+            UserManager     = userManager;
             ActivityManager = activityManager;
             Log             = logMan.GetLogger(Plugin.Instance.Name);
             Instance        = this;
@@ -135,7 +137,7 @@ namespace AlexaController
         {
             try
             {
-                var id     = QuerySpeechResultItem(seriesName, new[] { "Series" }, user).InternalId;
+                var id     = QuerySpeechResultItem(seriesName, new[] { "Series" }).InternalId;
                 var nextUp = TvSeriesManager.GetNextUp(new NextUpQuery()
                 {
                     SeriesId = id,
@@ -157,7 +159,7 @@ namespace AlexaController
         
         public Dictionary<BaseItem, List<BaseItem>> GetCollectionItems(User user, string collectionName)
         {
-            var result = QuerySpeechResultItem(collectionName, new[] { "collections", "Boxset" }, user);
+            var result = QuerySpeechResultItem(collectionName, new[] { "collections", "Boxset" });
 
             var collection = LibraryManager.QueryItems(new InternalItemsQuery()
             {

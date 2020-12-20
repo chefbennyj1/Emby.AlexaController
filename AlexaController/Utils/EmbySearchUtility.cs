@@ -11,19 +11,21 @@ namespace AlexaController.Utils
     public class EmbySearchUtility 
     {
         private ILibraryManager LibraryManager { get; }
-        
-        protected EmbySearchUtility(ILibraryManager libMan) 
+        private IUserManager UserManager       { get; }
+
+        protected EmbySearchUtility(ILibraryManager libMan, IUserManager userManager) 
         {
             LibraryManager = libMan;
+            UserManager = userManager;
         }
                 
-        public BaseItem QuerySpeechResultItem(string searchName, string[] type, User user)
+        public BaseItem QuerySpeechResultItem(string searchName, string[] type)
         {
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 Name             = searchName,
                 IncludeItemTypes = type,
-                User             = user
+                User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                
             });
 
@@ -40,7 +42,7 @@ namespace AlexaController.Utils
                         {
                             Name             = query,
                             IncludeItemTypes = type,
-                            User             = user
+                            User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                         });
 
                         if (queryResult.Items.Any())
@@ -58,7 +60,7 @@ namespace AlexaController.Utils
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
-                    User             = user
+                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
@@ -113,7 +115,7 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     NameStartsWith   = query,
-                    User             = user
+                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
@@ -209,7 +211,7 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     SearchTerm       = query,
-                    User             = user
+                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
@@ -226,7 +228,7 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     NameStartsWith   = query,
-                    User             = user
+                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
@@ -244,7 +246,7 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     NameStartsWith   = query,
-                    User             = user
+                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())

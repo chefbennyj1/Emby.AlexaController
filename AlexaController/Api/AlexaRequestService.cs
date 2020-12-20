@@ -150,7 +150,7 @@ namespace AlexaController.Api
             catch (Exception exception)
             {
                 //TODO: Value can not be null - parameter(type) is no class to reflect on. Create the Intent Class to access. Example, yuo moved the class into another namespace.
-                return await new ErrorHandler().OnError(new Exception($"I was unable to do that. {exception.Message}"), alexaRequest, session);
+                return await new ErrorHandler().OnError(new Exception($"Sorry, I was unable to do that. Are you sure that item exists?... Are you sure you are allowed to view that item?"), alexaRequest, session);
             }
         }
 

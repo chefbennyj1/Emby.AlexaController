@@ -37,14 +37,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
-            var request = AlexaRequest.request;
-            var intent = request.intent;
-            var slots = intent.slots;
-            var type = slots.Movie.value is null ? "Series" : "Movie";
-            var searchName = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
-            var context = AlexaRequest.context;
+            var request        = AlexaRequest.request;
+            var intent         = request.intent;
+            var slots          = intent.slots;
+            var type           = slots.Movie.value is null ? "Series" : "Movie";
+            var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
+            var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
-            var requestId = request.requestId;
+            var requestId      = request.requestId;
 
             var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
@@ -61,31 +61,20 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
 
-            var result = EmbyServerEntryPoint.Instance.QuerySpeechResultItem(searchName, new[] { type }, Session.User);
-
-            if (result is null)
-            {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
-                {
-                    shouldEndSession = true,
-                    outputSpeech = new OutputSpeech()
-                    {
-                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        {
-                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
-                            session = Session
-                        }),
-                    }
-                }, Session);
-            }
+            var result = EmbyServerEntryPoint.Instance.QuerySpeechResultItem(searchName, new[] { type });
 
             if (!result.IsParentalAllowed(Session.User))
             {
-                if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
+                try
                 {
-                    await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
-                        $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {result.Name}.");
+                    if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
+                    {
+                        await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                            $"{Session.User} attempted to view a restricted item.",
+                            $"{Session.User} attempted to view {result.Name}.");
+                    }
                 }
+                catch { }
 
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
@@ -112,6 +101,24 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     }
                 }, Session);
             }
+
+            if (result is null)
+            {
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                {
+                    shouldEndSession = true,
+                    outputSpeech = new OutputSpeech()
+                    {
+                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        {
+                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
+                            session = Session
+                        }),
+                    }
+                }, Session);
+            }
+
+            
 
             if (!(Session.room is null))
             {

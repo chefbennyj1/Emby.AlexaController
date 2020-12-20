@@ -57,7 +57,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             {
                 var type = slots.Movie.value is null ? "Series" : "Movie";
                 result = EmbyServerEntryPoint.Instance.QuerySpeechResultItem(
-                    type == "Movie" ? slots.Movie.value : slots.Series.value, new[] { type }, Session.User);
+                    type == "Movie" ? slots.Movie.value : slots.Series.value, new[] { type });
             }
             else
             {
