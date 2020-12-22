@@ -99,7 +99,8 @@ namespace AlexaController.Api
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech(){phrase = "I have encountered an error."},
-                shouldEndSession = true
+                shouldEndSession = true,
+                SpeakUserName = true
             }, null);
         }
 
@@ -150,7 +151,7 @@ namespace AlexaController.Api
             catch (Exception exception)
             {
                 //TODO: Value can not be null - parameter(type) is no class to reflect on. Create the Intent Class to access. Example, yuo moved the class into another namespace.
-                return await new ErrorHandler().OnError(new Exception($"Sorry, I was unable to do that. Are you sure that item exists?... Are you sure you are allowed to view that item?"), alexaRequest, session);
+                return await new ErrorHandler().OnError(new Exception($"Sorry, I was unable to do that. Are you sure that item exists in the library?..."), alexaRequest, session);
             }
         }
 
@@ -184,7 +185,8 @@ namespace AlexaController.Api
                             {
                                 type = SpeechResponseType.PERSON_NOT_RECOGNIZED
                             })
-                        }
+                        }, 
+                        SpeakUserName = true
                     }, null);
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
@@ -201,6 +203,7 @@ namespace AlexaController.Api
                     })
                    
                 },
+                SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {

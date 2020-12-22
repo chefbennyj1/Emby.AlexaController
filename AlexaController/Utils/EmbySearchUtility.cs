@@ -21,9 +21,12 @@ namespace AlexaController.Utils
                 
         public BaseItem QuerySpeechResultItem(string searchName, string[] type)
         {
+            EmbyServerEntryPoint.Instance.Log.Info("Beginning item search");
+
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 Name             = searchName,
+                Recursive = true,
                 IncludeItemTypes = type,
                 User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                
@@ -47,6 +50,7 @@ namespace AlexaController.Utils
 
                         if (queryResult.Items.Any())
                         {
+                            EmbyServerEntryPoint.Instance.Log.Info("search found: " + queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(query))).Name);
                             return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(query)));
                         }
                     }
@@ -60,6 +64,7 @@ namespace AlexaController.Utils
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
+                    Recursive = true,
                     User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
@@ -102,18 +107,23 @@ namespace AlexaController.Utils
                             //return item;
                         }
                     });
-                    if (!(resultItem is null)) return resultItem;
+                    if (!(resultItem is null))
+                    {
+                        EmbyServerEntryPoint.Instance.Log.Info("search found: " + resultItem.Name);
+                        return resultItem;
+                    }
                 }
             }
             
             //Return items that start with the first two letters of search term, removing proceeding  "the"
             if (!result.Any())
             {
-                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0,2);
+                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0);
                 
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
+                    Recursive = true,
                     NameStartsWith   = query,
                     User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
@@ -199,23 +209,33 @@ namespace AlexaController.Utils
 
                     });
 
-                    if (!(resultItem is null)) return resultItem;
+                    if (!(resultItem is null))
+                    {
+                        EmbyServerEntryPoint.Instance.Log.Info("search found: " + resultItem.Name);
+                        return resultItem;
+                    }
                 }
             }
             
             if (!result.Any()) //split name "" - Starts with string first and second word
             {
-                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0, 2);
+                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4) : searchName;
 
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
+                    Recursive = true,
                     SearchTerm       = query,
                     User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
+                    EmbyServerEntryPoint.Instance.Log.Info("search found: " + queryResult.Items
+                                                               .FirstOrDefault(r =>
+                                                                   NormalizeQueryString(r.Name)
+                                                                       .Contains(NormalizeQueryString(searchName)))
+                                                               .Name);
                     return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(searchName)));
                 }
             }
@@ -227,12 +247,17 @@ namespace AlexaController.Utils
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
+                    Recursive = true,
                     NameStartsWith   = query,
                     User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
+                    EmbyServerEntryPoint.Instance.Log.Info("search found: " + queryResult.Items
+                                                               .FirstOrDefault(item =>
+                                                                   item.Name.ToLower().Contains(searchName.ToLower()))
+                                                               .Name);
                     return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
                 }
             }
@@ -245,12 +270,17 @@ namespace AlexaController.Utils
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
+                    Recursive = true,
                     NameStartsWith   = query,
                     User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
+                    EmbyServerEntryPoint.Instance.Log.Info("search found: " + queryResult.Items
+                                                               .FirstOrDefault(item =>
+                                                                   item.Name.ToLower().Contains(searchName.ToLower()))
+                                                               .Name);
                     return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
                 }
             }
@@ -259,6 +289,9 @@ namespace AlexaController.Utils
             {
                 return null;
             }
+
+            EmbyServerEntryPoint.Instance.Log.Info("search found: " +
+                                                   LibraryManager.GetItemById(result.FirstOrDefault()).Name);
 
             return LibraryManager.GetItemById(result.FirstOrDefault());
         }

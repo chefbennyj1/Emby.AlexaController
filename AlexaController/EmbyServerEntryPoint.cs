@@ -159,13 +159,16 @@ namespace AlexaController
         
         public Dictionary<BaseItem, List<BaseItem>> GetCollectionItems(User user, string collectionName)
         {
-            var result = QuerySpeechResultItem(collectionName, new[] { "collections", "Boxset" });
+            var result = QuerySpeechResultItem(collectionName, new[] { "BoxSet" });
 
-            var collection = LibraryManager.QueryItems(new InternalItemsQuery()
+            EmbyServerEntryPoint.Instance.Log.Info("Search found collection item: " + result.Name);
+
+            var collection = LibraryManager.QueryItems(new InternalItemsQuery(UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator))
             {
                 ListIds        = new[] { result.InternalId },
                 EnableAutoSort = true,
                 OrderBy        = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray(),
+                
             });
             
             return new Dictionary<BaseItem, List<BaseItem>>() { { result, collection.Items.ToList() } };

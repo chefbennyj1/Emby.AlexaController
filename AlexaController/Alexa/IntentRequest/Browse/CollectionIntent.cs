@@ -60,7 +60,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
             EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + " normalized request: " + collectionRequest);
+            
             var collection          = EmbyServerEntryPoint.Instance.GetCollectionItems(Session.User, collectionRequest);
+
+            EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + " collection: " + collection.Keys.FirstOrDefault().Name);
             var collectionItems     = collection.Values.FirstOrDefault();
             var collectionBaseItem  = collection.Keys.FirstOrDefault();
             
@@ -78,6 +81,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                     {
                         shouldEndSession = true,
+                        SpeakUserName = true,
                         outputSpeech = new OutputSpeech()
                         {
                             phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
@@ -110,6 +114,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     Session.room = null;
                 }
             }
+
+            EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + "Preparing collection base item: " + collectionBaseItem?.Name);
 
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
             var documentTemplateInfo = new RenderDocumentTemplate()

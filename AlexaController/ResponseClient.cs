@@ -37,7 +37,7 @@ namespace AlexaController
         // ReSharper disable once FlagArgument
         public async Task<string> BuildAlexaResponse(IResponse response, IAlexaSession session)
         {
-            var person = !(session.person is null) ? Ssml.SayName(session.person) : "";
+            var person = !(session.person is null) && response.SpeakUserName ? Ssml.SayName(session.person) : "";
             
             if (!(response.outputSpeech is null))
             {

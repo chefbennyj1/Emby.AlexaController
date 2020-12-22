@@ -93,6 +93,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
+                    SpeakUserName = true,
                     outputSpeech = new OutputSpeech()
                     {
                         phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
@@ -142,6 +143,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         items = new List<BaseItem>() { result }
                     })
                 },
+                SpeakUserName = true,
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {

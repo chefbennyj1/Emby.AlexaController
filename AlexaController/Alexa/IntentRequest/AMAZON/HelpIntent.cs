@@ -27,6 +27,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                     phrase = "Welcome to help.",
                 },
                 shouldEndSession = null,
+                SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
                     await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()

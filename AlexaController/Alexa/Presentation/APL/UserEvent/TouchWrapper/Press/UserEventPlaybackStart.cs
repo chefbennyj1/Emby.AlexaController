@@ -86,6 +86,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     }),
                    
                 },
+                SpeakUserName = true,
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {

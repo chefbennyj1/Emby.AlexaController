@@ -94,6 +94,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                     args = new []{duration.ToLongDateString()}
                                 })
                             },
+                            SpeakUserName = true,
                             shouldEndSession = true,
 
                         }, Session);

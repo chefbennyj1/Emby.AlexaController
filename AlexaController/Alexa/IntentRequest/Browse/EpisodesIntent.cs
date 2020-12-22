@@ -118,6 +118,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     phrase = $"Season { seasonNumber}"
                 },
                 shouldEndSession = null,
+                SpeakUserName = true,
                 directives       = new List<IDirective>()
                 {
                     renderDocumentDirective

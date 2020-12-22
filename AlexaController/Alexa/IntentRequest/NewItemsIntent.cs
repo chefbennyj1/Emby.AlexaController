@@ -57,7 +57,7 @@ namespace AlexaController.Alexa.IntentRequest
                         phrase = $"No { type } have been added."
                     },
                     shouldEndSession = true,
-
+                    SpeakUserName = true,
                 }, Session);
             }
            
@@ -91,6 +91,7 @@ namespace AlexaController.Alexa.IntentRequest
                                 })
                             },
                             shouldEndSession = null,
+                            SpeakUserName = true,
                             directives       = new List<IDirective>()
                             {
                                 renderDocumentDirective
@@ -113,6 +114,7 @@ namespace AlexaController.Alexa.IntentRequest
                                 })
                             },
                             shouldEndSession = true,
+                            SpeakUserName = true,
 
                         }, Session);
                     }

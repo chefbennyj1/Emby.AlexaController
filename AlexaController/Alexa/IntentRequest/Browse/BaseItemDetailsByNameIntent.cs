@@ -167,6 +167,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                     },
                     shouldEndSession = null,
+                    SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
                         renderDocumentDirective

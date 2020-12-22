@@ -71,6 +71,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         sound          = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
+                    SpeakUserName = true,
                     directives       = new List<IDirective>()
                     {
                         await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
@@ -105,7 +106,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         sound     = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
 
                     },
-                    shouldEndSession = true
+                    shouldEndSession = true,
+                    SpeakUserName = true,
                 }, Session);
             }
 
@@ -152,6 +154,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     sound  = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                 },
                 shouldEndSession = null,
+                SpeakUserName = true,
                 directives       = new List<IDirective>()
                 {
                     await renderDocumentDirective

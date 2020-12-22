@@ -31,6 +31,7 @@ namespace AlexaController.Alexa.IntentRequest
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
+                    SpeakUserName = true,
                     outputSpeech = new OutputSpeech()
                     {
                         phrase             = await SpeechStrings.GetPhrase(new SpeechStringQuery()
@@ -50,6 +51,7 @@ namespace AlexaController.Alexa.IntentRequest
                     return await ResponseClient.Instance.BuildAlexaResponse(new Response
                     {
                         shouldEndSession = true,
+                        SpeakUserName = true,
                         outputSpeech = new OutputSpeech()
                         {
                             phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
@@ -69,6 +71,7 @@ namespace AlexaController.Alexa.IntentRequest
             return await ResponseClient.Instance.BuildAlexaResponse(new Response
             {
                 shouldEndSession = true,
+                SpeakUserName = true,
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
