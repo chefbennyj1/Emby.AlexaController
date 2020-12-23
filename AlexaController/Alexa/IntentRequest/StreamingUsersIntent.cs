@@ -29,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest
 
         public async Task<string> Response()
         {
-            var speechString = GetUserSessionSpeechString(EmbyServerEntryPoint.Instance.GetCurrentSessions());
+            var speechString = GetUserSessionSpeechString(ServerQuery.Instance.GetCurrentSessions());
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {

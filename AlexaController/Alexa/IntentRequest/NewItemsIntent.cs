@@ -43,8 +43,8 @@ namespace AlexaController.Alexa.IntentRequest
 #pragma warning restore 4014
 
             var query = type == "New TV Shows"
-                ? EmbyServerEntryPoint.Instance.GetLatestTv(Session.User, d)
-                : EmbyServerEntryPoint.Instance.GetLatestMovies(Session.User, d);
+                ? ServerQuery.Instance.GetLatestTv(Session.User, d)
+                : ServerQuery.Instance.GetLatestMovies(Session.User, d);
 
             var results = query.Where(item => item.IsParentalAllowed(Session.User)).ToList();
 

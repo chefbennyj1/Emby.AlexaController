@@ -8,25 +8,25 @@ using MediaBrowser.Controller.Library;
 
 namespace AlexaController.Utils
 {
-    public class EmbySearchUtility 
+    public class SearchUtility 
     {
         private ILibraryManager LibraryManager { get; }
         private IUserManager UserManager       { get; }
 
-        protected EmbySearchUtility(ILibraryManager libMan, IUserManager userManager) 
+        protected SearchUtility(ILibraryManager libMan, IUserManager userManager) 
         {
             LibraryManager = libMan;
-            UserManager = userManager;
+            UserManager    = userManager;
         }
                 
         public BaseItem QuerySpeechResultItem(string searchName, string[] type)
         {
-            EmbyServerEntryPoint.Instance.Log.Info("Beginning item search");
+            ServerQuery.Instance.Log.Info("Beginning item search");
 
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 Name             = searchName,
-                Recursive = true,
+                Recursive        = true,
                 IncludeItemTypes = type,
                 User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                
@@ -50,7 +50,7 @@ namespace AlexaController.Utils
 
                         if (queryResult.Items.Any())
                         {
-                            EmbyServerEntryPoint.Instance.Log.Info("search found: " + queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(query))).Name);
+                            
                             return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(query)));
                         }
                     }
@@ -109,7 +109,7 @@ namespace AlexaController.Utils
                     });
                     if (!(resultItem is null))
                     {
-                        EmbyServerEntryPoint.Instance.Log.Info("search found: " + resultItem.Name);
+                        
                         return resultItem;
                     }
                 }
@@ -211,7 +211,7 @@ namespace AlexaController.Utils
 
                     if (!(resultItem is null))
                     {
-                        EmbyServerEntryPoint.Instance.Log.Info("search found: " + resultItem.Name);
+                       
                         return resultItem;
                     }
                 }
@@ -231,11 +231,7 @@ namespace AlexaController.Utils
 
                 if (queryResult.Items.Any())
                 {
-                    EmbyServerEntryPoint.Instance.Log.Info("search found: " + queryResult.Items
-                                                               .FirstOrDefault(r =>
-                                                                   NormalizeQueryString(r.Name)
-                                                                       .Contains(NormalizeQueryString(searchName)))
-                                                               .Name);
+                    
                     return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(searchName)));
                 }
             }
@@ -254,10 +250,7 @@ namespace AlexaController.Utils
 
                 if (queryResult.Items.Any())
                 {
-                    EmbyServerEntryPoint.Instance.Log.Info("search found: " + queryResult.Items
-                                                               .FirstOrDefault(item =>
-                                                                   item.Name.ToLower().Contains(searchName.ToLower()))
-                                                               .Name);
+                   
                     return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
                 }
             }
@@ -277,10 +270,7 @@ namespace AlexaController.Utils
 
                 if (queryResult.Items.Any())
                 {
-                    EmbyServerEntryPoint.Instance.Log.Info("search found: " + queryResult.Items
-                                                               .FirstOrDefault(item =>
-                                                                   item.Name.ToLower().Contains(searchName.ToLower()))
-                                                               .Name);
+                    
                     return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
                 }
             }
@@ -290,9 +280,7 @@ namespace AlexaController.Utils
                 return null;
             }
 
-            EmbyServerEntryPoint.Instance.Log.Info("search found: " +
-                                                   LibraryManager.GetItemById(result.FirstOrDefault()).Name);
-
+            
             return LibraryManager.GetItemById(result.FirstOrDefault());
         }
 

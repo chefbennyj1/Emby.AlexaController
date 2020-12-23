@@ -30,7 +30,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var request  = AlexaRequest.request;
             var source   = request.source;
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
-            var baseItem = EmbyServerEntryPoint.Instance.GetItemById(source.id);
+            var baseItem = ServerQuery.Instance.GetItemById(source.id);
 
             session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
 
@@ -62,7 +62,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
 #pragma warning disable 4014
-            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(session, baseItem)).ConfigureAwait(false);
+            Task.Run(() => ServerController.Instance.PlayMediaItemAsync(session, baseItem)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             documentTemplateInfo = new RenderDocumentTemplate()

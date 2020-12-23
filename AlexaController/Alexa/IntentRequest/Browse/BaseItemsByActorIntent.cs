@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{progressiveSpeech}, looking for {searchName}", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
-            var result = EmbyServerEntryPoint.Instance.GetItemsByActor(Session.User, searchName);
+            var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchName);
 
             if (result is null)
             {
@@ -84,7 +84,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (!(Session.room is null))
                 try
                 {
-                    await EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault());
+                    await ServerController.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault());
                 }
                 catch (Exception exception)
                 {

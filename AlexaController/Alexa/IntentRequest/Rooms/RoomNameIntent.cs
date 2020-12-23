@@ -47,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     throw new Exception("That room is currently not configured to show media.");
                 }
 
-                if (!EmbyServerEntryPoint.Instance.GetCurrentSessions().ToList()
+                if (!ServerQuery.Instance.GetCurrentSessions().ToList()
                     .Exists(s => string.Equals(s.DeviceName,room?.DeviceName, StringComparison.CurrentCultureIgnoreCase)))
                 {
                     throw new DeviceUnavailableException("That device is currently unavailable.");
@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             else
             {
 
-                await EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("RoomSetupIntent", slots.Room.value);
+                await ServerController.Instance.SendMessageToPluginConfigurationPage("RoomSetupIntent", slots.Room.value);
 
                 //Give a Room object with the Setup Name back to the RoomSetupIntent Class through the Session object.
                 //Leave it to the  configuration JavaScript to finish saving the new room set up device information.

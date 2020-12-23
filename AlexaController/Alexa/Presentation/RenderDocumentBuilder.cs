@@ -115,7 +115,7 @@ namespace AlexaController.Alexa.Presentation
         
         public async Task<IDirective> GetRenderDocumentDirectiveAsync(IRenderDocumentTemplate template, IAlexaSession session)
         {
-            LocalApiUrl = await EmbyServerEntryPoint.Instance.GetLocalApiUrlAsync();
+            LocalApiUrl = await ServerQuery.Instance.GetLocalApiUrlAsync();
 
             switch (template.renderDocumentType)
             {
@@ -136,18 +136,18 @@ namespace AlexaController.Alexa.Presentation
         //Create Render Document Directives below
         private async Task<IDirective> RenderItemListSequenceTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document Started");
+            ServerQuery.Instance.Log.Info("Render Document Started");
 
             var layout             = new List<IItem>();
             var touchWrapperLayout = new List<IItem>();
             var baseItems          = template.baseItems;
             var type               = baseItems[0].GetType().Name;
 
-            EmbyServerEntryPoint.Instance.Log.Info($"Render Document is RenderItemListSequenceTemplate for {type}");
+            ServerQuery.Instance.Log.Info($"Render Document is RenderItemListSequenceTemplate for {type}");
 
             baseItems.ForEach(async i => touchWrapperLayout.Add(await RenderItemPrimaryImageTouchWrapper(session, i, type)));
 
-            EmbyServerEntryPoint.Instance.Log.Info($"Render Document has {baseItems.Count} Primary Image Touch Wrappers");
+            ServerQuery.Instance.Log.Info($"Render Document has {baseItems.Count} Primary Image Touch Wrappers");
 
             layout.Add(new Container()
             {
@@ -182,11 +182,11 @@ namespace AlexaController.Alexa.Presentation
                 }
             });
 
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Touch Wrapper Container");
+            ServerQuery.Instance.Log.Info("Render Document has Touch Wrapper Container");
 
             var sequenceItemsHintText = await GetSequenceItemsHintText(template.baseItems, session);
 
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Sequence Item Hint Texts");
+            ServerQuery.Instance.Log.Info("Render Document has Sequence Item Hint Texts");
 
             var scaleFadeInSequenceItems = new List<ICommand>();
             for (var i = 0; i < baseItems.Count; i++)
@@ -196,7 +196,7 @@ namespace AlexaController.Alexa.Presentation
                 semaphore.Release();
             }
 
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has primary image animations");
+            ServerQuery.Instance.Log.Info("Render Document has primary image animations");
 
             var view = new Directive()
             {
@@ -233,14 +233,14 @@ namespace AlexaController.Alexa.Presentation
                 }
             };
 
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document is creating view");
+            ServerQuery.Instance.Log.Info("Render Document is creating view");
 
             return await Task.FromResult(view);
         }
         
         private async Task<IDirective> RenderItemDetailsTemplate(IRenderDocumentTemplate template, IAlexaSession session)
         {
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document Started");
+            ServerQuery.Instance.Log.Info("Render Document Started");
 
             var baseItem = template.baseItems[0];
             var type     = baseItem.GetType().Name;
@@ -249,11 +249,11 @@ namespace AlexaController.Alexa.Presentation
             var layout = new List<IItem>();
             const string token = "mediaItemDetails";
 
-            EmbyServerEntryPoint.Instance.Log.Info($"Render Document is {token} for {item.Name}");
+            ServerQuery.Instance.Log.Info($"Render Document is {token} for {item.Name}");
             
             (await GetVideoBackdropLayout(item, token)).ForEach(i => layout.Add(i));
 
-            EmbyServerEntryPoint.Instance.Log.Info($"Render Document has {layout.Count} video backdrops");
+            ServerQuery.Instance.Log.Info($"Render Document has {layout.Count} video backdrops");
 
             var graphicsDictionary = new Dictionary<string, Graphic>
             {
@@ -327,7 +327,7 @@ namespace AlexaController.Alexa.Presentation
                 headerBackButton       = session.paging.canGoBack,
                 headerDivider          = true,
             });
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Header");
+            ServerQuery.Instance.Log.Info("Render Document has Header");
 
             //Room - Rating
             layout.Add(new Text()
@@ -337,7 +337,7 @@ namespace AlexaController.Alexa.Presentation
                 left = "42%",
                 top = "3vh"
             });
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Rating");
+            ServerQuery.Instance.Log.Info("Render Document has Rating");
 
             //Genres
             layout.Add(new Text()
@@ -352,7 +352,7 @@ namespace AlexaController.Alexa.Presentation
                 opacity = 0,
                 id = "genre"
             });
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Genres");
+            ServerQuery.Instance.Log.Info("Render Document has Genres");
 
             //TagLines
             layout.Add(new Text()
@@ -367,7 +367,7 @@ namespace AlexaController.Alexa.Presentation
                 id = "tag",
                 display = !string.IsNullOrEmpty(item.Tagline) ? "normal" : "none"
             });
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Tag lines");
+            ServerQuery.Instance.Log.Info("Render Document has Tag lines");
 
             //Watched check-mark
             layout.Add(new VectorGraphic()
@@ -375,7 +375,7 @@ namespace AlexaController.Alexa.Presentation
                 source = "CheckMark",
                 left = "87vw"
             });
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Watch status");
+            ServerQuery.Instance.Log.Info("Render Document has Watch status");
 
             //Runtime span
             if (string.Equals(type, "Movie")) { 
@@ -405,7 +405,7 @@ namespace AlexaController.Alexa.Presentation
                     id = "endTime"
                 });
             }
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Runtime");
+            ServerQuery.Instance.Log.Info("Render Document has Runtime");
 
             //Overview
             layout.Add(new ScrollView()
@@ -423,7 +423,7 @@ namespace AlexaController.Alexa.Presentation
                     fontSize = "20dp"
                 }
             });
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Overview");
+            ServerQuery.Instance.Log.Info("Render Document has Overview");
 
             //Series - Season Count
             if (string.Equals(type, "Series"))
@@ -455,7 +455,7 @@ namespace AlexaController.Alexa.Presentation
                             fontSize = "23dp",
                             left = "12dp",
                             text = "<b>" + 
-                                   EmbyServerEntryPoint.Instance.GetItemsResult(item, new []{"Season"}, session.User)
+                                   ServerQuery.Instance.GetItemsResult(item, new []{"Season"}, session.User)
                                        .TotalRecordCount + "</b>"
                         },
                         new Text()
@@ -518,7 +518,7 @@ namespace AlexaController.Alexa.Presentation
                                    id   : template.baseItems[0].InternalId.ToString())
                 }
             });
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Primary Image");
+            ServerQuery.Instance.Log.Info("Render Document has Primary Image");
 
             layout.Add(new AlexaFooter()
             {
@@ -526,7 +526,7 @@ namespace AlexaController.Alexa.Presentation
                 position = "absolute",
                 bottom = "1vh"
             });
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document has Footer");
+            ServerQuery.Instance.Log.Info("Render Document has Footer");
 
             var view = new Directive()
             {
@@ -617,7 +617,7 @@ namespace AlexaController.Alexa.Presentation
                     }
                 }
             };
-            EmbyServerEntryPoint.Instance.Log.Info("Render Document is creating view");
+            ServerQuery.Instance.Log.Info("Render Document is creating view");
 
             return await Task.FromResult(view);
         }
@@ -1297,7 +1297,7 @@ namespace AlexaController.Alexa.Presentation
             {
                 var disabled = true;
 
-                foreach (var session in EmbyServerEntryPoint.Instance.GetCurrentSessions())
+                foreach (var session in ServerQuery.Instance.GetCurrentSessions())
                 {
                     if (session.DeviceName == room.DeviceName) disabled = false;
                     if (session.Client     == room.DeviceName) disabled = false;
@@ -1343,7 +1343,7 @@ namespace AlexaController.Alexa.Presentation
         {
             var videoBackdropIds = baseItem.ThemeVideoIds;
             // ReSharper disable once TooManyChainedReferences
-            var videoBackdropId = videoBackdropIds.Length > 0 ? EmbyServerEntryPoint.Instance.GetItemById(videoBackdropIds[0]).InternalId.ToString() : string.Empty;
+            var videoBackdropId = videoBackdropIds.Length > 0 ? ServerQuery.Instance.GetItemById(videoBackdropIds[0]).InternalId.ToString() : string.Empty;
             
             var backdropImageUrl     = $"{Url}/Items/{baseItem.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
             var videoBackdropUrl     = $"{Url}/videos/{videoBackdropId}/stream.mp4";

@@ -51,12 +51,12 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
-            var result = EmbyServerEntryPoint.Instance.GetItemById(EmbyServerEntryPoint.Instance.GetLibraryId(LibraryName));
+            var result = ServerQuery.Instance.GetItemById(ServerQuery.Instance.GetLibraryId(LibraryName));
 
             try
             {
 #pragma warning disable 4014
-                Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(session, result)).ConfigureAwait(false);
+                Task.Run(() => ServerController.Instance.BrowseItemAsync(session, result)).ConfigureAwait(false);
 #pragma warning restore 4014
             }
             catch (BrowseCommandException)

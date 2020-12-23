@@ -30,8 +30,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 try
                 {
 #pragma warning disable 4014
-                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(session,
-                            EmbyServerEntryPoint.Instance.GetItemById(previousPage.baseItems[0].InternalId)))
+                    Task.Run(() => ServerController.Instance.BrowseItemAsync(session,
+                            ServerQuery.Instance.GetItemById(previousPage.baseItems[0].InternalId)))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
                 }

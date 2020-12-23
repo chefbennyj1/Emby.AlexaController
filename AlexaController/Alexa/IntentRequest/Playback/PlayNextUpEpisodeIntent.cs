@@ -36,7 +36,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var request       = AlexaRequest.request;
             var intent        = request.intent;
             var slots         = intent.slots;
-            var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(slots.Series.value, Session?.User);
+            var nextUpEpisode = ServerQuery.Instance.GetNextUpEpisode(slots.Series.value, Session?.User);
 
             if (nextUpEpisode is null)
             {
@@ -55,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             }
 
 #pragma warning disable 4014
-            Task.Run(() => EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, nextUpEpisode)).ConfigureAwait(false);
+            Task.Run(() => ServerController.Instance.PlayMediaItemAsync(Session, nextUpEpisode)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             Session.NowViewingBaseItem = nextUpEpisode;

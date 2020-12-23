@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
 

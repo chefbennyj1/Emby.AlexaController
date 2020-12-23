@@ -65,7 +65,7 @@ namespace AlexaController.Alexa.IntentRequest
             }
 
 #pragma warning disable 4014
-            Task.Run(() => EmbyServerEntryPoint.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
+            Task.Run(() => ServerController.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 #pragma warning restore 4014
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response

@@ -61,7 +61,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
 
-            var result = EmbyServerEntryPoint.Instance.QuerySpeechResultItem(searchName, new[] { type });
+            var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
 
             if (!result.IsParentalAllowed(Session.User))
             {
@@ -69,7 +69,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
                     if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
                     {
-                        await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                        await ServerController.Instance.CreateActivityEntry(LogSeverity.Warn,
                             $"{Session.User} attempted to view a restricted item.",
                             $"{Session.User} attempted to view {result.Name}.");
                     }
@@ -124,7 +124,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 try
                 {
-                    await EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, result);
+                    await ServerController.Instance.BrowseItemAsync(Session, result);
                 }
                 catch (Exception exception)
                 {

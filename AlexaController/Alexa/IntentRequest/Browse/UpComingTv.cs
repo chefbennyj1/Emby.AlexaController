@@ -43,7 +43,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var durationValue  = slots.Duration.value;
             var duration       = durationValue is null ? DateTime.Now.AddDays(7) : DateTimeDurationSerializer.GetMaxPremiereDate(durationValue);
             
-            var results = await EmbyServerEntryPoint.Instance.GetUpComingTvAsync(duration);
+            var results = await ServerQuery.Instance.GetUpComingTvAsync(duration);
 
             switch (Session.alexaSessionDisplayType)
             {

@@ -78,7 +78,7 @@ namespace AlexaController.Api
                 var s = await sr.ReadToEndAsync();
                 var alexaRequest = JsonSerializer.DeserializeFromString<AlexaRequest>(s);
 
-                EmbyServerEntryPoint.Instance.Log.Info($"Alexa incoming request: {alexaRequest.request.type}");
+                ServerQuery.Instance.Log.Info($"Alexa incoming request: {alexaRequest.request.type}");
 
                 switch (alexaRequest.request.type)
                 {

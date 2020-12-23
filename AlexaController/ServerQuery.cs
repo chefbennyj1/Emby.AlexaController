@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
-using AlexaController.Session;
 using AlexaController.Utils;
-using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
@@ -14,87 +11,38 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.TV;
-using MediaBrowser.Model.Activity;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Querying;
-using MediaBrowser.Model.Session;
 using User = MediaBrowser.Controller.Entities.User;
 
 
 namespace AlexaController
 {
-    public interface IEmbyServerEntryPoint 
-    {
-        Task<string> GetLocalApiUrlAsync();
-        ILogger Log { get; }
-        IUserManager UserManager { get; }
-        QueryResult<BaseItem> GetItemsResult(BaseItem parent, string[] types, User user);
-        IEnumerable<SessionInfo> GetCurrentSessions();
-        BaseItem GetNextUpEpisode(string seriesName, User user);
-        string GetLibraryId(string name);
-        BaseItem GetItemById<T>(T id);
-        Task SendMessageToPluginConfigurationPage<T>(string name, T data);
-        Task CreateActivityEntry(LogSeverity logSeverity, string name, string overview);
-        Dictionary<BaseItem, List<BaseItem>> GetCollectionItems(User userName, string collectionName);
-        List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user);
-        IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration );
-        IEnumerable<BaseItem> GetLatestTv(User user, DateTime duration);
-        Task<List<BaseItem>> GetUpComingTvAsync(DateTime duration);
-        Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request);
-        Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item);
-        BaseItem QuerySpeechResultItem(string searchName, string[] type);
-        IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName);
-        Task GoBack(string room, User user);
-    }
-
-   
+    
     // ReSharper disable once ClassTooBig
-    public class EmbyServerEntryPoint : EmbySearchUtility, IServerEntryPoint, IEmbyServerEntryPoint
+    public class ServerQuery : SearchUtility, IServerEntryPoint 
     {
-        private IServerApplicationHost Host           { get; }
-        public IUserManager UserManager               { get; }
-        private ILibraryManager LibraryManager        { get; }
-        private ITVSeriesManager TvSeriesManager      { get; }
-        private ISessionManager SessionManager        { get; }
-        private IActivityManager ActivityManager      { get; set; }
-        public ILogger Log                            { get; }
-        public static IEmbyServerEntryPoint Instance  { get; private set; }
+        private IServerApplicationHost Host            { get; }
+        private IUserManager UserManager               { get; }
+        private ILibraryManager LibraryManager         { get; }
+        private ITVSeriesManager TvSeriesManager       { get; }
+        private ISessionManager SessionManager         { get; }
+        public ILogger Log                             { get; }
+        public static ServerQuery Instance             { get; private set; }
 
         // ReSharper disable once TooManyDependencies
-        public EmbyServerEntryPoint(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IActivityManager activityManager, IUserManager userManager) : base(libMan, userManager)
+        public ServerQuery(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IUserManager userManager) : base(libMan, userManager)
         {
             Host            = host;
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
             SessionManager  = sesMan;
             UserManager     = userManager;
-            ActivityManager = activityManager;
             Log             = logMan.GetLogger(Plugin.Instance.Name);
             Instance        = this;
         }
-
-        // ReSharper disable once TooManyArguments
-        public async Task CreateActivityEntry(LogSeverity logSeverity, string name, string overview)
-        {
-            await Task.Run(() => ActivityManager.Create(new ActivityLogEntry()
-            {
-                Date     = DateTimeOffset.Now,
-                Id       = new Random().Next(1000, 9999),
-                Overview = overview,
-                UserId   = UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator)?.Id.ToString(),
-                Name     = name,
-                Type     = "Alert",
-                ItemId   = "",
-                Severity = logSeverity
-            }));
-        }
-
-        public async Task SendMessageToPluginConfigurationPage<T>(string name, T data)
-        {
-            await SessionManager.SendMessageToAdminSessions(name, data, CancellationToken.None);
-        }
-
+        
         public IEnumerable<SessionInfo> GetCurrentSessions()
         {
             return SessionManager.Sessions;
@@ -161,7 +109,7 @@ namespace AlexaController
         {
             var result = QuerySpeechResultItem(collectionName, new[] { "BoxSet" });
 
-            EmbyServerEntryPoint.Instance.Log.Info("Search found collection item: " + result.Name);
+            Log.Info("Search found collection item: " + result.Name);
 
             var collection = LibraryManager.QueryItems(new InternalItemsQuery(UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator))
             {
@@ -207,7 +155,7 @@ namespace AlexaController
             return results.Select(id => LibraryManager.GetItemById(id).Parent.Parent).Distinct().ToList();
         }
 
-        private string GetDeviceIdFromRoomName(string roomName)
+        public string GetDeviceIdFromRoomName(string roomName)
         {
             var config = Plugin.Instance.Configuration;
             if (!config.Rooms.Any())
@@ -234,132 +182,12 @@ namespace AlexaController
             throw new Exception($"{room}'s device is currently unavailable.");
         }
 
-        private SessionInfo GetSession(string deviceId)
+        public SessionInfo GetSession(string deviceId)
         {
             return SessionManager.Sessions.FirstOrDefault(i => i.DeviceId == deviceId);
         }
 
-        // ReSharper disable once TooManyArguments
-        private async Task BrowseHome(string room, User user, string deviceId = null, SessionInfo session = null)
-        {
-            try
-            {
-                deviceId = deviceId ?? GetDeviceIdFromRoomName(room);
-                session = session ?? GetSession(deviceId);
-
-                await SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
-                {
-                    Name = "GoHome",
-                    ControllingUserId = user.Id.ToString(),
-
-                }, CancellationToken.None);
-            }
-            catch (Exception)
-            {
-                throw new Exception("I was unable to browse to the home page.");
-            }
-        }
-
-        public async Task GoBack(string room, User user)
-        {
-            try
-            {
-                var deviceId = GetDeviceIdFromRoomName(room);
-                var session = GetSession(deviceId);
-
-                await SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
-                {
-                    Name = "Back",
-                    ControllingUserId = user.Id.ToString(),
-
-                }, CancellationToken.None);
-            }
-            catch
-            {
-
-            }
-        }
-
-        public async Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request)
-        {
-            var deviceId = string.Empty;
-            try
-            {
-                deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-
-            var session = GetSession(deviceId);
-            var type = request.GetType().Name;
-
-            // ReSharper disable once ComplexConditionExpression
-            if (!type.Equals("Season") || !type.Equals("Series"))
-                await BrowseHome(alexaSession.room.Name, alexaSession.User, deviceId, session);
-
-            try
-            {
-#pragma warning disable 4014
-                SessionManager.SendBrowseCommand(null, session.Id, new BrowseRequest()
-#pragma warning restore 4014
-                {
-                    ItemId = request.Id.ToString(),
-                    ItemName = request.Name,
-                    ItemType = request.MediaType
-
-                }, CancellationToken.None);
-            }
-            catch
-            {
-                throw new BrowseCommandException($"I was unable to browse to {request.Name}.");
-            }
-        }
-
-        public async Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item)
-        {
-            var deviceId = GetDeviceIdFromRoomName(alexaSession.room.Name);
-
-            if (string.IsNullOrEmpty(deviceId))
-            {
-                throw new DeviceUnavailableException(await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                {
-                    type = SpeechResponseType.DEVICE_UNAVAILABLE,
-                    args = new[] { alexaSession.room.Name }
-                }));
-            }
-
-            var session = GetSession(deviceId);
-
-            if (session is null)
-            {
-                throw new DeviceUnavailableException(await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                {
-                    type = SpeechResponseType.DEVICE_UNAVAILABLE,
-                    args = new[] { alexaSession.room.Name }
-                }));
-            }
-
-            // ReSharper disable once TooManyChainedReferences
-            long startTicks = item.SupportsPositionTicksResume ? item.PlaybackPositionTicks : 0;
-
-            try
-            {
-                await SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
-                {
-                    StartPositionTicks = startTicks,
-                    PlayCommand = PlayCommand.PlayNow,
-                    ItemIds = new[] { item.InternalId },
-                    ControllingUserId = alexaSession.User.Id.ToString()
-
-                }, CancellationToken.None);
-            }
-            catch (Exception)
-            {
-                throw new PlaybackCommandException($"I had a problem playing {item.Name}.");
-            }
-        }
+//      
 
         public IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName)
         {

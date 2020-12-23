@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
             
-            var result = EmbyServerEntryPoint.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
+            var result = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
                 Session.NowViewingBaseItem, Session.User);
             
             // User requested season/episode data that doesn't exist
@@ -79,13 +79,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             var seasonId = result[0].Parent.InternalId;
-            var season = EmbyServerEntryPoint.Instance.GetItemById(seasonId);
+            var season = ServerQuery.Instance.GetItemById(seasonId);
 
             if (!(Session.room is null))
             {
                 try
                 {
-                    await EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, season);
+                    await ServerController.Instance.BrowseItemAsync(Session, season);
                 }
                 catch (Exception exception)
                 {

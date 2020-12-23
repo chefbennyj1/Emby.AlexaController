@@ -25,7 +25,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var helpListIndex = Convert.ToInt32(arguments[2]);
             session.person = null;
-            EmbyServerEntryPoint.Instance.Log.Info("ALEXA HELP PAGES " + helpListIndex);
+            ServerQuery.Instance.Log.Info("ALEXA HELP PAGES " + helpListIndex);
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = null,

@@ -55,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Task.Run( () => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
-            var nextUpEpisode = EmbyServerEntryPoint.Instance.GetNextUpEpisode(slots.Series.value, Session.User);
+            var nextUpEpisode = ServerQuery.Instance.GetNextUpEpisode(slots.Series.value, Session.User);
             
             if (nextUpEpisode is null)
             {
@@ -89,7 +89,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
                 {
-                    await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                    await ServerController.Instance.CreateActivityEntry(LogSeverity.Warn,
                         $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {nextUpEpisode.Name}.").ConfigureAwait(false);
                 }
 
@@ -115,7 +115,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 try
                 {
-                    await EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, nextUpEpisode);
+                    await ServerController.Instance.BrowseItemAsync(Session, nextUpEpisode);
                 }
                 catch (Exception exception)
                 {

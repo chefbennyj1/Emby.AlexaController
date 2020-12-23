@@ -20,7 +20,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
         {
             var request        = AlexaRequest.request;
             var source         = request.source;
-            var baseItem       = EmbyServerEntryPoint.Instance.GetItemById(source.id);
+            var baseItem       = ServerQuery.Instance.GetItemById(source.id);
             var session        = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room           = session.room;
             
@@ -41,7 +41,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 try
                 {
 #pragma warning disable 4014
-                    Task.Run(() => EmbyServerEntryPoint.Instance.BrowseItemAsync(session, baseItem))
+                    Task.Run(() => ServerController.Instance.BrowseItemAsync(session, baseItem))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
                 }

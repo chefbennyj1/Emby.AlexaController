@@ -57,13 +57,11 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 #pragma warning disable 4014
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
-            EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
+            ServerQuery.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
-            EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + " normalized request: " + collectionRequest);
+            ServerQuery.Instance.Log.Info(nameof(CollectionIntent) + " normalized request: " + collectionRequest);
             
-            var collection          = EmbyServerEntryPoint.Instance.GetCollectionItems(Session.User, collectionRequest);
-
-            EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + " collection: " + collection.Keys.FirstOrDefault().Name);
+            var collection          = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems     = collection.Values.FirstOrDefault();
             var collectionBaseItem  = collection.Keys.FirstOrDefault();
             
@@ -74,7 +72,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
                     if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
                     {
-                        await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                        await ServerController.Instance.CreateActivityEntry(LogSeverity.Warn,
                             $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
                     }
 
@@ -86,9 +84,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         {
                             phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
                             {
-                                type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
+                                type    = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
                                 session = Session, 
-                                items =  new List<BaseItem>(){ collectionBaseItem }
+                                items   =  new List<BaseItem>(){ collectionBaseItem }
                             }),
                             sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                         }
@@ -100,7 +98,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 try
                 {
-                    await EmbyServerEntryPoint.Instance.BrowseItemAsync(Session, collectionBaseItem);
+                    await ServerController.Instance.BrowseItemAsync(Session, collectionBaseItem);
                 }
                 catch (Exception exception)
                 {
@@ -115,7 +113,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            EmbyServerEntryPoint.Instance.Log.Info(nameof(CollectionIntent) + "Preparing collection base item: " + collectionBaseItem?.Name);
+            ServerQuery.Instance.Log.Info(nameof(CollectionIntent) + "Preparing collection base item: " + collectionBaseItem?.Name);
 
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
             var documentTemplateInfo = new RenderDocumentTemplate()

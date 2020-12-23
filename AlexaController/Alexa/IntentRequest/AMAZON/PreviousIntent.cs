@@ -33,7 +33,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 try
                 {
 #pragma warning disable 4014
-                    EmbyServerEntryPoint.Instance.BrowseItemAsync(Session,EmbyServerEntryPoint.Instance.GetItemById(Session.NowViewingBaseItem.Parent.InternalId)).ConfigureAwait(false);
+                    ServerController.Instance.BrowseItemAsync(Session,ServerQuery.Instance.GetItemById(Session.NowViewingBaseItem.Parent.InternalId)).ConfigureAwait(false);
 #pragma warning restore 4014
                 } catch { }
 

@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             if (Session.NowViewingBaseItem is null)
             {
                 var type = slots.Movie.value is null ? "Series" : "Movie";
-                result = EmbyServerEntryPoint.Instance.QuerySpeechResultItem(
+                result = ServerQuery.Instance.QuerySpeechResultItem(
                     type == "Movie" ? slots.Movie.value : slots.Series.value, new[] { type });
             }
             else
@@ -86,7 +86,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             {
                 if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
                 {
-                    await EmbyServerEntryPoint.Instance.CreateActivityEntry(LogSeverity.Warn,
+                    await ServerController.Instance.CreateActivityEntry(LogSeverity.Warn,
                         $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {result.Name}.").ConfigureAwait(false);
                 }
 
@@ -110,7 +110,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             try
             {
 #pragma warning disable 4014
-                await EmbyServerEntryPoint.Instance.PlayMediaItemAsync(Session, result);
+                await ServerController.Instance.PlayMediaItemAsync(Session, result);
 #pragma warning restore 4014
             }
             catch (Exception exception)
