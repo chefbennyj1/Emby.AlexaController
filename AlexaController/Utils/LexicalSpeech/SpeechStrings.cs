@@ -121,10 +121,6 @@ namespace AlexaController.Utils.LexicalSpeech
                 case SpeechResponseType.ON_LAUNCH:
                 {
                     speech.Append(GetRandomSemanticSpeechResponse(SpeechType.GREETINGS));
-                    if (speechQuery.session.person != null)
-                    {
-                        speech.Append(Ssml.SayName(speechQuery.session.person));
-                    }  
                     speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.strong));
                     speech.Append("What media can I help you find.");
                     return await Task.FromResult<string>(speech.ToString());

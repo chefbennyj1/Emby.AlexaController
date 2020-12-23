@@ -57,7 +57,7 @@ namespace AlexaController
 
             response.reprompt = new Reprompt
             {
-                outputSpeech = new OutputSpeech() { ssml = "<speak>Can I help you with anything else?</speak>" }
+                outputSpeech = new OutputSpeech() { ssml = "<speak>Can I help you with anything? You can ask to show a movie, or to show a tv series.</speak>" }
             };
 
             // Remove the directive if the device doesn't handle APL.
