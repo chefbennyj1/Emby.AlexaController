@@ -11,10 +11,9 @@
     public class OutputSpeech : IOutputSpeech
     {
         public string type => "SSML";
-        public string ssml                                                 { get; set; }
-        public string phrase                                               { get; set; }
-        public string sound                                                { get; set; } = string.Empty;
-
+        public string ssml   { get; set; }
+        public string phrase { get; set; }
+        public string sound  { get; set; } = string.Empty;
         
     }
 }

@@ -417,7 +417,10 @@
                     "slots": [
                         {
                             "name": "ActorName",
-                            "type": "AMAZON.Actor"
+                            "type": "AMAZON.Actor",
+                            "multipleValues": {
+                                "enabled": true
+                            }
                         },
                         {
                             "name": "VisualModeTrigger",

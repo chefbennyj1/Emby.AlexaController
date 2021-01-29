@@ -189,26 +189,34 @@ namespace AlexaController
 
 //      
 
-        public IDictionary<BaseItem, List<BaseItem>> GetItemsByActor(User user, string actorName)
+        public IDictionary<List<BaseItem>, List<BaseItem>> GetItemsByActor(User user, List<string> actorNames)
         {
-            actorName = StringNormalization.ValidateSpeechQueryString(actorName);
-            var actorQuery = LibraryManager.GetItemsResult(new InternalItemsQuery()
-            {
-                IncludeItemTypes = new []{ "Person" },
-                SearchTerm = actorName,
-                Recursive = true
-            });
-          
-            if (actorQuery.TotalRecordCount <= 0) return null;
+            var actors = new List<BaseItem>();
 
+            foreach (var actor in actorNames)
+            {
+                var actorName = StringNormalization.ValidateSpeechQueryString(actor);
+                var actorQuery = LibraryManager.GetItemsResult(new InternalItemsQuery()
+                {
+                    IncludeItemTypes = new []{ "Person" },
+                    SearchTerm = actorName,
+                    Recursive = true
+                });
+          
+                if (actorQuery.TotalRecordCount <= 0) continue;
+
+                actors.Add(actorQuery.Items[0]);
+            }
+
+           
             var query = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
             {
                 IncludeItemTypes = new []{"Series", "Movie"},
                 Recursive = true,
-                PersonIds = new[] { actorQuery.Items[0].InternalId }
+                PersonIds = actors.Select(a => a.InternalId).ToArray()
             });
 
-            return new Dictionary<BaseItem, List<BaseItem>>() {{ actorQuery.Items[0], query.Items.ToList() }};
+            return new Dictionary<List<BaseItem>, List<BaseItem>>() {{ actors, query.Items.ToList() }};
 
         }
 

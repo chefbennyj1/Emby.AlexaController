@@ -40,7 +40,23 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
-            var searchName     = slots.ActorName.value;
+
+            var searchNames = new List<string>();
+            
+            //= slots.ActorName.value;
+
+            if (slots.ActorName.slotValue.type == "Simple")
+            {
+                searchNames.Add(slots.ActorName.slotValue.value);
+            }
+
+            if (slots.ActorName.slotValue.type == "List")
+            {
+                foreach (var name in slots.ActorName.slotValue.values)
+                {
+                    searchNames.Add(name.value);
+                }
+            }
 
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
@@ -53,10 +69,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             });
 
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{progressiveSpeech}, looking for {searchName}", apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{progressiveSpeech}, looking for {(slots.ActorName.slotValue.type == "List" ? " actors " : "actor")}", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
-            var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchName);
+            var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchNames);
 
             if (result is null)
             {
@@ -84,7 +100,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (!(Session.room is null))
                 try
                 {
-                    await ServerController.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault());
+                    await ServerController.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault().FirstOrDefault());
                 }
                 catch (Exception exception)
                 {
@@ -96,29 +112,43 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     Session.room = null;
                 }
 
+            var actors = result.Keys.FirstOrDefault();
             
-            var actor = result.Keys.FirstOrDefault();
             var actorCollection = result.Values.FirstOrDefault();
+
+            var phrase = "";
+            for (var i = 0; i <= actors.Count; i++)
+            {
+                if (i == actors.Count)
+                {
+                    phrase += $" {actors[i].Name}.";
+                    break;
+                }
+                phrase += $"{actors[i].Name}, and ";
+            }
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
                 baseItems =  actorCollection ,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle = $"Staring {actor?.Name}",
-                HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
+                HeaderTitle = $"Staring {phrase}",
+                //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
+            //TODO: Fix session Update (it is only looking at one actor, might not matter)
             //Update Session
-            Session.NowViewingBaseItem = actor;
+            Session.NowViewingBaseItem = actors[0];
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
             var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+
+           
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = searchName,
+                    phrase = $"Items staring {phrase}",
                     sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                 },
                 shouldEndSession = null,

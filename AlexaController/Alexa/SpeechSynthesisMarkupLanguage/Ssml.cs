@@ -100,6 +100,6 @@ namespace AlexaController.Alexa.SpeechSynthesisMarkupLanguage
 
         public static string SayAsDate(Date date, string text)                                 => $"<say-as interpret-as='date' format='{date}'>{text}</say-as>";
 
-        public static string SayName(IPerson person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
+        public static string SayName(IPerson person)                                           => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
     }
 }
