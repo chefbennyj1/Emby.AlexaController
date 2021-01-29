@@ -117,9 +117,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var actorCollection = result.Values.FirstOrDefault();
 
             var phrase = "";
-            for (var i = 0; i <= actors.Count; i++)
+            for (var i = 0; i <= actors.Count -1; i++)
             {
-                if (i == actors.Count)
+                if (i == actors.Count -1)
                 {
                     phrase += $" {actors[i].Name}.";
                     break;
@@ -131,7 +131,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 baseItems =  actorCollection ,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle = $"Staring {phrase}",
+                HeaderTitle = $"Starring {phrase}",
                 //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
@@ -148,7 +148,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"Items staring {phrase}",
+                    phrase = $"Items starring {phrase}",
                     sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                 },
                 shouldEndSession = null,
