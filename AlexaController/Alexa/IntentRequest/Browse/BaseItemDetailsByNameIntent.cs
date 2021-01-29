@@ -20,7 +20,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-
+        
         public BaseItemDetailsByNameIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
@@ -46,6 +46,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
+            ServerQuery.Instance.Log.Info(searchName);
+
             var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
                 type = SpeechResponseType.PROGRESSIVE_RESPONSE,
@@ -56,12 +58,34 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
+           
+
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
 
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
+            
 
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
+
+           
+
+            if (result is null)
+            {
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                {
+                    shouldEndSession = true,
+                    outputSpeech = new OutputSpeech()
+                    {
+                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        {
+                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
+                            session = Session
+                        }),
+                    }
+                }, Session);
+            }
+
 
             if (!result.IsParentalAllowed(Session.User))
             {
@@ -102,21 +126,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }, Session);
             }
 
-            if (result is null)
-            {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
-                {
-                    shouldEndSession = true,
-                    outputSpeech = new OutputSpeech()
-                    {
-                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        {
-                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
-                            session = Session
-                        }),
-                    }
-                }, Session);
-            }
+           
 
             
 

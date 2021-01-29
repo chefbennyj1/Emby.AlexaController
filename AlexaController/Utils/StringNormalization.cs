@@ -18,6 +18,7 @@
                 .Replace("show the ", string.Empty)
                 .Replace("saga", "")
                 .Replace("collection", "")
+                .Replace("1 division", "wandavision")
                 .Replace("home theater", string.Empty);
         }
     }
