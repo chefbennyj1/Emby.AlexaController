@@ -79,8 +79,7 @@ namespace AlexaController.Api
                 var alexaRequest = JsonSerializer.DeserializeFromString<AlexaRequest>(s);
 
                 ServerQuery.Instance.Log.Info($"Alexa incoming request: {alexaRequest.request.type}");
-                ServerQuery.Instance.Log.Info($"Alexa incoming request: {alexaRequest.request.intent.name}");
-
+                
                 switch (alexaRequest.request.type)
                 {
                     case "Alexa.Presentation.APL.UserEvent" : return await OnUserEvent(alexaRequest);
@@ -166,6 +165,7 @@ namespace AlexaController.Api
         {
             var request    = alexaRequest.request;
             var @namespace = Type.GetType(UserEventNamespace(request));
+            ServerQuery.Instance.Log.Info(@namespace.FullName);
             return await GetResponseResult(@namespace, alexaRequest, null);
         }
 
@@ -235,7 +235,7 @@ namespace AlexaController.Api
         {
             var paramArgs = session is null
                 ? new object[] { alexaRequest } : new object[] { alexaRequest, session };
-
+            //ServerQuery.Instance.Log.Info(@namespace.FullName);
             var instance = Activator.CreateInstance(@namespace, paramArgs);
             return await (Task<string>)@namespace.GetMethod("Response").Invoke(instance, null);
         }
