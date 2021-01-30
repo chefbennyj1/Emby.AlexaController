@@ -43,7 +43,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             if (room is null)
             {
-                Session.PersistedRequestData = AlexaRequest;
+                Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
 
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()

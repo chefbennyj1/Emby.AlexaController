@@ -49,7 +49,7 @@ namespace AlexaController.Alexa.Presentation
             new Import()
             {
                 name                          = "alexa-layouts",
-                version                       = "1.1.0"
+                version                       = "1.2.0"
             },
             new Import()
             {

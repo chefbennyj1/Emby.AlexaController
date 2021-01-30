@@ -48,8 +48,7 @@ namespace AlexaController.Api
         
         private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent  => intent.name == "VoiceAuthenticationAccountLink";
         private readonly Func<Intent, bool> IsRoomNameIntentRequest                 = intent  => intent.name == "Rooms_RoomNameIntent";
-        private readonly Func<Request, string> IntentNamespace                      = request => $"AlexaController.Alexa.IntentRequest.{request.intent.name.Replace("_", ".")}";
-        private readonly Func<Request, string> UserEventNamespace                   = request => $"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}";
+        
         
         public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager sessionManager)
         {
@@ -136,17 +135,23 @@ namespace AlexaController.Api
 
                 session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
                
-                if (session.PersistedRequestData is null && IsRoomNameIntentRequest(intent))
+                //How can there be a room intent request without any session context data? There can not be.
+                if (session.PersistedRequestContextData is null && IsRoomNameIntentRequest(intent))
                 {
-                    //There has been a speech recognition mistake, end the session.
+                    //end the session.
                     return await new NotUnderstood(alexaRequest, session).Response(); 
                 }
             }
             
             try
             {
-                var @namespace = Type.GetType(IntentNamespace(request));
-                return await GetResponseResult(@namespace, alexaRequest, session);
+                //Amazon Alexa Custom SKill Console does not allow "." in skill names.
+                //This would make creating namespace paths easier.
+                //Instead we save the skill name with "_", which replaces the "." in the reflected path to the corresponding .cs file.
+                //Replace the "_" (underscore) with a "." (period) to create the proper reflection path to the corresponding IntentRequest file.
+                var intentName = intent.name.Replace("_", ".");
+
+                return await GetResponseResult( Type.GetType($"AlexaController.Alexa.IntentRequest.{intentName}"), alexaRequest, session);
             }
             catch (Exception exception)
             {
@@ -164,9 +169,7 @@ namespace AlexaController.Api
         private async Task<string> OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request    = alexaRequest.request;
-            var @namespace = Type.GetType(UserEventNamespace(request));
-            ServerQuery.Instance.Log.Info(@namespace.FullName);
-            return await GetResponseResult(@namespace, alexaRequest, null);
+            return await GetResponseResult(Type.GetType($"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}"), alexaRequest, null);
         }
 
         private static async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)
@@ -231,13 +234,13 @@ namespace AlexaController.Api
             }, null);
         }
 
-        private static async Task<string> GetResponseResult(Type @namespace, IAlexaRequest alexaRequest, IAlexaSession session)
+        private static async Task<string> GetResponseResult(Type type, IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var paramArgs = session is null
                 ? new object[] { alexaRequest } : new object[] { alexaRequest, session };
-            //ServerQuery.Instance.Log.Info(@namespace.FullName);
-            var instance = Activator.CreateInstance(@namespace, paramArgs);
-            return await (Task<string>)@namespace.GetMethod("Response").Invoke(instance, null);
+            
+            var instance = Activator.CreateInstance(type, paramArgs);
+            return await (Task<string>)type.GetMethod("Response").Invoke(instance, null);
         }
     }
 }

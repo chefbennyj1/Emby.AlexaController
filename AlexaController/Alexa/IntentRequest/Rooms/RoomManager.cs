@@ -28,7 +28,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            session.PersistedRequestData = alexaRequest;
+            session.PersistedRequestContextData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()

@@ -27,7 +27,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             var slots   = intent.slots;
            
             // ReSharper disable once TooManyChainedReferences
-            var rePromptIntent     = Session.PersistedRequestData.request.intent;
+            var rePromptIntent     = Session.PersistedRequestContextData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
             
             Room room = null;
@@ -73,7 +73,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             try
             {
-                return await GetResponseResult(type, Session.PersistedRequestData, Session);
+                return await GetResponseResult(type, Session.PersistedRequestContextData, Session);
             }
             catch 
             {

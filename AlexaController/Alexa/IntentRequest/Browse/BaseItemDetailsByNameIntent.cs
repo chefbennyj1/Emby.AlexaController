@@ -40,7 +40,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
-            var type           = slots.Movie.value is null ? "Series" : "Movie";
+            var type           = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
             var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
@@ -57,8 +57,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 #pragma warning disable 4014
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
-
-           
+            
 
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
@@ -125,9 +124,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     }
                 }, Session);
             }
-
-           
-
             
 
             if (!(Session.room is null))

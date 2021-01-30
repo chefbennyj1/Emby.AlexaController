@@ -32,7 +32,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
 
             if (session.room is null || (session.room is null && context.Viewport is null))
             {
-                session.PersistedRequestData = alexaRequest;
+                session.PersistedRequestContextData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session, null);
                 return await RoomManager.Instance.RequestRoom(alexaRequest, session);
             }
@@ -66,7 +66,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
 
             session.NowViewingBaseItem = result;
             //reset rePrompt data because we have fulfilled the request
-            session.PersistedRequestData = null;
+            session.PersistedRequestContextData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
             var documentTemplateInfo = new RenderDocumentTemplate()

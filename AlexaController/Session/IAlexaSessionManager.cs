@@ -71,7 +71,7 @@ namespace AlexaController.Session
             {
                 sessionInfo = OpenSessions.FirstOrDefault(s => s.SessionId == amazonSession.sessionId);
 
-                persistedRequestData = sessionInfo?.PersistedRequestData;
+                persistedRequestData = sessionInfo?.PersistedRequestContextData;
                 room = sessionInfo?.room;
                
                 // ReSharper disable once ComplexConditionExpression
@@ -98,7 +98,7 @@ namespace AlexaController.Session
                 room                    = room,
                 User                    = user,
                 alexaSessionDisplayType = GetCurrentViewport(alexaRequest),
-                PersistedRequestData    = persistedRequestData,
+                PersistedRequestContextData    = persistedRequestData,
                 paging                  = new Paging { pages = new Dictionary<int, IRenderDocumentTemplate>() }
             };
 
