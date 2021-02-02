@@ -343,14 +343,14 @@ namespace AlexaController.Alexa.Presentation
             layout.Add(new Text()
             {
                 // ReSharper disable once TooManyChainedReferences
-                text = $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}",
-                left = "42%",
-                top = "6vh",
-                width = "40vw",
-                height = "22dp",
+                text     = $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}",
+                left     = "42%",
+                top      = "6vh",
+                width    = "40vw",
+                height   = "22dp",
                 fontSize = "18dp",
-                opacity = 0,
-                id = "genre"
+                opacity  = 0,
+                id       = "genre"
             });
             ServerQuery.Instance.Log.Info("Render Document has Genres");
 
@@ -408,14 +408,15 @@ namespace AlexaController.Alexa.Presentation
             ServerQuery.Instance.Log.Info("Render Document has Runtime");
 
             //Overview
-            layout.Add(new ScrollView()
+            layout.Add(new TouchWrapper()
             {
                 top     = string.Equals(type, "Movie") ? "9vh" : "7vh",
                 left    = "42vw",
-                id      = "overview",
                 height  = "25vh",
-                opacity = 0,
-                item    = new Text()
+                opacity = 1,
+                id = baseItem.InternalId.ToString(),
+                onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) }},
+                item = new Text()
                 {
                     text = $"{baseItem.Overview}",
                     style = "textStyleBody",
@@ -423,6 +424,7 @@ namespace AlexaController.Alexa.Presentation
                     fontSize = "20dp"
                 }
             });
+
             ServerQuery.Instance.Log.Info("Render Document has Overview");
 
             //Series - Season Count
@@ -514,7 +516,7 @@ namespace AlexaController.Alexa.Presentation
                         : await GetButtonFrame(args : type == "Movie" || type == "Episode" 
                                 ? new List<object>() { nameof(UserEventPlaybackStart), session.room != null ? session.room.Name : "" } 
                                 : new List<object>() { nameof(UserEventShowItemListSequenceTemplate) },
-                                   icon : item.GetType().Name == "Series" ?  MaterialVectorIcons.ListIcon :  MaterialVectorIcons.PlayOutlineIcon,
+                                   icon : item.GetType().Name == "Series" ?  MaterialVectorIcons.ListIcon : MaterialVectorIcons.PlayOutlineIcon,
                                    id   : template.baseItems[0].InternalId.ToString())
                 }
             });
@@ -546,7 +548,7 @@ namespace AlexaController.Alexa.Presentation
                             {
                                 await Animations.ScaleFadeInItem("primaryButton", 800),
                                 await Animations.ScaleFadeInItem("genre", 1000),
-                                await Animations.FadeInItem("overview", 800),
+                                //await Animations.FadeInItem("overview", 800),
                                 await Animations.FadeInItem("showing", 2000),
                                 new Parallel()
                                 {
@@ -1094,7 +1096,7 @@ namespace AlexaController.Alexa.Presentation
                 token = "Help",
                 document = new Document()
                 {
-                    theme = "dark",
+                    theme = "light",
                     import = Imports,
                     resources = Resources,
                     mainTemplate = new MainTemplate()
@@ -1118,7 +1120,7 @@ namespace AlexaController.Alexa.Presentation
                                             new Source()
                                             {
                                                 repeatCount = 15,
-                                                url         = $"{Url}/particles"
+                                                url         = $"{Url}/MovingFloor"
                                             }
                                         },
                                         backgroundScale = "best-fill",

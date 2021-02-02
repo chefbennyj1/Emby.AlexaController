@@ -44,6 +44,13 @@ namespace AlexaController.Api
     {
         public object mp4 { get; set; }
     }
+
+    [Route("/MovingFloor", "Get", Summary = "video backdrop")]
+    public class MovingFloor : IReturn<object>
+    {
+        public object mp4 { get; set; }
+    }
+
     public class AlexaBackgroundImageService : IService, IHasResultFactory
     {
         public IRequest Request                 { get; set; }
@@ -78,6 +85,10 @@ namespace AlexaController.Api
         public async Task<object> Get(Particles request) => 
             await Task.Factory.StartNew(() => 
                 GetEmbeddedResourceStream("particles.mp4", "video/mp4"));
+
+        public async Task<object> Get(MovingFloor request) => 
+            await Task.Factory.StartNew(() => 
+                GetEmbeddedResourceStream("MovingFloor.mp4", "video/mp4"));
 
 
         private object GetEmbeddedResourceStream(string resourceName, string contentType)

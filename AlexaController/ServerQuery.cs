@@ -187,7 +187,16 @@ namespace AlexaController
             return SessionManager.Sessions.FirstOrDefault(i => i.DeviceId == deviceId);
         }
 
-//      
+        public QueryResult<BaseItem> GetBaseItemsByGenre(string[] type, string[] genres)
+        {
+            return LibraryManager.GetItemsResult(new InternalItemsQuery()
+            {
+                Genres = genres,
+                IncludeItemTypes = type,
+                Recursive = true,
+                Limit = 15
+            });
+        }
 
         public IDictionary<List<BaseItem>, List<BaseItem>> GetItemsByActor(User user, List<string> actorNames)
         {
@@ -220,17 +229,17 @@ namespace AlexaController
 
         }
 
-        public async Task<List<BaseItem>> GetUpComingTvAsync(DateTime duration)
+        public async Task<QueryResult<BaseItem>> GetUpComingTvAsync(DateTime duration)
         {
-            var upComing = LibraryManager.GetItemsResult(new InternalItemsQuery()
+            return await Task.FromResult(LibraryManager.GetItemsResult(new InternalItemsQuery()
             {
                 MinPremiereDate  = DateTime.Now.AddDays(-1),
                 IncludeItemTypes = new[] {"Episode"},
                 MaxPremiereDate  = duration,
                 OrderBy          = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray()
-            });
+            }));
 
-            return await Task.FromResult(upComing.Items.ToList());
+            //return await Task.FromResult(upComing.Items.ToList());
         }
 
 

@@ -14,6 +14,5 @@
         public string ssml   { get; set; }
         public string phrase { get; set; }
         public string sound  { get; set; } = string.Empty;
-        
     }
 }

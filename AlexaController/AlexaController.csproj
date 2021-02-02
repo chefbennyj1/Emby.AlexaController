@@ -15,6 +15,7 @@
   <None Remove="ICON_VERSION6.mp4" />
   <None Remove="MoviesLibrary.mp4" />
   <None Remove="particles.mp4" />
+  <None Remove="Resources\MovingFloor.mp4" />
   <None Remove="thumb.gif" />
   <None Remove="thumb.jpg" />
   <None Remove="Utils\ttd3km1d.3sb~" />
@@ -28,6 +29,7 @@
   <EmbeddedResource Include="Resources\fiberOptics.mp4" />
   <EmbeddedResource Include="Resources\ICON_VERSION6.mp4" />
   <EmbeddedResource Include="Resources\MoviesLibrary.mp4" />
+  <EmbeddedResource Include="Resources\MovingFloor.mp4" />
   <EmbeddedResource Include="Resources\particles.mp4" />
   <EmbeddedResource Include="thumb.gif" />
 </ItemGroup>

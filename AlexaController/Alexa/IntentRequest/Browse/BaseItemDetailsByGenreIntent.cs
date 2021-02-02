@@ -13,16 +13,17 @@ using AlexaController.Utils.LexicalSpeech;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class BaseItemsByActorIntent : IIntentResponse
+    public class BaseItemDetailsByGenreIntent : IIntentResponse
     {
-        public IAlexaRequest AlexaRequest { get; }
-        public IAlexaSession Session { get; }
-        
-        public BaseItemsByActorIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public BaseItemDetailsByGenreIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
-            Session = session;
+            Session      = session;
         }
+
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session      { get; }
+
         public async Task<string> Response()
         {
             try
@@ -38,20 +39,23 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
+            var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
+            var slotGenres     = slots.Genre;
 
-            var searchNames = new List<string>();
-            
-           
+            var genres = new List<string>();
 
-            switch (slots.ActorName.slotValue.type) {
+            switch (slotGenres.slotValue.type) {
                 case "Simple":
-                    searchNames.Add(slots.ActorName.slotValue.value);
+
+                    ServerQuery.Instance.Log.Info($"Genre Intent Request: { type } { slotGenres.value} ");
+
+                    genres.Add(slotGenres.slotValue.value);
                     break;
                 case "List":
                 {
-                    foreach (var name in slots.ActorName.slotValue.values)
+                    foreach (var name in slotGenres.slotValue.values)
                     {
-                        searchNames.Add(name.value);
+                        genres.Add(name.value);
                     }
 
                     break;
@@ -62,17 +66,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-                session = Session
-            });
-
-#pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{progressiveSpeech}, looking for library items by {(slots.ActorName.slotValue.type == "List" ? " those actors." : " that actor.")}", apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
-
-            var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchNames);
+            //var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+            //{
+            //    type    = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+            //    session = Session
+            //});
+            
+            //await Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{progressiveSpeech}, looking for {type} items with {(slotGenres.slotValue.type == "List" ? " those genres." : " that genre.")}", apiAccessToken, requestId)).ConfigureAwait(false);
+            
+            var result = ServerQuery.Instance.GetBaseItemsByGenre(new [] {type}, genres.ToArray());
 
             if (result is null)
             {
@@ -80,7 +82,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = "I was unable to find that actor.",
+                        phrase = "I was unable to find items.",
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
@@ -89,7 +91,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     {
                         await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                         {
-                            HeadlinePrimaryText = "I was unable to find that actor.",
+                            HeadlinePrimaryText = "I was unable to find items.",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
 
                         }, Session)
@@ -98,65 +100,61 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             if (!(Session.room is null))
+            {
                 try
                 {
-                    await ServerController.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault().FirstOrDefault());
+                    await ServerController.Instance.BrowseItemAsync(Session, result.Items.FirstOrDefault());
                 }
                 catch (Exception exception)
                 {
-                    await Task.Run(() => 
-                        ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, 
-                            requestId))
+                    await Task.Run(() =>
+                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
+                                requestId))
                         .ConfigureAwait(false);
                     await Task.Delay(1200);
                     Session.room = null;
                 }
+            }
 
-            var actors = result.Keys.FirstOrDefault();
-            
-            var actorCollection = result.Values.FirstOrDefault();
 
             var phrase = "";
             
-            for (var i = 0; i <= actors?.Count -1; i++)
+            for (var i = 0; i <= genres.Count -1; i++)
             {
-                if (actors.Count - 1 > 0)
+                if (genres.Count - 1 > 0)
                 {
-                    if (i == actors.Count - 1)
+                    if (i == genres.Count - 1)
                     {
-                        phrase += $"and {actors[i].Name}.";
+                        phrase += $"and {genres[i]}.";
                         break;
                     }
-                    phrase += $"{actors[i].Name}, ";
+                    phrase += $"{genres[i]}, ";
                 }
                 else
                 {
-                    phrase += $"{actors[i].Name}";
+                    phrase += $"{genres[i]}";
                 }
             }
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
-                baseItems =  actorCollection ,
+                baseItems =  result.Items.ToList() ,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle = $"Starring {phrase}",
+                HeaderTitle = $"Genres: {phrase}",
                 //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
-
-            //TODO: Fix session Update (it is only looking at one actor, might not matter)
+            
             //Update Session
-            Session.NowViewingBaseItem = actors[0];
+            Session.NowViewingBaseItem = result.Items[0];
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
             var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
-
-           
-
+            
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"Items starring {phrase}",
+                    phrase = $"Items with {phrase} genres.",
                     sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                 },
                 shouldEndSession = null,

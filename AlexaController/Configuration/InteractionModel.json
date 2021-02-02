@@ -348,19 +348,23 @@
                         {
                             "name": "Duration",
                             "type": "AMAZON.DURATION"
+                        },
+                        {
+                            "name": "MediaType",
+                            "type": "AMAZON.CreativeWorkType"
                         }
                     ],
                     "samples": [
-                        "to show {TVAlternatives} added in the last {Duration}",
-                        "to show {MovieAlternatives} added in the last {Duration}",
-                        "to show new {TVAlternatives} added in the last {Duration}",
-                        "to show new {MovieAlternatives} added in the last {Duration}",
-                        "about new {TVAlternatives} added in the last {Duration}",
-                        "about new {MovieAlternatives} added in the last {Duration}",
-                        "about new {MovieAlternatives} from the last {Duration}",
                         "about new {TVAlternatives} from the last {Duration}",
-                        "about new {TVAlternatives}",
-                        "about new {MovieAlternatives}"
+                        "about new {MovieAlternatives}",
+                        "about new {MovieAlternatives} added in the last {Duration}",
+                        "to show new {MovieAlternatives} added in the last {Duration}",
+                        "to show {MovieAlternatives} added in the last {Duration}",
+                        "to show {TVAlternatives} added in the last {Duration}",
+                        "to show new {TVAlternatives} added in the last {Duration}",
+                        "about new {TVAlternatives} added in the last {Duration}",
+                        "about new {MovieAlternatives} from the last {Duration}",
+                        "about new {TVAlternatives}"
                     ]
                 },
                 {
@@ -455,6 +459,34 @@
                 {
                     "name": "AMAZON.FallbackIntent",
                     "samples": []
+                },
+                {
+                    "name": "Browse_BaseItemDetailsByGenreIntent",
+                    "slots": [
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        },
+                        {
+                            "name": "Genre",
+                            "type": "AMAZON.Genre",
+                            "multipleValues": {
+                                "enabled": true
+                            }
+                        },
+                        {
+                            "name": "TVAlternatives",
+                            "type": "LIST_OF_TV_ALTS"
+                        },
+                        {
+                            "name": "MovieAlternatives",
+                            "type": "LIST_OF_MOVIE_ALTS"
+                        }
+                    ],
+                    "samples": [
+                        "to {VisualModeTrigger} {Genre} {MovieAlternatives} ",
+                        "to {VisualModeTrigger} {Genre} {TVAlternatives} "
+                    ]
                 }
             ],
             "types": [

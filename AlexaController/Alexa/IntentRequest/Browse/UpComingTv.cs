@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.RequestData.Model;
@@ -43,7 +44,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var durationValue  = slots.Duration.value;
             var duration       = durationValue is null ? DateTime.Now.AddDays(7) : DateTimeDurationSerializer.GetMaxPremiereDate(durationValue);
             
-            var results = await ServerQuery.Instance.GetUpComingTvAsync(duration);
+            var result = await ServerQuery.Instance.GetUpComingTvAsync(duration);
 
             switch (Session.alexaSessionDisplayType)
             {
@@ -51,7 +52,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     {
                         var documentTemplateInfo = new RenderDocumentTemplate()
                         {
-                            baseItems = results,
+                            baseItems = result.Items.ToList(),
                             renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
                             HeaderTitle = "Upcoming Episode"
                         };
@@ -68,7 +69,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                 {
                                     type = SpeechResponseType.UP_COMING_EPISODES,
                                     session = Session,
-                                    items = results,
+                                    items = result.Items.ToList(),
                                     args = new []{duration.ToLongDateString()}
                                 })
                             },
@@ -90,7 +91,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                 {
                                     type = SpeechResponseType.UP_COMING_EPISODES,
                                     session = Session,
-                                    items = results,
+                                    items = result.Items.ToList(),
                                     args = new []{duration.ToLongDateString()}
                                 })
                             },
