@@ -8,7 +8,6 @@ using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.LexicalSpeech;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -35,7 +34,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
             if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
-
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
@@ -46,10 +44,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             switch (slotGenres.slotValue.type) {
                 case "Simple":
-
                     ServerQuery.Instance.Log.Info($"Genre Intent Request: { type } { slotGenres.value} ");
-
-                    genres.Add(slotGenres.slotValue.value);
+                    genres.Add(slotGenres.value);
                     break;
                 case "List":
                 {
@@ -65,24 +61,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-
-            //var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            //{
-            //    type    = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-            //    session = Session
-            //});
-            
-            //await Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{progressiveSpeech}, looking for {type} items with {(slotGenres.slotValue.type == "List" ? " those genres." : " that genre.")}", apiAccessToken, requestId)).ConfigureAwait(false);
             
             var result = ServerQuery.Instance.GetBaseItemsByGenre(new [] {type}, genres.ToArray());
 
-            if (result is null)
+            if (result.TotalRecordCount <= 0)
             {
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = "I was unable to find items.",
+                        phrase = "I was unable to find items. Does that genre exist?",
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
@@ -91,7 +79,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     {
                         await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                         {
-                            HeadlinePrimaryText = "I was unable to find items.",
+                            HeadlinePrimaryText = "I was unable to find items. Does that genre exist?",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
 
                         }, Session)
@@ -125,7 +113,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
                     if (i == genres.Count - 1)
                     {
-                        phrase += $"and {genres[i]}.";
+                        phrase += $"and {genres[i]}";
                         break;
                     }
                     phrase += $"{genres[i]}, ";
@@ -140,7 +128,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 baseItems =  result.Items.ToList() ,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle = $"Genres: {phrase}",
+                HeaderTitle = $"{type} Genres: {phrase}",
                 //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
             
@@ -154,7 +142,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"Items with {phrase} genres.",
+                    phrase = $"{type} Items with {phrase} genres.",
                     sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
                 },
                 shouldEndSession = null,
