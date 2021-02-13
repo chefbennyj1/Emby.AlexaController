@@ -28,18 +28,17 @@ namespace AlexaController
         private ILibraryManager LibraryManager         { get; }
         private ITVSeriesManager TvSeriesManager       { get; }
         private ISessionManager SessionManager         { get; }
-        public ILogger Log                             { get; }
+       
         public static ServerQuery Instance             { get; private set; }
 
         // ReSharper disable once TooManyDependencies
-        public ServerQuery(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IUserManager userManager) : base(libMan, userManager)
+        public ServerQuery(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IUserManager userManager) : base(libMan, userManager)
         {
             Host            = host;
             LibraryManager  = libMan;
             TvSeriesManager = tvMan;
             SessionManager  = sesMan;
             UserManager     = userManager;
-            Log             = logMan.GetLogger(Plugin.Instance.Name);
             Instance        = this;
         }
         
@@ -109,7 +108,7 @@ namespace AlexaController
         {
             var result = QuerySpeechResultItem(collectionName, new[] { "BoxSet" });
 
-            Log.Info("Search found collection item: " + result.Name);
+            ServerController.Instance.Log.Info("Search found collection item: " + result.Name);
 
             var collection = LibraryManager.QueryItems(new InternalItemsQuery(UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator))
             {

@@ -25,7 +25,7 @@ namespace AlexaController
         private ITVSeriesManager TvSeriesManager       { get; }
         private ISessionManager SessionManager         { get; }
         private IActivityManager ActivityManager       { get; set; }
-        private ILogger Log                            { get; }
+        public ILogger Log                            { get; }
         public static ServerController Instance        { get; private set; }
 
         // ReSharper disable once TooManyDependencies

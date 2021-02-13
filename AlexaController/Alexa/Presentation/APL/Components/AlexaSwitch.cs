@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaSwitch : Item
+    public class AlexaSwitch : VisualItem
     {
         public object type => typeof(AlexaSwitch);
         public SendEvent primaryAction { get; set; }

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.Presentation.APL;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using MediaBrowser.Controller.Session;
@@ -14,7 +13,8 @@ namespace AlexaController.Session
     {
         void EndSession(IAlexaRequest alexaRequest);
         IAlexaSession GetSession(IAlexaRequest alexaRequest, User user = null);
-        void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template, bool? isBack = null);
+        void UpdateSession(IAlexaSession session, RenderDocumentTemplate template, bool? isBack = null);
+        double GetPlaybackProgressTicks(IAlexaSession alexaSession);
     }
 
     public class AlexaSessionManager : IAlexaSessionManager
@@ -23,14 +23,19 @@ namespace AlexaController.Session
 
         private static readonly List<IAlexaSession> OpenSessions = new List<IAlexaSession>();
 
+        private static Dictionary<string, long> PlaybackPositions = new Dictionary<string, long>();
+
         private ISessionManager SessionManager { get; }
         
         public AlexaSessionManager(ISessionManager sessionManager)
         {
             Instance = this;
             SessionManager = sessionManager;
-            SessionManager.PlaybackStopped += SessionManager_PlaybackStopped;
+            SessionManager.PlaybackStopped  += SessionManager_PlaybackStopped;
+            SessionManager.PlaybackProgress += SessionManager_PlaybackProgress;
         }
+
+       
 
         private static AlexaSessionDisplayType GetCurrentViewport(IAlexaRequest alexaRequest)
         {
@@ -92,14 +97,14 @@ namespace AlexaController.Session
             // Sync AMAZON session Id with our own.
             sessionInfo = new AlexaSession()
             {
-                SessionId               = amazonSession.sessionId,
-                EchoDeviceId            = system.device.deviceId,
-                person                  = person,
-                room                    = room,
-                User                    = user,
-                alexaSessionDisplayType = GetCurrentViewport(alexaRequest),
-                PersistedRequestContextData    = persistedRequestData,
-                paging                  = new Paging { pages = new Dictionary<int, IRenderDocumentTemplate>() }
+                SessionId                   = amazonSession.sessionId,
+                EchoDeviceId                = system.device.deviceId,
+                person                      = person,
+                room                        = room,
+                User                        = user,
+                alexaSessionDisplayType     = GetCurrentViewport(alexaRequest),
+                PersistedRequestContextData = persistedRequestData,
+                paging                      = new Paging { pages = new Dictionary<int, RenderDocumentTemplate>() }
             };
 
             OpenSessions.Add(sessionInfo);
@@ -107,7 +112,7 @@ namespace AlexaController.Session
             return sessionInfo;
         }
 
-        public void UpdateSession(IAlexaSession session, IRenderDocumentTemplate template, bool? isBack = null)
+        public void UpdateSession(IAlexaSession session, RenderDocumentTemplate template, bool? isBack = null)
         {
             if (!(template is null))
                 session = UpdateSessionPaging(session, template, isBack);
@@ -116,7 +121,7 @@ namespace AlexaController.Session
             OpenSessions.Add(session);
         }
 
-        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, IRenderDocumentTemplate template, bool? isBack = null)
+        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, RenderDocumentTemplate template, bool? isBack = null)
         {
             if (isBack == true)
             {
@@ -165,10 +170,51 @@ namespace AlexaController.Session
 
             var sessionToUpdate = OpenSessions.FirstOrDefault(session => session.room.Name == room?.Name);
 
+            try
+            {
+                PlaybackPositions.Remove(sessionToUpdate.SessionId);
+            }
+            catch { }
+
             // ReSharper disable once PossibleNullReferenceException
             sessionToUpdate.PlaybackStarted = false;
             UpdateSession(sessionToUpdate, null);
         }
         
+        private void SessionManager_PlaybackProgress(object sender, MediaBrowser.Controller.Library.PlaybackProgressEventArgs e)
+        {
+            var deviceName = e.DeviceName;
+            var config = Plugin.Instance.Configuration;
+            var configRooms = config.Rooms;
+            if (!configRooms.Exists(r => r.DeviceName == deviceName)) return;
+            var room = configRooms.FirstOrDefault(r => r.DeviceName == deviceName);
+            if (!OpenSessions.Exists(session => session.room.Name == room?.Name)) return;
+            var sessionToUpdate = OpenSessions.FirstOrDefault(session => session.room.Name == room?.Name);
+
+            if (!PlaybackPositions.ContainsKey(sessionToUpdate.SessionId))
+            {
+                PlaybackPositions.Add(sessionToUpdate.SessionId, e.PlaybackPositionTicks ?? 0);
+                return;
+            }
+
+            PlaybackPositions[sessionToUpdate.SessionId] = e.PlaybackPositionTicks ?? 0;
+        }
+
+        public double GetPlaybackProgressTicks(IAlexaSession alexaSession)
+        {
+            var progressPercent = 0.0;
+            try
+            {
+                var d = (int)PlaybackPositions[alexaSession.SessionId] / (int)alexaSession.NowViewingBaseItem.RunTimeTicks;
+                progressPercent = (d * 100);
+            }
+            catch
+            {
+
+            }
+
+            return progressPercent;
+
+        }
     }
 }

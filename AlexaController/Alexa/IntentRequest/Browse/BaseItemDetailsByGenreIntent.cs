@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -40,29 +41,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
             var slotGenres     = slots.Genre;
 
-            var genres = new List<string>();
-
-            switch (slotGenres.slotValue.type) {
-                case "Simple":
-                    ServerQuery.Instance.Log.Info($"Genre Intent Request: { type } { slotGenres.value} ");
-                    genres.Add(slotGenres.value);
-                    break;
-                case "List":
-                {
-                    foreach (var name in slotGenres.slotValue.values)
-                    {
-                        genres.Add(name.value);
-                    }
-
-                    break;
-                }
-            }
-
+            var genres         = GetGenreList(slotGenres);
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
             
-            var result = ServerQuery.Instance.GetBaseItemsByGenre(new [] {type}, genres.ToArray());
+            var result         = ServerQuery.Instance.GetBaseItemsByGenre(new [] { type }, genres.ToArray());
 
             if (result.TotalRecordCount <= 0)
             {
@@ -74,8 +58,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
-                    SpeakUserName = true,
-                    directives = new List<IDirective>()
+                    SpeakUserName    = true,
+                    directives       = new List<IDirective>()
                     {
                         await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                         {
@@ -153,6 +137,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
 
             }, Session);
+        }
+
+        private static List<string> GetGenreList(slotData slotGenres)
+        {
+            switch (slotGenres.slotValue.type)
+            {
+                case "Simple" : return new List<string>() { slotGenres.value };
+                case "List"   : return slotGenres.slotValue.values.Select(v => v.value).ToList();
+                default       : return null;
+            }
         }
     }
 }

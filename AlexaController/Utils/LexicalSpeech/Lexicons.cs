@@ -44,7 +44,7 @@ namespace AlexaController.Utils.LexicalSpeech
         {
             "One moment...",
             "One moment please...",
-            "Just one moment...",
+            $"Just {Ssml.InsertVoicePitch(Pitch.high, "one")} moment...",
             "Just a moment...",
             "I can do that... just a moment...",
             ""
@@ -69,25 +69,28 @@ namespace AlexaController.Utils.LexicalSpeech
 
         private static readonly List<string> Compliance   = new List<string>
         {
-            "OK, ",
+            Ssml.ExpressiveInterjection("OK"),
             "Alright, ",
-            "Yes, ",
+            Ssml.SayWithEmotion("Yes, ... ", Emotion.excited, Intensity.medium),
             "Yep, "
         };
 
         private static readonly List<string> NonCompliant = new List<string>
         {
             "No way, Hosea!... ",
-            "No can do... ",
+            $"{Ssml.ExpressiveInterjection("whoops")}... no can do... ",
             "I can't do that... ",
-            "now now... ",
+            $"{Ssml.ExpressiveInterjection("now now")}",
+            $"{Ssml.ExpressiveInterjection("hey now")}",
+            $"{Ssml.ExpressiveInterjection("uh oh")}",
             ""
         };
 
         private static readonly List<string> Dysfluency   = new List<string>()
         {
             "oh...",
-            "umm... "
+            "umm... ",
+            $"{Ssml.ExpressiveInterjection("wow")}...",
         };
 
         private static readonly List<string> Greetings    = new List<string>()
@@ -122,7 +125,6 @@ namespace AlexaController.Utils.LexicalSpeech
                 ? string.Join(" ", Ssml.SayWithEmotion(Greetings[RandomIndex.Next(1, Greetings.Count)], Emotion.excited, Intensity.low), 
                 Ssml.InsertStrengthBreak(StrengthBreak.weak)) 
                 : GetTimeOfDayResponse();
-        
         
     }
 }

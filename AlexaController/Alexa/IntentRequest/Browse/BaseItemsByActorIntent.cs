@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -39,24 +40,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var intent         = request.intent;
             var slots          = intent.slots;
 
-            var searchNames = new List<string>();
-            
-           
-
-            switch (slots.ActorName.slotValue.type) {
-                case "Simple":
-                    searchNames.Add(slots.ActorName.slotValue.value);
-                    break;
-                case "List":
-                {
-                    foreach (var name in slots.ActorName.slotValue.values)
-                    {
-                        searchNames.Add(name.value);
-                    }
-
-                    break;
-                }
-            }
+            var searchNames    = GetActorList(slots);
 
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
@@ -167,6 +151,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
 
             }, Session);
+        }
+
+        private static List<string> GetActorList(Slots slots)
+        {
+            switch (slots.ActorName.slotValue.type)
+            {
+                case "Simple" : return new List<string>() { slots.ActorName.value };
+                case "List"   : return slots.ActorName.slotValue.values.Select(a => a.value).ToList();
+                default       : return null;
+            }
         }
     }
 }

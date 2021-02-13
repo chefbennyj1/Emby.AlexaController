@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -18,7 +19,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
         }
         public async Task<string> Response()
         {
-            ServerQuery.Instance.Log.Info("UserEventShowBaseItemDetailsTemplate");
+            ServerController.Instance.Log.Info("UserEventShowBaseItemDetailsTemplate");
             var request        = AlexaRequest.request;
             var source         = request.source;
             var baseItem       = ServerQuery.Instance.GetItemById(source.id);

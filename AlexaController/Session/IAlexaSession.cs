@@ -21,7 +21,7 @@ namespace AlexaController.Session
         string EchoDeviceId                               { get; set; }
         AlexaSessionDisplayType alexaSessionDisplayType   { get; set; }
         IPerson person                                    { get; set; }
-        IAlexaRequest PersistedRequestContextData                { get; set; }
+        IAlexaRequest PersistedRequestContextData         { get; set; }
         BaseItem NowViewingBaseItem                       { get; set; }
         bool PlaybackStarted                              { get; set; }
         Room room                                         { get; set; }
@@ -30,15 +30,15 @@ namespace AlexaController.Session
 
     public class AlexaSession : IAlexaSession
     {
-        public User User                                         { get; set; }
-        public string SessionId                                  { get; set; }
-        public string EchoDeviceId                               { get; set; }
-        public AlexaSessionDisplayType alexaSessionDisplayType   { get; set; } 
-        public IPerson person                                    { get; set; }
+        public User User                                                { get; set; }
+        public string SessionId                                         { get; set; }
+        public string EchoDeviceId                                      { get; set; }
+        public AlexaSessionDisplayType alexaSessionDisplayType          { get; set; } 
+        public IPerson person                                           { get; set; }
         public IAlexaRequest PersistedRequestContextData                { get; set; }
-        public BaseItem NowViewingBaseItem                       { get; set; }
-        public bool PlaybackStarted                              { get; set; }
-        public Room room                                         { get; set; } 
-        public Paging paging                                     { get; set; }
+        public BaseItem NowViewingBaseItem                              { get; set; }
+        public bool PlaybackStarted                                     { get; set; }
+        public Room room                                                { get; set; } 
+        public Paging paging                                            { get; set; }
     }
 }

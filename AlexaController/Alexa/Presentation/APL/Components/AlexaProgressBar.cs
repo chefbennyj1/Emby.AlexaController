@@ -1,13 +1,16 @@
 ﻿namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaProgressBar
+    public class AlexaProgressBar : VisualItem
     {
-        public object type => typeof(AlexaProgressBar);
-        public int bufferValue { get; set; }
+        public object type => nameof(AlexaProgressBar);
+        public long bufferValue { get; set; }
         public bool isLoading { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public ProgressBarType progressBarType { get; set; }
-        public int progressValue { get; set; }
-        public int totalValue { get; set; }
+        public double progressValue { get; set; }
+        public double totalValue { get; set; }
     }
 
     // ReSharper disable twice InconsistentNaming

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using MediaBrowser.Model.Services;
 using System.IO;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
+using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
 using AlexaController.Session;
 using AlexaController.Utils;
 using AlexaController.Utils.LexicalSpeech;
@@ -77,7 +78,7 @@ namespace AlexaController.Api
                 var s = await sr.ReadToEndAsync();
                 var alexaRequest = JsonSerializer.DeserializeFromString<AlexaRequest>(s);
 
-                ServerQuery.Instance.Log.Info($"Alexa incoming request: {alexaRequest.request.type}");
+                ServerController.Instance.Log.Info($"Alexa incoming request: {alexaRequest.request.type}");
                 
                 switch (alexaRequest.request.type)
                 {
@@ -155,8 +156,25 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                //TODO: Value can not be null - parameter(type) is no class to reflect on. Create the Intent Class to access. Example, yuo moved the class into another namespace.
-                return await new ErrorHandler().OnError(new Exception($"Sorry, I was unable to do that. {exception.Message}"), alexaRequest, session);
+                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                {
+                    shouldEndSession = true,
+                    outputSpeech = new OutputSpeech()
+                    {
+                        phrase = $"{Ssml.SayWithEmotion($"Sorry, I was unable to do that. {exception.Message}", Emotion.excited, Intensity.low)}",
+                    },
+
+                    directives = new List<IDirective>()
+                    {
+                        await RenderDocumentBuilder.Instance
+                            .GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
+                            {
+                                renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
+                                HeadlinePrimaryText = exception.Message
+
+                            }, session)
+                    }
+                }, session);
             }
         }
 
@@ -169,7 +187,8 @@ namespace AlexaController.Api
         private async Task<string> OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request    = alexaRequest.request;
-            return await GetResponseResult(Type.GetType($"AlexaController.{request.type}.{request.source.type}.{request.source.handler}.{request.arguments[0]}"), alexaRequest, null);
+            ServerController.Instance.Log.Info($"USEREVENT: {alexaRequest.request.source.type} {alexaRequest.request.source.handler}");
+            return await GetResponseResult(Type.GetType($"AlexaController.Alexa.Presentation.APL.UserEvent.{request.source.type}.{request.source.handler}.{request.arguments[0]}"), alexaRequest, null);
         }
 
         private static async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)

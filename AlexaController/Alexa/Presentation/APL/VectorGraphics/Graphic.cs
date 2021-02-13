@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AlexaController.Alexa.Presentation.APL.Components
+namespace AlexaController.Alexa.Presentation.APL.VectorGraphics
 {
     public class Graphic
     {
@@ -11,7 +11,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public int viewportHeight { get; set; }
         public int viewportWidth { get; set; }
         public List<Parameter> parameters { get; set; }
-        public List<IItem> items { get; set; }
+        public List<Path> items { get; set; }
     }
 
     public class Parameter

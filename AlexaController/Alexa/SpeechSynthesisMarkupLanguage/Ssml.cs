@@ -37,6 +37,13 @@ namespace AlexaController.Alexa.SpeechSynthesisMarkupLanguage
         moderate
     }
 
+    public enum Pitch
+    {
+        low,
+        medium,
+        high
+    }
+
     public enum Rate
     {
         slow,
@@ -95,6 +102,8 @@ namespace AlexaController.Alexa.SpeechSynthesisMarkupLanguage
         public static string SayWithEmotion(string text, Emotion emotion, Intensity intensity) => $"<amazon:emotion name='{emotion}' intensity='{intensity}'>{text}</amazon:emotion>";
 
         public static string SpeechRate(Rate rate, string text)                                => $"<prosody rate='{rate}'>{text}</prosody>";
+
+        public static string InsertVoicePitch(Pitch pitch, string text)                        => $"<prosody pitch='{pitch}'>{text}</prosody>";
 
         public static string ExpressiveInterjection(string text)                               => $"<say-as interpret-as='interjection'>{text}</say-as>";
 

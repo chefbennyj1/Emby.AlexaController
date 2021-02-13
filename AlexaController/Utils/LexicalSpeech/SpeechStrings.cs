@@ -49,16 +49,15 @@ namespace AlexaController.Utils.LexicalSpeech
     {
         public static readonly List<string> HelpStrings = new List<string>()
         {
-            "Welcome to help! Let's get started. Swipe left to continue...",
+            $"{Lexicons.GetRandomSemanticSpeechResponse(SpeechType.GREETINGS)}. Welcome to help! Let's get started. Swipe left to continue...",
             "<b>Accessing Emby accounts based on your voice.</b>",
-            "Open the plugin configuration in emby server.",
             "I have the ability to access specific emby user accounts, and library data based on the sound of your voice. If you have not yet turned on Personalization in your Alexa App, and enabled it for this skill, please do that now.",
             "You can enable Parental Controls, so media will be filtered based on who is speaking. This way, media items can not be accessed by people who shouldn't have access to them.",
-            "To enable this feature, toggle the button for \"Enable parental control using voice recognition\". If this feature is turned off, I will not filter media items, and will show media based on the Emby Administrators account, at all times.",
+            "To enable this feature, open the Emby plugin configuration page, and toggle the button for \"Enable parental control using voice recognition\". If this feature is turned off, I will not filter media items, and will show media based on the Emby Administrators account, at all times.",
             "Select the \"New Authorization Account Link\" button, and follow the instructions to add personalization.",
             "<b>Accessing media Items in rooms</b>",
-            "The Emby plugin will allow you to create rooms, based on devices in your home.",
-            "In the plugin configuration, map each Emby ready device to a specific room. You create the room name that I will understand.",
+            "The Emby plugin will allow you to create \"Rooms\", based on the devices in your home.",
+            "In the plugin configuration, map each Emby ready device to a specific room. You will create the room name that I will understand.",
             "For example: map your Amazon Fire Stick 4K to a room named: \"Family Room\".",
             "Now you can access titles and request them to display per room.",
             "You can use the phrase:",

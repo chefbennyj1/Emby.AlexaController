@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -46,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            ServerQuery.Instance.Log.Info(searchName);
+            ServerController.Instance.Log.Info(searchName);
 
             var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
             {
@@ -66,7 +67,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             
 
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
-
            
 
             if (result is null)
@@ -85,7 +85,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }, Session);
             }
 
-
+            //User should not access this item. Warn the user, and place a notification in the Emby Activity Label
             if (!result.IsParentalAllowed(Session.User))
             {
                 try

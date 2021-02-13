@@ -1,6 +1,6 @@
 ﻿namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Image : Item
+    public class Image : VisualItem
     {
         public object type => nameof(Image);
         public string source                   { get; set; }

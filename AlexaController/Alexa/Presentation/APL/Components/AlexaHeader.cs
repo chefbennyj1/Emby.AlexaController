@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaHeader : Item
+    public class AlexaHeader : VisualItem
     {
         public bool headerBackButton                     { get; set; }
         public string headerTitle                        { get; set; }

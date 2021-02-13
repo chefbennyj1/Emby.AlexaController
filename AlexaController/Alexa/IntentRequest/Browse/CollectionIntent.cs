@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -57,9 +58,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 #pragma warning disable 4014
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
-            ServerQuery.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
+            ServerController.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
-            ServerQuery.Instance.Log.Info(nameof(CollectionIntent) + " normalized request: " + collectionRequest);
+            ServerController.Instance.Log.Info(nameof(CollectionIntent) + " normalized request: " + collectionRequest);
             
             var collection          = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems     = collection.Values.FirstOrDefault();
@@ -113,7 +114,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            ServerQuery.Instance.Log.Info(nameof(CollectionIntent) + "Preparing collection base item: " + collectionBaseItem?.Name);
+            ServerController.Instance.Log.Info(nameof(CollectionIntent) + "Preparing collection base item: " + collectionBaseItem?.Name);
 
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
             var documentTemplateInfo = new RenderDocumentTemplate()

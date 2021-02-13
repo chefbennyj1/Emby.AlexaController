@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -34,7 +35,8 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                     {
                         renderDocumentType = RenderDocumentType.HELP
 
-                    }, Session)
+                    }, Session),
+                    await new RenderAudioBuilder().GetApologeticSpeech()
                 }
             }, Session);
         }

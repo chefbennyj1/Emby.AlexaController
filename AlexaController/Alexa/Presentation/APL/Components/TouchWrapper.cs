@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class TouchWrapper : Item
+    public class TouchWrapper : VisualItem
     {
         public ICommand onPress { get; set; }
         public ICommand onDoublePress { get; set; }

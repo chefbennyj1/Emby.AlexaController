@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Frame : Item
+    public class Frame : VisualItem
     {
         public string backgroundColor { get; set; }
         public string borderRadius    { get; set; }

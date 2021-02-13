@@ -21,7 +21,7 @@ namespace AlexaController.Utils
                 
         public BaseItem QuerySpeechResultItem(string searchName, string[] type)
         {
-            ServerQuery.Instance.Log.Info("Beginning item search");
+            ServerController.Instance.Log.Info("Beginning item search");
 
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {

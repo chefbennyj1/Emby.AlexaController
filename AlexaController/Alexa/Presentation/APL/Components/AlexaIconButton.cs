@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaIconButton : Item
+    public class AlexaIconButton : VisualItem
     {
         public object type => nameof(AlexaIconButton);
         public object primaryAction { get; set; }

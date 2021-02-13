@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using MediaBrowser.Controller.Entities;
 
-namespace AlexaController.Alexa.Presentation
+namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 {
     public enum RenderDocumentType
     {
@@ -17,17 +17,8 @@ namespace AlexaController.Alexa.Presentation
         ROOM_SELECTION_TEMPLATE,
         VERTICAL_TEXT_LIST_TEMPLATE
     }
-
-    public interface IRenderDocumentTemplate
-    {
-        RenderDocumentType renderDocumentType { get; }
-        string HeaderTitle { get; }
-        List<BaseItem> baseItems { get; }
-        string HeadlinePrimaryText { get; }
-        string HeaderAttributionImage { get; }
-    }
-
-    public class RenderDocumentTemplate : IRenderDocumentTemplate
+    
+    public class RenderDocumentTemplate 
     {
         public RenderDocumentType renderDocumentType { get; set; }
         public string HeaderTitle                    { get; set; } = "";

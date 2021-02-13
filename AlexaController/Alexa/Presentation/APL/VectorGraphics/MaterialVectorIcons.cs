@@ -1,4 +1,7 @@
-﻿namespace AlexaController.Alexa.Presentation.APL.VectorGraphics
+﻿using System.Collections.Generic;
+using AlexaController.Alexa.Presentation.APL.Components;
+
+namespace AlexaController.Alexa.Presentation.APL.VectorGraphics
 {
     public class MaterialVectorIcons
     {
@@ -14,4 +17,5 @@
         public static string Carousel        => "M18,6V17H22V6M2,17H6V6H2M7,19H17V4H7V19Z";
         public static string ArrayIcon       => "M8,18H17V5H8M18,5V18H21V5M4,18H7V5H4V18Z";
     }
+
 }

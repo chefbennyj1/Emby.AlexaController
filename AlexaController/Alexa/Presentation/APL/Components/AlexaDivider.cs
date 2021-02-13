@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaDivider : Item
+    public class AlexaDivider : VisualItem
     {
         public object type => nameof(AlexaDivider);
     }
