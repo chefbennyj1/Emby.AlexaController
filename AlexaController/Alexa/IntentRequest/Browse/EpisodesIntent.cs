@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 
@@ -47,39 +47,57 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-                session = Session
-            });
+            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+            //{
+            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+            //    session = Session
+            //});
 
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
             
-            var result = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
+            var results = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
                 Session.NowViewingBaseItem, Session.User);
+
+            RenderAudioTemplate renderAudioTemplateInfo = null;
             
+
             // User requested season/episode data that doesn't exist
-            if (!result.Any())
+            if (!results.Any())
             {
+                renderAudioTemplateInfo = new RenderAudioTemplate()
+                {
+                    speechContent = SpeechContent.NO_SEASON_ITEM_EXIST,
+                    session = Session,
+                    args = new[] {seasonNumber},
+                    audio = new Audio()
+                    {
+                        source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                        filter = new List<IFilter>() { new Volume() { amount = 0.5} }
+                    }
+                };
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
-                    outputSpeech = new OutputSpeech()
-                    {
-                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        {
-                            type = SpeechResponseType.NO_SEASON_ITEM_EXIST, 
-                            session = Session, 
-                            args = new[] {seasonNumber}
-                        }),
+                    //outputSpeech = new OutputSpeech()
+                    //{
+                    //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                    //    {
+                    //        type = SpeechResponseType.NO_SEASON_ITEM_EXIST, 
+                    //        session = Session, 
+                    //        args = new[] {seasonNumber}
+                    //    }),
                         
-                    },
-                    shouldEndSession = null
+                    //},
+                    shouldEndSession = null,
+                    directives = new List<IDirective>()
+                    {
+                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo)
+                    }
                 }, Session);
             }
 
-            var seasonId = result[0].Parent.InternalId;
+            var seasonId = results[0].Parent.InternalId;
             var season = ServerQuery.Instance.GetItemById(seasonId);
 
             if (!(Session.room is null))
@@ -90,10 +108,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch (Exception exception)
                 {
-                    await Task.Run(() =>
-                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
-                                requestId))
-                        .ConfigureAwait(false);
+                    await Task.Run(() => ResponseClient.Instance
+                            .PostProgressiveResponse(exception.Message, apiAccessToken, requestId)).ConfigureAwait(false);
                     await Task.Delay(1200);
                     Session.room = null;
                 }
@@ -101,28 +117,44 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
-                baseItems              = result,
+                baseItems              = results,
                 renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
                 HeaderTitle            = $"Season {seasonNumber}",
                 HeaderAttributionImage = season.Parent.HasImage(ImageType.Logo) ? $"/Items/{season.Parent.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
+            renderAudioTemplateInfo = new RenderAudioTemplate()
+            {
+                speechContent = SpeechContent.BROWSE_ITEM,
+                session = Session,
+                items = new List<BaseItem>() { season },
+                args = new[] {seasonNumber},
+                audio = new Audio()
+                {
+                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                    
+                }
+            };
+
+
             Session.NowViewingBaseItem = season;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
             var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = $"Season { seasonNumber}"
-                },
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = $"Season { seasonNumber}"
+                //},
                 shouldEndSession = null,
                 SpeakUserName = true,
                 directives       = new List<IDirective>()
                 {
-                    renderDocumentDirective
+                    renderDocumentDirective,
+                    renderAudioDirective
                 }
 
             }, Session);

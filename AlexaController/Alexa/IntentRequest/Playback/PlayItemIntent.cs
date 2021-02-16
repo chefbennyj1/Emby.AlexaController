@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -43,14 +45,14 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var intent         = request.intent;
             var slots          = intent.slots;
 
-            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-                session = Session
-            });
+            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+            //{
+            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+            //    session = Session
+            //});
 
 #pragma warning disable 4014
-            ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId).ConfigureAwait(false);
+            ResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId).ConfigureAwait(false);
 #pragma warning restore 4014
 
             BaseItem result = null;
@@ -71,14 +73,26 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
-                    outputSpeech = new OutputSpeech()
+                    directives = new List<IDirective>()
                     {
-                        phrase    = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
                         {
-                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, 
-                            session = Session
+                            speechContent = SpeechContent.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
+                            audio = new Audio()
+                            {
+                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                
+                            }
                         })
                     }
+                    //outputSpeech = new OutputSpeech()
+                    //{
+                    //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    //    {
+                    //        type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
+                    //        session = Session
+                    //    }),
+                    //}
                 }, Session);
             }
             
@@ -95,16 +109,36 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 {
                     shouldEndSession = true,
                     SpeakUserName = true,
-                    outputSpeech = new OutputSpeech()
+                    directives = new List<IDirective>()
                     {
-                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        {
-                            type    = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
-                            session = Session, 
-                            items   = new List<BaseItem>() { result }
-                        }),
-                        sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
+                        await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(
+                            new RenderDocumentTemplate()
+                            {
+                                renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
+                                HeadlinePrimaryText = $"Stop! Rated {result.OfficialRating}"
+
+                            }, Session),
+                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
+                            new RenderAudioTemplate()
+                            {
+                                speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
+                                audio = new Audio()
+                                {
+                                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                    
+                                }
+                            })
                     }
+                    //outputSpeech = new OutputSpeech()
+                    //{
+                    //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                    //    {
+                    //        type    = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
+                    //        session = Session, 
+                    //        items   = new List<BaseItem>() { result }
+                    //    }),
+                    //    sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
+                    //}
                 }, Session);
             }
 
@@ -131,24 +165,38 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 baseItems = new List<BaseItem>() {result}
             };
 
+            var renderAudioTemplateInfo = new RenderAudioTemplate()
+            {
+                speechContent = SpeechContent.PLAY_MEDIA_ITEM,
+                session = Session,
+                items = new List<BaseItem>() { result },
+                audio = new Audio()
+                {
+                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                    
+                }
+            };
+
             var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.PLAY_MEDIA_ITEM, 
-                        session = Session, 
-                        items = new List<BaseItem>() { result }
-                    })
-                },
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                //    {
+                //        type = SpeechResponseType.PLAY_MEDIA_ITEM, 
+                //        session = Session, 
+                //        items = new List<BaseItem>() { result }
+                //    })
+                //},
                 SpeakUserName = true,
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    renderDocumentDirective
+                    renderDocumentDirective,
+                    renderAudioDirective
                 }
 
             }, Session);

@@ -1,5 +1,9 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -32,15 +36,29 @@ namespace AlexaController.Alexa.IntentRequest
                 {
                     shouldEndSession = true,
                     SpeakUserName = true,
-                    outputSpeech = new OutputSpeech()
-                    {
-                        phrase             = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        {
-                            type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, 
-                            session = Session
-                        }),
+                    //outputSpeech = new OutputSpeech()
+                    //{
+                    //    phrase             = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    //    {
+                    //        type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, 
+                    //        session = Session
+                    //    }),
                         
-                    },
+                    //},
+                    directives = new List<IDirective>()
+                    {
+                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
+                            new RenderAudioTemplate()
+                            {
+                                speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR,
+                                session = Session,
+                                audio = new Audio()
+                                {
+                                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                    
+                                }
+                            })
+                    }
                 }, Session);
             }
 
@@ -52,13 +70,27 @@ namespace AlexaController.Alexa.IntentRequest
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
-                        outputSpeech = new OutputSpeech()
+                        //outputSpeech = new OutputSpeech()
+                        //{
+                        //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        //    {
+                        //        type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, 
+                        //        session = Session
+                        //    }),
+                        //}
+                        directives = new List<IDirective>()
                         {
-                            phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
+                            new RenderAudioTemplate()
                             {
-                                type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, 
-                                session = Session
-                            }),
+                                speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_EXISTS,
+                                session = Session,
+                                audio = new Audio()
+                                {
+                                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                    
+                                }
+                            })
                         }
                     }, Session);
                 }
@@ -72,14 +104,29 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 shouldEndSession = true,
                 SpeakUserName = true,
-                outputSpeech = new OutputSpeech()
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                //    {
+                //        type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, 
+                //        session  = Session
+                //    }),
+                //},
+                directives = new List<IDirective>()
                 {
-                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, 
-                        session  = Session
-                    }),
-                },
+                    await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
+                        new RenderAudioTemplate()
+                        {
+                            speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS,
+                            session = Session,
+                            audio = new Audio()
+                            {
+                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                
+                            }
+                        })
+                }
+
             }, Session);
         }
     }

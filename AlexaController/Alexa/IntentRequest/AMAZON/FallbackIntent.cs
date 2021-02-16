@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.LexicalSpeech;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
@@ -24,14 +24,14 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = false,
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.NOT_UNDERSTOOD, 
-                        session = Session
-                    })
-                },
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                //    {
+                //        type = SpeechResponseType.NOT_UNDERSTOOD, 
+                //        session = Session
+                //    })
+                //},
                 
                 directives = new List<IDirective>()
                 {
@@ -39,7 +39,18 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                         .GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
                         {
                             renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
-                        }, Session)
+                        }, Session),
+                    await RenderAudioBuilder.Instance
+                        .GetAudioDirectiveAsync(new RenderAudioTemplate()
+                        {
+                            speechContent = SpeechContent.NOT_UNDERSTOOD,
+                            session = Session,
+                            audio = new Audio()
+                            {
+                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                
+                            }
+                        })
                 }
             }, Session);
         }

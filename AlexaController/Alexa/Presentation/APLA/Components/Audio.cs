@@ -8,6 +8,6 @@ namespace AlexaController.Alexa.Presentation.APLA.Components
         public string duration => "trimToParent";
         public object type => nameof(Audio);
         public string source       { get; set; }
-        public List<Filter> filter { get; set; }
+        public List<IFilter> filter { get; set; }
     }
 }

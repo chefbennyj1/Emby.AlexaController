@@ -26,7 +26,7 @@ namespace AlexaController.Alexa.Presentation.APL
             });
         }
 
-        public static async Task<ICommand> FadeInItem(string componentId, int duration, int? delay = null)
+        public static async Task<ICommand> FadeIn(string componentId, int duration, int? delay = null)
         {
             return await Task.FromResult(new AnimateItem()
             {
@@ -127,6 +127,42 @@ namespace AlexaController.Alexa.Presentation.APL
                             {
                                 from = new List<From>() {new From() {scaleX = 0.9, scaleY = 0.9}},
                                 to = new List<To>() {new To() {scaleX = 1, scaleY = 1}}
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        public static async Task<ICommand> FadeInUp(string componentId, int duration, string distance, int? delay = null)
+        {
+            return await Task.FromResult(new AnimateItem()
+            {
+                componentId = componentId,
+                easing = "ease-in",
+                duration = duration,
+                delay = delay ?? 0,
+                value = new List<IValue>()
+                {
+                    new OpacityValue()
+                    {
+                        @from = 0,
+                        to = 1
+                    },
+                    new TransitionValue()
+                    {
+                        from = new List<From>()
+                        {
+                            new From()
+                            {
+                                translateY = distance
+                            }
+                        },
+                        to = new List<To>()
+                        {
+                            new To()
+                            {
+                                translateY = "0"
                             }
                         }
                     }

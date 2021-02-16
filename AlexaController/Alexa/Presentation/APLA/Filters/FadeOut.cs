@@ -4,9 +4,9 @@ using System.Text;
 
 namespace AlexaController.Alexa.Presentation.APLA.Filters
 {
-    public class FadeOut : Filter
+    public class FadeOut : IFilter
     {
-        public string type => nameof(FadeOut);
+        public object type => nameof(FadeOut);
         public int duration { get; set; }
     }
 }

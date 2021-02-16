@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -36,7 +38,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
 
             RenderDocumentTemplate documentTemplateInfo = null;
-
+            RenderAudioTemplate audioTemplateInfo = null;
             if (session.room is null)
             {
                 documentTemplateInfo = new RenderDocumentTemplate()
@@ -72,25 +74,39 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
             };
 
+            audioTemplateInfo = new RenderAudioTemplate()
+            {
+                speechContent = SpeechContent.PLAY_MEDIA_ITEM,
+                session = session, 
+                items = new List<BaseItem>() { baseItem },
+                audio = new Audio()
+                {
+                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                    
+                }
+            };
+
             var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderAudioDirective = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.PLAY_MEDIA_ITEM, 
-                        session = session, 
-                        items = new List<BaseItem>() { baseItem }
-                    }),
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                //    {
+                //        type = SpeechResponseType.PLAY_MEDIA_ITEM, 
+                //        session = session, 
+                //        items = new List<BaseItem>() { baseItem }
+                //    }),
                    
-                },
+                //},
                 SpeakUserName = true,
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    renderDocumentDirective
+                    renderDocumentDirective,
+                    renderAudioDirective
                 }
 
             }, session);   

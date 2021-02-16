@@ -7,6 +7,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string textAlign { get; set; }
         public string textAlignVertical { get; set; }
         public string fontSize  { get; set; }
+        public string fontWeight { get; set; }
         public string text      { get; set; }
         public string shadowRadius { get; set; }
         public string shadowVerticalOffset { get; set; }

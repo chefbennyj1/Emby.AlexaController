@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -32,6 +34,18 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
             };
 
+            var renderAudioTemplateInfo = new RenderAudioTemplate()
+            {
+                speechContent = SpeechContent.BROWSE_ITEM,
+                session = session,
+                items =  new List<BaseItem>() { baseItem },
+                audio = new Audio()
+                {
+                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                    
+                }
+            };
+
             // Update session data
             session.NowViewingBaseItem = baseItem;
             session.room               = room;
@@ -53,22 +67,24 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             }
 
             var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.BROWSE_ITEM, 
-                        session = session, 
-                        items =  new List<BaseItem>() { baseItem }
-                    }),
-                },
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                //    {
+                //        type = SpeechResponseType.BROWSE_ITEM, 
+                //        session = session, 
+                //        items =  new List<BaseItem>() { baseItem }
+                //    }),
+                //},
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    renderDocumentDirective
+                    renderDocumentDirective,
+                    renderAudioDirective
                 }
 
             }, session);

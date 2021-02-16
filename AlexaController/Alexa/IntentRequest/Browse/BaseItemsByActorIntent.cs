@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.LexicalSpeech;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -46,14 +46,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-                session = Session
-            });
+            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+            //{
+            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+            //    session = Session
+            //});
 
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"{progressiveSpeech}, looking for library items by {(slots.ActorName.slotValue.type == "List" ? " those actors." : " that actor.")}", apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"One moment please... looking for library items by {(slots.ActorName.slotValue.type == "List" ? " those actors." : " that actor.")}", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchNames);
@@ -121,10 +121,23 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             var documentTemplateInfo = new RenderDocumentTemplate()
             {
-                baseItems =  actorCollection ,
+                baseItems          =  actorCollection ,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle = $"Starring {phrase}",
+                HeaderTitle        = $"Starring {phrase}",
                 //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
+            };
+
+            var audioTemplateInfo = new RenderAudioTemplate()
+            {
+                speechPrefix  = SpeechPrefix.COMPLIANCE,
+                speechContent = SpeechContent.BROWSE_ITEMS_BY_ACTOR,
+                args          = new []{ phrase },
+                session       = Session,
+                audio = new Audio()
+                {
+                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                    
+                }
             };
 
             //TODO: Fix session Update (it is only looking at one actor, might not matter)
@@ -133,21 +146,21 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
             var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
-
-           
+            var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = $"Items starring {phrase}",
-                    sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
-                },
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = $"Items starring {phrase}",
+                //    sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
+                //},
                 shouldEndSession = null,
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    renderDocumentDirective
+                    renderDocumentDirective,
+                    renderAudioDirective
                 }
 
             }, Session);

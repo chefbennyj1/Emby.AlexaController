@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -31,7 +32,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
                 shouldEndSession = null,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = SpeechStrings.HelpStrings.ElementAt(helpListIndex)
+                    phrase = RenderAudioBuilder.HelpStrings.ElementAt(helpListIndex)
                 }
 
             }, session);

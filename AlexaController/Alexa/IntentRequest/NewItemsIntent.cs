@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
-using AlexaController.Utils.LexicalSpeech;
 
 namespace AlexaController.Alexa.IntentRequest
 {
@@ -74,48 +74,75 @@ namespace AlexaController.Alexa.IntentRequest
                             HeaderTitle        = type
                         };
 
+                        var renderAudioTemplateInfo = new RenderAudioTemplate()
+                        {
+                            speechContent = SpeechContent.NEW_ITEMS_APL,
+                            session = Session, 
+                            items = results,
+                            args = new []{d.ToLongDateString()},
+                            audio = new Audio()
+                            {
+                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                
+                            }
+                        };
+
                         AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-                        var renderDocumentDirective =
-                            await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+                        var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+                        var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
                         return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
-                            outputSpeech = new OutputSpeech()
-                            {
-                                phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                                {
-                                    type = SpeechResponseType.NEW_ITEMS_APL, 
-                                    session = Session, 
-                                    items = results,
-                                    args = new []{d.ToLongDateString()}
-                                })
-                            },
+                            //outputSpeech = new OutputSpeech()
+                            //{
+                            //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                            //    {
+                            //        type = SpeechResponseType.NEW_ITEMS_APL, 
+                            //        session = Session, 
+                            //        items = results,
+                            //        args = new []{d.ToLongDateString()}
+                            //    })
+                            //},
                             shouldEndSession = null,
                             SpeakUserName = true,
                             directives       = new List<IDirective>()
                             {
-                                renderDocumentDirective
+                                renderDocumentDirective,
+                                renderAudioDirective
                             }
 
                         }, Session);
                     }
                 default: //Voice only
                     {
+                        var renderAudioTemplateInfo = new RenderAudioTemplate()
+                        {
+                            speechContent = SpeechContent.NEW_ITEMS_DISPLAY_NONE,
+                            session = Session, 
+                            items = results,
+                            args = new []{d.ToLongDateString()}
+                        };
+
+                        var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
                         return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
-                            outputSpeech = new OutputSpeech()
-                            {
-                                phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                                {
-                                    type = SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, 
-                                    session = Session, 
-                                    items = results,
-                                    args = new []{d.ToLongDateString()}
-                                })
-                            },
+                            //outputSpeech = new OutputSpeech()
+                            //{
+                            //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                            //    {
+                            //        type = SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, 
+                            //        session = Session, 
+                            //        items = results,
+                            //        args = new []{d.ToLongDateString()}
+                            //    })
+                            //},
                             shouldEndSession = true,
                             SpeakUserName = true,
+                            directives       = new List<IDirective>()
+                            {
+                                renderAudioDirective
+                            }
 
                         }, Session);
                     }

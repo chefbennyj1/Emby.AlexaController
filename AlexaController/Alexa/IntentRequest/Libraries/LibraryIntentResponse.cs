@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -42,14 +44,14 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             var apiAccessToken = context.System.apiAccessToken;
             var requestId = request.requestId;
 
-            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-                session = session
-            });
+            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+            //{
+            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+            //    session = session
+            //});
 
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var result = ServerQuery.Instance.GetItemById(ServerQuery.Instance.GetLibraryId(LibraryName));
@@ -76,23 +78,37 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                 renderDocumentType = RenderDocumentType.BROWSE_LIBRARY_TEMPLATE
             };
 
-            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var audioTemplateInfo = new RenderAudioTemplate()
+            {
+                speechContent = SpeechContent.BROWSE_LIBRARY,
+                session = session,
+                items = new List<BaseItem>() { result },
+                audio = new Audio()
+                {
+                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                    
+                }
+            };
 
+            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderAudioDirective = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.BROWSE_LIBRARY, 
-                        session = session, 
-                        items = new List<BaseItem>() { result }
-                    })
-                },
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                //    {
+                //        type = SpeechResponseType.BROWSE_LIBRARY, 
+                //        session = session, 
+                //        items = new List<BaseItem>() { result }
+                //    })
+                //},
                 shouldEndSession = null,
                 directives       = new List<IDirective>()
                 {
-                    renderDocumentDirective
+                    renderDocumentDirective,
+                    renderAudioDirective
                 }
 
             }, session);

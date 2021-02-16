@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -44,14 +46,27 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
-                    outputSpeech = new OutputSpeech()
+                    directives = new List<IDirective>()
                     {
-                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
                         {
-                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, 
-                            session = Session
+                            speechContent = SpeechContent.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
+                            session = Session,
+                            audio = new Audio()
+                            {
+                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                
+                            }
                         })
-                    },
+                    }
+                    //outputSpeech = new OutputSpeech()
+                    //{
+                    //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                    //    {
+                    //        type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY, 
+                    //        session = Session
+                    //    })
+                    //},
                 }, Session);
             }
 
@@ -59,21 +74,22 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Task.Run(() => ServerController.Instance.PlayMediaItemAsync(Session, nextUpEpisode)).ConfigureAwait(false);
 #pragma warning restore 4014
 
+           
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.PLAY_NEXT_UP_EPISODE, 
-                        session = Session, 
-                        items = new List<BaseItem>() { nextUpEpisode }
-                    }),
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                //    {
+                //        type = SpeechResponseType.PLAY_NEXT_UP_EPISODE, 
+                //        session = Session, 
+                //        items = new List<BaseItem>() { nextUpEpisode }
+                //    }),
                    
-                },
+                //},
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
@@ -82,7 +98,19 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         baseItems          = new List<BaseItem>() { nextUpEpisode },
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
 
-                    }, Session)
+                    }, Session),
+                    await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
+                        new RenderAudioTemplate()
+                        {
+                            speechContent = SpeechContent.PLAY_NEXT_UP_EPISODE, 
+                            session = Session, 
+                            items = new List<BaseItem>() { nextUpEpisode },
+                            audio = new Audio()
+                            {
+                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                
+                            }
+                        })
                 }
             }, Session);
         }

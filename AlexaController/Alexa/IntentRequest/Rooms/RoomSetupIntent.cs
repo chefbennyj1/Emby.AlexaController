@@ -30,14 +30,14 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
 
-            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-                session = Session
-            });
+            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+            //{
+            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
+            //    session = Session
+            //});
 
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var room = Session.room;

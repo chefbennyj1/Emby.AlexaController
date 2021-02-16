@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
@@ -61,9 +62,14 @@ namespace AlexaController
             };
 
             // Remove the directive if the device doesn't handle APL.
-            if (!session.alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE)) 
-                response.directives = null;
-            
+            if (!session.alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE))
+            {
+                if (response.directives.Any(d => d.type == "Alexa.Presentation.APL.RenderDocument"))
+                {
+                    response.directives.RemoveAll(d => d.type == "Alexa.Presentation.APL.RenderDocument");
+                }
+            } 
+
             return await Task.FromResult(JsonSerializer.SerializeToString(new AlexaResponse()
             {
                 version = "1.2",

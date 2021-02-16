@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -69,6 +71,9 @@ namespace AlexaController.Api
 
             if (RenderDocumentBuilder.Instance is null)
                 Activator.CreateInstance<RenderDocumentBuilder>();
+
+            if (RenderAudioBuilder.Instance is null)
+                Activator.CreateInstance<RenderAudioBuilder>();
         }
 
         public async Task<object> Post(AlexaRequest data)
@@ -202,30 +207,43 @@ namespace AlexaController.Api
                     new Response()
                     {
                         shouldEndSession = true,
-                        outputSpeech = new OutputSpeech()
+
+                        //outputSpeech = new OutputSpeech()
+                        //{
+                        //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                        //    {
+                        //        type = SpeechResponseType.PERSON_NOT_RECOGNIZED
+                        //    })
+                        //}, 
+                        SpeakUserName = true,
+                        directives = new List<IDirective>()
                         {
-                            phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                            await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
                             {
-                                type = SpeechResponseType.PERSON_NOT_RECOGNIZED
+                                speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
+                                audio = new Audio()
+                                {
+                                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                    
+                                }
                             })
-                        }, 
-                        SpeakUserName = true
+                        }
                     }, null);
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    sound = "<audio src=\"soundbank://soundlibrary/alarms/beeps_and_bloops/intro_02\"/>",
-                    phrase= await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.ON_LAUNCH, 
-                        session = session
-                    })
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    sound = "<audio src=\"soundbank://soundlibrary/alarms/beeps_and_bloops/intro_02\"/>",
+                //    phrase= await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                //    {
+                //        type = SpeechResponseType.ON_LAUNCH, 
+                //        session = session
+                //    })
                    
-                },
+                //},
                 SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
@@ -234,7 +252,17 @@ namespace AlexaController.Api
                     {
                         HeadlinePrimaryText = "Welcome to Home Theater Emby Controller",
                         renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE
-                    }, session)
+                    }, session),
+                    await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
+                    {
+                        speechContent = SpeechContent.ON_LAUNCH,
+                        session = session,
+                        audio = new Audio()
+                        {
+                            source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                            
+                        }
+                    })
 
                 }
             }, session);

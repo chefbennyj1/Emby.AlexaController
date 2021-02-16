@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
@@ -49,14 +51,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
 
-            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-                session = Session
-            });
-
+            
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse("One Moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
             ServerController.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
@@ -81,15 +78,36 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
-                        outputSpeech = new OutputSpeech()
+                        //outputSpeech = new OutputSpeech()
+                        //{
+                        //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        //    {
+                        //        type    = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
+                        //        session = Session, 
+                        //        items   =  new List<BaseItem>(){ collectionBaseItem }
+                        //    }),
+                        //    sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
+                        directives = new List<IDirective>()
                         {
-                            phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                            {
-                                type    = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
-                                session = Session, 
-                                items   =  new List<BaseItem>(){ collectionBaseItem }
-                            }),
-                            sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
+                            await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(
+                                new RenderDocumentTemplate()
+                                {
+                                    renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
+                                    HeadlinePrimaryText = "Stop!"
+
+                                }, Session),
+                            await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
+                                new RenderAudioTemplate()
+                                {
+                                    speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
+                                    session = Session, 
+                                    items   =  new List<BaseItem>(){ collectionBaseItem },
+                                    audio = new Audio()
+                                    {
+                                        source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                        
+                                    }
+                                })
                         }
                     }, Session);
                 }

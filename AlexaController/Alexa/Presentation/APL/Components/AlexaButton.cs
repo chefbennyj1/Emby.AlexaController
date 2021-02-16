@@ -10,6 +10,5 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string buttonText       { get; set; }
         public string buttonStyle      { get; set; }
         public string fontSize         { get; set; }
-        
     }
 }

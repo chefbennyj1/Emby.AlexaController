@@ -1,8 +1,8 @@
 ﻿namespace AlexaController.Alexa.Presentation.APLA.Filters
 {
-    public class Repeat : Filter
+    public class Repeat : IFilter
     {
-        public string type => nameof(Repeat);
+        public object type => nameof(Repeat);
         public int repeatCount { get; set; }
     }
 }

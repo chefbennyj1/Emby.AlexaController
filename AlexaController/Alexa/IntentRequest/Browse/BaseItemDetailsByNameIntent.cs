@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
-using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
@@ -48,15 +48,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var requestId      = request.requestId;
 
             ServerController.Instance.Log.Info(searchName);
-
-            var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            {
-                type = SpeechResponseType.PROGRESSIVE_RESPONSE,
-                session = Session
-            });
-
+            
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse(progressiveSpeech, apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse("One moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
             
 
@@ -65,23 +59,34 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
             
-
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
            
-
             if (result is null)
             {
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
-                    outputSpeech = new OutputSpeech()
+                    directives = new List<IDirective>()
                     {
-                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
                         {
-                            type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
-                            session = Session
-                        }),
+                            speechContent = SpeechContent.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
+                            session = Session,
+                            audio = new Audio()
+                            {
+                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                                
+                            }
+                        })
                     }
+                    //outputSpeech = new OutputSpeech()
+                    //{
+                    //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    //    {
+                    //        type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
+                    //        session = Session
+                    //    }),
+                    //}
                 }, Session);
             }
 
@@ -102,16 +107,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
-                    outputSpeech = new OutputSpeech()
-                    {
-                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        {
-                            type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED,
-                            session = Session,
-                            items = new List<BaseItem>() { result }
-                        }),
-                        sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
-                    },
+                    //outputSpeech = new OutputSpeech()
+                    //{
+                    //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    //    {
+                    //        type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED,
+                    //        session = Session,
+                    //        items = new List<BaseItem>() { result }
+                    //    }),
+                    //    sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
+                    //},
                     directives = new List<IDirective>()
                     {
                         await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(
@@ -120,7 +125,19 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                 renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                                 HeadlinePrimaryText = $"Stop! Rated {result.OfficialRating}"
 
-                            }, Session)
+                            }, Session),
+                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
+                            new RenderAudioTemplate()
+                            {
+                                speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
+                                session = Session,
+                                items = new List<BaseItem>() { result },
+                                audio = new Audio()
+                                {
+                                    source = "soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02",
+                                    
+                                }
+                            })
                     }
                 }, Session);
             }
@@ -151,32 +168,44 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
                 HeaderAttributionImage = result.HasImage(ImageType.Logo) ? $"/Items/{result.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
-
+            
+            var renderAudioTemplateInfo = new RenderAudioTemplate()
+            {
+                speechContent = SpeechContent.BROWSE_ITEM,
+                session = Session,
+                items = new List<BaseItem> { result },
+                audio = new Audio()
+                {
+                    source = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
+                }
+            };
             //Update Session
             Session.NowViewingBaseItem = result;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
             var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             try
             {
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
-                    outputSpeech = new OutputSpeech()
-                    {
-                        phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        {
-                            type = SpeechResponseType.BROWSE_ITEM,
-                            session = Session,
-                            items = new List<BaseItem> { result }
-                        }),
-                        sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
-                    },
+                    //outputSpeech = new OutputSpeech()
+                    //{
+                    //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
+                    //    {
+                    //        type = SpeechResponseType.BROWSE_ITEM,
+                    //        session = Session,
+                    //        items = new List<BaseItem> { result }
+                    //    }),
+                    //    sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
+                    //},
                     shouldEndSession = null,
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        renderDocumentDirective
+                        renderDocumentDirective,
+                        renderAudioDirective
                     }
 
                 }, Session);

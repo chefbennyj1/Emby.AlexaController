@@ -146,22 +146,14 @@ namespace AlexaController
 
             if (string.IsNullOrEmpty(deviceId))
             {
-                throw new DeviceUnavailableException(await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                {
-                    type = SpeechResponseType.DEVICE_UNAVAILABLE,
-                    args = new[] { alexaSession.room.Name }
-                }));
+                throw new DeviceUnavailableException($"{alexaSession.room.Name} device is currently not available.");
             }
 
             var session = ServerQuery.Instance.GetSession(deviceId);
 
             if (session is null)
             {
-                throw new DeviceUnavailableException(await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                {
-                    type = SpeechResponseType.DEVICE_UNAVAILABLE,
-                    args = new[] { alexaSession.room.Name }
-                }));
+                throw new DeviceUnavailableException($"{alexaSession.room.Name} device is currently not available.");
             }
 
             // ReSharper disable once TooManyChainedReferences

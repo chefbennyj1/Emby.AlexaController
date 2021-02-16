@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APL;
@@ -241,7 +242,8 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         private async Task<IDirective> RenderItemDetailsTemplate(RenderDocumentTemplate template, IAlexaSession session)
         {
             ServerController.Instance.Log.Info("Render Document Started");
-           
+
+            var leftColumnSpacing = "36vw";
 
             var baseItem = template.baseItems[0];
             var type     = baseItem.GetType().Name;
@@ -321,22 +323,50 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 ? $"{Url}/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200"
                 : "";
 
-            layout.Add(new AlexaHeader()
+            if (session.paging.canGoBack)
             {
-                headerTitle            = template.HeaderTitle != "" ? template.HeaderTitle : template.baseItems[0].Name,
-                headerAttributionImage = logo,
-                headerBackButton       = session.paging.canGoBack,
-                headerDivider          = true,
+                layout.Add(new AlexaIconButton()
+                {
+                    vectorSource = MaterialVectorIcons.Left,
+                    buttonSize = "15vh",
+                    position = "absolute",
+                    left = "2vw",
+                    color = "white",
+                    top = "-1vw",
+                    id = "goBack",
+                    primaryAction = new Parallel()
+                    {
+                        commands = new List<ICommand>()
+                        {
+                            await Animations.ScaleInOutOnPress(),
+                            new SendEvent() {arguments = new List<object>() {"goBack"}}
+                        }
+                    }
+                });
+            }
+
+            layout.Add(new Image()
+            {
+                id = "logo",
+                source = logo,
+                width = "12vw",
+                //headerBackButton       = session.paging.canGoBack,
+                position = "absolute",
+                left = "85vw",
+                //headerDivider          = true,
             });
             ServerController.Instance.Log.Info("Render Document has Header");
 
-            //Room - Rating
+            //Name
             layout.Add(new Text()
             {
-                text = $"{(session.room != null ? session.room.Name.ToUpperInvariant() : string.Empty)} | Rated {item.OfficialRating}",
-                style = "textStyleBody",
-                left = "42%",
-                top = "3vh"
+                text       = item.Name,
+                style      = "textStylePrimary",
+                left       = leftColumnSpacing,
+                fontWeight = "100",
+                top        = "15vh",
+                id         = "baseItemName",
+                opacity    = 0
             });
             ServerController.Instance.Log.Info("Render Document has Rating");
 
@@ -345,28 +375,47 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             {
                 // ReSharper disable once TooManyChainedReferences
                 text     = $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}",
-                left     = "42%",
-                top      = "6vh",
+                left     = leftColumnSpacing,
+                style    = "textStyleBody",
+                top      = "15vh",
                 width    = "40vw",
                 height   = "22dp",
                 fontSize = "18dp",
                 opacity  = 0,
-                id       = "genre"
+                id       = "genre",
+            });
+            ServerController.Instance.Log.Info("Render Document has Genres");
+
+            //Rating - Runtime - End time
+            //Runtime span
+            layout.Add(new Text()
+            {
+                // ReSharper disable once TooManyChainedReferences
+                text     = $"{item.ProductionYear} | {item.OfficialRating} | {GetRunTime(type, item)} | {GetEndTime(item)}",
+                left     = leftColumnSpacing,
+                style    = "textStyleBody",
+                top      = "17vh",
+                width    = "40vw",
+                height   = "22dp",
+                fontSize = "18dp",
+                opacity  = 0,
+                id       = "rating",
             });
             ServerController.Instance.Log.Info("Render Document has Genres");
 
             //TagLines
             layout.Add(new Text()
             {
-                text = $"<b>{item.Tagline}</b>",
+                text = $"{item.Tagline}",
                 style = "textStyleBody",
-                left = "42vw",
-                top = "12vh",
+                left = leftColumnSpacing,
+                top = "18vh",
                 height = "10dp",
-                width = "35vw",
+                width    = "40vw",
                 fontSize = "22dp",
                 id = "tag",
-                display = !string.IsNullOrEmpty(item.Tagline) ? "normal" : "none"
+                display = !string.IsNullOrEmpty(item.Tagline) ? "normal" : "none",
+                opacity = 0
             });
             ServerController.Instance.Log.Info("Render Document has Tag lines");
 
@@ -374,59 +423,61 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new VectorGraphic()
             {
                 source = "CheckMark",
-                left = "87vw"
+                left = "87vw",
+                position = "absolute",
+                top = "30vh"
             });
             ServerController.Instance.Log.Info("Render Document has Watch status");
 
-            //Runtime span
-            if (string.Equals(type, "Movie")) { 
-                var runTimeTicks = template.baseItems[0].RunTimeTicks;
-                if (!(runTimeTicks is null))
-                    layout.Add(new Text()
-                    {
-                        text = $"{TimeSpan.FromTicks(runTimeTicks.Value).TotalMinutes.ToString(CultureInfo.InvariantCulture).Split('.')[0]} minutes",
-                        style = "textStyleBody",
-                        left = "82%",
-                        top = "3vh",
-                        width = "15vw",
-                        height = "5%",
-                        fontSize = "18dp",
-                        id = "timespan"
-                    });
-                //End Time
-                layout.Add(new Text()
-                {
-                    text = $"Ends at: {DateTime.Now.AddTicks(template.baseItems[0].GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}",
-                    style = "textStyleBody",
-                    left = "82%",
-                    top = "4vh",
-                    width = "55vw",
-                    height = "5%",
-                    fontSize = "18dp",
-                    id = "endTime"
-                });
-            }
+            
             ServerController.Instance.Log.Info("Render Document has Runtime");
 
             //Overview
             layout.Add(new TouchWrapper()
             {
-                top     = string.Equals(type, "Movie") ? "9vh" : "7vh",
-                left    = "42vw",
-                height  = "25vh",
+                top     = string.Equals(type, "Movie") ? "24vh" : "20vh",
+                left    = leftColumnSpacing,
+                height  = "20vh",
                 opacity = 1,
-                id = baseItem.InternalId.ToString(),
+                id      = baseItem.InternalId.ToString(),
                 onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) }},
-                item = new Text()
+                item    = new Container()
                 {
-                    text = $"{baseItem.Overview}",
-                    style = "textStyleBody",
-                    width = "55vw",
-                    fontSize = "20dp"
+                    items = new List<VisualItem>()
+                    {
+                        new Text()
+                        {
+                            fontSize = "22dp",
+                            text     = "<b>Overview</b>",
+                            style    = "textStyleBody",
+                            width    = "35vw",
+                            id       = "overviewHeader",
+                            opacity  = 0
+                        },
+                        new Text()
+                        {
+                            text     = $"{baseItem.Overview}",
+                            style    = "textStyleBody",
+                            id       = "overview",
+                            width    = "55vw",
+                            fontSize = "20dp",
+                            opacity  = 0
+                        }
+                    }
                 }
             });
-
             ServerController.Instance.Log.Info("Render Document has Overview");
+
+            //Room
+            layout.Add(new Text()
+            {
+                text = $"{(session.room != null ? session.room.Name.ToUpperInvariant() : string.Empty)}",
+                id = "rating",
+                style = "textStyleBody",
+                top = "22vh",
+                left = leftColumnSpacing,
+                opacity = 0
+            });
 
             //Series - Season Count
             if (string.Equals(type, "Series"))
@@ -435,7 +486,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 layout.Add(new Container()
                 {
                     position = "absolute",
-                    left = "42vw",
+                    left = "38vw",
                     top = "78vh",
                     direction = "row",
                     items = new List<VisualItem>()
@@ -472,6 +523,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     }
                 });
             }
+            
 
             //Primary Image
             layout.Add(new Container()
@@ -480,14 +532,13 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 position = "absolute",
                 width = "38%",
                 height = "75vh",
-                left = "3%",
-                top = "20%",
+                top = "15vh",
                 opacity = 1,
                 items = new List<VisualItem>()
                 {
                     new Image()
                     {
-                        source = $"{Url}/Items/{baseItem.InternalId}/Images/primary?maxHeight=508&quality=90",
+                        source = $"{Url}/Items/{baseItem.InternalId}/Images/primary?maxHeight=908&quality=90",
                         scale  = "best-fit",
                         height = "63vh",
                         width  = "100%",
@@ -565,19 +616,31 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         {
                             commands = new List<ICommand>()
                             {
-                                await Animations.ScaleFadeInItem("primaryButton", 800),
-                                await Animations.ScaleFadeInItem("genre", 1000),
-                                //await Animations.FadeInItem("overview", 800),
-                                await Animations.FadeInItem("showing", 2000),
                                 new Parallel()
                                 {
-                                    delay = 2000,
                                     commands = new List<ICommand>()
                                     {
-                                        await Animations.FadeInItem("SeasonCarouselIcon", 500),
+                                        await Animations.FadeIn("primaryButton", 1250),
+                                        await Animations.FadeIn("baseItemName", 1250),
+                                        await Animations.FadeIn("SeasonCarouselIcon", 500),
                                         await Animations.FadeOutItem("SeasonCarouselArrayIcon", 500)
                                     }
-                                }
+                                },
+                                await Animations.FadeIn("genre", 1250),
+                                await Animations.FadeIn("rating", 1250),
+                                await Animations.FadeIn("tag", 50),
+                                new Parallel()
+                                {
+                                    commands = new List<ICommand>()
+                                    {
+                                        await Animations.FadeIn("overviewHeader", 1250),
+                                        await Animations.FadeIn("overview", 1250),
+                                    }
+                                },
+                               
+                               
+                                
+                                
                             }
                         },
                         //session.PlaybackStarted == true ? new Sequential()
@@ -1125,7 +1188,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         {
             var helpItems = new List<VisualItem>();
             
-            SpeechStrings.HelpStrings.ForEach(s => helpItems.Add(new Text()
+            RenderAudioBuilder.HelpStrings.ForEach(s => helpItems.Add(new Text()
             {
                 id                = "helpText",
                 text              = s,
@@ -1454,7 +1517,20 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 }
             });
         }
-        
+
+        private static string GetRunTime(string type, BaseItem baseItem)
+        {
+            if (!string.Equals(type, "Movie")) return string.Empty;
+            var runTimeTicks = baseItem.RunTimeTicks;
+            return !(runTimeTicks is null) ? $"{TimeSpan.FromTicks(runTimeTicks.Value).TotalMinutes.ToString(CultureInfo.InvariantCulture).Split('.')[0]} minutes" : string.Empty;
+        }
+
+        private static string GetEndTime(BaseItem baseItem)
+        {
+            return
+                $"Ends at: {DateTime.Now.AddTicks(baseItem.GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}";
+        }
+
         private static async Task<IEnumerable<ICommand>> GetSequenceItemsHintText(IList<BaseItem> sequenceItems, IAlexaSession session)
         {
             if (session.PlaybackStarted) return new List<Command>();
@@ -1494,6 +1570,8 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         delay = 2500
                     }
                 }));
+
+            
         }
         
     }

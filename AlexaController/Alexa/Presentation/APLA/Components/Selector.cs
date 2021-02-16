@@ -7,6 +7,9 @@ namespace AlexaController.Alexa.Presentation.APLA.Components
         public object type => nameof(Selector);
         public List<AudioItem> items { get; set; }
         public AudioItem item { get; set; }
-        public string strategy => "randomItem";
+        /// <summary>
+        /// normal, randomItem, randomData, randomItemRandomData
+        /// </summary>
+        public string strategy { get; set; } 
     }
 }

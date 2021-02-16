@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
+using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
@@ -34,14 +36,14 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech()
-                {
-                    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    {
-                        type = SpeechResponseType.ROOM_CONTEXT, 
-                        session = session
-                    })
-                },
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
+                //    {
+                //        type = SpeechResponseType.ROOM_CONTEXT, 
+                //        session = session
+                //    })
+                //},
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
@@ -50,7 +52,17 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                         renderDocumentType  = RenderDocumentType.QUESTION_TEMPLATE,
                         HeadlinePrimaryText = "Which room did you want?"
 
-                    }, session)
+                    }, session),
+                    await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
+                    {
+                        speechContent = SpeechContent.ROOM_CONTEXT,
+                        session = session,
+                        audio = new Audio()
+                        {
+                            source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
+                            
+                        }
+                    })
                 }
             }, session);
         }

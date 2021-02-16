@@ -1,13 +1,4 @@
-﻿
-// ReSharper disable TooManyChainedReferences
-// ReSharper disable TooManyDependencies
-// ReSharper disable once UnusedAutoPropertyAccessor.Local
-// ReSharper disable once ExcessiveIndentation
-// ReSharper disable twice ComplexConditionExpression
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable TooManyArguments
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
