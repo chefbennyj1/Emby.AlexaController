@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Session;
-using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;

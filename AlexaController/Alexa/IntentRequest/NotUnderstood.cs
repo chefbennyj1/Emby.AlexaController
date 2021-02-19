@@ -1,14 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
-using AlexaController.Utils.LexicalSpeech;
 
 namespace AlexaController.Alexa.IntentRequest
 {

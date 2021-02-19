@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APL;
@@ -14,7 +13,6 @@ using AlexaController.Alexa.Presentation.APL.UserEvent.Video.End;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Session;
-using AlexaController.Utils.LexicalSpeech;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
@@ -280,6 +278,25 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     }
                 },
                 {
+                    "Audio", new Graphic()
+                    {
+                        height = 25,
+                        width = 25,
+                        viewportHeight = 28,
+                        viewportWidth = 28,
+                        items = new List<Path>()
+                        {
+                            new Path()
+                            {
+                                pathData = MaterialVectorIcons.Audio,
+                                stroke = "none",
+                                strokeWidth = "1px",
+                                fill = "white"
+                            }
+                        }
+                    }
+                },
+                {
                     "Carousel", new Graphic()
                     {
                         height = 35,
@@ -445,14 +462,29 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     items = new List<VisualItem>()
                     {
-                        new Text()
+                        new Container()
                         {
-                            fontSize = "22dp",
-                            text     = "<b>Overview</b>",
-                            style    = "textStyleBody",
-                            width    = "35vw",
-                            id       = "overviewHeader",
-                            opacity  = 0
+                            direction = "row",
+                            items = new List<VisualItem>()
+                            {
+                                new Text()
+                                {
+                                    fontSize = "22dp",
+                                    text     = "<b>Overview</b>",
+                                    style    = "textStyleBody",
+                                    width    = "35vw",
+                                    id       = "overviewHeader",
+                                    opacity  = 0
+                                },
+                                new VectorGraphic()
+                                {
+                                    source = "Audio",
+                                    right = "25vw",
+                                    opacity = 0,
+                                    id = "audioIcon",
+                                    top = "5px"
+                                }
+                            }
                         },
                         new Text()
                         {
@@ -635,12 +667,9 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                     {
                                         await Animations.FadeIn("overviewHeader", 1250),
                                         await Animations.FadeIn("overview", 1250),
+                                        await Animations.FadeIn("audioIcon", 1250),
                                     }
                                 },
-                               
-                               
-                                
-                                
                             }
                         },
                         //session.PlaybackStarted == true ? new Sequential()

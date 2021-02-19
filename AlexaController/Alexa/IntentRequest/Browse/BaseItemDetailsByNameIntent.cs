@@ -60,7 +60,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
             
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
-           
+            
             if (result is null)
             {
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()

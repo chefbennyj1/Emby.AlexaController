@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Model.Extensions;
 
 // ReSharper disable once ExcessiveIndentation
 
@@ -109,7 +110,6 @@ namespace AlexaController.Utils
                     });
                     if (!(resultItem is null))
                     {
-                        
                         return resultItem;
                     }
                 }
@@ -120,100 +120,69 @@ namespace AlexaController.Utils
             {
                 var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0);
                 
+                ServerController.Instance.Log.Info($"Final Search hit: {searchName}");
+
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
                     Recursive = true,
-                    NameStartsWith   = query,
-                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+                    //NameStartsWithOrGreater = query,
+                    User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
-                    BaseItem resultItem = null;
-
-                    Parallel.ForEach(queryResult.Items, (item, state) =>
+                    
+                    foreach(var item in queryResult.Items)
                     {
                         // The user may have used the phrase "part 2", the movie name is "part ii"
                         if (item.Name.ToLower().Replace(" ii", " 2").Equals(searchName))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                           return item;
                         }
 
                         if (item.Name.ToLower().Replace(" iii", " 3").Equals(searchName))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                           return item;
                         }
 
                         if (item.Name.ToLower().Replace(" iv", " 4").Equals(searchName))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                           return item;
                         }
 
                         if (item.Name.ToLower().Replace(" v", " 5").Equals(searchName))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                           return item;
                         }
                         if (item.Name.ToLower().Replace("part ii", "2").Equals(searchName))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                            return item;
                         }
                         if (item.Name.ToLower().Replace("part iii", "3").Equals(searchName))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                            return item;
                         }
 
                         if (item.Name.ToLower().Replace("part iv", "4").Equals(searchName))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                           return item;
                         }
 
                         if (item.Name.ToLower().Replace("part v", "5").Equals(searchName))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                            return item;
                         }
 
-
-
-                        if (item.Name.ToLower().Replace("vol.", string.Empty)
-                            .Equals(searchName.ToLowerInvariant().Replace("volume", string.Empty),
-                                StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
-                        }
+                        
 
                         if (NormalizeQueryString(item.Name).Contains(NormalizeQueryString(searchName)))
                         {
-                            state.Break();
-                            resultItem = item;
-                            //return item;
+                            return item;
                         }
 
-                    });
-
-                    if (!(resultItem is null))
-                    {
-                       
-                        return resultItem;
                     }
+                    
                 }
             }
             
@@ -286,7 +255,7 @@ namespace AlexaController.Utils
 
         private static string NormalizeQueryString(string sample)
         {
-            var result = sample
+            var result = sample.ToLowerInvariant()
                 .Replace("-", string.Empty)
                 .Replace("(", string.Empty)
                 .Replace(")", string.Empty)
@@ -294,8 +263,11 @@ namespace AlexaController.Utils
                 .Replace("and", string.Empty)
                 .Replace(":", string.Empty)
                 .Replace("1", "one")
-                .Replace("...", string.Empty);
-            return result.Replace(" ", string.Empty).ToLower();
+                .Replace("vol.", string.Empty)
+                .Replace("volume", string.Empty)
+                .Replace("...", string.Empty)
+                .Replace("home theater", string.Empty);
+            return result.Replace(" ", string.Empty);
         }
     }
 }
