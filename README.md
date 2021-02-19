@@ -1,5 +1,11 @@
 # Emby.AlexaController
 
+
+https://apl.ninja/BenjaminAnderson/xstJTwn4
+
+https://apl.ninja/BenjaminAnderson/lU8KwtLw
+
+
 <b>Setup</b>
 
 Because this endpoint is hosted inside Emby Server, your server should have an SSL/TLS cert with a reachable domain to send the Alexa skill requests.
