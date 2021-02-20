@@ -2,7 +2,7 @@
 {
     public class AutoPage : ICommand
     {
-        public string type => nameof(AutoPage);
+        public object type => nameof(AutoPage);
         public int count          { get; set; }
         public int duration       { get; set; }
         public string componentId { get; set; }

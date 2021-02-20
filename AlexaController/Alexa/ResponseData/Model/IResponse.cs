@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AlexaController.Alexa.ResponseData.Model.DataSources;
 
 namespace AlexaController.Alexa.ResponseData.Model
 {
@@ -27,5 +28,6 @@ namespace AlexaController.Alexa.ResponseData.Model
         // Progressive Response elements
         public IHeader header               { get; set; }
         public IDirective directive         { get; set; }
+       
     }
 }

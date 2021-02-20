@@ -28,7 +28,6 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
         public static readonly List<string> HelpStrings = new List<string>()
         {
-            "Welcome to help! Let's get started. Swipe left to continue...",
             "<b>Accessing Emby accounts based on your voice.</b>",
             "I have the ability to access specific emby user accounts, and library data based on the sound of your voice. If you have not yet turned on Personalization in your Alexa App, and enabled it for this skill, please do that now.",
             "You can enable Parental Controls, so media will be filtered based on who is speaking. This way, media items can not be accessed by people who shouldn't have access to them.",

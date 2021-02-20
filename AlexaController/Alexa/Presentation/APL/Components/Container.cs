@@ -6,6 +6,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
     {
         public object type => nameof(Container);
         public string alignItems { get; set; }
+        public string justifyContent { get; set; }
         /// <summary>
         /// column (default), row
         /// </summary>

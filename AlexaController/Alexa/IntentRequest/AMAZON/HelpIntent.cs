@@ -24,7 +24,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = "Welcome to help.",
+                    phrase = "Welcome to help. Swipe left to get started",
                 },
                 shouldEndSession = null,
                 SpeakUserName = true,

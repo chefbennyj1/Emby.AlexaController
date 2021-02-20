@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AlexaController.Alexa.Presentation.APL.Commands;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
@@ -32,6 +33,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string content                  { get; set; }
         public List<HandleTick> handleTick     { get; set; }
         public string data                     { get; set; }
+        public List<ICommand> onMount          { get; set; }
     }
     
 }

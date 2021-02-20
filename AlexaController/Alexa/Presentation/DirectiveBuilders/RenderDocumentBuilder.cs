@@ -17,6 +17,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 using Source   = AlexaController.Alexa.Presentation.APL.Components.Source;
+using Text = AlexaController.Alexa.Presentation.APL.Components.Text;
 using Video    = AlexaController.Alexa.Presentation.APL.Components.Video;
 
 // ReSharper disable twice InconsistentNaming
@@ -146,6 +147,23 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             baseItems.ForEach(async i => touchWrapperLayout.Add(await RenderItemPrimaryImageTouchWrapper(session, i, type)));
 
+            ////TESTING DATASOURCE
+
+            //var dataSource = new Dictionary<string, IDataSource>();
+            //dataSource.Add("documentData", new DataSourceObject()
+            //{
+            //    properties = new Properties()
+            //    {
+            //        values = new List<object>()
+            //        {
+            //            "Testing",
+            //            "Testing2"
+            //        }
+            //    }
+            //});
+
+            ////////////////////////
+
             ServerController.Instance.Log.Info($"Render Document has {baseItems.Count} Primary Image Touch Wrappers");
 
             layout.Add(new Container()
@@ -224,12 +242,17 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         }
                     },
                     resources = Resources,
+                    commands = new Dictionary<string, ICommand>()
+                    {
+                        { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() }
+                    },
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>() { "payload" },
                         items = layout
                     }
-                }
+                },
+                //datasources = dataSource
             };
 
             ServerController.Instance.Log.Info("Render Document is creating view");
@@ -256,79 +279,79 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             ServerController.Instance.Log.Info($"Render Document has {layout.Count} video backdrops");
             
-            var graphicsDictionary = new Dictionary<string, Graphic>
+            var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
                 {
-                    "CheckMark", new Graphic()
+                    "CheckMark", new AlexaVectorGraphic()
                     {
                         height = 35,
                         width = 35,
                         viewportHeight = 25,
                         viewportWidth = 25,
-                        items = new List<Path>()
+                        items = new List<IVectorGraphic>()
                         {
-                            new Path()
+                            new VectorPath()
                             {
                                 pathData = MaterialVectorIcons.CheckMark,
                                 stroke = "none",
-                                strokeWidth = "1px",
+                                strokeWidth = 1,
                                 fill = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
                             }
                         }
                     }
                 },
                 {
-                    "Audio", new Graphic()
+                    "Audio", new AlexaVectorGraphic()
                     {
                         height = 25,
                         width = 25,
                         viewportHeight = 28,
                         viewportWidth = 28,
-                        items = new List<Path>()
+                        items = new List<IVectorGraphic>()
                         {
-                            new Path()
+                            new VectorPath()
                             {
                                 pathData = MaterialVectorIcons.Audio,
                                 stroke = "none",
-                                strokeWidth = "1px",
+                                strokeWidth = 1,
                                 fill = "white"
                             }
                         }
                     }
                 },
                 {
-                    "Carousel", new Graphic()
+                    "Carousel", new AlexaVectorGraphic()
                     {
                         height = 35,
                         width = 35,
                         viewportHeight = 25,
                         viewportWidth = 25,
-                        items = new List<Path>()
+                        items = new List<IVectorGraphic>()
                         {
-                            new Path()
+                            new VectorPath()
                             {
                                 pathData =  MaterialVectorIcons.Carousel,
                                 stroke = "none",
-                                strokeWidth = "1px",
+                                strokeWidth = 1,
                                 fill = "rgba(255,250,0,1)" 
                             }
                         }
                     }
                 },
                 {
-                    "ArrayIcon", new Graphic()
+                    "ArrayIcon", new AlexaVectorGraphic()
                     {
                         height = 35,
                         width = 35,
                         viewportHeight = 25,
                         viewportWidth = 25,
-                        items = new List<Path>()
+                        items = new List<IVectorGraphic>()
                         {
-                            new Path()
+                            new VectorPath()
                             {
                                 pathData =  MaterialVectorIcons.ArrayIcon,
                                 stroke = "none",
-                                strokeWidth = "1px",
+                                strokeWidth = 1,
                                 fill = "rgba(255,250,0,1)" 
                             }
                         }
@@ -355,7 +378,10 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     {
                         commands = new List<ICommand>()
                         {
-                            await Animations.ScaleInOutOnPress(),
+                           new Command()
+                           {
+                               type = nameof(Animations.ScaleInOutOnPress)
+                           },
                             new SendEvent() {arguments = new List<object>() {"goBack"}}
                         }
                     }
@@ -642,6 +668,10 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     settings = new Settings() { idleTimeout = 120000 },
                     import   = Imports,
                     graphics = graphicsDictionary,
+                    commands = new Dictionary<string, ICommand>()
+                    {
+                        { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() }
+                    },
                     onMount = new List<ICommand>()
                     {
                         new Sequential()
@@ -739,20 +769,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                 items  = layout,
                             }
                         }
-                    },
-                    //handleTick = new List<HandleTick>()
-                    //{
-                    //    new HandleTick() {
-                    //        minimumDelay = 1000,
-                    //        commands = new List<ICommand>()
-                    //        {
-                    //            new SendEvent()
-                    //            {
-                    //                arguments = new List<object>() { nameof(PlaybackProgressValueUpdate), token}
-                    //            }
-                    //        }
-                    //    }
-                    //}
+                    }
                 }
             };
             ServerController.Instance.Log.Info("Render Document is creating view");
@@ -761,7 +778,6 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         }
 
         
-
         private async Task<IDirective> RenderVerticalTextListTemplate(RenderDocumentTemplate template, IAlexaSession session)
         {
             var layout          = new List<VisualItem>();
@@ -1216,15 +1232,97 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         private async Task<IDirective> RenderHelpTemplate()
         {
             var helpItems = new List<VisualItem>();
-            
-            RenderAudioBuilder.HelpStrings.ForEach(s => helpItems.Add(new Text()
+
+            var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
-                id                = "helpText",
-                text              = s,
-                textAlign         = "center",
-                textAlignVertical = "center",
-                paddingRight      = "20dp",
-                paddingLeft       = "20dp"
+                {
+                    "Emby", new AlexaVectorGraphic()
+                    {
+                        height = 235,
+                        width = 235,
+                        viewportHeight = 25,
+                        viewportWidth = 25,
+                        items = new List<IVectorGraphic>()
+                        {
+                            new VectorPath()
+                            {
+                                pathData = MaterialVectorIcons.EmbyIcon,
+                                stroke = "rgba(81,201,39)",
+                                strokeWidth = 0,
+                                fill = "rgb(81,201,39)"
+                            }
+                        }
+                    }
+                },
+                {
+                    "Line", new AlexaVectorGraphic()
+                    {
+                        height = 55,
+                        width = 500,
+                        viewportWidth = 50,
+                        viewportHeight = 50,
+                        items = new List<IVectorGraphic>()
+                        {
+                            new VectorPath()
+                            {
+                                pathData = "M0 0 l1120 0",
+                                stroke = "rgba(255,255,255)",
+                                strokeWidth = 1
+                            }
+                        }
+                    }
+                }
+            };
+            
+            helpItems.Add(new Container()
+            {
+                justifyContent = "center",
+                alignItems = "center",
+                direction = "column",
+                items = new List<VisualItem>()
+                {
+                    new VectorGraphic()
+                    {
+                        source = "Emby",
+                        id = "embyLogo",
+                        onMount = new List<ICommand>()
+                        {
+                            Animations.FadeIn("embyLogo", 1200).Result
+                        }
+                    },
+                    new Text()
+                    {
+                       text       = "emby",
+                       fontSize   = "100",
+                       fontFamily = "Roboto",
+                       fontWeight = "300",
+                       id         = "embyText",
+                       top        = "-4vh"
+                    }
+                }
+            });
+
+            RenderAudioBuilder.HelpStrings.ForEach(s => helpItems.Add(new Container()
+            {
+                justifyContent = "center",
+                alignItems = "center",
+                direction = "column",
+                items = new List<VisualItem>()
+                {
+                    new VectorGraphic()
+                    {
+                        source = "Line",
+                    },
+                    new Text()
+                    {
+                        id                = "helpText",
+                        text              = s,
+                        textAlign         = "center",
+                        textAlignVertical = "center",
+                        paddingRight      = "20dp",
+                        paddingLeft       = "20dp"
+                    }
+                }
             }));
 
             var view = new Directive()
@@ -1233,9 +1331,10 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 token = "Help",
                 document = new Document()
                 {
-                    theme = "light",
+                    theme = "dark",
                     import = Imports,
                     resources = Resources,
+                    graphics = graphicsDictionary,
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>()
@@ -1256,14 +1355,15 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                         {
                                             new Source()
                                             {
-                                                repeatCount = 15,
+                                                repeatCount = -1,
                                                 url         = $"{Url}/MovingFloor"
                                             }
                                         },
                                         backgroundScale = "best-fill",
                                         videoAudioTrack = "none",
                                         videoAutoPlay   = true,
-                                        overlayGradient = true
+                                        overlayGradient = true,
+                                        colorOverlay = true
                                     },
                                     new Pager()
                                     {
@@ -1336,7 +1436,11 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     commands = new List<ICommand>()
                     {
-                        await Animations.ScaleInOutOnPress(),
+                        //await Animations.ScaleInOutOnPress(),
+                        new Command()
+                        {
+                            type = nameof(Animations.ScaleInOutOnPress)
+                        },
                         new SendEvent()
                         {
                             arguments = IsMovie || IsTrailer ? new List<object>() { nameof(UserEventShowBaseItemDetailsTemplate) }
@@ -1432,7 +1536,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             if (config.Rooms is null) return roomButtons;
 
-            System.Threading.Tasks.Parallel.ForEach(config.Rooms, async room =>
+            System.Threading.Tasks.Parallel.ForEach(config.Rooms, room =>
             {
                 var disabled = true;
 

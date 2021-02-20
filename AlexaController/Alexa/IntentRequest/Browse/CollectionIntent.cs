@@ -75,15 +75,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
-                        //outputSpeech = new OutputSpeech()
-                        //{
-                        //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        //    {
-                        //        type    = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
-                        //        session = Session, 
-                        //        items   =  new List<BaseItem>(){ collectionBaseItem }
-                        //    }),
-                        //    sound  = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                         directives = new List<IDirective>()
                         {
                             await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(
@@ -102,7 +93,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                     audio = new Audio()
                                     {
                                         source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                        
                                     }
                                 })
                         }

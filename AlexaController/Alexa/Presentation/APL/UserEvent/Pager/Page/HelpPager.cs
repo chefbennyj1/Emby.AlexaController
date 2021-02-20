@@ -23,7 +23,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
             var request       = AlexaRequest.request;
             var arguments     = request.arguments;
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
-            var helpListIndex = Convert.ToInt32(arguments[2]);
+            var helpListIndex = Convert.ToInt32(arguments[2]) -1;
             session.person = null;
             ServerController.Instance.Log.Info("ALEXA HELP PAGES " + helpListIndex);
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
                 shouldEndSession = null,
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = RenderAudioBuilder.HelpStrings.ElementAt(helpListIndex)
+                    phrase = helpListIndex > 0 ? RenderAudioBuilder.HelpStrings.ElementAt(helpListIndex) : ""
                 }
 
             }, session);

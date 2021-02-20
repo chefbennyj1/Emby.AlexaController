@@ -13,7 +13,6 @@ namespace AlexaController
     { 
         public string version                                              { get; set; }
         public IResponse response                                          { get; set; }
-        public string userAgent                                            { get; set; }
     }
 
     public interface IResponseClient
