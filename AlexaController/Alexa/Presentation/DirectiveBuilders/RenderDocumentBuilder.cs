@@ -12,6 +12,7 @@ using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.UserEvent.Video.End;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Alexa.ResponseData.Model;
+using AlexaController.Alexa.ResponseData.Model.DataSources;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
@@ -139,32 +140,31 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             ServerController.Instance.Log.Info("Render Document Started");
 
             var layout             = new List<IItem>();
-            var touchWrapperLayout = new List<VisualItem>();
             var baseItems          = template.baseItems;
             var type               = baseItems[0].GetType().Name;
 
             ServerController.Instance.Log.Info($"Render Document is RenderItemListSequenceTemplate for {type}");
 
-            baseItems.ForEach(async i => touchWrapperLayout.Add(await RenderItemPrimaryImageTouchWrapper(session, i, type)));
+            var dataSource = new Dictionary<string, IDataSource>();
+            var dataSourceItems = new List<Item>();
+            baseItems.ForEach(i => dataSourceItems.Add(new Item()
+            {
+                source       = GetImageUrl(i), 
+                id           = i.InternalId,
+                name         = i.Name,
+                index        = type == "Episode" ? $"Episode {i.IndexNumber}" : string.Empty,
+                premiereDate = i.PremiereDate?.ToString("D")
+            }));
 
-            ////TESTING DATASOURCE
+            dataSource.Add("templateData", new DataSourceObject()
+            {
+                properties = new Properties()
+                {
+                    items = dataSourceItems
+                }
+            });
 
-            //var dataSource = new Dictionary<string, IDataSource>();
-            //dataSource.Add("documentData", new DataSourceObject()
-            //{
-            //    properties = new Properties()
-            //    {
-            //        values = new List<object>()
-            //        {
-            //            "Testing",
-            //            "Testing2"
-            //        }
-            //    }
-            //});
-
-            ////////////////////////
-
-            ServerController.Instance.Log.Info($"Render Document has {baseItems.Count} Primary Image Touch Wrappers");
+            ServerController.Instance.Log.Info($"Render Document has Data Source");
 
             layout.Add(new Container()
             {
@@ -187,7 +187,38 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         top                    = "4vh",
                         left                   = "5vw",
                         scrollDirection        = "horizontal",
-                        items                  = touchWrapperLayout
+                        data                   = "${payload.templateData.properties.items}",
+                        items = new List<VisualItem>()
+                        {
+                            new TouchWrapper()
+                            {
+                               id = "${data.id}",
+                               onPress = new Parallel()
+                               {
+                                   commands = new List<ICommand>()
+                                   {
+                                       //await Animations.ScaleInOutOnPress(),
+                                       new Command()
+                                       {
+                                           type = nameof(Animations.ScaleInOutOnPress)
+                                       },
+                                       new SendEvent()
+                                       {
+                                           arguments = type.Equals("Movie") || type.Equals("Trailer") 
+                                               ? new List<object>() { nameof(UserEventShowBaseItemDetailsTemplate) }
+                                               : type.Equals("Episode") 
+                                                   ? new List<object>() { nameof(UserEventPlaybackStart), session.room != null 
+                                                       ? session.room.Name : ""}
+                                               : new List<object>() { nameof(UserEventShowItemListSequenceTemplate) }
+                                       }
+                                   }
+                               },
+                               items = new List<VisualItem>()
+                               {
+                                   type == "Episode" ? await RenderEpisodePrimaryImageContainer() : await RenderMoviePrimaryImageContainer()
+                               }
+                            }
+                        }
                     },
                     new AlexaFooter()
                     {
@@ -199,19 +230,19 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 }
             });
 
-            ServerController.Instance.Log.Info("Render Document has Touch Wrapper Container");
+            ServerController.Instance.Log.Info("Render Document has Item Touch Wrapper Containers");
 
             var sequenceItemsHintText = await GetSequenceItemsHintText(template.baseItems, session);
 
             ServerController.Instance.Log.Info("Render Document has Sequence Item Hint Texts");
 
-            var scaleFadeInSequenceItems = new List<ICommand>();
-            for (var i = 0; i < baseItems.Count; i++)
-            {
-                await semaphore.WaitAsync();
-                scaleFadeInSequenceItems.Add(await Animations.ScaleFadeInItem(baseItems[i].InternalId.ToString(), 250, i*100));
-                semaphore.Release();
-            }
+            //var scaleFadeInSequenceItems = new List<ICommand>();
+            //for (var i = 0; i < baseItems.Count; i++)
+            //{
+            //    await semaphore.WaitAsync();
+            //    scaleFadeInSequenceItems.Add(await Animations.ScaleFadeInItem(baseItems[i].InternalId.ToString(), 250, i*100));
+            //    semaphore.Release();
+            //}
 
             ServerController.Instance.Log.Info("Render Document has primary image animations");
 
@@ -229,10 +260,10 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         {
                             commands = new List<ICommand>()
                             {
-                                new Parallel()
-                                {
-                                    commands = scaleFadeInSequenceItems
-                                },
+                                //new Parallel()
+                                //{
+                                //    commands = scaleFadeInSequenceItems
+                                //},
                                 new Sequential()
                                 {
                                     commands    = sequenceItemsHintText.ToList(),
@@ -252,7 +283,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         items = layout
                     }
                 },
-                //datasources = dataSource
+                datasources = dataSource
             };
 
             ServerController.Instance.Log.Info("Render Document is creating view");
@@ -1421,43 +1452,10 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 }
             });
         }
+        
+        
 
-        private static async Task<TouchWrapper> RenderItemPrimaryImageTouchWrapper(IAlexaSession session, BaseItem item, string type)
-        {
-            var IsMovie    = type.Equals("Movie");
-            var IsTrailer  = type.Equals("Trailer");
-            var IsEpisode  = type.Equals("Episode");
-
-            return await Task.FromResult(new TouchWrapper()
-            {
-                id = item.InternalId.ToString(),
-                opacity = 1,
-                onPress = new Parallel()
-                {
-                    commands = new List<ICommand>()
-                    {
-                        //await Animations.ScaleInOutOnPress(),
-                        new Command()
-                        {
-                            type = nameof(Animations.ScaleInOutOnPress)
-                        },
-                        new SendEvent()
-                        {
-                            arguments = IsMovie || IsTrailer ? new List<object>() { nameof(UserEventShowBaseItemDetailsTemplate) }
-                                : IsEpisode ? new List<object>() { nameof(UserEventPlaybackStart), session.room != null ? session.room.Name : ""}
-                                : new List<object>() { nameof(UserEventShowItemListSequenceTemplate) }
-                        }
-                    }
-                },
-                items = new List<VisualItem>()
-                {
-                    type == "Episode" ? await RenderEpisodePrimaryImageContainer(item) : await RenderMoviePrimaryImageContainer(item)
-                }
-                    
-            });
-        }
-
-        private static async Task<Container> RenderMoviePrimaryImageContainer(BaseItem item)
+        private static async Task<Container> RenderMoviePrimaryImageContainer()
         {
             return await Task.FromResult(new Container()
             {
@@ -1465,7 +1463,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     new Image()
                     {
-                        source       = $"{Url}/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;",
+                        source       = "${data.source}",
                         width        = "30vw",
                         height       = "62vh",
                         paddingRight = "12px",
@@ -1474,23 +1472,8 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             });
         }
 
-        private static async Task<Container> RenderEpisodePrimaryImageContainer(BaseItem item)
+        private static async Task<Container> RenderEpisodePrimaryImageContainer()
         {
-            var primaryId = 0L;
-            var imageType = string.Empty;	
-            switch (item.HasImage(ImageType.Primary))
-            {
-                case true:
-                    primaryId = item.InternalId;
-                    imageType = "primary";
-                    break;
-
-                case false:
-                    primaryId = item.Parent.Parent.InternalId;
-                    imageType = "backdrop/0";
-                    break;
-            } 
-
             return await Task.FromResult(new Container()
             {
                 height = "70vh",
@@ -1499,28 +1482,28 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     new Image()
                     {
-                        source       = $"{Url}/Items/{primaryId}/Images/{imageType}?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;",
+                        source       = "${data.source}",
                         width        = "30vw",
                         height       = "62vh",
                         paddingRight = "12px",
                     },
                     new Text()
                     {
-                        text         = $"{item.Name}",
+                        text         = "${data.name}",
                         style        = "textStyleBody",
                         top          = "-15vh",
                         fontSize     = "20dp"
                     },
                     new Text()
                     {
-                        text         = $"Episode {item.IndexNumber}",
+                        text         = "${data.index}",
                         style        = "textStyleBody",
                         top          = "-15vh",
                         fontSize     = "20dp"
                     },
                     new Text()
                     {
-                        text = item.PremiereDate?.ToString("D"),
+                        text = "${data.premiereDate}",
                         style        = "textStyleBody",
                         top          = "-15vh",
                         fontSize     = "15dp"
@@ -1662,6 +1645,22 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         {
             return
                 $"Ends at: {DateTime.Now.AddTicks(baseItem.GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}";
+        }
+
+        private static string GetImageUrl(BaseItem item)
+        {
+            if (item.GetType().Name != "Episode")
+            {
+                return $"{Url}/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;";
+            }
+
+            switch (item.HasImage(ImageType.Primary))
+            {
+                case true  : return $"{Url}/Items/{ item.InternalId }/Images/primary?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
+                case false : return $"{Url}/Items/{ item.InternalId }/Images/backdrop/0?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
+            }
+
+            return string.Empty;
         }
 
         private static async Task<IEnumerable<ICommand>> GetSequenceItemsHintText(IList<BaseItem> sequenceItems, IAlexaSession session)

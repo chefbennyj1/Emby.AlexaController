@@ -17,7 +17,16 @@ namespace AlexaController.Alexa.ResponseData.Model.DataSources
 
     public class Properties
     {
-        public object value { get; set; }
-        public List<object> values { get; set; }
+        public Item item { get; set; }
+        public List<Item> items { get; set; }
+    }
+
+    public class Item
+    {
+        public string source { get; set; }
+        public long id { get; set; }
+        public string name { get; set; }
+        public string index { get; set; }
+        public string premiereDate { get; set; }
     }
 }
