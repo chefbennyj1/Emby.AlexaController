@@ -13,7 +13,6 @@ using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.TV;
 using MediaBrowser.Model.Entities;
-using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Querying;
 using User = MediaBrowser.Controller.Entities.User;
 
@@ -255,25 +254,40 @@ namespace AlexaController
                 $"Ends at: {DateTime.Now.AddTicks(baseItem.GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}";
         }
 
-        public async Task<string> GetPrimaryImageUrl(BaseItem item)
+        public string GetPrimaryImageUrl(BaseItem item)
         {
-            var url = await GetLocalApiUrlAsync();
+            
             if (item.GetType().Name != "Episode")
             {
-                return $"{url}/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;";
+                return $"/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;";
             }
 
             return item.HasImage(ImageType.Primary) 
-                ? $"{url}/Items/{ item.InternalId }/Images/primary?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;" 
-                : $"{url}/Items/{ item.InternalId }/Images/backdrop/0?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
+                ? $"/Items/{ item.InternalId }/Images/primary?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;" 
+                : $"/Items/{ item.InternalId }/Images/backdrop/0?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
         }
 
-        public async Task<string> GetLogoUrl(BaseItem item)
+        public string GetVideoOverlay()
         {
-            var url = await GetLocalApiUrlAsync();
+            return "/EmptyPng?quality=90";
+        }
+
+        public string GetBackdropImageUrl(BaseItem item)
+        {
+            var internalId = item.InternalId;
+            return $"/Items/{internalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
+        }
+
+        public string GetLogoUrl(BaseItem item)
+        {
             return item.HasImage(ImageType.Logo)
-                ? $"{url}/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200"
-                : "";
+                ? $"/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
+        }
+
+        public string GetVideoBackdropUrl(BaseItem item)
+        {
+            var videoBackdropIds = item.ThemeVideoIds;
+            return videoBackdropIds.Length > 0 ? $"/videos/{GetItemById(videoBackdropIds[0]).InternalId}/stream.mp4" : string.Empty;
         }
 
         public void Dispose()

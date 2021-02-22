@@ -6,7 +6,6 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
 using AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page;
 using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
-using AlexaController.Alexa.Presentation.APL.UserEvent.Video.End;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Alexa.Presentation.DataSource;
 using AlexaController.Alexa.ResponseData.Model;
@@ -30,16 +29,11 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
     public class RenderDocumentBuilder 
     {
         public static RenderDocumentBuilder Instance { get; private set; }
-       // private static string LocalApiUrl            { get; set; }
-      
+     
         public RenderDocumentBuilder()
         {
             Instance = this;
         }
-
-        //private static string Url => $"{LocalApiUrl}/emby";
-
-        //private readonly SemaphoreSlim semaphore = new SemaphoreSlim(2);
 
         private readonly List<Import> Imports = new List<Import>()
         {
@@ -112,8 +106,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         
         public async Task<IDirective> GetRenderDocumentDirectiveAsync(RenderDocumentTemplate template, IAlexaSession session)
         {
-            //LocalApiUrl = await ServerQuery.Instance.GetLocalApiUrlAsync();
-
+           
             switch (template.renderDocumentType)
             {
                 case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return await RenderBrowseLibraryTemplate(template, session);
@@ -279,8 +272,59 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             const string token = "mediaItemDetails";
 
             ServerController.Instance.Log.Info($"Render Document is {token} for {item.Name}");
-            
-            (await RenderComponent_VideoBackdrop(item, token)).ForEach(i => layout.Add(i));
+
+            layout.Add(new Video()
+            {
+                source = new List<Source>()
+                {
+                    new Source()
+                    {
+                        url = "${data.url}${data.item.videoBackdropSource}",
+                        repeatCount = 0,
+                    }
+                },
+                scale      = "best-fill",
+                width      = "100vw",
+                height     = "100vh",
+                position   = "absolute",
+                autoplay   = true,
+                audioTrack = "none",
+                id         = "${data.item.id}",
+                onEnd      = new List<ICommand>()
+                {
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "source",
+                        value       = "${data.url}${data.item.backdropImageSource}"
+                    },
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "opacity",
+                        value       = 1
+                    },
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "overlayColor",
+                        value       = "rgba(0,0,0,0.55)"
+                    }
+                }
+            });
+            layout.Add(new Image()
+            {
+                overlayColor = "rgba(0,0,0,1)",
+                scale        = "best-fill",
+                width        = "100vw",
+                height       = "100vh",
+                position     = "absolute",
+                source       = "${data.url}${data.item.videoOverlaySource}",
+                opacity      = 0.65,
+                id           = "backdropOverlay"
+            });
+
+            //(await RenderComponent_VideoBackdrop(item, token)).ForEach(i => layout.Add(i));
 
             ServerController.Instance.Log.Info($"Render Document has {layout.Count} video backdrops");
             
@@ -392,7 +436,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Image()
             {
                 id       = "logo",
-                source   = "${data.logoImageSource}", 
+                source   = "${data.url}${data.item.logoImageSource}", 
                 width    = "12vw",
                 position = "absolute",
                 left     = "85vw",
@@ -402,7 +446,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             //Name
             layout.Add(new Text()
             {
-                text       = "${data.name}", 
+                text       = "${data.item.name}", 
                 style      = "textStylePrimary",
                 left       = leftColumnSpacing,
                 fontWeight = "100",
@@ -416,7 +460,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Text()
             {
                 // ReSharper disable once TooManyChainedReferences
-                text     = "${data.genres}", 
+                text     = "${data.item.genres}", 
                 left     = leftColumnSpacing,
                 style    = "textStyleBody",
                 top      = "15vh",
@@ -433,7 +477,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Text()
             {
                 // ReSharper disable once TooManyChainedReferences
-                text     = "${data.premiereDate} | ${data.officialRating} | ${data.runtimeMinutes} | ${data.endTime}",  
+                text     = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",  
                 left     = leftColumnSpacing,
                 style    = "textStyleBody",
                 top      = "17vh",
@@ -448,7 +492,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             //TagLines
             layout.Add(new Text()
             {
-                text     = "${data.tagLine}", 
+                text     = "${data.item.tagLine}", 
                 style    = "textStyleBody",
                 left     = leftColumnSpacing,
                 top      = "18vh",
@@ -481,7 +525,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 left    = leftColumnSpacing,
                 height  = "20vh",
                 opacity = 1,
-                id      = "${data.id}",//baseItem.InternalId.ToString(),
+                id      = "${data.item.id}",//baseItem.InternalId.ToString(),
                 onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) }},
                 item    = new Container()
                 {
@@ -513,7 +557,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         },
                         new Text()
                         {
-                            text     = "${data.overview}", 
+                            text     = "${data.item.overview}", 
                             style    = "textStyleBody",
                             id       = "overview",
                             width    = "55vw",
@@ -595,7 +639,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     new Image()
                     {
-                        source = "${data.primaryImageSource}",
+                        source = "${data.url}${data.item.primaryImageSource}",
                         scale  = "best-fit",
                         height = "63vh",
                         width  = "100%",
@@ -721,7 +765,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                 bind = new DataBind()
                                 {
                                     name = "data",
-                                    value = "${payload.templateData.properties.item}"
+                                    value = "${payload.templateData.properties}"
                                 },
                                 width  = "100vw",
                                 height = "100vh",
@@ -1395,7 +1439,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         {
                             new Image()
                             {
-                                source       = "${data.primaryImageSource}",
+                                source       = "${payload.templateData.properties.url}.${data.primaryImageSource}",
                                 width        = "30vw",
                                 height       = "62vh",
                                 paddingRight = "12px",
@@ -1430,7 +1474,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         {
                             new Image()
                             {
-                                source       = "${data.primaryImageSource}",
+                                source       = "${payload.templateData.properties.url}${data.primaryImageSource}",
                                 width        = "30vw",
                                 height       = "62vh",
                                 paddingRight = "12px",
@@ -1515,7 +1559,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         {
                             new Source()
                             {
-                                url         = $"{videoBackdropUrl}",
+                                url         = "${data.videoBackdropSource}",
                                 repeatCount = 0,
                             }
                         },
@@ -1532,7 +1576,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             {
                                 componentId = "backdropOverlay",
                                 property    = "source",
-                                value       = backdropImageUrl
+                                value       = "${data.backdropImageSource}"
                             },
                             new SetValue()
                             {
@@ -1583,10 +1627,10 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             var dataSource      = new Dictionary<string, IDataSource>();
             var dataSourceItems = new List<Item>();
             var type            = sequenceItems[0].GetType().Name;
-            sequenceItems.ForEach(async i => dataSourceItems.Add(new Item()
+            sequenceItems.ForEach(i => dataSourceItems.Add(new Item()
             {
                 type               = type,
-                primaryImageSource = await ServerQuery.Instance.GetPrimaryImageUrl(i), 
+                primaryImageSource = ServerQuery.Instance.GetPrimaryImageUrl(i), 
                 id                 = i.InternalId,
                 name               = i.Name,
                 index              = type == "Episode" ? $"Episode {i.IndexNumber}" : string.Empty,
@@ -1597,6 +1641,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             {
                 properties = new Properties()
                 {
+                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
                     items = dataSourceItems
                 }
             });
@@ -1610,23 +1655,27 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             // ReSharper disable once ComplexConditionExpression
             var dataSourceItem = new Item()
             {
-                type           = item.GetType().Name,
-                primaryImageSource         = await ServerQuery.Instance.GetPrimaryImageUrl(item), 
-                id             = item.InternalId,
-                name           = item.Name,
-                premiereDate   = item.ProductionYear.ToString(),
-                officialRating = item.OfficialRating,
-                tagLine        = item.Tagline,
-                runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
-                endTime        = ServerQuery.Instance.GetEndTime(item),
-                genres         = $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}",
-                logoImageSource        = await ServerQuery.Instance.GetLogoUrl(item),
-                overview       = item.Overview
+                type                = item.GetType().Name,
+                primaryImageSource  = ServerQuery.Instance.GetPrimaryImageUrl(item), 
+                id                  = item.InternalId,
+                name                = item.Name,
+                premiereDate        = item.ProductionYear.ToString(),
+                officialRating      = item.OfficialRating,
+                tagLine             = item.Tagline,
+                runtimeMinutes      = ServerQuery.Instance.GetRunTime(item),
+                endTime             = ServerQuery.Instance.GetEndTime(item),
+                genres              = $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}",
+                logoImageSource     = ServerQuery.Instance.GetLogoUrl(item),
+                overview            = item.Overview,
+                videoBackdropSource = ServerQuery.Instance.GetVideoBackdropUrl(item),
+                backdropImageSource = ServerQuery.Instance.GetBackdropImageUrl(item),
+                videoOverlaySource  = ServerQuery.Instance.GetVideoOverlay()
             };
             dataSource.Add(dataSourceKey, new DataSourceObject()
             {
                 properties = new Properties()
                 {
+                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
                     item = dataSourceItem
                 }
             });
