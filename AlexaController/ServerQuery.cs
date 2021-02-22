@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -241,7 +242,39 @@ namespace AlexaController
             //return await Task.FromResult(upComing.Items.ToList());
         }
 
+        public string GetRunTime(BaseItem baseItem)
+        {
+            if (!string.Equals(baseItem.GetType().Name, "Movie")) return string.Empty;
+            var runTimeTicks = baseItem.RunTimeTicks;
+            return !(runTimeTicks is null) ? $"{TimeSpan.FromTicks(runTimeTicks.Value).TotalMinutes.ToString(CultureInfo.InvariantCulture).Split('.')[0]} minutes" : string.Empty;
+        }
 
+        public string GetEndTime(BaseItem baseItem)
+        {
+            return
+                $"Ends at: {DateTime.Now.AddTicks(baseItem.GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}";
+        }
+
+        public async Task<string> GetPrimaryImageUrl(BaseItem item)
+        {
+            var url = await GetLocalApiUrlAsync();
+            if (item.GetType().Name != "Episode")
+            {
+                return $"{url}/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;";
+            }
+
+            return item.HasImage(ImageType.Primary) 
+                ? $"{url}/Items/{ item.InternalId }/Images/primary?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;" 
+                : $"{url}/Items/{ item.InternalId }/Images/backdrop/0?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
+        }
+
+        public async Task<string> GetLogoUrl(BaseItem item)
+        {
+            var url = await GetLocalApiUrlAsync();
+            return item.HasImage(ImageType.Logo)
+                ? $"{url}/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200"
+                : "";
+        }
 
         public void Dispose()
         {

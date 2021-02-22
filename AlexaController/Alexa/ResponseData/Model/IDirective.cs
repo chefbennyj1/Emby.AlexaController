@@ -2,7 +2,7 @@
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
-using AlexaController.Alexa.ResponseData.Model.DataSources;
+using AlexaController.Alexa.Presentation.DataSource;
 
 namespace AlexaController.Alexa.ResponseData.Model
 {

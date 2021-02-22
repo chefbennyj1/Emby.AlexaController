@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AlexaController.Alexa.Presentation.APL.Commands;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
@@ -15,7 +16,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public bool autoplay       { get; set; }
         public string scale        { get; set; }
         public string audioTrack   { get; set; }
-        public List<object> onEnd  { get; set; }
+        public List<ICommand> onEnd  { get; set; }
 
     }
 }

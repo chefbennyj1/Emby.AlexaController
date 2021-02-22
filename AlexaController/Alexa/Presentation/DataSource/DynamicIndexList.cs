@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AlexaController.Alexa.ResponseData.Model.DataSources
+namespace AlexaController.Alexa.Presentation.DataSource
 {
     public class DynamicIndexList : IDataSource
     {

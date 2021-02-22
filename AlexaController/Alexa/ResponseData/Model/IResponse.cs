@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AlexaController.Alexa.ResponseData.Model.DataSources;
 
 namespace AlexaController.Alexa.ResponseData.Model
 {
