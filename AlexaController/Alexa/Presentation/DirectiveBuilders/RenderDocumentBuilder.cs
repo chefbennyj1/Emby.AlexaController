@@ -9,7 +9,6 @@ using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Alexa.Presentation.DataSource;
 using AlexaController.Alexa.ResponseData.Model;
-using AlexaController.Api;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
@@ -142,7 +141,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 id     = "primary",
                 width  = "100vw",
                 height = "100vh",
-                items  = new List<VisualItem>()
+                items  = new List<VisualBaseItem>()
                 {
                     new AlexaHeader()
                     {
@@ -159,7 +158,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         left                   = "5vw",
                         scrollDirection        = "horizontal",
                         data                   = "${payload.templateData.properties.items}",
-                        items                  = new List<VisualItem>()
+                        items                  = new List<VisualBaseItem>()
                         {
                             new TouchWrapper()
                             {
@@ -172,7 +171,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                        new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
                                    }
                                },
-                               items = new List<VisualItem>()
+                               items = new List<VisualBaseItem>()
                                {
                                    await RenderComponent_SequencePrimaryImageContainer(type)
                                }
@@ -269,7 +268,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             var type     = baseItem.GetType().Name;
             var item     = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
             
-            var layout = new List<VisualItem>();
+            var layout = new List<VisualBaseItem>();
             const string token = "mediaItemDetails";
 
             ServerController.Instance.Log.Info($"Render Document is {token} for {item.Name}");
@@ -528,12 +527,12 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) }},
                 item    = new Container()
                 {
-                    items = new List<VisualItem>()
+                    items = new List<VisualBaseItem>()
                     {
                         new Container()
                         {
                             direction = "row",
-                            items = new List<VisualItem>()
+                            items = new List<VisualBaseItem>()
                             {
                                 new Text()
                                 {
@@ -558,6 +557,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         {
                             text     = "${data.item.overview}", 
                             style    = "textStyleBody",
+                            maxHeight = "20vh",
                             id       = "overview",
                             width    = "55vw",
                             fontSize = "20dp",
@@ -586,7 +586,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 height = "250px",
                 top    = "29vh",
                 left   = "36vw",
-                items  = new List<VisualItem>()
+                items  = new List<VisualBaseItem>()
                 {
                     new Text()
                     {
@@ -600,7 +600,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         height = "250px",
                         scrollDirection = "horizontal",
                         data = "${payload.templateData.properties.recommendations}",
-                        items = new List<VisualItem>()
+                        items = new List<VisualBaseItem>()
                         {
                             new TouchWrapper()
                             {
@@ -636,7 +636,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     left = "38vw",
                     top = "78vh",
                     direction = "row",
-                    items = new List<VisualItem>()
+                    items = new List<VisualBaseItem>()
                     {
                         new VectorGraphic()
                         {
@@ -681,7 +681,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 height   = "75vh",
                 top      = "15vh",
                 opacity  = 1,
-                items    = new List<VisualItem>()
+                items    = new List<VisualBaseItem>()
                 {
                     new Image()
                     {
@@ -779,7 +779,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                 when   = "${viewport.shape == 'round'}",
                                 width  = "100vw",
                                 height = "100vh",
-                                items  = new List<VisualItem>()
+                                items  = new List<VisualBaseItem>()
                                 {
                                     new AlexaHeader()
                                     {
@@ -829,8 +829,8 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         
         private async Task<IDirective> RenderVerticalTextListTemplate(RenderDocumentTemplate template, IAlexaSession session)
         {
-            var layout          = new List<VisualItem>();
-            var layoutBaseItems = new List<VisualItem>();
+            var layout          = new List<VisualBaseItem>();
+            var layoutBaseItems = new List<VisualBaseItem>();
             var baseItems       = template.baseItems;
 
             const string token = "textList";
@@ -848,14 +848,14 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         }
                     }
                 },
-                items = new List<VisualItem>()
+                items = new List<VisualBaseItem>()
                 {
                     new Container()
                     {
                         direction   = "row",
                         paddingLeft = "12vw",
                         paddingTop  = "4vh",
-                        items       = new List<VisualItem>()
+                        items       = new List<VisualBaseItem>()
                         {
                             new Text()
                             {
@@ -910,7 +910,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             new Container()
                             {
                                 position = "absolute",
-                                items    = new List<VisualItem>()
+                                items    = new List<VisualBaseItem>()
                                 {
                                     await RenderComponent_ButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Right, "ScrollNext" )
                                 }
@@ -918,7 +918,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             new Container()
                             {
                                 position = "absolute",
-                                items = new List<VisualItem>()
+                                items = new List<VisualBaseItem>()
                                 {
                                     await RenderComponent_ButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Left, "ScrollPrev" )
                                 }
@@ -933,7 +933,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         
         private async Task<IDirective> RenderRoomSelectionTemplate(RenderDocumentTemplate template, IAlexaSession session)
         {
-            var layout         = new List<VisualItem>();
+            var layout         = new List<VisualBaseItem>();
             var baseItem       = template.baseItems[0];
             const string token = "roomSelection";
 
@@ -1048,7 +1048,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         private async Task<IDirective> RenderBrowseLibraryTemplate(RenderDocumentTemplate template, IAlexaSession session)
         {
             var url    = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            var layout = new List<VisualItem>();
+            var layout = new List<VisualBaseItem>();
             const string token = "browseLibrary";
 
             layout.Add(new AlexaBackground()
@@ -1108,7 +1108,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
         private async Task<IDirective> RenderQuestionRequestTemplate(RenderDocumentTemplate template)
         {
-            var layout = new List<VisualItem>();
+            var layout = new List<VisualBaseItem>();
             var url    = await ServerQuery.Instance.GetLocalApiUrlAsync();
             
             layout.Add(new Video()
@@ -1180,7 +1180,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         private async Task<IDirective> RenderNotUnderstoodTemplate()
         {
             // ReSharper disable once UseObjectOrCollectionInitializer
-            var layout = new List<VisualItem>();
+            var layout = new List<VisualBaseItem>();
             var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
             layout.Add(new Video()
             {
@@ -1258,7 +1258,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         private async Task<IDirective> RenderGenericHeadlineRequestTemplate(RenderDocumentTemplate template)
         {
             // ReSharper disable once UseObjectOrCollectionInitializer
-            var layout = new List<VisualItem>();
+            var layout = new List<VisualBaseItem>();
             var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
             layout.Add(new Video()
             {
@@ -1335,7 +1335,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         
         private async Task<IDirective> RenderHelpTemplate()
         {
-            var helpItems          = new List<VisualItem>();
+            var helpItems          = new List<VisualBaseItem>();
             var url                = await ServerQuery.Instance.GetLocalApiUrlAsync();
             var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
@@ -1383,7 +1383,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 justifyContent = "center",
                 alignItems = "center",
                 direction = "column",
-                items = new List<VisualItem>()
+                items = new List<VisualBaseItem>()
                 {
                     new VectorGraphic()
                     {
@@ -1411,7 +1411,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 justifyContent = "center",
                 alignItems = "center",
                 direction = "column",
-                items = new List<VisualItem>()
+                items = new List<VisualBaseItem>()
                 {
                     new VectorGraphic()
                     {
@@ -1451,7 +1451,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             {
                                 width  = "100vw",
                                 height = "100vh",
-                                items  = new List<VisualItem>()
+                                items  = new List<VisualBaseItem>()
                                 {
                                     new AlexaBackground()
                                     {
@@ -1506,7 +1506,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 borderColor = "white",
                 borderRadius = "75px",
                 backgroundColor = "rgba(0,0,0,0.35)",
-                items = new List<VisualItem>()
+                items = new List<VisualBaseItem>()
                 {
                     new AlexaIconButton()
                     {
@@ -1535,7 +1535,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     {
                         height = "70vh",
                         width  = "30vw",
-                        items  = new List<VisualItem>()
+                        items  = new List<VisualBaseItem>()
                         {
                             new Image()
                             {
@@ -1570,7 +1570,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 default:
                     return await Task.FromResult(new Container()
                     {
-                        items = new List<VisualItem>()
+                        items = new List<VisualBaseItem>()
                         {
                             new Image()
                             {
@@ -1585,10 +1585,10 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             
         }
 
-        private List<VisualItem> RenderComponent_RoomButtonLayoutContainer(RenderDocumentTemplate template)
+        private List<VisualBaseItem> RenderComponent_RoomButtonLayoutContainer(RenderDocumentTemplate template)
         {
             var config = Plugin.Instance.Configuration;
-            var roomButtons = new List<VisualItem>();
+            var roomButtons = new List<VisualBaseItem>();
 
             if (config.Rooms is null) return roomButtons;
 
@@ -1607,7 +1607,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     direction = "row",
                     left = "15vw",
                     top = "10vh",
-                    items = new List<VisualItem>()
+                    items = new List<VisualBaseItem>()
                     {
                         new AlexaIconButton()
                         {

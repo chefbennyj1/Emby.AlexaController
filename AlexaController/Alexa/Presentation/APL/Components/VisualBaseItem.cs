@@ -3,7 +3,7 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class VisualItem : IItem
+    public class VisualBaseItem : IItem
     {
         public string style                    { get; set; }
         public string color                    { get; set; }
@@ -11,8 +11,8 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string paddingTop               { get; set; }
         public string align                    { get; set; }
         public string when                     { get; set; }
-        public List<VisualItem> items          { get; set; }
-        public VisualItem item                 { get; set; }
+        public List<VisualBaseItem> items          { get; set; }
+        public VisualBaseItem item                 { get; set; }
         public DataBind bind                   { get; set; }
         public string width                    { get; set; }
         public string height                   { get; set; }

@@ -9,7 +9,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public int repeatCount { get; set; }
     }
 
-    public class Video : VisualItem
+    public class Video : VisualBaseItem
     {
         public object type => nameof(Video);
         public List<Source> source { get; set; }

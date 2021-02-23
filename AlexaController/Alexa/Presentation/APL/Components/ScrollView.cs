@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class ScrollView : VisualItem
+    public class ScrollView : VisualBaseItem
     {
         public object type => nameof(ScrollView);
         

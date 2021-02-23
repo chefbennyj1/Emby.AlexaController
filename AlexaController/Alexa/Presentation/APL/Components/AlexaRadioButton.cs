@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaRadioButton : VisualItem
+    public class AlexaRadioButton : VisualBaseItem
     {
         public object type => typeof(AlexaRadioButton);
         public bool @checked { get; set; }

@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Pager : VisualItem
+    public class Pager : VisualBaseItem
     {
         public string type => nameof(Pager);
         /// <summary>

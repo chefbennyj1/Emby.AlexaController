@@ -1,6 +1,6 @@
 ﻿namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaProgressBar : VisualItem
+    public class AlexaProgressBar : VisualBaseItem
     {
         public object type => nameof(AlexaProgressBar);
         public long bufferValue { get; set; }
