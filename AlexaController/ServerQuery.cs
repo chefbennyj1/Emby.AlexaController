@@ -255,7 +255,7 @@ namespace AlexaController
                 $"Ends at: {DateTime.Now.AddTicks(baseItem.GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}";
         }
 
-        public string GetPrimaryImageUrl(BaseItem item)
+        public string GetPrimaryImageSource(BaseItem item)
         {
             
             if (item.GetType().Name != "Episode")
@@ -268,25 +268,25 @@ namespace AlexaController
                 : $"/Items/{ item.InternalId }/Images/backdrop/0?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
         }
         
-        public string GetBackdropImageUrl(BaseItem item)
+        public string GetBackdropImageSource(BaseItem item)
         {
             var internalId = item.InternalId;
             return $"/Items/{internalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
         }
 
-        public string GetThumbImageUrl(BaseItem item)
+        public string GetThumbImageSource(BaseItem item)
         {
             var internalId = item.InternalId;
             return $"/Items/{internalId}/Images/thumb?quality=90&maxWidth=225";
         }
 
-        public string GetLogoUrl(BaseItem item)
+        public string GetLogoImageSource(BaseItem item)
         {
             return item.HasImage(ImageType.Logo)
                 ? $"/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
         }
 
-        public string GetVideoBackdropUrl(BaseItem item)
+        public string GetVideoBackdropImageSource(BaseItem item)
         {
             var videoBackdropIds = item.ThemeVideoIds;
             return videoBackdropIds.Length > 0 ? $"/videos/{GetItemById(videoBackdropIds[0]).InternalId}/stream.mp4" : string.Empty;
@@ -302,7 +302,7 @@ namespace AlexaController
                 Recursive = true,
                 IncludeItemTypes = new[] { item.GetType().Name }
             });
-            ServerController.Instance.Log.Info($"SIMILAR ITEMS HAS {similarQuery.TotalRecordCount} Items");
+            
             return similarQuery.Items.Take(4).ToList();
 
         }

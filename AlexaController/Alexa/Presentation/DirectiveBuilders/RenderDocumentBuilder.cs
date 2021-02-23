@@ -1648,7 +1648,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             sequenceItems.ForEach(i => dataSourceItems.Add(new Item()
             {
                 type               = type,
-                primaryImageSource = ServerQuery.Instance.GetPrimaryImageUrl(i), 
+                primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(i), 
                 id                 = i.InternalId,
                 name               = i.Name,
                 index              = type == "Episode" ? $"Episode {i.IndexNumber}" : string.Empty,
@@ -1674,7 +1674,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             var dataSourceItem = new Item()
             {
                 type                = item.GetType().Name,
-                primaryImageSource  = ServerQuery.Instance.GetPrimaryImageUrl(item), 
+                primaryImageSource  = ServerQuery.Instance.GetPrimaryImageSource(item), 
                 id                  = item.InternalId,
                 name                = item.Name,
                 premiereDate        = item.ProductionYear.ToString(),
@@ -1683,19 +1683,19 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 runtimeMinutes      = ServerQuery.Instance.GetRunTime(item),
                 endTime             = ServerQuery.Instance.GetEndTime(item),
                 genres              = $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}",
-                logoImageSource     = ServerQuery.Instance.GetLogoUrl(item),
+                logoImageSource     = ServerQuery.Instance.GetLogoImageSource(item),
                 overview            = item.Overview,
-                videoBackdropSource = ServerQuery.Instance.GetVideoBackdropUrl(item),
-                backdropImageSource = ServerQuery.Instance.GetBackdropImageUrl(item),
+                videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
+                backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item),
                 videoOverlaySource  = "/EmptyPng?quality=90"
             };
 
             var recommendationItems =  ServerQuery.Instance.GetSimilarItems(item);
-            var recommendations = new List<Recommendation>();
-            recommendationItems.ForEach(r => recommendations.Add(new Recommendation()
+            var recommendations = new List<SimilarItem>();
+            recommendationItems.ForEach(r => recommendations.Add(new SimilarItem()
             {
                 id = r.InternalId,
-                thumbImageSource = ServerQuery.Instance.GetThumbImageUrl(r)
+                thumbImageSource = ServerQuery.Instance.GetThumbImageSource(r)
             }));
 
             dataSource.Add(dataSourceKey, new DataSourceObject()
@@ -1703,7 +1703,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 properties = new Properties()
                 {
                     url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                    recommendations = recommendations,
+                    similarItems = recommendations,
                     item = dataSourceItem
                 }
             });

@@ -15,10 +15,10 @@ namespace AlexaController.Alexa.Presentation.DataSource
 
     public class Properties
     {
-        public string url           { get; set; }
-        public List<Recommendation> recommendations { get; set; }
-        public Item item            { get; set; }
-        public List<Item> items     { get; set; }
+        public string url                     { get; set; }
+        public List<SimilarItem> similarItems { get; set; }
+        public Item item                      { get; set; }
+        public List<Item> items               { get; set; }
     }
 
     public class Item
@@ -41,7 +41,7 @@ namespace AlexaController.Alexa.Presentation.DataSource
         public string videoOverlaySource  { get; set; }
     }
 
-    public class Recommendation
+    public class SimilarItem
     {
         public string thumbImageSource { get; set; }
         public long id { get; set; }
