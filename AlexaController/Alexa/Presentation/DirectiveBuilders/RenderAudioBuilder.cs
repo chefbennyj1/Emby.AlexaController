@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
 using AlexaController.Utils;
 using MediaBrowser.Model.Extensions;
-using MediaBrowser.Model.Querying;
 using Document = AlexaController.Alexa.Presentation.APLA.Document;
 
 namespace AlexaController.Alexa.Presentation.DirectiveBuilders
@@ -17,7 +15,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
     public class RenderAudioBuilder : Ssml
     {
-        public static RenderAudioBuilder Instance { get; set; }
+        public static RenderAudioBuilder Instance { get; private set; }
         
         public RenderAudioBuilder()
         {
@@ -74,8 +72,8 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         {
             return await Task.FromResult(new Directive()
             {
-                type = "Alexa.Presentation.APLA.RenderDocument",
-                token = query.speechPrefix.ToString(),
+                type     = Directive.AplaRenderDocument,
+                token    = query.speechPrefix.ToString(),
                 document = new Document()
                 {
                     mainTemplate = new MainTemplate()

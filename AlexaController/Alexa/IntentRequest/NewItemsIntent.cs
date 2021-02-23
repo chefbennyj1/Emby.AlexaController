@@ -7,6 +7,7 @@ using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.RequestData.Model;
 using AlexaController.Alexa.ResponseData.Model;
+using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -63,9 +64,12 @@ namespace AlexaController.Alexa.IntentRequest
             }
            
 
-            switch (Session.alexaSessionDisplayType)
+            switch (Session.viewport)
             {
-                case AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE:
+                case ViewportProfile.HUB_ROUND_SMALL:
+                case ViewportProfile.HUB_LANDSCAPE_SMALL:
+                case ViewportProfile.HUB_LANDSCAPE_MEDIUM:
+                case ViewportProfile.HUB_LANDSCAPE_LARGE:
                 {
                         var documentTemplateInfo = new RenderDocumentTemplate()
                         {

@@ -35,9 +35,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
             catch { }
 
-            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
-            
+           
+            if (Session.room is null && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+
             var request           = AlexaRequest.request;
             var intent            = request.intent;
             var slots             = intent.slots;

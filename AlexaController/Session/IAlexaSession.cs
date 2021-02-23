@@ -1,4 +1,5 @@
 ﻿using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using MediaBrowser.Controller.Entities;
 using IPerson = AlexaController.Alexa.RequestData.Model.IPerson;
@@ -7,19 +8,14 @@ using User = MediaBrowser.Controller.Entities.User;
 namespace AlexaController.Session
 {
 
-    public enum AlexaSessionDisplayType
-    {
-        NONE,
-        ALEXA_PRESENTATION_LANGUAGE,
-        VIDEO
-    }
-
+    
     public interface IAlexaSession
     {
         User User                                         { get; set; }
         string SessionId                                  { get; set; }
         string EchoDeviceId                               { get; set; }
-        AlexaSessionDisplayType alexaSessionDisplayType   { get; set; }
+        ViewportProfile viewport   { get; set; }
+        bool supportsApl { get; set; }
         IPerson person                                    { get; set; }
         IAlexaRequest PersistedRequestContextData         { get; set; }
         BaseItem NowViewingBaseItem                       { get; set; }
@@ -33,7 +29,8 @@ namespace AlexaController.Session
         public User User                                                { get; set; }
         public string SessionId                                         { get; set; }
         public string EchoDeviceId                                      { get; set; }
-        public AlexaSessionDisplayType alexaSessionDisplayType          { get; set; } 
+        public ViewportProfile viewport          { get; set; }
+        public bool supportsApl { get; set; }
         public IPerson person                                           { get; set; }
         public IAlexaRequest PersistedRequestContextData                { get; set; }
         public BaseItem NowViewingBaseItem                              { get; set; }

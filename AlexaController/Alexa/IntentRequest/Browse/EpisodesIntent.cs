@@ -36,14 +36,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
             catch { }
 
-            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             
+            if (Session.room is null && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
             var seasonNumber   = slots.SeasonNumber.value;
-            var context        = AlexaRequest.context;
+            var context = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
@@ -145,12 +145,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = $"Season { seasonNumber}"
-                //},
                 shouldEndSession = null,
-                SpeakUserName = true,
+                SpeakUserName    = true,
                 directives       = new List<IDirective>()
                 {
                     renderDocumentDirective,

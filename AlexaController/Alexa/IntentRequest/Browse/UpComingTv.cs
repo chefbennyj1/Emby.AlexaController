@@ -77,16 +77,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
                         return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                         {
-                            //outputSpeech = new OutputSpeech()
-                            //{
-                            //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                            //    {
-                            //        type = SpeechResponseType.UP_COMING_EPISODES,
-                            //        session = Session,
-                            //        items = result.Items.ToList(),
-                            //        args = new []{duration.ToLongDateString()}
-                            //    })
-                            //},
                             shouldEndSession = null,
                             directives = new List<IDirective>()
                             {
@@ -95,28 +85,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             }
 
                         }, Session);
-                   // }
-                //default: //Voice only
-                //    {
-
-                //        return await ResponseClient.Instance.BuildAlexaResponse(new Response()
-                //        {
-                //            outputSpeech = new OutputSpeech()
-                //            {
-                //                phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                //                {
-                //                    type = SpeechResponseType.UP_COMING_EPISODES,
-                //                    session = Session,
-                //                    items = result.Items.ToList(),
-                //                    args = new []{duration.ToLongDateString()}
-                //                })
-                //            },
-                //            SpeakUserName = true,
-                //            shouldEndSession = true,
-
-                //        }, Session);
-                //    }
-            //}
+                   
         }
     }
 }

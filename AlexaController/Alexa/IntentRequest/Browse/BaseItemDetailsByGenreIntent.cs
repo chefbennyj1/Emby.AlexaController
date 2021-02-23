@@ -31,16 +31,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             }
             catch { }
+            
 
-            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (Session.room is null && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
             var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
             var slotGenres     = slots.Genre;
-
             var genres         = GetGenreList(slotGenres);
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;

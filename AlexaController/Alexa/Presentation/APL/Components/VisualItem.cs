@@ -16,6 +16,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public DataBind bind                   { get; set; }
         public string width                    { get; set; }
         public string height                   { get; set; }
+        public string maxHeight                { get; set; }
         public string position                 { get; set; }
         public string paddingBottom            { get; set; }
         public string paddingLeft              { get; set; }

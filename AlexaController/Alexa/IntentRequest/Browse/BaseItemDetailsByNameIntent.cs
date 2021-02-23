@@ -35,8 +35,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
             catch { }
 
-            var displayNone = Equals(Session.alexaSessionDisplayType, AlexaSessionDisplayType.NONE);
-            if (Session.room is null && displayNone) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+           
+            if (Session.room is null && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request        = AlexaRequest.request;
             var intent         = request.intent;
@@ -53,7 +53,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Task.Run(() => ResponseClient.Instance.PostProgressiveResponse("One moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
             
-
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
 
@@ -79,14 +78,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             }
                         })
                     }
-                    //outputSpeech = new OutputSpeech()
-                    //{
-                    //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    //    {
-                    //        type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
-                    //        session = Session
-                    //    }),
-                    //}
                 }, Session);
             }
 
@@ -107,16 +98,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
                     shouldEndSession = true,
-                    //outputSpeech = new OutputSpeech()
-                    //{
-                    //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    //    {
-                    //        type = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED,
-                    //        session = Session,
-                    //        items = new List<BaseItem>() { result }
-                    //    }),
-                    //    sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
-                    //},
                     directives = new List<IDirective>()
                     {
                         await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(
@@ -134,8 +115,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                                 items = new List<BaseItem>() { result },
                                 audio = new Audio()
                                 {
-                                    source = "soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02",
-                                    
+                                    source = "soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02"
                                 }
                             })
                     }
@@ -190,16 +170,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 return await ResponseClient.Instance.BuildAlexaResponse(new Response()
                 {
-                    //outputSpeech = new OutputSpeech()
-                    //{
-                    //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    //    {
-                    //        type = SpeechResponseType.BROWSE_ITEM,
-                    //        session = Session,
-                    //        items = new List<BaseItem> { result }
-                    //    }),
-                    //    sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
-                    //},
                     shouldEndSession = null,
                     SpeakUserName = true,
                     directives = new List<IDirective>()

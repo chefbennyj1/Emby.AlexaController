@@ -109,8 +109,9 @@ namespace AlexaController
             var result = QuerySpeechResultItem(collectionName, new[] { "BoxSet" });
 
             ServerController.Instance.Log.Info("Search found collection item: " + result.Name);
-
-            var collection = LibraryManager.QueryItems(new InternalItemsQuery(UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator))
+            var users         = UserManager.Users;
+            var administrator = users.FirstOrDefault(u => u.Policy.IsAdministrator);
+            var collection    = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
             {
                 ListIds        = new[] { result.InternalId },
                 EnableAutoSort = true,
@@ -266,16 +267,17 @@ namespace AlexaController
                 ? $"/Items/{ item.InternalId }/Images/primary?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;" 
                 : $"/Items/{ item.InternalId }/Images/backdrop/0?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
         }
-
-        public string GetVideoOverlay()
-        {
-            return "/EmptyPng?quality=90";
-        }
-
+        
         public string GetBackdropImageUrl(BaseItem item)
         {
             var internalId = item.InternalId;
             return $"/Items/{internalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
+        }
+
+        public string GetThumbImageUrl(BaseItem item)
+        {
+            var internalId = item.InternalId;
+            return $"/Items/{internalId}/Images/thumb?quality=90&maxWidth=225";
         }
 
         public string GetLogoUrl(BaseItem item)
@@ -288,6 +290,21 @@ namespace AlexaController
         {
             var videoBackdropIds = item.ThemeVideoIds;
             return videoBackdropIds.Length > 0 ? $"/videos/{GetItemById(videoBackdropIds[0]).InternalId}/stream.mp4" : string.Empty;
+        }
+
+        public List<BaseItem> GetSimilarItems(BaseItem item)
+        {
+            var users         = UserManager.Users;
+            var administrator = users.FirstOrDefault(u => u.Policy.IsAdministrator);
+            var similarQuery  = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
+            {
+                SimilarTo = item,
+                Recursive = true,
+                IncludeItemTypes = new[] { item.GetType().Name }
+            });
+            ServerController.Instance.Log.Info($"SIMILAR ITEMS HAS {similarQuery.TotalRecordCount} Items");
+            return similarQuery.Items.Take(4).ToList();
+
         }
 
         public void Dispose()

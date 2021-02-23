@@ -9,6 +9,7 @@ using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Alexa.Presentation.DataSource;
 using AlexaController.Alexa.ResponseData.Model;
+using AlexaController.Api;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
@@ -54,7 +55,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             new Resource()
             {
                 description = "Stock color for the light theme",
-                colors = new Colors()
+                colors      = new Colors()
                 {
                     colorTextPrimary = "#151920"
                 }
@@ -62,8 +63,8 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             new Resource()
             {
                 description = "Stock color for the dark theme",
-                when = "${viewport.theme == 'dark'}",
-                colors = new Colors()
+                when        = "${viewport.theme == 'dark'}",
+                colors      = new Colors()
                 {
                     colorTextPrimary = "#f0f1ef"
                 }
@@ -71,7 +72,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             new Resource()
             {
                 description = "Standard font sizes",
-                dimensions = new Dimensions()
+                dimensions  = new Dimensions()
                 {
                     textSizeBody          = 48,
                     textSizePrimary       = 27,
@@ -82,7 +83,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             new Resource()
             {
                 description = "Common spacing values",
-                dimensions = new Dimensions()
+                dimensions  = new Dimensions()
                 {
                     spacingThin       = 6,
                     spacingSmall      = 12,
@@ -94,7 +95,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             new Resource()
             {
                 description = "Common margins and padding",
-                dimensions = new Dimensions()
+                dimensions  = new Dimensions()
                 {
                     marginTop    = 40,
                     marginLeft   = 60,
@@ -232,8 +233,8 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             
             var view = new Directive()
             {
-                type  = "Alexa.Presentation.APL.RenderDocument",
-                token = "mediaItemSequence",
+                type     = "Alexa.Presentation.APL.RenderDocument",
+                token    = "mediaItemSequence",
                 document = new Document()
                 {
                     theme     = "dark",
@@ -247,7 +248,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>() { "payload" },
-                        items = layout
+                        items      = layout
                     }
                 },
                 datasources = await GetSequenceItemsDataSource("templateData", baseItems)
@@ -279,7 +280,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     new Source()
                     {
-                        url = "${data.url}${data.item.videoBackdropSource}",
+                        url         = "${data.url}${data.item.videoBackdropSource}",
                         repeatCount = 0,
                     }
                 },
@@ -312,6 +313,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     }
                 }
             });
+
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
@@ -323,8 +325,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 opacity      = 0.65,
                 id           = "backdropOverlay"
             });
-
-            //(await RenderComponent_VideoBackdrop(item, token)).ForEach(i => layout.Add(i));
+            
 
             ServerController.Instance.Log.Info($"Render Document has {layout.Count} video backdrops");
             
@@ -333,18 +334,18 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     "CheckMark", new AlexaVectorGraphic()
                     {
-                        height = 35,
-                        width = 35,
+                        height         = 35,
+                        width          = 35,
                         viewportHeight = 25,
-                        viewportWidth = 25,
-                        items = new List<IVectorGraphic>()
+                        viewportWidth  = 25,
+                        items          = new List<IVectorGraphic>()
                         {
                             new VectorPath()
                             {
-                                pathData = MaterialVectorIcons.CheckMark,
-                                stroke = "none",
+                                pathData    = MaterialVectorIcons.CheckMark,
+                                stroke      = "none",
                                 strokeWidth = 1,
-                                fill = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
+                                fill        = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
                             }
                         }
                     }
@@ -352,18 +353,18 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     "Audio", new AlexaVectorGraphic()
                     {
-                        height = 25,
-                        width = 25,
+                        height         = 25,
+                        width          = 25,
                         viewportHeight = 28,
-                        viewportWidth = 28,
-                        items = new List<IVectorGraphic>()
+                        viewportWidth  = 28,
+                        items          = new List<IVectorGraphic>()
                         {
                             new VectorPath()
                             {
-                                pathData = MaterialVectorIcons.Audio,
-                                stroke = "none",
+                                pathData    = MaterialVectorIcons.Audio,
+                                stroke      = "none",
                                 strokeWidth = 1,
-                                fill = "white"
+                                fill        = "white"
                             }
                         }
                     }
@@ -371,18 +372,18 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     "Carousel", new AlexaVectorGraphic()
                     {
-                        height = 35,
-                        width = 35,
+                        height         = 35,
+                        width          = 35,
                         viewportHeight = 25,
-                        viewportWidth = 25,
-                        items = new List<IVectorGraphic>()
+                        viewportWidth  = 25,
+                        items          = new List<IVectorGraphic>()
                         {
                             new VectorPath()
                             {
-                                pathData =  MaterialVectorIcons.Carousel,
-                                stroke = "none",
+                                pathData    =  MaterialVectorIcons.Carousel,
+                                stroke      = "none",
                                 strokeWidth = 1,
-                                fill = "rgba(255,250,0,1)" 
+                                fill        = "rgba(255,250,0,1)" 
                             }
                         }
                     }
@@ -390,18 +391,18 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     "ArrayIcon", new AlexaVectorGraphic()
                     {
-                        height = 35,
-                        width = 35,
+                        height         = 35,
+                        width          = 35,
                         viewportHeight = 25,
-                        viewportWidth = 25,
-                        items = new List<IVectorGraphic>()
+                        viewportWidth  = 25,
+                        items          = new List<IVectorGraphic>()
                         {
                             new VectorPath()
                             {
-                                pathData =  MaterialVectorIcons.ArrayIcon,
-                                stroke = "none",
+                                pathData    =  MaterialVectorIcons.ArrayIcon,
+                                stroke      = "none",
                                 strokeWidth = 1,
-                                fill = "rgba(255,250,0,1)" 
+                                fill        = "rgba(255,250,0,1)" 
                             }
                         }
                     }
@@ -412,13 +413,13 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             {
                 layout.Add(new AlexaIconButton()
                 {
-                    vectorSource = MaterialVectorIcons.Left,
-                    buttonSize = "15vh",
-                    position = "absolute",
-                    left = "2vw",
-                    color = "white",
-                    top = "-1vw",
-                    id = "goBack",
+                    vectorSource  = MaterialVectorIcons.Left,
+                    buttonSize    = "15vh",
+                    position      = "absolute",
+                    left          = "2vw",
+                    color         = "white",
+                    top           = "-1vw",
+                    id            = "goBack",
                     primaryAction = new Parallel()
                     {
                         commands = new List<ICommand>()
@@ -459,7 +460,6 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             //Genres
             layout.Add(new Text()
             {
-                // ReSharper disable once TooManyChainedReferences
                 text     = "${data.item.genres}", 
                 left     = leftColumnSpacing,
                 style    = "textStyleBody",
@@ -476,7 +476,6 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             //Runtime span
             layout.Add(new Text()
             {
-                // ReSharper disable once TooManyChainedReferences
                 text     = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",  
                 left     = leftColumnSpacing,
                 style    = "textStyleBody",
@@ -523,7 +522,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             {
                 top     = string.Equals(type, "Movie") ? "24vh" : "20vh",
                 left    = leftColumnSpacing,
-                height  = "20vh",
+                maxHeight  = "20vh",
                 opacity = 1,
                 id      = "${data.item.id}",//baseItem.InternalId.ToString(),
                 onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) }},
@@ -548,7 +547,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                 new VectorGraphic()
                                 {
                                     source  = "Audio",
-                                    right   = "25vw",
+                                    right   = "20vw",
                                     opacity = 0,
                                     id      = "audioIcon",
                                     top     = "5px"
@@ -570,14 +569,61 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             ServerController.Instance.Log.Info("Render Document has Overview");
 
             //Room
-            layout.Add(new Text()
+            //layout.Add(new Text()
+            //{
+            //    text    = $"{(session.room != null ? session.room.Name.ToUpperInvariant() : string.Empty)}",
+            //    id      = "rating",
+            //    style   = "textStyleBody",
+            //    top     = "22vh",
+            //    left    = leftColumnSpacing,
+            //    opacity = 0
+            //});
+
+            layout.Add(new Container()
             {
-                text = $"{(session.room != null ? session.room.Name.ToUpperInvariant() : string.Empty)}",
-                id = "rating",
-                style = "textStyleBody",
-                top = "22vh",
-                left = leftColumnSpacing,
-                opacity = 0
+                when   = "${viewport.shape == 'rectangle' && viewport.mode == 'hub' && viewport.width > 960}",
+                width  = "50vw",
+                height = "250px",
+                top    = "29vh",
+                left   = "36vw",
+                items  = new List<VisualItem>()
+                {
+                    new Text()
+                    {
+                        text     = "Recommendations",
+                        style    = "textStylePrimary",
+                        fontSize = "20"
+                    },
+                    new Sequence()
+                    {
+                        width = "50vw",
+                        height = "250px",
+                        scrollDirection = "horizontal",
+                        data = "${payload.templateData.properties.recommendations}",
+                        items = new List<VisualItem>()
+                        {
+                            new TouchWrapper()
+                            {
+                                width = "245px",
+                                id = "${data.id}",
+                                item = new Image()
+                                {
+                                    height = "140px",
+                                    width = "225px",
+                                    source = "${payload.templateData.properties.url}${data.thumbImageSource}", 
+                                },
+                                onPress = new Parallel()
+                                {
+                                    commands = new List<ICommand>()
+                                    {
+                                        new Command() { type = nameof(Animations.ScaleInOutOnPress) },
+                                        new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
             //Series - Season Count
@@ -660,7 +706,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             {
                 hintText = type == "Series" ? "Try \"Alexa, show season one...\"" : "Try \"Alexa, play that...\"",
                 position = "absolute",
-                bottom = "1vh"
+                bottom   = "1vh"
             });
             ServerController.Instance.Log.Info("Render Document has Footer");
 
@@ -791,7 +837,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             baseItems.ForEach(item => layoutBaseItems.Add(new TouchWrapper()
             {
-                id = item.InternalId.ToString(),
+                id      = item.InternalId.ToString(),
                 onPress = new Sequential()
                 {
                     commands = new List<ICommand>()
@@ -809,13 +855,13 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         direction   = "row",
                         paddingLeft = "12vw",
                         paddingTop  = "4vh",
-                        items = new List<VisualItem>()
+                        items       = new List<VisualItem>()
                         {
                             new Text()
                             {
-                                text = $"{item.Name} ({item.ProductionYear}) - {item.OfficialRating}",
+                                text        = $"{item.Name} ({item.ProductionYear}) - {item.OfficialRating}",
                                 paddingLeft = "2vw",
-                                paddingTop = "25dp"
+                                paddingTop  = "25dp"
                             }
                         }
                     }
@@ -824,29 +870,29 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             layout.Add(new AlexaHeader()
             {
-                headerTitle = template.HeaderTitle,
+                headerTitle   = template.HeaderTitle,
                 headerDivider = true
             });
 
             layout.Add(new Sequence()
             {
                 scrollDirection = "vertical",
-                items = layoutBaseItems,
-                grow = 1,
-                width = "100%",
-                height = "100%",
-                paddingBottom = "12vh"
+                items           = layoutBaseItems,
+                grow            = 1,
+                width           = "100%",
+                height          = "100%",
+                paddingBottom   = "12vh"
             });
 
             var view = new Directive()
             {
-                type = "Alexa.Presentation.APL.RenderDocument",
-                token = token,
+                type     = "Alexa.Presentation.APL.RenderDocument",
+                token    = token,
                 document = new Document()
                 {
-                    theme = "dark",
-                    import = Imports,
-                    resources = Resources,
+                    theme        = "dark",
+                    import       = Imports,
+                    resources    = Resources,
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>()
@@ -857,14 +903,14 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         {
                             new Container()
                             {
-                                width = "100%",
+                                width  = "100%",
                                 height = "100%",
-                                items = layout
+                                items  = layout
                             },
                             new Container()
                             {
                                 position = "absolute",
-                                items = new List<VisualItem>()
+                                items    = new List<VisualItem>()
                                 {
                                     await RenderComponent_ButtonFrame(new List<object>() {"ShowVerticalTextListTemplate"},  MaterialVectorIcons.Right, "ScrollNext" )
                                 }
@@ -887,12 +933,60 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         
         private async Task<IDirective> RenderRoomSelectionTemplate(RenderDocumentTemplate template, IAlexaSession session)
         {
-            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            var imageEndpoint  = $"/Items/{template.baseItems[0].InternalId}/Images";
             var layout         = new List<VisualItem>();
+            var baseItem       = template.baseItems[0];
             const string token = "roomSelection";
 
-            (await RenderComponent_VideoBackdrop(template.baseItems[0], token)).ForEach(b => layout.Add(b));
+            layout.Add(new Video()
+            {
+                source = new List<Source>()
+                {
+                    new Source()
+                    {
+                        url = "${data.url}${data.item.videoBackdropSource}",
+                        repeatCount = 0,
+                    }
+                },
+                scale      = "best-fill",
+                width      = "100vw",
+                height     = "100vh",
+                position   = "absolute",
+                autoplay   = true,
+                audioTrack = "none",
+                id         = "${data.item.id}",
+                onEnd      = new List<ICommand>()
+                {
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "source",
+                        value       = "${data.url}${data.item.backdropImageSource}"
+                    },
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "opacity",
+                        value       = 1
+                    },
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "overlayColor",
+                        value       = "rgba(0,0,0,0.55)"
+                    }
+                }
+            });
+            layout.Add(new Image()
+            {
+                overlayColor = "rgba(0,0,0,1)",
+                scale        = "best-fill",
+                width        = "100vw",
+                height       = "100vh",
+                position     = "absolute",
+                source       = "${data.url}${data.item.videoOverlaySource}",
+                opacity      = 0.65,
+                id           = "backdropOverlay"
+            });
             
             layout.Add(new AlexaHeader()
             {
@@ -905,7 +999,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Image()
             {
                 position = "absolute",
-                source = url + imageEndpoint + "/logo?quality=90",
+                source = "${data.url}${data.item.logoImageSource}",
                 width = "25vw",
                 height = "10vh",
                 right = "5vw",
@@ -917,7 +1011,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             
             var view = new Directive()
             {
-                type = "Alexa.Presentation.APL.RenderDocument",
+                type = Directive.AplRenderDocument,
                 token = token,
                 document = new Document()
                 {
@@ -935,11 +1029,17 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             new Container()
                             {
                                 width = "100vw",
+                                bind = new DataBind()
+                                {
+                                    name = "data",
+                                    value = "${payload.templateData.properties}"
+                                },
                                 items = layout
                             }
                         }
                     }
-                }
+                },
+                datasources = await GetBaseItemDetailsDataSource("templateData", baseItem)
             };
 
             return await Task.FromResult(view);
@@ -947,7 +1047,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
         private async Task<IDirective> RenderBrowseLibraryTemplate(RenderDocumentTemplate template, IAlexaSession session)
         {
-            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
+            var url    = await ServerQuery.Instance.GetLocalApiUrlAsync();
             var layout = new List<VisualItem>();
             const string token = "browseLibrary";
 
@@ -962,28 +1062,28 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     }
                 },
                 backgroundScale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                videoAutoPlay = true
+                width           = "100vw",
+                height          = "100vh",
+                position        = "absolute",
+                videoAutoPlay   = true
             });
 
             layout.Add(new AlexaHeadline()
             {
-                primaryText = $"Now showing {template.baseItems[0].Name}",
-                secondaryText = $"{session.room.Name}",
+                primaryText     = $"Now showing {template.baseItems[0].Name}",
+                secondaryText   = $"{session.room.Name}",
                 backgroundColor = "rgba(0,0,0,0.45)"
             });
 
             var view = new Directive()
             {
-                type = "Alexa.Presentation.APL.RenderDocument",
-                token = token,
+                type     = Directive.AplRenderDocument,
+                token    = token,
                 document = new Document()
                 {
-                    theme = "light",
-                    import = Imports,
-                    resources = Resources,
+                    theme        = "light",
+                    import       = Imports,
+                    resources    = Resources,
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>()
@@ -1008,9 +1108,9 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
         private async Task<IDirective> RenderQuestionRequestTemplate(RenderDocumentTemplate template)
         {
-            // ReSharper disable once UseObjectOrCollectionInitializer
             var layout = new List<VisualItem>();
-            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
+            var url    = await ServerQuery.Instance.GetLocalApiUrlAsync();
+            
             layout.Add(new Video()
             {
                 source = new List<Source>()
@@ -1021,11 +1121,11 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         repeatCount = 1,
                     }
                 },
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                autoplay = true,
+                scale      = "best-fill",
+                width      = "100vw",
+                height     = "100vh",
+                position   = "absolute",
+                autoplay   = true,
                 audioTrack = "none"
             });
 
@@ -1043,18 +1143,18 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = template.HeadlinePrimaryText
+                primaryText     = template.HeadlinePrimaryText
             });
 
             var view = new Directive()
             {
-                type = "Alexa.Presentation.APL.RenderDocument",
-                token = "",
+                type     = Directive.AplRenderDocument,
+                token    = "",
                 document = new Document()
                 {
-                    theme = "light",
-                    import = Imports,
-                    resources = Resources,
+                    theme        = "light",
+                    import       = Imports,
+                    resources    = Resources,
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>()
@@ -1067,7 +1167,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             {
                                 width  = "100vw",
                                 height = "100vh",
-                                items =  layout
+                                items  = layout
                             }
                         }
                     }
@@ -1103,36 +1203,36 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                source = $"{url}/EmptyPng?quality=90",
-                opacity = 0.35
+                scale        = "best-fill",
+                width        = "100vw",
+                height       = "100vh",
+                position     = "absolute",
+                source       = $"{url}/EmptyPng?quality=90",
+                opacity      = 0.35
             });
 
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = "Could you say that again?"
+                primaryText     = "Could you say that again?"
             });
 
             layout.Add(new AlexaFooter()
             {
                 hintText = "Alexa, open help...",
                 position = "absolute",
-                bottom = "1vh"
+                bottom   = "1vh"
             });
 
             var view = new Directive()
             {
-                type = "Alexa.Presentation.APL.RenderDocument",
-                token = "",
+                type     = Directive.AplRenderDocument,
+                token    = "",
                 document = new Document()
                 {
-                    theme = "light",
-                    import = Imports,
-                    resources = Resources,
+                    theme        = "light",
+                    import       = Imports,
+                    resources    = Resources,
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>()
@@ -1181,30 +1281,30 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                source = $"{url}/EmptyPng?quality=90",
-                opacity = 0.35
+                scale        = "best-fill",
+                width        = "100vw",
+                height       = "100vh",
+                position     = "absolute",
+                source       = $"{url}/EmptyPng?quality=90",
+                opacity      = 0.35
             });
 
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = template.HeadlinePrimaryText
+                primaryText     = template.HeadlinePrimaryText
             });
 
             layout.Add(new AlexaFooter()
             {
                 hintText = "Alexa, open help...",
                 position = "absolute",
-                bottom = "1vh"
+                bottom   = "1vh"
             });
 
             var view = new Directive()
             {
-                type = "Alexa.Presentation.APL.RenderDocument",
+                type = Directive.AplRenderDocument,
                 token = "",
                 document = new Document()
                 {
@@ -1235,25 +1335,25 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         
         private async Task<IDirective> RenderHelpTemplate()
         {
-            var helpItems = new List<VisualItem>();
-            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
+            var helpItems          = new List<VisualItem>();
+            var url                = await ServerQuery.Instance.GetLocalApiUrlAsync();
             var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
                 {
                     "Emby", new AlexaVectorGraphic()
                     {
-                        height = 235,
-                        width = 235,
+                        height         = 235,
+                        width          = 235,
                         viewportHeight = 25,
-                        viewportWidth = 25,
-                        items = new List<IVectorGraphic>()
+                        viewportWidth  = 25,
+                        items          = new List<IVectorGraphic>()
                         {
                             new VectorPath()
                             {
-                                pathData = MaterialVectorIcons.EmbyIcon,
-                                stroke = "rgba(81,201,39)",
+                                pathData    = MaterialVectorIcons.EmbyIcon,
+                                stroke      = "rgba(81,201,39)",
                                 strokeWidth = 0,
-                                fill = "rgb(81,201,39)"
+                                fill        = "rgb(81,201,39)"
                             }
                         }
                     }
@@ -1261,16 +1361,16 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 {
                     "Line", new AlexaVectorGraphic()
                     {
-                        height = 55,
-                        width = 500,
-                        viewportWidth = 50,
+                        height         = 55,
+                        width          = 500,
+                        viewportWidth  = 50,
                         viewportHeight = 50,
-                        items = new List<IVectorGraphic>()
+                        items          = new List<IVectorGraphic>()
                         {
                             new VectorPath()
                             {
-                                pathData = "M0 0 l1120 0",
-                                stroke = "rgba(255,255,255)",
+                                pathData    = "M0 0 l1120 0",
+                                stroke      = "rgba(255,255,255)",
                                 strokeWidth = 1
                             }
                         }
@@ -1331,14 +1431,14 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             var view = new Directive()
             {
-                type = "Alexa.Presentation.APL.RenderDocument",
-                token = "Help",
+                type     = Directive.AplRenderDocument,
+                token    = "Help",
                 document = new Document()
                 {
-                    theme = "dark",
-                    import = Imports,
-                    resources = Resources,
-                    graphics = graphicsDictionary,
+                    theme        = "dark",
+                    import       = Imports,
+                    resources    = Resources,
+                    graphics     = graphicsDictionary,
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>()
@@ -1367,16 +1467,16 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                         videoAudioTrack = "none",
                                         videoAutoPlay   = true,
                                         overlayGradient = true,
-                                        colorOverlay = true
+                                        colorOverlay    = true
                                     },
                                     new Pager()
                                     {
-                                        height      = "100vh",
-                                        width       = "100vw",
-                                        initialPage = 0,
-                                        navigation  = "forward-only",
-                                        items       = helpItems,
-                                        id          = "HelpPager",
+                                        height        = "100vh",
+                                        width         = "100vw",
+                                        initialPage   = 0,
+                                        navigation    = "forward-only",
+                                        items         = helpItems,
+                                        id            = "HelpPager",
                                         onPageChanged = new List<object>()
                                         {
                                             new SendEvent() { arguments = new List<object>() { nameof(HelpPager), "Help", "${event.source.value}" } }
@@ -1538,88 +1638,6 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             return roomButtons;
         }
         
-        private async Task<List<VisualItem>> RenderComponent_VideoBackdrop(BaseItem baseItem, string token)
-        {
-            var videoBackdropIds = baseItem.ThemeVideoIds;
-            // ReSharper disable once TooManyChainedReferences
-            var videoBackdropId = videoBackdropIds.Length > 0 ? ServerQuery.Instance.GetItemById(videoBackdropIds[0]).InternalId.ToString() : string.Empty;
-            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            var backdropImageUrl     = $"{url}/Items/{baseItem.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
-            var videoBackdropUrl     = $"{url}/videos/{videoBackdropId}/stream.mp4";
-            var videoBackdropOverlay = $"{url}/EmptyPng?quality=90";
-
-           
-            if (!string.IsNullOrEmpty(videoBackdropId))
-            {
-                return await Task.FromResult(new List<VisualItem>()
-                {
-                    new Video()
-                    {
-                        source = new List<Source>()
-                        {
-                            new Source()
-                            {
-                                url         = "${data.videoBackdropSource}",
-                                repeatCount = 0,
-                            }
-                        },
-                        scale = "best-fill",
-                        width = "100vw",
-                        height = "100vh",
-                        position = "absolute",
-                        autoplay = true,
-                        audioTrack = "none",
-                        id = baseItem.InternalId.ToString(),
-                        onEnd = new List<ICommand>()
-                        {
-                            new SetValue()
-                            {
-                                componentId = "backdropOverlay",
-                                property    = "source",
-                                value       = "${data.backdropImageSource}"
-                            },
-                            new SetValue()
-                            {
-                                componentId = "backdropOverlay",
-                                property    = "opacity",
-                                value       = 1
-                            },
-                            new SetValue()
-                            {
-                                componentId = "backdropOverlay",
-                                property    = "overlayColor",
-                                value       = "rgba(0,0,0,0.55)"
-                            }
-                        }
-                    },
-                    new Image()
-                    {
-                        overlayColor = "rgba(0,0,0,1)",
-                        scale = "best-fill",
-                        width = "100vw",
-                        height = "100vh",
-                        position = "absolute",
-                        source = videoBackdropOverlay,
-                        opacity = 0.65,
-                        id = "backdropOverlay"
-                    }
-                });
-            }
-
-            return await Task.FromResult(new List<VisualItem>()
-            {
-                new Image()
-                {
-                    overlayColor = "rgba(0,0,0,0.55)",
-                    scale = "best-fill",
-                    width = "100vw",
-                    height = "100vh",
-                    position = "absolute",
-                    source = backdropImageUrl
-                }
-            });
-        }
-
         
        //Data Sources
         private static async Task<Dictionary<string, IDataSource>> GetSequenceItemsDataSource(string dataSourceKey, List<BaseItem> sequenceItems)
@@ -1641,7 +1659,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             {
                 properties = new Properties()
                 {
-                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                    url   = await ServerQuery.Instance.GetLocalApiUrlAsync(),
                     items = dataSourceItems
                 }
             });
@@ -1669,13 +1687,23 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 overview            = item.Overview,
                 videoBackdropSource = ServerQuery.Instance.GetVideoBackdropUrl(item),
                 backdropImageSource = ServerQuery.Instance.GetBackdropImageUrl(item),
-                videoOverlaySource  = ServerQuery.Instance.GetVideoOverlay()
+                videoOverlaySource  = "/EmptyPng?quality=90"
             };
+
+            var recommendationItems =  ServerQuery.Instance.GetSimilarItems(item);
+            var recommendations = new List<Recommendation>();
+            recommendationItems.ForEach(r => recommendations.Add(new Recommendation()
+            {
+                id = r.InternalId,
+                thumbImageSource = ServerQuery.Instance.GetThumbImageUrl(r)
+            }));
+
             dataSource.Add(dataSourceKey, new DataSourceObject()
             {
                 properties = new Properties()
                 {
                     url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                    recommendations = recommendations,
                     item = dataSourceItem
                 }
             });

@@ -23,15 +23,6 @@ namespace AlexaController.Alexa.IntentRequest
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
                 shouldEndSession = false,
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                //    {
-                //        type = SpeechResponseType.NOT_UNDERSTOOD, 
-                //        session = Session
-                //    })
-                //},
-                
                 directives = new List<IDirective>()
                 {
                      await RenderDocumentBuilder.Instance

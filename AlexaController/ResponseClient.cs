@@ -37,6 +37,7 @@ namespace AlexaController
         // ReSharper disable once FlagArgument
         public async Task<string> BuildAlexaResponse(IResponse response, IAlexaSession session)
         {
+            // ReSharper disable once ComplexConditionExpression
             var person = !(session.person is null) && response.SpeakUserName ? Ssml.SayName(session.person) : "";
             
             if (!(response.outputSpeech is null))
@@ -61,7 +62,7 @@ namespace AlexaController
             };
 
             // Remove the directive if the device doesn't handle APL.
-            if (!session.alexaSessionDisplayType.Equals(AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE))
+            if (!session.supportsApl)
             {
                 if (response.directives.Any(d => d.type == "Alexa.Presentation.APL.RenderDocument"))
                 {

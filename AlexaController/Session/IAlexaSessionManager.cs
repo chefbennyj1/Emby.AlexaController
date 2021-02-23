@@ -5,6 +5,7 @@ using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using MediaBrowser.Controller.Session;
+using MediaBrowser.Model.Services;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -35,21 +36,24 @@ namespace AlexaController.Session
             SessionManager.PlaybackProgress += SessionManager_PlaybackProgress;
         }
 
-       
-
-        private static AlexaSessionDisplayType GetCurrentViewport(IAlexaRequest alexaRequest)
+        private bool SupportsApl(IAlexaRequest alexaRequest)
         {
+            if (alexaRequest.context.Viewports is null) return false;
+
             var viewportUtility = new ViewportUtility();
             var viewportProfile = viewportUtility.GetViewportProfile(alexaRequest.context.Viewport);
+            if (viewportProfile == ViewportProfile.UNKNOWN_VIEWPORT_PROFILE) return false;
 
-            if (viewportProfile == ViewportProfile.UNKNOWN_VIEWPORT_PROFILE) return AlexaSessionDisplayType.NONE;
-
-            return !(alexaRequest.context.Viewports is null)
-                ? viewportUtility.ViewportSizeIsLessThen(viewportProfile, ViewportProfile.TV_LANDSCAPE_MEDIUM)
-                    ? alexaRequest.context.Viewports[0].type == "APL"
-                        ? AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE : AlexaSessionDisplayType.NONE : AlexaSessionDisplayType.NONE : AlexaSessionDisplayType.NONE;
+            return viewportUtility.ViewportSizeIsLessThen(viewportProfile, ViewportProfile.TV_LANDSCAPE_MEDIUM) && 
+                   Equals(alexaRequest.context.Viewports[0].type, "APL");
         }
-        
+
+        private static ViewportProfile GetCurrentViewport(IAlexaRequest alexaRequest)
+        {
+            var viewportUtility = new ViewportUtility();
+            return viewportUtility.GetViewportProfile(alexaRequest.context.Viewport);
+        }
+
         public void EndSession(IAlexaRequest alexaRequest)
         {
             OpenSessions.RemoveAll(s => s.SessionId.Equals(alexaRequest.session.sessionId));
@@ -99,10 +103,11 @@ namespace AlexaController.Session
             {
                 SessionId                   = amazonSession.sessionId,
                 EchoDeviceId                = system.device.deviceId,
+                supportsApl                 = SupportsApl(alexaRequest),
                 person                      = person,
                 room                        = room,
                 User                        = user,
-                alexaSessionDisplayType     = GetCurrentViewport(alexaRequest),
+                viewport                    = GetCurrentViewport(alexaRequest),
                 PersistedRequestContextData = persistedRequestData,
                 paging                      = new Paging { pages = new Dictionary<int, RenderDocumentTemplate>() }
             };

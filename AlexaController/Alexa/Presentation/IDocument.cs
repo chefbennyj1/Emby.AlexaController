@@ -8,7 +8,7 @@ namespace AlexaController.Alexa.Presentation
         string type                          { get; }
         string version                       { get; }
         Settings settings                    { get; }
-        List<Resource> resources            { get; }
+        List<Resource> resources             { get; }
         IMainTemplate mainTemplate           { get; }
     }
 }

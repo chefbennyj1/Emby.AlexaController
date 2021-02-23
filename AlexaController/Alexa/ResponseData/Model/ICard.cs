@@ -2,10 +2,10 @@
 {
     public interface ICard
     {
-        string type { get; set; }
-        string title { get; set; }
-        string content { get; set; }
-        string text { get; set; }
+        string type                                                        { get; set; }
+        string title                                                       { get; set; }
+        string content                                                     { get; set; }
+        string text                                                        { get; set; }
     }
 
     public class Card : ICard

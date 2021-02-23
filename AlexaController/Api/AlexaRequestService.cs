@@ -100,9 +100,9 @@ namespace AlexaController.Api
         {
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                outputSpeech = new OutputSpeech(){phrase = "I have encountered an error."},
+                outputSpeech     = new OutputSpeech(){phrase = "I have encountered an error."},
                 shouldEndSession = true,
-                SpeakUserName = true
+                SpeakUserName    = true
             }, null);
         }
 
@@ -204,14 +204,6 @@ namespace AlexaController.Api
                     new Response()
                     {
                         shouldEndSession = true,
-
-                        //outputSpeech = new OutputSpeech()
-                        //{
-                        //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                        //    {
-                        //        type = SpeechResponseType.PERSON_NOT_RECOGNIZED
-                        //    })
-                        //}, 
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
@@ -231,16 +223,6 @@ namespace AlexaController.Api
 
             return await ResponseClient.Instance.BuildAlexaResponse(new Response()
             {
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    sound = "<audio src=\"soundbank://soundlibrary/alarms/beeps_and_bloops/intro_02\"/>",
-                //    phrase= await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                //    {
-                //        type = SpeechResponseType.ON_LAUNCH, 
-                //        session = session
-                //    })
-                   
-                //},
                 SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
@@ -260,10 +242,8 @@ namespace AlexaController.Api
                             
                         }
                     })
-
                 }
             }, session);
-
         }
 
         private static async Task<string> OnDefault()
