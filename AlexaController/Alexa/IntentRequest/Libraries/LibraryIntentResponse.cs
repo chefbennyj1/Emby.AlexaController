@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
@@ -69,13 +69,13 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             session.PersistedRequestContextData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
-            var documentTemplateInfo = new RenderDocumentTemplate()
+            var documentTemplateInfo = new InternalRenderDocumentQuery()
             {
                 baseItems = new List<BaseItem>() {result},
                 renderDocumentType = RenderDocumentType.BROWSE_LIBRARY_TEMPLATE
             };
 
-            var audioTemplateInfo = new RenderAudioTemplate()
+            var audioTemplateInfo = new InternalRenderAudioQuery()
             {
                 speechContent = SpeechContent.BROWSE_LIBRARY,
                 session = session,
@@ -87,10 +87,10 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                 }
             };
 
-            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
-            var renderAudioDirective = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderAudioDirective = await RenderAudioManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
             
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 //outputSpeech = new OutputSpeech()
                 //{

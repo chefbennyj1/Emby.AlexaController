@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APL.Commands;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Sequence.onScroll
             var request = AlexaRequest.request;
             var arguments = request.arguments;
 
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()

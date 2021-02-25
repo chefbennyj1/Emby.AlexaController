@@ -14,7 +14,7 @@ namespace AlexaController.Session
     {
         void EndSession(IAlexaRequest alexaRequest);
         IAlexaSession GetSession(IAlexaRequest alexaRequest, User user = null);
-        void UpdateSession(IAlexaSession session, RenderDocumentTemplate template, bool? isBack = null);
+        void UpdateSession(IAlexaSession session, InternalRenderDocumentQuery template, bool? isBack = null);
         double GetPlaybackProgressTicks(IAlexaSession alexaSession);
     }
 
@@ -109,7 +109,7 @@ namespace AlexaController.Session
                 User                        = user,
                 viewport                    = GetCurrentViewport(alexaRequest),
                 PersistedRequestContextData = persistedRequestData,
-                paging                      = new Paging { pages = new Dictionary<int, RenderDocumentTemplate>() }
+                paging                      = new Paging { pages = new Dictionary<int, InternalRenderDocumentQuery>() }
             };
 
             OpenSessions.Add(sessionInfo);
@@ -117,7 +117,7 @@ namespace AlexaController.Session
             return sessionInfo;
         }
 
-        public void UpdateSession(IAlexaSession session, RenderDocumentTemplate template, bool? isBack = null)
+        public void UpdateSession(IAlexaSession session, InternalRenderDocumentQuery template, bool? isBack = null)
         {
             if (!(template is null))
                 session = UpdateSessionPaging(session, template, isBack);
@@ -126,7 +126,7 @@ namespace AlexaController.Session
             OpenSessions.Add(session);
         }
 
-        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, RenderDocumentTemplate template, bool? isBack = null)
+        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, InternalRenderDocumentQuery template, bool? isBack = null)
         {
             if (isBack == true)
             {

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -49,7 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result.TotalRecordCount <= 0)
             {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -60,7 +60,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName    = true,
                     directives       = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
+                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
                         {
                             HeadlinePrimaryText = "I was unable to find items. Does that genre exist?",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
@@ -107,7 +107,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var documentTemplateInfo = new RenderDocumentTemplate()
+            var documentTemplateInfo = new InternalRenderDocumentQuery()
             {
                 baseItems =  result.Items.ToList() ,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
@@ -119,9 +119,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = result.Items[0];
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
             
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

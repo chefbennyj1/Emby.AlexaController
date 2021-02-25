@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -41,9 +41,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(previousPage, session);
+            var renderDocumentDirective = RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(previousPage, session);
 
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()

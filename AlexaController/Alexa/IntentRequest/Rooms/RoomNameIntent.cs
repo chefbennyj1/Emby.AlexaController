@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
-using AlexaController.Alexa.RequestData.Model;
+using AlexaController.Alexa.Model.RequestData;
 using AlexaController.Api;
 using AlexaController.Session;
 

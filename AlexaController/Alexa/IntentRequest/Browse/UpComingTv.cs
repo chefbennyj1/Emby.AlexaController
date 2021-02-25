@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -50,14 +50,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //{
             //    case AlexaSessionDisplayType.ALEXA_PRESENTATION_LANGUAGE:
             //        {
-                        var documentTemplateInfo = new RenderDocumentTemplate()
+                        var documentTemplateInfo = new InternalRenderDocumentQuery()
                         {
                             baseItems = result.Items.ToList(),
                             renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
                             HeaderTitle = "Upcoming Episode"
                         };
 
-                        var audioInfo = new RenderAudioTemplate()
+                        var audioInfo = new InternalRenderAudioQuery()
                         {
                             speechContent = SpeechContent.UP_COMING_EPISODES,
                             session = Session,
@@ -72,10 +72,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
                         AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-                        var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
-                        var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(audioInfo);
+                        var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+                        var renderAudioDirective    = await RenderAudioManager.Instance.GetAudioDirectiveAsync(audioInfo);
 
-                        return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                        return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
                             shouldEndSession = null,
                             directives = new List<IDirective>()

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -62,12 +62,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             
             if (result is null)
             {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
+                        await RenderAudioManager.Instance.GetAudioDirectiveAsync(new InternalRenderAudioQuery()
                         {
                             speechContent = SpeechContent.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
                             session = Session,
@@ -95,20 +95,20 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch { }
 
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(
-                            new RenderDocumentTemplate()
+                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(
+                            new InternalRenderDocumentQuery()
                             {
                                 renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                                 HeadlinePrimaryText = $"Stop! Rated {result.OfficialRating}"
 
                             }, Session),
-                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
-                            new RenderAudioTemplate()
+                        await RenderAudioManager.Instance.GetAudioDirectiveAsync(
+                            new InternalRenderAudioQuery()
                             {
                                 speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
                                 session = Session,
@@ -142,14 +142,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var documentTemplateInfo = new RenderDocumentTemplate()
+            var documentTemplateInfo = new InternalRenderDocumentQuery()
             {
                 baseItems = new List<BaseItem>() { result },
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
                 HeaderAttributionImage = result.HasImage(ImageType.Logo) ? $"/Items/{result.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
             
-            var renderAudioTemplateInfo = new RenderAudioTemplate()
+            var renderAudioTemplateInfo = new InternalRenderAudioQuery()
             {
                 speechContent = SpeechContent.BROWSE_ITEM,
                 session = Session,
@@ -159,16 +159,17 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     source = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
             };
+
             //Update Session
             Session.NowViewingBaseItem = result;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
-            var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderAudioDirective    = await RenderAudioManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             try
             {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = null,
                     SpeakUserName = true,

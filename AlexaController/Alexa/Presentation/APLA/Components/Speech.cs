@@ -1,6 +1,6 @@
 ﻿namespace AlexaController.Alexa.Presentation.APLA.Components
 {
-    public class Speech : AudioItem
+    public class Speech : AudioBaseItem
     {
         public object type => nameof(Speech);
         public string contentType => "SSML";

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var results = ServerQuery.Instance.GetItemsResult(baseItem,
                 new[] { type == "Series" ? "Season" : "Episode" }, session.User);
 
-            var documentTemplateInfo = new RenderDocumentTemplate()
+            var documentTemplateInfo = new InternalRenderDocumentQuery()
             {
                 baseItems          = results.Items.ToList(),
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
@@ -56,9 +56,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
             
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

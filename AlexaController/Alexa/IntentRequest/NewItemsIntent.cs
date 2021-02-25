@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -52,7 +52,7 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (!results.Any())
             {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -71,14 +71,14 @@ namespace AlexaController.Alexa.IntentRequest
                 case ViewportProfile.HUB_LANDSCAPE_MEDIUM:
                 case ViewportProfile.HUB_LANDSCAPE_LARGE:
                 {
-                        var documentTemplateInfo = new RenderDocumentTemplate()
+                        var documentTemplateInfo = new InternalRenderDocumentQuery()
                         {
                             baseItems          = results,
                             renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
                             HeaderTitle        = type
                         };
 
-                        var renderAudioTemplateInfo = new RenderAudioTemplate()
+                        var renderAudioTemplateInfo = new InternalRenderAudioQuery()
                         {
                             speechContent = SpeechContent.NEW_ITEMS_APL,
                             session = Session, 
@@ -93,10 +93,10 @@ namespace AlexaController.Alexa.IntentRequest
 
                         AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-                        var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
-                        var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+                        var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+                        var renderAudioDirective    = await RenderAudioManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
-                        return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                        return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
                             //outputSpeech = new OutputSpeech()
                             //{
@@ -120,7 +120,7 @@ namespace AlexaController.Alexa.IntentRequest
                     }
                 default: //Voice only
                     {
-                        var renderAudioTemplateInfo = new RenderAudioTemplate()
+                        var renderAudioTemplateInfo = new InternalRenderAudioQuery()
                         {
                             speechContent = SpeechContent.NEW_ITEMS_DISPLAY_NONE,
                             session = Session, 
@@ -128,8 +128,8 @@ namespace AlexaController.Alexa.IntentRequest
                             args = new []{d.ToLongDateString()}
                         };
 
-                        var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
-                        return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                        var renderAudioDirective    = await RenderAudioManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+                        return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
                             //outputSpeech = new OutputSpeech()
                             //{

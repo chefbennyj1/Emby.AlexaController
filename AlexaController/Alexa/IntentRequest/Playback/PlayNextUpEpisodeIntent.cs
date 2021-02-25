@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
@@ -40,12 +40,12 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
             if (nextUpEpisode is null)
             {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
+                        await RenderAudioManager.Instance.GetAudioDirectiveAsync(new InternalRenderAudioQuery()
                         {
                             speechContent = SpeechContent.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
                             session = Session,
@@ -75,7 +75,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 //outputSpeech = new OutputSpeech()
                 //{
@@ -90,14 +90,14 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
+                    await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
                     {
                         baseItems          = new List<BaseItem>() { nextUpEpisode },
                         renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
 
                     }, Session),
-                    await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
-                        new RenderAudioTemplate()
+                    await RenderAudioManager.Instance.GetAudioDirectiveAsync(
+                        new InternalRenderAudioQuery()
                         {
                             speechContent = SpeechContent.PLAY_NEXT_UP_EPISODE, 
                             session = Session, 

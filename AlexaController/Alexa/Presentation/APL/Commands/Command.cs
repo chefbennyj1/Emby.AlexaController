@@ -1,10 +1,10 @@
-﻿namespace AlexaController.Alexa.Presentation.APL.Commands
+﻿using System.Collections.Generic;
+
+namespace AlexaController.Alexa.Presentation.APL.Commands
 {
     public interface ICommand
     {
-        object type { get; }
-        bool screenLock { get; set; }
-        int delay { get; set; }
+        
     }
 
     public class Command : ICommand

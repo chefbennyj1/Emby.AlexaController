@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -20,18 +20,18 @@ namespace AlexaController.Alexa.IntentRequest
         }
         public async Task<string> Response()
         {
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                     await RenderDocumentBuilder.Instance
-                        .GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
+                     await RenderDocumentManager.Instance
+                        .GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
                         {
                             renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
                         }, Session),
-                     await RenderAudioBuilder.Instance
-                         .GetAudioDirectiveAsync(new RenderAudioTemplate()
+                     await RenderAudioManager.Instance
+                         .GetAudioDirectiveAsync(new InternalRenderAudioQuery()
                          {
                              speechContent = SpeechContent.NOT_UNDERSTOOD,
                              session = Session,

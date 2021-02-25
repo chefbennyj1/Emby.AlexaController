@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlexaController.Alexa.ResponseData.Model;
-using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
+using AlexaController.Alexa.Model.ResponseData;
+using AlexaController.Alexa.SpeechSynthesis;
 using AlexaController.Session;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Model.Serialization;
@@ -17,7 +17,7 @@ namespace AlexaController
 
     public interface IResponseClient
     {
-        Task<string> BuildAlexaResponse(IResponse response,IAlexaSession session);
+        Task<string> BuildAlexaResponseAsync(IResponse response,IAlexaSession session);
         Task PostProgressiveResponse(string speechOutput, string accessToken, string requestId);
     }
 
@@ -35,7 +35,7 @@ namespace AlexaController
         }
 
         // ReSharper disable once FlagArgument
-        public async Task<string> BuildAlexaResponse(IResponse response, IAlexaSession session)
+        public async Task<string> BuildAlexaResponseAsync(IResponse response, IAlexaSession session)
         {
             // ReSharper disable once ComplexConditionExpression
             var person = !(session.person is null) && response.SpeakUserName ? Ssml.SayName(session.person) : "";
@@ -61,7 +61,7 @@ namespace AlexaController
                 outputSpeech = new OutputSpeech() { ssml = "<speak>Can I help you with anything? You can ask to show a movie, or to show a tv series.</speak>" }
             };
 
-            // Remove the directive if the device doesn't handle APL.
+            // Remove the APL directive if the device doesn't handle APL.
             if (!session.supportsApl)
             {
                 if (response.directives.Any(d => d.type == "Alexa.Presentation.APL.RenderDocument"))

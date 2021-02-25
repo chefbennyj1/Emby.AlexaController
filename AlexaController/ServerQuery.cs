@@ -242,6 +242,7 @@ namespace AlexaController
             //return await Task.FromResult(upComing.Items.ToList());
         }
 
+
         public string GetRunTime(BaseItem baseItem)
         {
             if (!string.Equals(baseItem.GetType().Name, "Movie")) return string.Empty;
@@ -265,13 +266,18 @@ namespace AlexaController
 
             return item.HasImage(ImageType.Primary) 
                 ? $"/Items/{ item.InternalId }/Images/primary?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;" 
-                : $"/Items/{ item.InternalId }/Images/backdrop/0?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
+                : $"/Items/{ item.InternalId }/Images/backdrop?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
         }
         
         public string GetBackdropImageSource(BaseItem item)
         {
-            var internalId = item.InternalId;
-            return $"/Items/{internalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
+            
+            switch (item.GetType().Name)
+            {
+                case "Episode" : return $"/Items/{item.Parent.Parent.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
+                case "Season"  : return $"/Items/{item.Parent.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
+                default:  return $"/Items/{item.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
+            }
         }
 
         public string GetThumbImageSource(BaseItem item)
@@ -305,6 +311,11 @@ namespace AlexaController
             
             return similarQuery.Items.Take(4).ToList();
 
+        }
+
+        public string GetGenres(BaseItem item)
+        {
+            return $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}";
         }
 
         public void Dispose()

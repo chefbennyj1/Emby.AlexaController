@@ -1,4 +1,7 @@
-﻿namespace AlexaController.Alexa.Presentation.APL.Components
+﻿using System.Collections.Generic;
+using AlexaController.Alexa.Presentation.APL.Components.FIlters;
+
+namespace AlexaController.Alexa.Presentation.APL.Components
 {
     public class Image : VisualBaseItem
     {
@@ -7,5 +10,6 @@
         public string overlayColor { get; set; }
         public string scale                    { get; set; }
         public Gradient overlayGradient        { get; set; }
+        public List<IFilter> filter { get; set; }
     }
 }

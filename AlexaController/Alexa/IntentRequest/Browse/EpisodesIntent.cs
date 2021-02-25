@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
@@ -60,13 +60,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var results = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
                 Session.NowViewingBaseItem, Session.User);
 
-            RenderAudioTemplate renderAudioTemplateInfo = null;
+            InternalRenderAudioQuery renderAudioTemplateInfo = null;
             
 
             // User requested season/episode data that doesn't exist
             if (!results.Any())
             {
-                renderAudioTemplateInfo = new RenderAudioTemplate()
+                renderAudioTemplateInfo = new InternalRenderAudioQuery()
                 {
                     speechContent = SpeechContent.NO_SEASON_ITEM_EXIST,
                     session = Session,
@@ -77,7 +77,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         filter = new List<IFilter>() { new Volume() { amount = 0.5} }
                     }
                 };
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     //outputSpeech = new OutputSpeech()
                     //{
@@ -92,7 +92,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo)
+                        await RenderAudioManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo)
                     }
                 }, Session);
             }
@@ -115,7 +115,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var documentTemplateInfo = new RenderDocumentTemplate()
+            var documentTemplateInfo = new InternalRenderDocumentQuery()
             {
                 baseItems              = results,
                 renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
@@ -123,7 +123,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 HeaderAttributionImage = season.Parent.HasImage(ImageType.Logo) ? $"/Items/{season.Parent.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
-            renderAudioTemplateInfo = new RenderAudioTemplate()
+            renderAudioTemplateInfo = new InternalRenderAudioQuery()
             {
                 speechContent = SpeechContent.BROWSE_ITEM,
                 session = Session,
@@ -140,10 +140,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = season;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
-            var renderAudioDirective    = await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderAudioDirective    = await RenderAudioManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
                 SpeakUserName    = true,

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -45,7 +45,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -54,7 +54,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
+                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
                         {
                             renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                             HeadlinePrimaryText = "Please say the name of the room you want to setup.",
@@ -65,7 +65,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 }, Session);
             }
             
-            var response = await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            var response = await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

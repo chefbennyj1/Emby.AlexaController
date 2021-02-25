@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 
@@ -30,7 +30,7 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (person is null)
             {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     SpeakUserName = true,
@@ -45,8 +45,8 @@ namespace AlexaController.Alexa.IntentRequest
                     //},
                     directives = new List<IDirective>()
                     {
-                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
-                            new RenderAudioTemplate()
+                        await RenderAudioManager.Instance.GetAudioDirectiveAsync(
+                            new InternalRenderAudioQuery()
                             {
                                 speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR,
                                 session = Session,
@@ -64,7 +64,7 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
-                    return await ResponseClient.Instance.BuildAlexaResponse(new Response
+                    return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
@@ -78,8 +78,8 @@ namespace AlexaController.Alexa.IntentRequest
                         //}
                         directives = new List<IDirective>()
                         {
-                        await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
-                            new RenderAudioTemplate()
+                        await RenderAudioManager.Instance.GetAudioDirectiveAsync(
+                            new InternalRenderAudioQuery()
                             {
                                 speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_EXISTS,
                                 session = Session,
@@ -98,7 +98,7 @@ namespace AlexaController.Alexa.IntentRequest
             Task.Run(() => ServerController.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 #pragma warning restore 4014
 
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response
             {
                 shouldEndSession = true,
                 SpeakUserName = true,
@@ -112,8 +112,8 @@ namespace AlexaController.Alexa.IntentRequest
                 //},
                 directives = new List<IDirective>()
                 {
-                    await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
-                        new RenderAudioTemplate()
+                    await RenderAudioManager.Instance.GetAudioDirectiveAsync(
+                        new InternalRenderAudioQuery()
                         {
                             speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS,
                             session = Session,

@@ -5,11 +5,11 @@ using System.IO;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
-using AlexaController.Alexa.SpeechSynthesisMarkupLanguage;
+using AlexaController.Alexa.SpeechSynthesis;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Common.Net;
@@ -66,11 +66,14 @@ namespace AlexaController.Api
             if (SpeechAuthorization.Instance is null)
                 Activator.CreateInstance(typeof(SpeechAuthorization), user);
 
-            if (RenderDocumentBuilder.Instance is null)
-                Activator.CreateInstance<RenderDocumentBuilder>();
+            if (RenderDocumentManager.Instance is null)
+                Activator.CreateInstance<RenderDocumentManager>();
 
-            if (RenderAudioBuilder.Instance is null)
-                Activator.CreateInstance<RenderAudioBuilder>();
+            if (RenderAudioManager.Instance is null)
+                Activator.CreateInstance<RenderAudioManager>();
+
+            if (DataSourceManager.Instance is null)
+                Activator.CreateInstance<DataSourceManager>();
         }
 
         public async Task<object> Post(AlexaRequest data)
@@ -84,21 +87,20 @@ namespace AlexaController.Api
                 
                 switch (alexaRequest.request.type)
                 {
-                    case "Alexa.Presentation.APL.UserEvent" : return await OnUserEvent(alexaRequest);
-                    case "IntentRequest"                    : return await OnIntentRequest(alexaRequest);
-                    case "SessionEndedRequest"              : return await OnSessionEndRequest(alexaRequest);
-                    case "LaunchRequest"                    : return await OnLaunchRequest(alexaRequest);
-                    case "System.ExceptionEncountered"      : return await OnExceptionEncountered();
-                    default                                 : return await OnDefault();
+                    case "Alexa.Presentation.APL.UserEvent"    : return await OnUserEvent(alexaRequest);
+                    case "IntentRequest"                       : return await OnIntentRequest(alexaRequest);
+                    case "SessionEndedRequest"                 : return await OnSessionEndRequest(alexaRequest);
+                    case "LaunchRequest"                       : return await OnLaunchRequest(alexaRequest);
+                    case "System.ExceptionEncountered"         : return await OnExceptionEncountered();
+                    default                                    : return await OnDefault();
                 }
             }
         }
 
-      
 
         private async Task<string> OnExceptionEncountered()
         {
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech     = new OutputSpeech(){phrase = "I have encountered an error."},
                 shouldEndSession = true,
@@ -122,7 +124,7 @@ namespace AlexaController.Api
                 {
                     if (!SpeechAuthorization.Instance.UserPersonalizationProfileExists(person))
                         
-                        return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                        return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
                             shouldEndSession = true,
                             outputSpeech = new OutputSpeech()
@@ -158,7 +160,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     outputSpeech = new OutputSpeech()
@@ -168,8 +170,8 @@ namespace AlexaController.Api
 
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentBuilder.Instance
-                            .GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
+                        await RenderDocumentManager.Instance
+                            .GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
                             {
                                 renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                                 HeadlinePrimaryText = exception.Message
@@ -200,14 +202,14 @@ namespace AlexaController.Api
             var user = SpeechAuthorization.Instance.GetRecognizedPersonalizationProfileResult(context.System.person);
             
             if (user is null)
-                return await ResponseClient.Instance.BuildAlexaResponse(
+                return await ResponseClient.Instance.BuildAlexaResponseAsync(
                     new Response()
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
+                            await RenderAudioManager.Instance.GetAudioDirectiveAsync(new InternalRenderAudioQuery()
                             {
                                 speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
                                 audio = new Audio()
@@ -221,18 +223,18 @@ namespace AlexaController.Api
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
 
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentTemplate()
+                    await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
                     {
                         HeadlinePrimaryText = "Welcome to Home Theater Emby Controller",
                         renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE
                     }, session),
-                    await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(new RenderAudioTemplate()
+                    await RenderAudioManager.Instance.GetAudioDirectiveAsync(new InternalRenderAudioQuery()
                     {
                         speechContent = SpeechContent.ON_LAUNCH,
                         session = session,
@@ -248,7 +250,7 @@ namespace AlexaController.Api
 
         private static async Task<string> OnDefault()
         {
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

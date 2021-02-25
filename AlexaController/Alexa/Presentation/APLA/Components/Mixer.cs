@@ -2,11 +2,11 @@
 
 namespace AlexaController.Alexa.Presentation.APLA.Components
 {
-    public class Mixer : AudioItem
+    public class Mixer : AudioBaseItem
     {
         public object type => nameof(Mixer);
-        public List<AudioItem> items { get; set; }
-        public AudioItem item { get; set; }
+        public List<AudioBaseItem> items { get; set; }
+        public AudioBaseItem item { get; set; }
         public Strategy strategy { get; set; }
     }
 

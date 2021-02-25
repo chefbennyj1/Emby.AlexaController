@@ -4,10 +4,10 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Model.RequestData;
+using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
-using AlexaController.Alexa.RequestData.Model;
-using AlexaController.Alexa.ResponseData.Model;
 using AlexaController.Api;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -71,21 +71,21 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
                     }
 
-                    return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+                    return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(
-                                new RenderDocumentTemplate()
+                            await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(
+                                new InternalRenderDocumentQuery()
                                 {
                                     renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                                     HeadlinePrimaryText = "Stop!"
 
                                 }, Session),
-                            await RenderAudioBuilder.Instance.GetAudioDirectiveAsync(
-                                new RenderAudioTemplate()
+                            await RenderAudioManager.Instance.GetAudioDirectiveAsync(
+                                new InternalRenderAudioQuery()
                                 {
                                     speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
                                     session = Session, 
@@ -122,7 +122,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             ServerController.Instance.Log.Info(nameof(CollectionIntent) + "Preparing collection base item: " + collectionBaseItem?.Name);
 
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
-            var documentTemplateInfo = new RenderDocumentTemplate()
+            var documentTemplateInfo = new InternalRenderDocumentQuery()
             {
                 HeaderTitle            = textInfo.ToTitleCase(collectionBaseItem?.Name.ToLower() ?? throw new Exception("no collection item")),
                 renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
@@ -134,9 +134,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = collectionBaseItem;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentBuilder.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
 
-            return await ResponseClient.Instance.BuildAlexaResponse(new Response()
+            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

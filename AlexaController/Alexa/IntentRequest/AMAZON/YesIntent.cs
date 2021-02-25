@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AlexaController.Alexa.RequestData.Model;
+using AlexaController.Alexa.Model.RequestData;
 using AlexaController.Api;
 using AlexaController.Session;
 
