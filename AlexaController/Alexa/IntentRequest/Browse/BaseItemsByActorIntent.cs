@@ -6,7 +6,6 @@ using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Model.RequestData;
 using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.APLA.Filters;
 using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
 using AlexaController.Session;

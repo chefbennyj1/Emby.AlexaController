@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AlexaController.Alexa.Presentation.APL.Components.FIlters
+﻿namespace AlexaController.Alexa.Presentation.APL.Components.VisualFilters
 {
     public class Blend : IFilter
     {

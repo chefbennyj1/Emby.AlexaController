@@ -23,50 +23,6 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         }
 
         private static readonly Random RandomIndex = new Random();
-
-        public static readonly List<string> HelpStrings = new List<string>()
-        {
-            "<b>Accessing Emby accounts based on your voice.</b>",
-            "I have the ability to access specific emby user accounts, and library data based on the sound of your voice. If you have not yet turned on Personalization in your Alexa App, and enabled it for this skill, please do that now.",
-            "You can enable Parental Controls, so media will be filtered based on who is speaking. This way, media items can not be accessed by people who shouldn't have access to them.",
-            "To enable this feature, open the Emby plugin configuration page, and toggle the button for \"Enable parental control using voice recognition\". If this feature is turned off, I will not filter media items, and will show media based on the Emby Administrators account, at all times.",
-            "Select the \"New Authorization Account Link\" button, and follow the instructions to add personalization.",
-            "<b>Accessing media Items in rooms</b>",
-            "The Emby plugin will allow you to create \"Rooms\", based on the devices in your home.",
-            "In the plugin configuration, map each Emby ready device to a specific room. You will create the room name that I will understand.",
-            "For example: map your Amazon Fire Stick 4K to a room named: \"Family Room\".",
-            "Now you can access titles and request them to display per room.",
-            "You can use the phrase:",
-            "Ask home theater to play the movie Iron Man in the family room.",
-            "To display the movies library on the \"Family Room\" device, you can use the phrase:",
-            "Ask home theater to show \"Movies\" in the Family Room.",
-            "The same can be said for \"Collections\", and \"TV Series\" libraries",
-            "The Emby client must already be running on the device in order to access the room commands.",
-            "<b>Accessing Collection Items</b>",
-            "I have the ability to show collection data on echo show, echo spot, or other devices with screens.",
-            "To access this ability, you can use the following phrases:",
-            "Ask home theater to show all the Iron Man movies...",
-            "Ask home theater to show the Spiderman collection...",
-            "Fire TV devices, with Alexa enabled, are exempt from displaying these items because the Emby client will take care of this for you.",
-            "<b>Accessing individual media Items</b>",
-            "I am able to show individual media items as well.",
-            "You can use the phrases:",
-            "Ask home theater to show the movie Spiderman Far From Home...",
-            "Ask home theater to show the movie Spiderman Far From Home, in the Family Room.",
-            "You can also access TV Series the same way.",
-            "I will understand the phrases: ",
-            "Ask home theater to show the series Westworld...",
-            "Ask home theater to show the next up episode for Westworld...",
-            "<b>Accessing new media Items</b>",
-            "To access new titles in your library, you can use the phrases:",
-            "Ask home theater about new movies...",
-            "Ask home theater about new TV Series...",
-            "You can also request a duration for new items... For example:",
-            "Ask home theater for new movies added in the last three days...",
-            "Ask home theater for new tv shows added in the last month",
-            "Remember that as long as the echo show, or spot is displaying an image, you are in an open session. This means you don't have to use the \"Ask home theater\" phrases to access media",
-            "This concludes the help section. Good luck!",
-        };
         
         public async Task<IDirective> GetAudioDirectiveAsync(InternalRenderAudioQuery query)
         {

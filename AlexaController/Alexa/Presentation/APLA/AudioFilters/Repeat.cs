@@ -1,4 +1,4 @@
-﻿namespace AlexaController.Alexa.Presentation.APLA.Filters
+﻿namespace AlexaController.Alexa.Presentation.APLA.AudioFilters
 {
     public class Repeat : IFilter
     {

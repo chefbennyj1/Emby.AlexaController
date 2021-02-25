@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL.Components.FIlters;
+using AlexaController.Alexa.Presentation.APL.Components.VisualFilters;
+
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {

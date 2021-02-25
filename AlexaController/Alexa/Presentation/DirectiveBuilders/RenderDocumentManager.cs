@@ -4,12 +4,13 @@ using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
-using AlexaController.Alexa.Presentation.APL.Components.FIlters;
+using AlexaController.Alexa.Presentation.APL.Components.VisualFilters;
 using AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page;
 using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
+using IFilter = AlexaController.Alexa.Presentation.APL.Components.VisualFilters.IFilter;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 using Source   = AlexaController.Alexa.Presentation.APL.Components.Source;
 using Text     = AlexaController.Alexa.Presentation.APL.Components.Text;
@@ -169,12 +170,12 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                    angle = 0
                                 }
                             },
-                            new Blend()
-                            {
-                                mode = "color-burn",
-                                source = -2,
-                                destination = -1
-                            }
+                           new Blend()
+                           {
+                               mode = "color-burn",
+                               source = -2,
+                               destination = -1
+                           }
                         }
                     },
                     new AlexaHeader()
@@ -1332,15 +1333,13 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         
         private async Task<IDirective> RenderHelpTemplate()
         {
-            var helpItems          = new List<VisualBaseItem>();
-            var url                = await ServerQuery.Instance.GetLocalApiUrlAsync();
             var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
                 {
                     "Emby", new AlexaVectorGraphic()
                     {
-                        height         = 235,
-                        width          = 235,
+                        height         = 75,
+                        width          = 75,
                         viewportHeight = 25,
                         viewportWidth  = 25,
                         items          = new List<IVectorGraphic>()
@@ -1348,9 +1347,9 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             new VectorPath()
                             {
                                 pathData    = MaterialVectorIcons.EmbyIcon,
-                                stroke      = "rgba(81,201,39)",
+                                stroke      = "none",
                                 strokeWidth = 0,
-                                fill        = "rgb(81,201,39)"
+                                fill        = "white"
                             }
                         }
                     }
@@ -1375,57 +1374,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 }
             };
             
-            helpItems.Add(new Container()
-            {
-                justifyContent = "center",
-                alignItems = "center",
-                direction = "column",
-                items = new List<VisualBaseItem>()
-                {
-                    new VectorGraphic()
-                    {
-                        source = "Emby",
-                        id = "embyLogo",
-                        onMount = new List<ICommand>()
-                        {
-                            new Command() { type = nameof(Animations.FadeIn)}
-                        }
-                    },
-                    new Text()
-                    {
-                       text       = "emby",
-                       fontSize   = "100",
-                       fontFamily = "Roboto",
-                       fontWeight = "300",
-                       id         = "embyText",
-                       top        = "-4vh"
-                    }
-                }
-            });
-
-            RenderAudioManager.HelpStrings.ForEach(s => helpItems.Add(new Container()
-            {
-                justifyContent = "center",
-                alignItems = "center",
-                direction = "column",
-                items = new List<VisualBaseItem>()
-                {
-                    new VectorGraphic()
-                    {
-                        source = "Line",
-                    },
-                    new Text()
-                    {
-                        id                = "helpText",
-                        text              = s,
-                        textAlign         = "center",
-                        textAlignVertical = "center",
-                        paddingRight      = "20dp",
-                        paddingLeft       = "20dp"
-                    }
-                }
-            }));
-
+            
             var view = new Directive()
             {
                 type     = Directive.AplRenderDocument,
@@ -1454,57 +1403,65 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                 height = "100vh",
                                 items  = new List<VisualBaseItem>()
                                 {
-                                    new AlexaBackground()
-                                    {
-                                        backgroundVideoSource = new List<Source>()
-                                        {
-                                            new Source()
-                                            {
-                                                repeatCount = -1,
-                                                url         = $"{url}/MovingFloor"
-                                            }
-                                        },
-                                        backgroundScale = "best-fill",
-                                        videoAudioTrack = "none",
-                                        videoAutoPlay   = true,
-                                        overlayGradient = true,
-                                        colorOverlay    = true
-                                    },
                                     new Pager()
                                     {
                                         height        = "100vh",
                                         width         = "100vw",
                                         initialPage   = 0,
                                         navigation    = "forward-only",
-                                        items         = helpItems,
-                                        id            = "HelpPager",
-                                        onPageChanged = new List<ICommand>()
+                                        data          = "${payload.templateData.properties.helpContent}",
+                                        items         = new List<VisualBaseItem>()
                                         {
-                                            new SendEvent() { arguments = new List<object>() { nameof(HelpPager), "Help", "${event.source.value}" } }
-                                        },
-                                        onMount = new List<ICommand>()
-                                        {
-                                            new Parallel()
+                                            new Container()
                                             {
-                                                commands = new List<ICommand>()
+                                                justifyContent = "center",
+                                                alignItems = "center",
+                                                direction = "column",
+                                                items = new List<VisualBaseItem>()
                                                 {
-                                                    new SendEvent() { arguments = new List<object>() { nameof(HelpPager), "Help", "${event.source.value}" } },
-                                                    new AutoPage()
+                                                    new VectorGraphic()
                                                     {
-                                                        duration = 10000,
-                                                        delay = 1200
+                                                        source = "Emby",
                                                     },
-                                                    
+                                                    new VectorGraphic()
+                                                    {
+                                                        source = "Line",
+                                                    },
+                                                    new Text()
+                                                    {
+                                                        text              = "${data.value}",
+                                                        textAlign         = "center",
+                                                        textAlignVertical = "center",
+                                                        paddingRight      = "20dp",
+                                                        paddingLeft       = "20dp"
+                                                    }
                                                 }
                                             }
-                                        }
+                                        },
+                                        id = "HelpPager",
+                                        onPageChanged = new List<ICommand>()
+                                        {
+                                            new SendEvent() { arguments = new List<object>() { nameof(HelpPager),  "${payload.templateData.properties.helpContent[event.source.value].value}" } }
+                                        },
+                                        //onMount = new List<ICommand>()
+                                        //{
+                                        //    new Parallel()
+                                        //    {
+                                        //        commands = new List<ICommand>()
+                                        //        {
+                                        //            new SendEvent() { arguments = new List<object>() { nameof(HelpPager), "${index+1}",  "${payload.templateData.properties.helpContent[index+1].value}" } },
+
+                                        //        }
+                                        //    }
+                                        //}
                                     }
                                 }
 
                             }
                         }
                     }
-                }
+                },
+                datasources = await DataSourceManager.Instance.GetHelpDataSourceAsync("templateData")
             };
 
             return await Task.FromResult<IDirective>(view);

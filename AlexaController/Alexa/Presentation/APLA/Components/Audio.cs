@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APLA.Filters;
+using AlexaController.Alexa.Presentation.APLA.AudioFilters;
 
 namespace AlexaController.Alexa.Presentation.APLA.Components
 {
