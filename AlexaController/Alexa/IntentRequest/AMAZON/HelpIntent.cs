@@ -20,11 +20,12 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
+            
             return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = "Welcome to help. Swipe left to get started",
+                    phrase = "Welcome to home theater help. In a moment, swipe left to follow the help instructions.",
                 },
                 shouldEndSession = null,
                 SpeakUserName = true,

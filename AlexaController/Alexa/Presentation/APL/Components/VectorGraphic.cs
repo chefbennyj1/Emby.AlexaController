@@ -12,5 +12,6 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string stroke      { get; set; }
         public int strokeWidth { get; set; }
         public string fill { get; set; }
+        public string input { get; set; }
     }
 }

@@ -19,11 +19,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var baseItem = ServerQuery.Instance.GetItemById(source.id);
 
-            //var progressiveSpeech = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-            //{
-            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE,
-            //    session = session
-            //});
+            
 #pragma warning disable 4014
             Task.Run(() =>
                     ResponseClient.Instance.PostProgressiveResponse("One moment please...", AlexaRequest.context.System.apiAccessToken,

@@ -12,9 +12,9 @@ using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using IFilter = AlexaController.Alexa.Presentation.APL.Components.VisualFilters.IFilter;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
-using Source   = AlexaController.Alexa.Presentation.APL.Components.Source;
-using Text     = AlexaController.Alexa.Presentation.APL.Components.Text;
-using Video    = AlexaController.Alexa.Presentation.APL.Components.Video;
+using Source = AlexaController.Alexa.Presentation.APL.Components.Source;
+using Text = AlexaController.Alexa.Presentation.APL.Components.Text;
+using Video = AlexaController.Alexa.Presentation.APL.Components.Video;
 
 // ReSharper disable twice InconsistentNaming
 
@@ -26,10 +26,10 @@ using Video    = AlexaController.Alexa.Presentation.APL.Components.Video;
 
 namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 {
-    public class RenderDocumentManager 
+    public class RenderDocumentManager
     {
         public static RenderDocumentManager Instance { get; private set; }
-     
+
         public RenderDocumentManager()
         {
             Instance = this;
@@ -103,23 +103,23 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 }
             }
         };
-        
+
         public async Task<IDirective> GetRenderDocumentDirectiveAsync(InternalRenderDocumentQuery template, IAlexaSession session)
         {
-           
+
             switch (template.renderDocumentType)
             {
-                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return await RenderBrowseLibraryTemplate(template, session);
-                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return await RenderItemDetailsTemplate(template, session);
-                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return await RenderItemListSequenceTemplate(template, session);
-                case RenderDocumentType.QUESTION_TEMPLATE           : return await RenderQuestionRequestTemplate(template);
-                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return await RenderRoomSelectionTemplate(template, session);
-                case RenderDocumentType.NOT_UNDERSTOOD              : return await RenderNotUnderstoodTemplate();
-                case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE : return await RenderVerticalTextListTemplate(template, session);
-                case RenderDocumentType.HELP                        : return await RenderHelpTemplate();
-                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE   : return await RenderGenericHeadlineRequestTemplate(template);
-                case RenderDocumentType.NONE                        : return null;
-                default                                             : return null;
+                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE: return await RenderBrowseLibraryTemplate(template, session);
+                case RenderDocumentType.ITEM_DETAILS_TEMPLATE: return await RenderItemDetailsTemplate(template, session);
+                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE: return await RenderItemListSequenceTemplate(template, session);
+                case RenderDocumentType.QUESTION_TEMPLATE: return await RenderQuestionRequestTemplate(template);
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE: return await RenderRoomSelectionTemplate(template, session);
+                case RenderDocumentType.NOT_UNDERSTOOD: return await RenderNotUnderstoodTemplate();
+                case RenderDocumentType.VERTICAL_TEXT_LIST_TEMPLATE: return await RenderVerticalTextListTemplate(template, session);
+                case RenderDocumentType.HELP: return await RenderHelpTemplate();
+                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE: return await RenderGenericHeadlineRequestTemplate(template);
+                case RenderDocumentType.NONE: return null;
+                default: return null;
             }
         }
 
@@ -135,13 +135,13 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             var attributionImage = template.HeaderAttributionImage != null ? $"{url}{template.HeaderAttributionImage}" : "";
 
             ServerController.Instance.Log.Info($"Render Document is RenderItemListSequenceTemplate for {type}");
-            
+
             layout.Add(new Container()
             {
-                id     = "primary",
-                width  = "100vw",
+                id = "primary",
+                width = "100vw",
                 height = "100vh",
-                items  = new List<VisualBaseItem>()
+                items = new List<VisualBaseItem>()
                 {
                     new Image()
                     {
@@ -198,9 +198,9 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             new TouchWrapper()
                             {
                                 paddingTop = "8vh",
-                               id      = "${data.id}",
-                               onPress = new Parallel()
-                               {
+                                id         = "${data.id}",
+                                onPress    = new Parallel()
+                                {
                                    commands = new List<ICommand>()
                                    {
                                        new Command() { type = nameof(Animations.ScaleInOutOnPress) },
@@ -220,7 +220,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         position = "absolute",
                         bottom   = "1vh",
                         id       = "hint",
-                        onMount = new List<ICommand>()
+                        onMount  = new List<ICommand>()
                         {
                             new Sequential()
                             {
@@ -265,25 +265,25 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             ServerController.Instance.Log.Info("Render Document has Item Touch Wrapper Containers");
             ServerController.Instance.Log.Info("Render Document has Sequence Item Hint Texts");
             ServerController.Instance.Log.Info("Render Document is creating view");
-            
+
             var view = new Directive()
             {
-                type     = "Alexa.Presentation.APL.RenderDocument",
-                token    = "mediaItemSequence",
+                type = "Alexa.Presentation.APL.RenderDocument",
+                token = "mediaItemSequence",
                 document = new Document()
                 {
-                    theme     = "dark",
-                    import    = Imports,
-                    onMount   = new List<ICommand>(),
+                    theme = "dark",
+                    import = Imports,
+                    onMount = new List<ICommand>(),
                     resources = Resources,
-                    commands  = new Dictionary<string, ICommand>()
+                    commands = new Dictionary<string, ICommand>()
                     {
                         { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() }
                     },
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>() { "payload" },
-                        items      = layout
+                        items = layout
                     }
                 },
                 datasources = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync("templateData", baseItems)
@@ -293,7 +293,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             return await Task.FromResult(view);
         }
-        
+
         private async Task<IDirective> RenderItemDetailsTemplate(InternalRenderDocumentQuery template, IAlexaSession session)
         {
             ServerController.Instance.Log.Info("Render Document Started");
@@ -301,9 +301,9 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             const string leftColumnSpacing = "36vw";
 
             var baseItem = template.baseItems[0];
-            var type     = baseItem.GetType().Name;
-            var item     = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
-            
+            var type = baseItem.GetType().Name;
+            var item = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
+
             var layout = new List<VisualBaseItem>();
             const string token = "mediaItemDetails";
 
@@ -319,14 +319,14 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         repeatCount = 0,
                     }
                 },
-                scale      = "best-fill",
-                width      = "100vw",
-                height     = "100vh",
-                position   = "absolute",
-                autoplay   = true,
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                autoplay = true,
                 audioTrack = "none",
-                id         = "${data.item.id}",
-                onEnd      = new List<ICommand>()
+                id = "${data.item.id}",
+                onEnd = new List<ICommand>()
                 {
                     new SetValue()
                     {
@@ -352,18 +352,18 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale        = "best-fill",
-                width        = "100vw",
-                height       = "100vh",
-                position     = "absolute",
-                source       = "${data.url}${data.item.videoOverlaySource}",
-                opacity      = 0.65,
-                id           = "backdropOverlay"
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                source = "${data.url}${data.item.videoOverlaySource}",
+                opacity = 0.65,
+                id = "backdropOverlay"
             });
-            
+
 
             ServerController.Instance.Log.Info($"Render Document has {layout.Count} video backdrops");
-            
+
             var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
                 {
@@ -418,7 +418,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                 pathData    =  MaterialVectorIcons.Carousel,
                                 stroke      = "none",
                                 strokeWidth = 1,
-                                fill        = "rgba(255,250,0,1)" 
+                                fill        = "rgba(255,250,0,1)"
                             }
                         }
                     }
@@ -437,24 +437,24 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                 pathData    =  MaterialVectorIcons.ArrayIcon,
                                 stroke      = "none",
                                 strokeWidth = 1,
-                                fill        = "rgba(255,250,0,1)" 
+                                fill        = "rgba(255,250,0,1)"
                             }
                         }
                     }
                 }
             };
-            
+
             if (session.paging.canGoBack)
             {
                 layout.Add(new AlexaIconButton()
                 {
-                    vectorSource  = MaterialVectorIcons.Left,
-                    buttonSize    = "15vh",
-                    position      = "absolute",
-                    left          = "2vw",
-                    color         = "white",
-                    top           = "-1vw",
-                    id            = "goBack",
+                    vectorSource = MaterialVectorIcons.Left,
+                    buttonSize = "15vh",
+                    position = "absolute",
+                    left = "2vw",
+                    color = "white",
+                    top = "-1vw",
+                    id = "goBack",
                     primaryAction = new Parallel()
                     {
                         commands = new List<ICommand>()
@@ -471,41 +471,41 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             layout.Add(new Image()
             {
-                id       = "logo",
-                source   = "${data.url}${data.item.logoImageSource}", 
-                width    = "12vw",
+                id = "logo",
+                source = "${data.url}${data.item.logoImageSource}",
+                width = "12vw",
                 position = "absolute",
-                left     = "85vw",
+                left = "85vw",
             });
             ServerController.Instance.Log.Info("Render Document has Logo");
 
             //Name
             layout.Add(new Text()
             {
-                text       = "${data.item.name}", 
-                style      = "textStylePrimary",
-                left       = leftColumnSpacing,
+                text = "${data.item.name}",
+                style = "textStylePrimary",
+                left = leftColumnSpacing,
                 fontWeight = "100",
-                top        = "15vh",
-                id         = "baseItemName",
-                opacity    = 1,
-                
+                top = "15vh",
+                id = "baseItemName",
+                opacity = 1,
+
             });
             ServerController.Instance.Log.Info("Render Document has Rating");
 
             //Genres
             layout.Add(new Text()
             {
-                text     = "${data.item.genres}", 
-                left     = leftColumnSpacing,
-                style    = "textStyleBody",
-                top      = "15vh",
-                width    = "40vw",
-                height   = "22dp",
+                text = "${data.item.genres}",
+                left = leftColumnSpacing,
+                style = "textStyleBody",
+                top = "15vh",
+                width = "40vw",
+                height = "22dp",
                 fontSize = "18dp",
-                opacity  = 1,
-                id       = "genre",
-                
+                opacity = 1,
+                id = "genre",
+
             });
             ServerController.Instance.Log.Info("Render Document has Genres");
 
@@ -513,58 +513,58 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             //Runtime span
             layout.Add(new Text()
             {
-                text     = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",  
-                left     = leftColumnSpacing,
-                style    = "textStyleBody",
-                top      = "17vh",
-                width    = "40vw",
-                height   = "22dp",
+                text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
+                left = leftColumnSpacing,
+                style = "textStyleBody",
+                top = "17vh",
+                width = "40vw",
+                height = "22dp",
                 fontSize = "18dp",
-                opacity  = 1,
-                id       = "rating",
-                
+                opacity = 1,
+                id = "rating",
+
             });
             ServerController.Instance.Log.Info("Render Document has Genres");
 
             //TagLines
             layout.Add(new Text()
             {
-                text     = "${data.item.tagLine}", 
-                style    = "textStyleBody",
-                left     = leftColumnSpacing,
-                top      = "18vh",
-                height   = "10dp",
-                width    = "40vw",
+                text = "${data.item.tagLine}",
+                style = "textStyleBody",
+                left = leftColumnSpacing,
+                top = "18vh",
+                height = "10dp",
+                width = "40vw",
                 fontSize = "22dp",
-                id       = "tag",
-                display  = !string.IsNullOrEmpty(item.Tagline) ? "normal" : "none",
-                opacity  = 1,
+                id = "tag",
+                display = !string.IsNullOrEmpty(item.Tagline) ? "normal" : "none",
+                opacity = 1,
             });
             ServerController.Instance.Log.Info("Render Document has Tag lines");
 
             //Watched check-mark
             layout.Add(new VectorGraphic()
             {
-                source   = "CheckMark",
-                left     = "87vw",
+                source = "CheckMark",
+                left = "87vw",
                 position = "absolute",
-                top      = "30vh"
+                top = "30vh"
             });
             ServerController.Instance.Log.Info("Render Document has Watch status");
 
-            
+
             ServerController.Instance.Log.Info("Render Document has Runtime");
 
             //Overview
             layout.Add(new TouchWrapper()
             {
-                top        = string.Equals(type, "Movie") ? "24vh" : "20vh",
-                left       = leftColumnSpacing,
-                maxHeight  = "20vh",
-                opacity    = 1,
-                id         = "${data.item.id}", 
-                onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) }},
-                item    = new Container()
+                top = string.Equals(type, "Movie") ? "24vh" : "20vh",
+                left = leftColumnSpacing,
+                maxHeight = "20vh",
+                opacity = 1,
+                id = "${data.item.id}",
+                onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) } },
+                item = new Container()
                 {
                     items = new List<VisualBaseItem>()
                     {
@@ -581,7 +581,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                     width    = "35vw",
                                     id       = "overviewHeader",
                                     opacity  = 1,
-                                    
+
                                 },
                                 new VectorGraphic()
                                 {
@@ -590,20 +590,20 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                     opacity = 1,
                                     id      = "audioIcon",
                                     top     = "5px",
-                                    
+
                                 }
                             }
                         },
                         new Text()
                         {
-                            text      = "${data.item.overview}", 
+                            text      = "${data.item.overview}",
                             style     = "textStyleBody",
                             maxHeight = "20vh",
                             id        = "overview",
                             width     = "55vw",
                             fontSize  = "20dp",
                             opacity   = 1,
-                            
+
                         }
                     }
                 },
@@ -625,13 +625,13 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             //Recommendations
             layout.Add(new Container()
             {
-                when   = "${viewport.shape == 'rectangle' && viewport.mode == 'hub' && viewport.width > 960 && payload.templateData.properties.similarItems.length > 0}",
-                width  = "50vw",
+                when = "${viewport.shape == 'rectangle' && viewport.mode == 'hub' && viewport.width > 960 && payload.templateData.properties.similarItems.length > 0}",
+                width = "50vw",
                 height = "250px",
-                top    = "29vh",
-                left   = "36vw",
+                top = "29vh",
+                left = "36vw",
                 opacity = 1,
-                items  = new List<VisualBaseItem>()
+                items = new List<VisualBaseItem>()
                 {
                     new Text()
                     {
@@ -655,7 +655,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                 {
                                     height = "140px",
                                     width = "225px",
-                                    source = "${payload.templateData.properties.url}${data.thumbImageSource}", 
+                                    source = "${payload.templateData.properties.url}${data.thumbImageSource}",
                                 },
                                 onPress = new Parallel()
                                 {
@@ -669,13 +669,13 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         }
                     }
                 },
-               
+
             });
 
             //Series - Season Count
             if (string.Equals(type, "Series"))
             {
-                
+
                 layout.Add(new Container()
                 {
                     position = "absolute",
@@ -701,7 +701,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                             style = "textStyleBody",
                             fontSize = "23dp",
                             left = "12dp",
-                            text = "<b>" + 
+                            text = "<b>" +
                                    ServerQuery.Instance.GetItemsResult(item, new []{"Season"}, session.User)
                                        .TotalRecordCount + "</b>"
                         },
@@ -716,18 +716,18 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     }
                 });
             }
-            
-            
+
+
             //Primary Image
             layout.Add(new Container()
             {
-                id       = "primaryButton",
+                id = "primaryButton",
                 position = "absolute",
-                width    = "38%",
-                height   = "75vh",
-                top      = "15vh",
-                opacity  = 1,
-                items    = new List<VisualBaseItem>()
+                width = "38%",
+                height = "75vh",
+                top = "15vh",
+                opacity = 1,
+                items = new List<VisualBaseItem>()
                 {
                     new Image()
                     {
@@ -741,25 +741,25 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 }
             });
             ServerController.Instance.Log.Info("Render Document has Primary Image");
-            
+
             layout.Add(new AlexaFooter()
             {
                 hintText = type == "Series" ? "Try \"Alexa, show season one...\"" : "Try \"Alexa, play that...\"",
                 position = "absolute",
-                bottom   = "1vh"
+                bottom = "1vh"
             });
             ServerController.Instance.Log.Info("Render Document has Footer");
 
             // ReSharper disable once ComplexConditionExpression
             var view = new Directive()
             {
-                type     = Directive.AplRenderDocument,
-                token    = token,
+                type = Directive.AplRenderDocument,
+                token = token,
                 document = new Document()
                 {
-                    theme    = "dark",
+                    theme = "dark",
                     settings = new Settings() { idleTimeout = 120000 },
-                    import   = Imports,
+                    import = Imports,
                     graphics = graphicsDictionary,
                     commands = new Dictionary<string, ICommand>()
                     {
@@ -824,18 +824,18 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             return await Task.FromResult(view);
         }
-        
+
         private async Task<IDirective> RenderVerticalTextListTemplate(InternalRenderDocumentQuery template, IAlexaSession session)
         {
-            var layout          = new List<VisualBaseItem>();
+            var layout = new List<VisualBaseItem>();
             var layoutBaseItems = new List<VisualBaseItem>();
-            var baseItems       = template.baseItems;
+            var baseItems = template.baseItems;
 
             const string token = "textList";
 
             baseItems.ForEach(item => layoutBaseItems.Add(new TouchWrapper()
             {
-                id      = item.InternalId.ToString(),
+                id = item.InternalId.ToString(),
                 onPress = new Sequential()
                 {
                     commands = new List<ICommand>()
@@ -868,35 +868,32 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             layout.Add(new AlexaHeader()
             {
-                headerTitle   = template.HeaderTitle,
+                headerTitle = template.HeaderTitle,
                 headerDivider = true
             });
 
             layout.Add(new Sequence()
             {
                 scrollDirection = "vertical",
-                items           = layoutBaseItems,
-                grow            = 1,
-                width           = "100%",
-                height          = "100%",
-                paddingBottom   = "12vh"
+                items = layoutBaseItems,
+                grow = 1,
+                width = "100%",
+                height = "100%",
+                paddingBottom = "12vh"
             });
 
             var view = new Directive()
             {
-                type     = "Alexa.Presentation.APL.RenderDocument",
-                token    = token,
+                type = "Alexa.Presentation.APL.RenderDocument",
+                token = token,
                 document = new Document()
                 {
-                    theme        = "dark",
-                    import       = Imports,
-                    resources    = Resources,
+                    theme = "dark",
+                    import = Imports,
+                    resources = Resources,
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>()
-                        {
-                            "payload"
-                        },
+                        parameters = new List<string>() { "payload" },
                         items = new List<IItem>()
                         {
                             new Container()
@@ -928,11 +925,11 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             return await Task.Factory.StartNew(() => view);
         }
-        
+
         private async Task<IDirective> RenderRoomSelectionTemplate(InternalRenderDocumentQuery template, IAlexaSession session)
         {
-            var layout         = new List<VisualBaseItem>();
-            var baseItem       = template.baseItems[0];
+            var layout = new List<VisualBaseItem>();
+            var baseItem = template.baseItems[0];
             const string token = "roomSelection";
 
             layout.Add(new Video()
@@ -945,14 +942,14 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         repeatCount = 0,
                     }
                 },
-                scale      = "best-fill",
-                width      = "100vw",
-                height     = "100vh",
-                position   = "absolute",
-                autoplay   = true,
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                autoplay = true,
                 audioTrack = "none",
-                id         = "${data.item.id}",
-                onEnd      = new List<ICommand>()
+                id = "${data.item.id}",
+                onEnd = new List<ICommand>()
                 {
                     new SetValue()
                     {
@@ -977,15 +974,15 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale        = "best-fill",
-                width        = "100vw",
-                height       = "100vh",
-                position     = "absolute",
-                source       = "${data.url}${data.item.videoOverlaySource}",
-                opacity      = 0.65,
-                id           = "backdropOverlay"
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                source = "${data.url}${data.item.videoOverlaySource}",
+                opacity = 0.65,
+                id = "backdropOverlay"
             });
-            
+
             layout.Add(new AlexaHeader()
             {
                 headerBackButton = true,
@@ -1006,22 +1003,19 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             var roomButtons = RenderComponent_RoomButtonLayoutContainer(template);
             roomButtons.ForEach(b => layout.Add(b));
-            
+
             var view = new Directive()
             {
-                type  = Directive.AplRenderDocument,
+                type = Directive.AplRenderDocument,
                 token = token,
                 document = new Document()
                 {
-                    theme        = "dark",
-                    import       = Imports,
-                    resources    = Resources,
+                    theme = "dark",
+                    import = Imports,
+                    resources = Resources,
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>()
-                        {
-                            "payload"
-                        },
+                        parameters = new List<string>() { "payload" },
                         items = new List<IItem>()
                         {
                             new Container()
@@ -1045,7 +1039,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
         private async Task<IDirective> RenderBrowseLibraryTemplate(InternalRenderDocumentQuery template, IAlexaSession session)
         {
-            var url    = await ServerQuery.Instance.GetLocalApiUrlAsync();
+            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
             var layout = new List<VisualBaseItem>();
             const string token = "browseLibrary";
 
@@ -1060,34 +1054,31 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     }
                 },
                 backgroundScale = "best-fill",
-                width           = "100vw",
-                height          = "100vh",
-                position        = "absolute",
-                videoAutoPlay   = true
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                videoAutoPlay = true
             });
 
             layout.Add(new AlexaHeadline()
             {
-                primaryText     = $"Now showing {template.baseItems[0].Name}",
-                secondaryText   = $"{session.room.Name}",
+                primaryText = $"Now showing {template.baseItems[0].Name}",
+                secondaryText = $"{session.room.Name}",
                 backgroundColor = "rgba(0,0,0,0.45)"
             });
 
             var view = new Directive()
             {
-                type     = Directive.AplRenderDocument,
-                token    = token,
+                type = Directive.AplRenderDocument,
+                token = token,
                 document = new Document()
                 {
-                    theme        = "light",
-                    import       = Imports,
-                    resources    = Resources,
+                    theme = "light",
+                    import = Imports,
+                    resources = Resources,
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>()
-                        {
-                            "payload"
-                        },
+                        parameters = new List<string>() { "payload" },
                         items = new List<IItem>()
                         {
                             new Container()
@@ -1107,8 +1098,8 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         private async Task<IDirective> RenderQuestionRequestTemplate(InternalRenderDocumentQuery template)
         {
             var layout = new List<VisualBaseItem>();
-            var url    = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            
+            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
+
             layout.Add(new Video()
             {
                 source = new List<Source>()
@@ -1119,46 +1110,43 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         repeatCount = 1,
                     }
                 },
-                scale      = "best-fill",
-                width      = "100vw",
-                height     = "100vh",
-                position   = "absolute",
-                autoplay   = true,
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                autoplay = true,
                 audioTrack = "none"
             });
 
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale        = "best-fill",
-                width        = "100vw",
-                height       = "100vh",
-                position     = "absolute",
-                source       = $"{url}/EmptyPng?quality=90",
-                opacity      = 0.45
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                source = $"{url}/EmptyPng?quality=90",
+                opacity = 0.45
             });
 
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText     = template.HeadlinePrimaryText
+                primaryText = template.HeadlinePrimaryText
             });
 
             var view = new Directive()
             {
-                type     = Directive.AplRenderDocument,
-                token    = "",
+                type = Directive.AplRenderDocument,
+                token = "",
                 document = new Document()
                 {
-                    theme        = "light",
-                    import       = Imports,
-                    resources    = Resources,
+                    theme = "light",
+                    import = Imports,
+                    resources = Resources,
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>()
-                        {
-                            "payload"
-                        },
+                        parameters = new List<string>() { "payload" },
                         items = new List<IItem>()
                         {
                             new Container()
@@ -1201,42 +1189,39 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale        = "best-fill",
-                width        = "100vw",
-                height       = "100vh",
-                position     = "absolute",
-                source       = $"{url}/EmptyPng?quality=90",
-                opacity      = 0.35
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                source = $"{url}/EmptyPng?quality=90",
+                opacity = 0.35
             });
 
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText     = "Could you say that again?"
+                primaryText = "Could you say that again?"
             });
 
             layout.Add(new AlexaFooter()
             {
                 hintText = "Alexa, open help...",
                 position = "absolute",
-                bottom   = "1vh"
+                bottom = "1vh"
             });
 
             var view = new Directive()
             {
-                type     = Directive.AplRenderDocument,
-                token    = "",
+                type = Directive.AplRenderDocument,
+                token = "",
                 document = new Document()
                 {
-                    theme        = "light",
-                    import       = Imports,
-                    resources    = Resources,
+                    theme = "light",
+                    import = Imports,
+                    resources = Resources,
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>()
-                        {
-                            "payload"
-                        },
+                        parameters = new List<string>() { "payload" },
                         items = new List<IItem>()
                         {
                             new Container()
@@ -1279,25 +1264,25 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale        = "best-fill",
-                width        = "100vw",
-                height       = "100vh",
-                position     = "absolute",
-                source       = $"{url}/EmptyPng?quality=90",
-                opacity      = 0.35
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                source = $"{url}/EmptyPng?quality=90",
+                opacity = 0.35
             });
 
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText     = template.HeadlinePrimaryText
+                primaryText = template.HeadlinePrimaryText
             });
 
             layout.Add(new AlexaFooter()
             {
                 hintText = "Alexa, open help...",
                 position = "absolute",
-                bottom   = "1vh"
+                bottom = "1vh"
             });
 
             var view = new Directive()
@@ -1311,10 +1296,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     resources = Resources,
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>()
-                        {
-                            "payload"
-                        },
+                        parameters = new List<string>() { "payload" },
                         items = new List<IItem>()
                         {
                             new Container()
@@ -1330,13 +1312,73 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             return await Task.FromResult<IDirective>(view);
         }
-        
+
         private async Task<IDirective> RenderHelpTemplate()
         {
             var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
                 {
-                    "Emby", new AlexaVectorGraphic()
+                    "AlexaLarge", new AlexaVectorGraphic()
+                    {
+                        height         = 235,
+                        width          = 235,
+                        viewportHeight = 25,
+                        viewportWidth  = 25,
+                        items          = new List<IVectorGraphic>()
+                        {
+                            new VectorPath()
+                            {
+                                pathData    = MaterialVectorIcons.Alexa,
+                                stroke      = "none",
+                                strokeWidth = 0,
+                                fill        = "rgba(20,200,255,1)",
+                                filters = new List<VectorFilter>()
+                                {
+                                    new VectorFilter()
+                                    {
+                                        type = VectorFilterType.DropShadow,
+                                        color = "rgba(0,0,0,0.375)",
+                                        horizontalOffset = 0.005,
+                                        verticalOffset = 0.005,
+                                        radius = 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "EmbyLarge", new AlexaVectorGraphic()
+                    {
+                        height         = 240,
+                        width          = 240,
+                        viewportHeight = 25,
+                        viewportWidth  = 25,
+                        items          = new List<IVectorGraphic>()
+                        {
+                            new VectorPath()
+                            {
+                                pathData    = MaterialVectorIcons.EmbyIcon,
+                                stroke      = "none",
+                                strokeWidth = 0.1,
+                                fill        = "rgba(81,201,39)",
+                                filters = new List<VectorFilter>()
+                                {
+                                    new VectorFilter()
+                                    {
+                                        type = VectorFilterType.DropShadow,
+                                        color = "rgba(0,0,0,0.375)",
+                                        horizontalOffset = 0.005,
+                                        verticalOffset = 0.005,
+                                        radius = 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "EmbySmall", new AlexaVectorGraphic()
                     {
                         height         = 75,
                         width          = 75,
@@ -1373,36 +1415,132 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                     }
                 }
             };
-            
-            
+
+
             var view = new Directive()
             {
-                type     = Directive.AplRenderDocument,
-                token    = "Help",
+                type = Directive.AplRenderDocument,
+                token = "Help",
                 document = new Document()
                 {
-                    theme        = "dark",
-                    import       = Imports,
-                    resources    = Resources,
-                    graphics     = graphicsDictionary,
+                    theme = "dark",
+                    import = Imports,
+                    resources = Resources,
+                    graphics = graphicsDictionary,
                     commands = new Dictionary<string, ICommand>()
                     {
                         { nameof(Animations.FadeIn), await Animations.FadeIn() }
                     },
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>()
-                        {
-                            "payload"
-                        },
+                        parameters = new List<string>() { "payload" },
                         items = new List<IItem>()
                         {
                             new Container()
                             {
                                 width  = "100vw",
                                 height = "100vh",
+                                id     = "helpPageContainer",
                                 items  = new List<VisualBaseItem>()
                                 {
+                                    new Frame()
+                            {
+                                id = "logoFrame",
+                                width = "100vw",
+                                height ="100vh",
+                                backgroundColor = "white",
+                                items = new List<VisualBaseItem>()
+                                {
+                                    new Container()
+                                    {
+                                        direction = "row",
+                                        alignItems = "center",
+                                        justifyContent = "center",
+                                        width = "100vw",
+                                        height = "100vh",
+                                        items = new List<VisualBaseItem>()
+                                        {
+                                            new VectorGraphic()
+                                            {
+                                                source = "AlexaLarge",
+                                                id = "logoAlexa",
+                                                width = "50vw",
+                                                height = "50vh",
+                                                opacity = 1
+                                            },
+                                            new VectorGraphic()
+                                            {
+                                                source = "EmbyLarge",
+                                                position = "absolute",
+                                                width = "30vw",
+                                                height = "50vh",
+                                                id = "logoEmby",
+                                                opacity = 0
+                                            }
+                                        },
+                                        onMount = new List<ICommand>()
+                                        {
+                                            new Sequential()
+                                            {
+                                                commands = new List<ICommand>()
+                                                {
+                                                    new AnimateItem()
+                                                    {
+                                                        easing = "ease-in",
+                                                        componentId = "logoAlexa",
+                                                        duration = 1000,
+                                                        delay = 2000,
+                                                        value = new List<IValue>()
+                                                        {
+                                                            new OpacityValue()
+                                                            {
+                                                                from = 1,
+                                                                to = 0
+                                                            }
+                                                        }
+                                                    },
+                                                    new AnimateItem()
+                                                    {
+                                                        easing = "ease-in",
+                                                        componentId = "logoEmby",
+                                                        duration = 1000,
+                                                        value = new List<IValue>()
+                                                        {
+                                                            new OpacityValue()
+                                                            {
+                                                                from = 0,
+                                                                to = 1
+                                                            }
+                                                        }
+                                                    },
+                                                    new AnimateItem()
+                                                    {
+                                                        easing = "ease-in",
+                                                        componentId = "logoFrame",
+                                                        duration = 1000,
+                                                        delay = 2000,
+                                                        value = new List<IValue>()
+                                                        {
+                                                            new OpacityValue()
+                                                            {
+                                                                from = 1,
+                                                                to = 0
+                                                            }
+                                                        }
+                                                    },
+                                                    new SetValue()
+                                                    {
+                                                        componentId = "logoFrame",
+                                                        property = "display",
+                                                        value = "none"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                }
+                            },
                                     new Pager()
                                     {
                                         height        = "100vh",
@@ -1421,7 +1559,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                                 {
                                                     new VectorGraphic()
                                                     {
-                                                        source = "Emby",
+                                                        source = "EmbySmall",
                                                     },
                                                     new VectorGraphic()
                                                     {
@@ -1430,10 +1568,12 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                                     new Text()
                                                     {
                                                         text              = "${data.value}",
+                                                        id = "helpText",
                                                         textAlign         = "center",
                                                         textAlignVertical = "center",
                                                         paddingRight      = "20dp",
-                                                        paddingLeft       = "20dp"
+                                                        paddingLeft       = "20dp",
+                                                        speech = "${data.speech.url}"
                                                     }
                                                 }
                                             }
@@ -1442,18 +1582,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                                         onPageChanged = new List<ICommand>()
                                         {
                                             new SendEvent() { arguments = new List<object>() { nameof(HelpPager),  "${payload.templateData.properties.helpContent[event.source.value].value}" } }
-                                        },
-                                        //onMount = new List<ICommand>()
-                                        //{
-                                        //    new Parallel()
-                                        //    {
-                                        //        commands = new List<ICommand>()
-                                        //        {
-                                        //            new SendEvent() { arguments = new List<object>() { nameof(HelpPager), "${index+1}",  "${payload.templateData.properties.helpContent[index+1].value}" } },
-
-                                        //        }
-                                        //    }
-                                        //}
+                                        }
                                     }
                                 }
 
@@ -1471,27 +1600,27 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
         //Create template components 
         private static async Task<Frame> RenderComponent_PlayButton(BaseItem item, IAlexaSession session)
         {
-            
+
             List<object> args = null;
             switch (item.GetType().Name)
             {
-                case "Episode" :
+                case "Episode":
                 case "Movie":
-                    args = new List<object>() {nameof(UserEventPlaybackStart), session.room != null ? session.room.Name : ""};
+                    args = new List<object>() { nameof(UserEventPlaybackStart), session.room != null ? session.room.Name : "" };
                     break;
                 default:
-                    args = new List<object>() {nameof(UserEventShowItemListSequenceTemplate)};
+                    args = new List<object>() { nameof(UserEventShowItemListSequenceTemplate) };
                     break;
             }
 
             return await Task.FromResult(new Frame()
             {
-                position        = "absolute",
-                top             = "29vh",
-                right           = "40%",
-                borderWidth     = "3px",
-                borderColor     = "white",
-                borderRadius    = "75px",
+                position = "absolute",
+                top = "29vh",
+                right = "40%",
+                borderWidth = "3px",
+                borderColor = "white",
+                borderRadius = "75px",
                 backgroundColor = "rgba(0,0,0,0.35)",
                 items = new List<VisualBaseItem>()
                 {
@@ -1512,17 +1641,17 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 }
             });
         }
-        
+
         private static async Task<Container> RenderComponent_SequencePrimaryImageContainer(string type)
         {
             switch (type)
             {
-                case "Episode" : 
+                case "Episode":
                     return await Task.FromResult(new Container()
                     {
                         height = "70vh",
-                        width  = "30vw",
-                        items  = new List<VisualBaseItem>()
+                        width = "30vw",
+                        items = new List<VisualBaseItem>()
                         {
                             new Image()
                             {
@@ -1570,7 +1699,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                         }
                     });
             }
-            
+
         }
 
         private List<VisualBaseItem> RenderComponent_RoomButtonLayoutContainer(InternalRenderDocumentQuery template)
@@ -1587,7 +1716,7 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
                 foreach (var session in ServerQuery.Instance.GetCurrentSessions())
                 {
                     if (session.DeviceName == room.DeviceName) disabled = false;
-                    if (session.Client     == room.DeviceName) disabled = false;
+                    if (session.Client == room.DeviceName) disabled = false;
                 }
 
                 roomButtons.Add(new Container()
@@ -1625,17 +1754,17 @@ namespace AlexaController.Alexa.Presentation.DirectiveBuilders
 
             return roomButtons;
         }
-        
+
         private static List<object> GetSequenceItemsOnPressArguments(string type, IAlexaSession session)
         {
             var room = session.room != null ? session.room.Name : "";
             //TODO: Do we want to show episodes Detail page from sequence, or just play the item?
             switch (type)
             {
-                case "Movie"   :
-                case "Trailer" : return new List<object>() { nameof(UserEventShowBaseItemDetailsTemplate) };
-                case "Episode" : return new List<object>() { nameof(UserEventPlaybackStart), room };
-                default        : return new List<object>() { nameof(UserEventShowItemListSequenceTemplate) };
+                case "Movie":
+                case "Trailer": return new List<object>() { nameof(UserEventShowBaseItemDetailsTemplate) };
+                case "Episode": return new List<object>() { nameof(UserEventPlaybackStart), room };
+                default: return new List<object>() { nameof(UserEventShowItemListSequenceTemplate) };
             }
         }
     }

@@ -24,6 +24,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
             return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
+
                 outputSpeech = new OutputSpeech()
                 {
                     phrase = arguments[1]

@@ -4,11 +4,11 @@ using System.Text;
 
 namespace AlexaController.Alexa.Presentation.APL.VectorGraphics
 {
-    public class VectorFilters
+    public class VectorFilter
     {
         public VectorFilterType type { get; set; }
-        public int horizontalOffset { get; set; }
-        public int verticalOffset { get; set; }
+        public double horizontalOffset { get; set; }
+        public double verticalOffset { get; set; }
         public int radius { get; set; }
         public string color { get; set; }
 

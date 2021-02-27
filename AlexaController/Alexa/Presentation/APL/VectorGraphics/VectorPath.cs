@@ -11,8 +11,8 @@ namespace AlexaController.Alexa.Presentation.APL.VectorGraphics
         public string source { get; set; }
         public string scale { get; set; }
         public string stroke { get; set; }
-        public int strokeWidth { get; set; }
+        public double strokeWidth { get; set; }
         public string fill { get; set; }
-        public List<VectorFilters> filters { get; set; }
+        public List<VectorFilter> filters { get; set; }
     }
 }

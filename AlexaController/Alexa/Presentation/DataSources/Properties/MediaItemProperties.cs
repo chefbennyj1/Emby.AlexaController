@@ -2,18 +2,10 @@
 
 // ReSharper disable once InconsistentNaming
 
-namespace AlexaController.Alexa.Presentation.DataSourceModel
+namespace AlexaController.Alexa.Presentation.DataSources.Properties
 {
-    public class MediaItemDataSource : IDataSource
-    {
-        public object type => "object";
-        public IProperties properties { get; set; }
-        public string objectID       { get; set; }
-        public string description    { get; set; }
-        //TODO: Transformers
-    }
-
-    public class MediaItemDataSourceProperties : IProperties
+    
+    public class MediaItemProperties : IProperties
     {
         public string url                      { get; set; }
         public List<SimilarItem> similarItems  { get; set; }
@@ -46,4 +38,7 @@ namespace AlexaController.Alexa.Presentation.DataSourceModel
         public string thumbImageSource { get; set; }
         public long id                 { get; set; }
     }
+
+
+
 }
