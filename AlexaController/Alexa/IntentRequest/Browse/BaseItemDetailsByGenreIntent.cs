@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Model.RequestData;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -49,7 +48,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result.TotalRecordCount <= 0)
             {
-                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+                return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -60,7 +59,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName    = true,
                     directives       = new List<IDirective>()
                     {
-                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
                         {
                             HeadlinePrimaryText = "I was unable to find items. Does that genre exist?",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
@@ -79,7 +78,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 catch (Exception exception)
                 {
                     await Task.Run(() =>
-                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
+                            AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
                                 requestId))
                         .ConfigureAwait(false);
                     await Task.Delay(1200);
@@ -107,7 +106,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var documentTemplateInfo = new InternalRenderDocumentQuery()
+            var documentTemplateInfo = new RenderDocumentQuery()
             {
                 baseItems =  result.Items.ToList() ,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
@@ -119,9 +118,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = result.Items[0];
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
             
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

@@ -4,14 +4,15 @@
 
 namespace AlexaController.Alexa.Presentation.DataSources.Properties
 {
-    
     public class MediaItemProperties : IProperties
     {
         public string url                      { get; set; }
         public List<SimilarItem> similarItems  { get; set; }
         public MediaItem item                  { get; set; }
         public List<MediaItem> items           { get; set; }
+        
     }
+}
 
     public class MediaItem
     {
@@ -40,5 +41,3 @@ namespace AlexaController.Alexa.Presentation.DataSources.Properties
     }
 
 
-
-}

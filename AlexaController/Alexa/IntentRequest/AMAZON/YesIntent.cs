@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Model.RequestData;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON

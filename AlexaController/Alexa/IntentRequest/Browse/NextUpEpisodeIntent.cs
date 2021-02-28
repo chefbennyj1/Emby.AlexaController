@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Model.RequestData;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
@@ -52,14 +51,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //});
 
 #pragma warning disable 4014
-            Task.Run( () => ResponseClient.Instance.PostProgressiveResponse("One moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run( () => AlexaResponseClient.Instance.PostProgressiveResponse("One moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var nextUpEpisode = ServerQuery.Instance.GetNextUpEpisode(slots.Series.value, Session.User);
             
             if (nextUpEpisode is null)
             {
-                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+                return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     //outputSpeech = new OutputSpeech()
                     //{
@@ -74,13 +73,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives       = new List<IDirective>()
                     {
-                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
                         {
                             HeadlinePrimaryText = "There doesn't seem to be a new episode available.",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
 
                         }, Session),
-                        await RenderAudioManager.Instance.GetAudioDirectiveAsync(new InternalRenderAudioQuery()
+                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
                         {
                             speechContent = SpeechContent.NO_NEXT_UP_EPISODE_AVAILABLE,
                             session = Session,
@@ -103,7 +102,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {nextUpEpisode.Name}.").ConfigureAwait(false);
                 }
 
-                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+                return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     //outputSpeech = new OutputSpeech()
                     //{
@@ -120,15 +119,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(
-                            new InternalRenderDocumentQuery()
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(
+                            new RenderDocumentQuery()
                             {
                                 renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                                 HeadlinePrimaryText = $"Stop! Rated {nextUpEpisode.OfficialRating}"
 
                             }, Session),
-                        await RenderAudioManager.Instance.GetAudioDirectiveAsync(
-                            new InternalRenderAudioQuery()
+                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
+                            new AudioDirectiveQuery()
                             {
                                 speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
                                 session = Session,
@@ -152,7 +151,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 catch (Exception exception)
                 {
                     await Task.Run(() =>
-                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
+                            AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
                                 requestId))
                         .ConfigureAwait(false);
                     await Task.Delay(1200);
@@ -161,14 +160,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             var series = nextUpEpisode.Parent.Parent;
-            var documentTemplateInfo = new InternalRenderDocumentQuery()
+            var documentTemplateInfo = new RenderDocumentQuery()
             {
                 baseItems          = new List<BaseItem>() {nextUpEpisode},
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
                 HeaderAttributionImage = series.HasImage(ImageType.Logo) ? $"/Items/{series.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
-            var audioTemplateInfo = new InternalRenderAudioQuery()
+            var audioTemplateInfo = new AudioDirectiveQuery()
             {
                 speechContent = SpeechContent.BROWSE_NEXT_UP_EPISODE,
                 session = Session,
@@ -182,10 +181,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
-            var renderAudioDirective    = await RenderAudioManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
             
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 //outputSpeech = new OutputSpeech()
                 //{

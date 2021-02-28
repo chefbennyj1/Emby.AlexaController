@@ -57,7 +57,7 @@ namespace AlexaController.Alexa.Viewport
 
     public interface IViewportUtility
     {
-        ViewportProfile GetViewportProfile(Model.RequestData.Viewport viewportState);
+        ViewportProfile GetViewportProfile(Api.RequestData.Viewport viewportState);
         bool ViewportSizeIsLessThen(ViewportProfile profile1, ViewportProfile profile2);
         bool ViewportSizeIsGreaterThen(ViewportProfile profile1, ViewportProfile profile2);
     }
@@ -162,7 +162,7 @@ namespace AlexaController.Alexa.Viewport
             ViewportProfile.TV_LANDSCAPE_XLARGE
         };
         
-        public ViewportProfile GetViewportProfile(Model.RequestData.Viewport viewportState)
+        public ViewportProfile GetViewportProfile(Api.RequestData.Viewport viewportState)
         {
             if (viewportState is null) return ViewportProfile.UNKNOWN_VIEWPORT_PROFILE;
 

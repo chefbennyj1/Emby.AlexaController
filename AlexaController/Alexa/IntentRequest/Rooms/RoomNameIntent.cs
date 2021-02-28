@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Exceptions;
-using AlexaController.Alexa.Model.RequestData;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Rooms

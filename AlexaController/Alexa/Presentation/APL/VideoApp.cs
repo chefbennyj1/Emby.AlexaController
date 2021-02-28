@@ -1,4 +1,4 @@
-﻿using AlexaController.Alexa.Model.ResponseData;
+﻿using AlexaController.Api.ResponseModel;
 
 namespace AlexaController.Alexa.Presentation.APL
 {

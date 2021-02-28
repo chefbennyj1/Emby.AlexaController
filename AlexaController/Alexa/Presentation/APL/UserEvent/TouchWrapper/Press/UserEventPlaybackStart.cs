@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -35,11 +34,11 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
 
-            InternalRenderDocumentQuery documentTemplateInfo = null;
-            InternalRenderAudioQuery audioTemplateInfo = null;
+            RenderDocumentQuery documentTemplateInfo = null;
+            AudioDirectiveQuery audioTemplateInfo = null;
             if (session.room is null)
             {
-                documentTemplateInfo = new InternalRenderDocumentQuery()
+                documentTemplateInfo = new RenderDocumentQuery()
                 {
                     renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
                     baseItems = new List<BaseItem>() {baseItem}
@@ -48,12 +47,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 session.NowViewingBaseItem = baseItem;
                 AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
 
-                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+                return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session)
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session)
                     }
 
                 }, session);
@@ -66,13 +65,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             Task.Run(() => ServerController.Instance.PlayMediaItemAsync(session, baseItem)).ConfigureAwait(false);
 #pragma warning restore 4014
 
-            documentTemplateInfo = new InternalRenderDocumentQuery()
+            documentTemplateInfo = new RenderDocumentQuery()
             {
                 baseItems = new List<BaseItem>() {baseItem},
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
             };
 
-            audioTemplateInfo = new InternalRenderAudioQuery()
+            audioTemplateInfo = new AudioDirectiveQuery()
             {
                 speechContent = SpeechContent.PLAY_MEDIA_ITEM,
                 session = session, 
@@ -84,10 +83,10 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             };
 
-            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
-            var renderAudioDirective = await RenderAudioManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderAudioDirective = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
 
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 //outputSpeech = new OutputSpeech()
                 //{

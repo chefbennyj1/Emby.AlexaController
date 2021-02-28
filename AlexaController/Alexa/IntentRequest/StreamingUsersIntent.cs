@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Model.RequestData;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Controller.Session;
@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.IntentRequest
         {
             var speechString = GetUserSessionSpeechString(ServerQuery.Instance.GetCurrentSessions());
 
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

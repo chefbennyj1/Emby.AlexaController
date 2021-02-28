@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -26,13 +25,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session        = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room           = session.room;
             
-            var documentTemplateInfo = new InternalRenderDocumentQuery()
+            var documentTemplateInfo = new RenderDocumentQuery()
             {
                 baseItems = new List<BaseItem>() {baseItem},
                 renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
             };
 
-            var renderAudioTemplateInfo = new InternalRenderAudioQuery()
+            var renderAudioTemplateInfo = new AudioDirectiveQuery()
             {
                 speechContent = SpeechContent.BROWSE_ITEM,
                 session = session,
@@ -64,10 +63,10 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
-            var renderAudioDirective    = await RenderAudioManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 //outputSpeech = new OutputSpeech()
                 //{

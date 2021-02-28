@@ -4,11 +4,10 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Model.RequestData;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Controller.Entities;
@@ -50,7 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse("One Moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse("One Moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
             ServerController.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
@@ -71,21 +70,21 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
                     }
 
-                    return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+                    return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(
-                                new InternalRenderDocumentQuery()
+                            await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(
+                                new RenderDocumentQuery()
                                 {
                                     renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                                     HeadlinePrimaryText = "Stop!"
 
                                 }, Session),
-                            await RenderAudioManager.Instance.GetAudioDirectiveAsync(
-                                new InternalRenderAudioQuery()
+                            await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
+                                new AudioDirectiveQuery()
                                 {
                                     speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
                                     session = Session, 
@@ -110,7 +109,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 {
 #pragma warning disable 4014
                     Task.Run(() => 
-                            ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
+                            AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
                                 requestId))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
@@ -122,7 +121,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             ServerController.Instance.Log.Info(nameof(CollectionIntent) + "Preparing collection base item: " + collectionBaseItem?.Name);
 
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
-            var documentTemplateInfo = new InternalRenderDocumentQuery()
+            var documentTemplateInfo = new RenderDocumentQuery()
             {
                 HeaderTitle            = textInfo.ToTitleCase(collectionBaseItem?.Name.ToLower() ?? throw new Exception("no collection item")),
                 renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
@@ -134,9 +133,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = collectionBaseItem;
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
 
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

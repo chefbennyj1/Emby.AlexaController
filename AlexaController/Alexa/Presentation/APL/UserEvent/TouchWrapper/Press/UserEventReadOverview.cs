@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Api;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
@@ -22,13 +22,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             
 #pragma warning disable 4014
             Task.Run(() =>
-                    ResponseClient.Instance.PostProgressiveResponse("One moment please...", AlexaRequest.context.System.apiAccessToken,
+                    AlexaResponseClient.Instance.PostProgressiveResponse("One moment please...", AlexaRequest.context.System.apiAccessToken,
                         request.requestId))
                 .ConfigureAwait(false);
 #pragma warning restore 4014
 
             
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {

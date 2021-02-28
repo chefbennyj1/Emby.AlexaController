@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Model.RequestData;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -50,14 +49,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //});
 
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse($"One moment please... looking for library items by {(slots.ActorName.slotValue.type == "List" ? " those actors." : " that actor.")}", apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse($"One moment please... looking for library items by {(slots.ActorName.slotValue.type == "List" ? " those actors." : " that actor.")}", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchNames);
 
             if (result is null)
             {
-                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+                return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -68,7 +67,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
                         {
                             HeadlinePrimaryText = "I was unable to find that actor.",
                             renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
@@ -86,7 +85,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 catch (Exception exception)
                 {
                     await Task.Run(() => 
-                        ResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, 
+                        AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, 
                             requestId))
                         .ConfigureAwait(false);
                     await Task.Delay(1200);
@@ -116,7 +115,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var documentTemplateInfo = new InternalRenderDocumentQuery()
+            var documentTemplateInfo = new RenderDocumentQuery()
             {
                 baseItems          =  actorCollection ,
                 renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
@@ -124,7 +123,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
             };
 
-            var audioTemplateInfo = new InternalRenderAudioQuery()
+            var audioTemplateInfo = new AudioDirectiveQuery()
             {
                 speechPrefix  = SpeechPrefix.COMPLIANCE,
                 speechContent = SpeechContent.BROWSE_ITEMS_BY_ACTOR,
@@ -142,10 +141,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = actors[0];
             AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
 
-            var renderDocumentDirective = await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
-            var renderAudioDirective    = await RenderAudioManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
 
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 //outputSpeech = new OutputSpeech()
                 //{

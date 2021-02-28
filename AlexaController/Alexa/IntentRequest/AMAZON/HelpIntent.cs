@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Model.ResponseData;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
@@ -11,7 +10,6 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
 
         public HelpIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
@@ -20,8 +18,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
                 {
@@ -31,7 +28,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
+                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
                     {
                         renderDocumentType = RenderDocumentType.HELP
 

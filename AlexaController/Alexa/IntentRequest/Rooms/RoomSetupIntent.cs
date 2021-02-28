@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Model.RequestData;
-using AlexaController.Alexa.Model.ResponseData;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 
@@ -35,7 +34,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             //});
 
 #pragma warning disable 4014
-            Task.Run(() => ResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId)).ConfigureAwait(false);
+            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId)).ConfigureAwait(false);
 #pragma warning restore 4014
 
             var room = Session.room;
@@ -45,7 +44,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-                return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+                return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
@@ -54,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
                         {
                             renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
                             HeadlinePrimaryText = "Please say the name of the room you want to setup.",
@@ -65,7 +64,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 }, Session);
             }
             
-            var response = await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            var response = await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = true,
                 outputSpeech = new OutputSpeech()

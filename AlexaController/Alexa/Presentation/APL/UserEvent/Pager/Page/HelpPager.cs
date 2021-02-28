@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Api;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 
@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page
             var arguments     = request.arguments;
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
 

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Model.RequestData;
-using AlexaController.Alexa.Model.ResponseData;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.RequestData;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
@@ -37,12 +36,12 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
 #pragma warning restore 4014
                 } catch { }
 
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(previousPage, Session)
+                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(previousPage, Session)
                 }
 
             }, Session);

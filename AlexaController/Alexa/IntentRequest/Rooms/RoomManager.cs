@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.DirectiveBuilders;
 using AlexaController.Api;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Configuration;
 using AlexaController.Session;
 
@@ -30,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             session.PersistedRequestContextData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 //outputSpeech = new OutputSpeech()
                 //{
@@ -43,13 +42,13 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync(new InternalRenderDocumentQuery()
+                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
                     {
                         renderDocumentType  = RenderDocumentType.QUESTION_TEMPLATE,
                         HeadlinePrimaryText = "Which room did you want?"
 
                     }, session),
-                    await RenderAudioManager.Instance.GetAudioDirectiveAsync(new InternalRenderAudioQuery()
+                    await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
                     {
                         speechContent = SpeechContent.ROOM_CONTEXT,
                         session = session,

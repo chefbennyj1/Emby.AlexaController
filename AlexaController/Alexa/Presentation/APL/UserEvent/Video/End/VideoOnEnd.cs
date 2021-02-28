@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Model.ResponseData;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Api;
+using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
             var request = AlexaRequest.request;
             var arguments = request.arguments;
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
-            return await ResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()
