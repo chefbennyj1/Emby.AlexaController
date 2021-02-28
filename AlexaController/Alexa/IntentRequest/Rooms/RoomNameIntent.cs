@@ -9,12 +9,12 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
-    public class RoomNameIntent : IIntentResponse
+    public class RoomNameIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
 
-        public RoomNameIntent(IAlexaRequest aR, IAlexaSession s)
+        public RoomNameIntent(IAlexaRequest aR, IAlexaSession s) : base(aR, s)
         {
             AlexaRequest = aR;
             Session = s;

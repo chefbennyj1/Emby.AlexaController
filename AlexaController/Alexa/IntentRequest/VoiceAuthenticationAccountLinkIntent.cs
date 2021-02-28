@@ -11,12 +11,12 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest
 {
     [Intent]
-    public class VoiceAuthenticationAccountLinkIntent : IIntentResponse
+    public class VoiceAuthenticationAccountLinkIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
-        public VoiceAuthenticationAccountLinkIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public VoiceAuthenticationAccountLinkIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;

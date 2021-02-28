@@ -12,12 +12,12 @@ using MediaBrowser.Controller.Entities;
 namespace AlexaController.Alexa.IntentRequest.Playback
 {
     [Intent]
-    public class PlayNextUpEpisodeIntent : IIntentResponse
+    public class PlayNextUpEpisodeIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
-        public PlayNextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public PlayNextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session      = session;

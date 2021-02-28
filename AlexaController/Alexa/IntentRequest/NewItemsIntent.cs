@@ -13,13 +13,13 @@ using AlexaController.Utils;
 namespace AlexaController.Alexa.IntentRequest
 {
     [Intent]
-    public class NewItemsIntent : IIntentResponse
+    public class NewItemsIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
 
-        public NewItemsIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public NewItemsIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;

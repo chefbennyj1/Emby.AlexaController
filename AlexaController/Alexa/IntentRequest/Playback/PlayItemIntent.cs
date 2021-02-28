@@ -16,14 +16,14 @@ using MediaBrowser.Model.Logging;
 namespace AlexaController.Alexa.IntentRequest.Playback
 {
     [Intent]
-    public class PlayItemIntent : IIntentResponse
+    public class PlayItemIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         //If no room is requested in the PlayItemIntent intent, we follow up immediately to get a room value from 'RoomName' intent. 
 
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session      { get; }
         
-        public PlayItemIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public PlayItemIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session      = session;

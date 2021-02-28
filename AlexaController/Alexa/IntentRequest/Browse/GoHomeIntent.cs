@@ -7,13 +7,13 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class GoHomeIntent : IIntentResponse
+    public class GoHomeIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
 
-        public GoHomeIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public GoHomeIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;

@@ -15,13 +15,13 @@ using MediaBrowser.Controller.Session;
 namespace AlexaController.Alexa.IntentRequest
 {
     [Intent]
-    public class StreamingUsersIntent : IIntentResponse
+    public class StreamingUsersIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
 
-        public StreamingUsersIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public StreamingUsersIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;

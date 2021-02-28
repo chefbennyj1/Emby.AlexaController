@@ -15,12 +15,12 @@ using MediaBrowser.Model.Logging;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class NextUpEpisodeIntent : IIntentResponse
+    public class NextUpEpisodeIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
 
-        public NextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public NextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;

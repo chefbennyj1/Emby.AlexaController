@@ -12,12 +12,12 @@ using AlexaController.Utils;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class UpComingTv : IIntentResponse
+    public class UpComingTv : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
 
-        public UpComingTv(IAlexaRequest alexaRequest, IAlexaSession session)
+        public UpComingTv(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;

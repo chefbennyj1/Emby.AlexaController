@@ -7,12 +7,12 @@ using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest
 {
-    public class NotUnderstood : IIntentResponse
+    public class NotUnderstood : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
 
-        public NotUnderstood(IAlexaRequest alexaRequest, IAlexaSession session)
+        public NotUnderstood(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;

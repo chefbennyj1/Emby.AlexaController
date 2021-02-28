@@ -12,12 +12,12 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class BaseItemsByActorIntent : IIntentResponse
+    public class BaseItemsByActorIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
-        public BaseItemsByActorIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public BaseItemsByActorIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;

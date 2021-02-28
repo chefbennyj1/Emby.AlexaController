@@ -16,12 +16,12 @@ using MediaBrowser.Model.Entities;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
-    public class EpisodesIntent : IIntentResponse
+    public class EpisodesIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
         
-        public EpisodesIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public EpisodesIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;
