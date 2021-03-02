@@ -30,19 +30,12 @@ namespace AlexaController.Alexa.IntentRequest
             var request        = AlexaRequest.request;
             var slots          = request.intent.slots;
             var duration       = slots.Duration.value;
-            var type           = slots.MovieAlternatives.value is null ? "New TV Shows" : "New Movies";
-            var context        = AlexaRequest.context;
-            var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
-            
+            var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
+           
             // Default will be 25 days ago unless given a time duration
             var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);
 
-#pragma warning disable 4014
-            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse($"Looking for {type}", apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
-
-            var query = type == "New TV Shows"
+            var query = type == "Series"
                 ? ServerQuery.Instance.GetLatestTv(Session.User, d)
                 : ServerQuery.Instance.GetLatestMovies(Session.User, d);
 
@@ -54,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = $"No { type } have been added."
+                        phrase = $"No new { type } have been added."
                     },
                     shouldEndSession = true,
                     SpeakUserName = true,
@@ -69,43 +62,27 @@ namespace AlexaController.Alexa.IntentRequest
                 case ViewportProfile.HUB_LANDSCAPE_MEDIUM:
                 case ViewportProfile.HUB_LANDSCAPE_LARGE:
                 {
-                        var documentTemplateInfo = new RenderDocumentQuery()
-                        {
-                            baseItems          = results,
-                            renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                            HeaderTitle        = type
-                        };
+                    var dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
 
                         var renderAudioTemplateInfo = new AudioDirectiveQuery()
                         {
                             speechContent = SpeechContent.NEW_ITEMS_APL,
-                            session = Session, 
+                            session = Session,
                             items = results,
-                            args = new []{d.ToLongDateString()},
+                            args = new[] { d.ToLongDateString() },
                             audio = new Audio()
                             {
-                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                
+                                source = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
                             }
                         };
 
-                        AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
+                        AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
-                        var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+                        var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
                         var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
-                            //outputSpeech = new OutputSpeech()
-                            //{
-                            //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                            //    {
-                            //        type = SpeechResponseType.NEW_ITEMS_APL, 
-                            //        session = Session, 
-                            //        items = results,
-                            //        args = new []{d.ToLongDateString()}
-                            //    })
-                            //},
                             shouldEndSession = null,
                             SpeakUserName = true,
                             directives       = new List<IDirective>()
@@ -129,16 +106,6 @@ namespace AlexaController.Alexa.IntentRequest
                         var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
-                            //outputSpeech = new OutputSpeech()
-                            //{
-                            //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                            //    {
-                            //        type = SpeechResponseType.NEW_ITEMS_DISPLAY_NONE, 
-                            //        session = Session, 
-                            //        items = results,
-                            //        args = new []{d.ToLongDateString()}
-                            //    })
-                            //},
                             shouldEndSession = true,
                             SpeakUserName = true,
                             directives       = new List<IDirective>()

@@ -74,27 +74,14 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
+            var dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(nextUpEpisode, Session);
+
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                //    {
-                //        type = SpeechResponseType.PLAY_NEXT_UP_EPISODE, 
-                //        session = Session, 
-                //        items = new List<BaseItem>() { nextUpEpisode }
-                //    }),
-                   
-                //},
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
-                    {
-                        baseItems          = new List<BaseItem>() { nextUpEpisode },
-                        renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
-
-                    }, Session),
+                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session),
                     await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
                         new AudioDirectiveQuery()
                         {

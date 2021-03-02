@@ -19,16 +19,15 @@ namespace AlexaController.Alexa.IntentRequest
         }
         public async Task<string> Response()
         {
+            var dataSource = await DataSourceManager.Instance.GetNotUnderstood();
+
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
                      await RenderDocumentDirectiveManager.Instance
-                        .GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
-                        {
-                            renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
-                        }, Session),
+                        .GetRenderDocumentDirectiveAsync(dataSource, Session),
                      await AudioDirectiveManager.Instance
                          .GetAudioDirectiveAsync(new AudioDirectiveQuery()
                          {

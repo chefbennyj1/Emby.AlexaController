@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Api;
 using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
@@ -24,6 +25,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             AlexaSessionManager.Instance.UpdateSession(session, currentPage, true);
 
+            var properties = (MediaItemProperties) previousPage.properties;
+            
             //if the user is controlling a client  session - go back on the client too.
             if (session.room != null)
             {
@@ -31,7 +34,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 {
 #pragma warning disable 4014
                     Task.Run(() => ServerController.Instance.BrowseItemAsync(session,
-                            ServerQuery.Instance.GetItemById(previousPage.baseItems[0].InternalId)))
+                            ServerQuery.Instance.GetItemById(properties.item.id)))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
                 }

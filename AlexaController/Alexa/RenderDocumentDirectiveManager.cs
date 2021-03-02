@@ -8,9 +8,10 @@ using AlexaController.Alexa.Presentation.APL.Components.VisualFilters;
 using AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page;
 using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
+using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
-using MediaBrowser.Controller.Entities;
 using IFilter  = AlexaController.Alexa.Presentation.APL.Components.VisualFilters.IFilter;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 using Source   = AlexaController.Alexa.Presentation.APL.Components.Source;
@@ -105,32 +106,32 @@ namespace AlexaController.Alexa
             }
         };
 
-        public async Task<IDirective> GetRenderDocumentDirectiveAsync(RenderDocumentQuery template, IAlexaSession session)
+        public async Task<IDirective> GetRenderDocumentDirectiveAsync(IDataSource dataSource, IAlexaSession session)
         {
-            switch (template.renderDocumentType)
+            var properties = dataSource.properties;
+            switch (properties.documentType)
             {
-                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE: return await RenderBrowseLibraryTemplate(template, session);
-                case RenderDocumentType.ITEM_DETAILS_TEMPLATE: return await RenderItemDetailsTemplate(template, session);
-                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE: return await RenderItemListSequenceTemplate(template, session);
-                case RenderDocumentType.QUESTION_TEMPLATE: return await RenderQuestionRequestTemplate(template);
-                case RenderDocumentType.ROOM_SELECTION_TEMPLATE: return await RenderRoomSelectionTemplate(template, session);
-                case RenderDocumentType.NOT_UNDERSTOOD: return await RenderNotUnderstoodTemplate();
-                case RenderDocumentType.HELP: return await RenderHelpTemplate();
-                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE: return await RenderGenericHeadlineRequestTemplate(template);
-                case RenderDocumentType.NONE: return null;
-                default: return null;
+                case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return await RenderBrowseLibraryTemplate(dataSource, session);
+                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return await RenderItemDetailsTemplate(dataSource, session);
+                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return await RenderItemListSequenceTemplate(dataSource, session);
+                case RenderDocumentType.FOLLOW_UP_QUESTION          : return await RenderQuestionRequestTemplate(dataSource);
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return await RenderRoomSelectionTemplate(dataSource, session);
+                case RenderDocumentType.NOT_UNDERSTOOD              : return await RenderNotUnderstoodTemplate(dataSource);
+                case RenderDocumentType.HELP                        : return await RenderHelpTemplate(dataSource);
+                case RenderDocumentType.GENERIC_HEADLINE_TEMPLATE   : return await RenderGenericHeadlineRequestTemplate(dataSource);
+                case RenderDocumentType.NONE                        : return null;
+                default                                             : return null;
             }
         }
 
         //Create Render Document Template Directives 
-        private async Task<IDirective> RenderItemListSequenceTemplate(RenderDocumentQuery template, IAlexaSession session)
+        private async Task<IDirective> RenderItemListSequenceTemplate(IDataSource dataSource, IAlexaSession session)
         {
             var layout           = new List<IItem>();
-            var baseItems        = template.baseItems;
-            var type             = baseItems[0].GetType().Name;
-            var url              = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            var attributionImage = template.HeaderAttributionImage != null ? $"{url}{template.HeaderAttributionImage}" : "";
-
+            var properties       = (MediaItemProperties) dataSource.properties;
+            var baseItems        = properties.items;
+            var type             = baseItems[0].type;
+            
             layout.Add(new Container()
             {
                 id = "primary",
@@ -144,7 +145,7 @@ namespace AlexaController.Alexa
                         width = "100%",
                         scale = "best-fill",
                         position = "absolute",
-                        source = "${payload.templateData.properties.url}${payload.templateData.properties.items[0].backdropImageSource}",
+                        source = "${payload.templateData.properties.url}${payload.templateData.properties.item.backdropImageSource}",
                         filter = new List<IFilter>()
                         {
                             new Gradient()
@@ -175,16 +176,16 @@ namespace AlexaController.Alexa
                     },
                     new AlexaHeader()
                     {
-                        headerTitle            = $"{template.HeaderTitle}",
+                        //TODO: Do we really want a header title if there is an attribution image?
+                        //headerTitle            = "${payload.templateData.properties.item.name}",
                         headerBackButton       = session.paging.canGoBack,
                         headerDivider          = true,
-                        headerAttributionImage = attributionImage
+                        headerAttributionImage = "${payload.templateData.properties.url}${payload.templateData.properties.item.logoImageSource}"
                     },
                     new Sequence()
                     {
                         height                 = "100vh",
                         width                  = "95vw",
-                        top                    = "4vh",
                         left                   = "5vw",
                         scrollDirection        = "horizontal",
                         data                   = "${payload.templateData.properties.items}",
@@ -277,17 +278,17 @@ namespace AlexaController.Alexa
                         items = layout
                     }
                 },
-                datasources = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync("templateData", baseItems)
+                datasources = new Dictionary<string, IDataSource>(){ {"templateData", dataSource } }
             });
         }
 
-        private async Task<IDirective> RenderItemDetailsTemplate(RenderDocumentQuery template, IAlexaSession session)
+        private async Task<IDirective> RenderItemDetailsTemplate(IDataSource dataSource, IAlexaSession session)
         {
             const string leftColumnSpacing = "36vw";
-
-            var baseItem = template.baseItems[0];
-            var type     = baseItem.GetType().Name;
-            var item     = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
+            var properties = (MediaItemProperties) dataSource.properties;
+            var baseItem = properties.item;
+            var type     = baseItem.type;
+            //var item     = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
 
             var layout   = new List<VisualBaseItem>();
             const string token = "mediaItemDetails";
@@ -359,7 +360,7 @@ namespace AlexaController.Alexa
                                 pathData    = MaterialVectorIcons.CheckMark,
                                 stroke      = "none",
                                 strokeWidth = 1,
-                                fill        = template.baseItems[0].IsPlayed(session.User) ? "rgba(255,0,0,1)" : "white"
+                                fill        = baseItem.isPlayed ? "rgba(255,0,0,1)" : "white"
                             }
                         }
                     }
@@ -508,7 +509,7 @@ namespace AlexaController.Alexa
                 width = "40vw",
                 fontSize = "22dp",
                 id = "tag",
-                display = !string.IsNullOrEmpty(item.Tagline) ? "normal" : "none",
+                display = !string.IsNullOrEmpty(baseItem.tagLine) ? "normal" : "none",
                 opacity = 1,
             });
             //Watched check-mark
@@ -652,7 +653,7 @@ namespace AlexaController.Alexa
                             fontSize = "23dp",
                             left = "12dp",
                             text = "<b>" +
-                                   ServerQuery.Instance.GetItemsResult(item, new []{"Season"}, session.User)
+                                   ServerQuery.Instance.GetItemsResult(baseItem.id, new []{"Season"}, session.User)
                                        .TotalRecordCount + "</b>"
                         },
                         new Text()
@@ -685,7 +686,7 @@ namespace AlexaController.Alexa
                         width  = "100%",
                         id     = "primary"
                     },
-                    await RenderComponent_PlayButton(item, session)
+                    await RenderComponent_PlayButton(baseItem, session)
                 }
             });
             layout.Add(new AlexaFooter()
@@ -762,89 +763,84 @@ namespace AlexaController.Alexa
                         }
                     }
                 },
-                datasources = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync("templateData", baseItem)
+                datasources = new Dictionary<string, IDataSource>(){ {"templateData", dataSource } }//await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync("templateData", baseItem, session)
             });
         }
 
-        private async Task<IDirective> RenderRoomSelectionTemplate(RenderDocumentQuery template, IAlexaSession session)
+        private async Task<IDirective> RenderRoomSelectionTemplate(IDataSource dataSource, IAlexaSession session)
         {
-            var layout = new List<VisualBaseItem>();
-            var baseItem = template.baseItems[0];
-            const string token = "roomSelection";
-            layout.Add(new Video()
+            var layout = new List<VisualBaseItem>
             {
-                source = new List<Source>()
+                new Video()
                 {
-                    new Source()
+                    source = new List<Source>()
                     {
-                        url = "${data.url}${data.item.videoBackdropSource}",
-                        repeatCount = 0,
+                        new Source()
+                        {
+                            url = "${data.url}${data.item.videoBackdropSource}", repeatCount = 0,
+                        }
+                    },
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    autoplay = true,
+                    audioTrack = "none",
+                    id = "${data.item.id}",
+                    onEnd = new List<ICommand>()
+                    {
+                        new SetValue()
+                        {
+                            componentId = "backdropOverlay",
+                            property = "source",
+                            value = "${data.url}${data.item.backdropImageSource}"
+                        },
+                        new SetValue() {componentId = "backdropOverlay", property = "opacity", value = 1},
+                        new SetValue()
+                        {
+                            componentId = "backdropOverlay",
+                            property = "overlayColor",
+                            value = "rgba(0,0,0,0.55)"
+                        }
                     }
                 },
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                autoplay = true,
-                audioTrack = "none",
-                id = "${data.item.id}",
-                onEnd = new List<ICommand>()
+                new Image()
                 {
-                    new SetValue()
-                    {
-                        componentId = "backdropOverlay",
-                        property    = "source",
-                        value       = "${data.url}${data.item.backdropImageSource}"
-                    },
-                    new SetValue()
-                    {
-                        componentId = "backdropOverlay",
-                        property    = "opacity",
-                        value       = 1
-                    },
-                    new SetValue()
-                    {
-                        componentId = "backdropOverlay",
-                        property    = "overlayColor",
-                        value       = "rgba(0,0,0,0.55)"
-                    }
+                    overlayColor = "rgba(0,0,0,1)",
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    source = "${data.url}${data.item.videoOverlaySource}",
+                    opacity = 0.65,
+                    id = "backdropOverlay"
+                },
+                new AlexaHeader()
+                {
+                    headerBackButton = true,
+                    headerTitle = "${data.item.name}",
+                    headerSubtitle = $"{session.User.Name} Play On...",
+                    headerDivider = true
+                },
+                new Image()
+                {
+                    position = "absolute",
+                    source = "${data.url}${data.item.logoImageSource}",
+                    width = "25vw",
+                    height = "10vh",
+                    right = "5vw",
+                    bottom = "5vh"
                 }
-            });
-            layout.Add(new Image()
-            {
-                overlayColor = "rgba(0,0,0,1)",
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                source = "${data.url}${data.item.videoOverlaySource}",
-                opacity = 0.65,
-                id = "backdropOverlay"
-            });
-            layout.Add(new AlexaHeader()
-            {
-                headerBackButton = true,
-                headerTitle = $"{template.baseItems[0].Name}",
-                headerSubtitle = $"{session.User.Name} Play On...",
-                headerDivider = true
-            });
-            layout.Add(new Image()
-            {
-                position = "absolute",
-                source = "${data.url}${data.item.logoImageSource}",
-                width = "25vw",
-                height = "10vh",
-                right = "5vw",
-                bottom = "5vh"
-            });
+            };
 
-            var roomButtons = RenderComponent_RoomButtonLayoutContainer(template);
+
+            var roomButtons = RenderComponent_RoomButtonLayoutContainer();
             roomButtons.ForEach(b => layout.Add(b));
 
             var view = new Directive()
             {
                 type = Directive.AplRenderDocument,
-                token = token,
+                token = "roomSelection",
                 document = new Document()
                 {
                     theme = "dark",
@@ -868,45 +864,45 @@ namespace AlexaController.Alexa
                         }
                     }
                 },
-                datasources = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync("templateData", baseItem)
+                datasources = new Dictionary<string, IDataSource>(){ {"templateData", dataSource } }
             };
 
             return await Task.FromResult(view);
         }
 
-        private async Task<IDirective> RenderBrowseLibraryTemplate(RenderDocumentQuery template, IAlexaSession session)
+        private async Task<IDirective> RenderBrowseLibraryTemplate(IDataSource dataSource, IAlexaSession session)
         {
-            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            var layout = new List<VisualBaseItem>();
-            const string token = "browseLibrary";
-
-            layout.Add(new AlexaBackground()
+            var layout = new List<VisualBaseItem>
             {
-                backgroundVideoSource = new List<Source>()
+                new AlexaBackground()
                 {
-                    new Source()
+                    backgroundVideoSource = new List<Source>()
                     {
-                        url         = $"{url}/MoviesLibrary",
-                        repeatCount = 1,
-                    }
+                        new Source()
+                        {
+                            url = "${payload.templateData.properties.url}/MoviesLibrary",
+                            repeatCount = 1,
+                        }
+                    },
+                    backgroundScale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    videoAutoPlay = true
                 },
-                backgroundScale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                videoAutoPlay = true
-            });
-            layout.Add(new AlexaHeadline()
-            {
-                primaryText = $"Now showing {template.baseItems[0].Name}",
-                secondaryText = $"{session.room.Name}",
-                backgroundColor = "rgba(0,0,0,0.45)"
-            });
+                new AlexaHeadline()
+                {
+                    primaryText = "Now showing ${payload.templateData.properties.HeadlinePrimaryText}",
+                    secondaryText = $"{session.room.Name}",
+                    backgroundColor = "rgba(0,0,0,0.45)"
+                }
+            };
+
 
             return await Task.FromResult(new Directive()
             {
                 type = Directive.AplRenderDocument,
-                token = token,
+                token = "browseLibrary",
                 document = new Document()
                 {
                     theme = "light",
@@ -925,116 +921,48 @@ namespace AlexaController.Alexa
                             }
                         }
                     }
-                }
+                },
+                datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource }}
             });
         }
 
-        private async Task<IDirective> RenderQuestionRequestTemplate(RenderDocumentQuery template)
+        private async Task<IDirective> RenderQuestionRequestTemplate(IDataSource dataSource)
         {
-            var layout = new List<VisualBaseItem>();
-            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
-
-            layout.Add(new Video()
+            var layout = new List<VisualBaseItem>
             {
-                source = new List<Source>()
+                new Video()
                 {
-                    new Source()
+                    source = new List<Source>()
                     {
-                        url         = $"{url}/Question",
-                        repeatCount = 1,
-                    }
-                },
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                autoplay = true,
-                audioTrack = "none"
-            });
-            layout.Add(new Image()
-            {
-                overlayColor = "rgba(0,0,0,1)",
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                source = $"{url}/EmptyPng?quality=90",
-                opacity = 0.45
-            });
-            layout.Add(new AlexaHeadline()
-            {
-                backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = template.HeadlinePrimaryText
-            });
-
-            return await Task.FromResult(new Directive()
-            {
-                type = Directive.AplRenderDocument,
-                token = "",
-                document = new Document()
-                {
-                    theme = "light",
-                    import = Imports,
-                    resources = Resources,
-                    mainTemplate = new MainTemplate()
-                    {
-                        parameters = new List<string>() { "payload" },
-                        items = new List<IItem>()
+                        new Source()
                         {
-                            new Container()
-                            {
-                                width  = "100vw",
-                                height = "100vh",
-                                items  = layout
-                            }
+                            url = "${payload.templateData.properties.url}/Question", repeatCount = 1,
                         }
-                    }
-                }
-            });
-        }
-
-        private async Task<IDirective> RenderNotUnderstoodTemplate()
-        {
-            var layout = new List<VisualBaseItem>();
-            var url = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            layout.Add(new Video()
-            {
-                source = new List<Source>()
-                {
-                    new Source()
-                    {
-                        url         = $"{url}/particles",
-                        repeatCount = 1,
-                    }
+                    },
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    autoplay = true,
+                    audioTrack = "none"
                 },
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                autoplay = true,
-                audioTrack = "none"
-            });
-            layout.Add(new Image()
-            {
-                overlayColor = "rgba(0,0,0,1)",
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                source = $"{url}/EmptyPng?quality=90",
-                opacity = 0.35
-            });
-            layout.Add(new AlexaHeadline()
-            {
-                backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = "Could you say that again?"
-            });
-            layout.Add(new AlexaFooter()
-            {
-                hintText = "Alexa, open help...",
-                position = "absolute",
-                bottom = "1vh"
-            });
+                new Image()
+                {
+                    overlayColor = "rgba(0,0,0,1)",
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    source = "${payload.templateData.properties.url}/EmptyPng?quality=90",
+                    opacity = 0.45
+                },
+                new AlexaHeadline()
+                {
+                    backgroundColor = "rgba(0,0,0,0.1)",
+                    primaryText = "${payload.templateData.properties.HeadlinePrimaryText}"
+                }
+            };
+
 
             return await Task.FromResult(new Directive()
             {
@@ -1058,11 +986,77 @@ namespace AlexaController.Alexa
                             }
                         }
                     }
-                }
+                }, 
+                datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource } }
             });
         }
 
-        private async Task<IDirective> RenderGenericHeadlineRequestTemplate(RenderDocumentQuery template)
+        private async Task<IDirective> RenderNotUnderstoodTemplate(IDataSource dataSource)
+        {
+            var layout = new List<VisualBaseItem>
+            {
+                new Video()
+                {
+                    source = new List<Source>()
+                    {
+                        new Source()
+                        {
+                            url = "${payload.templateData.properties.url}/particles", repeatCount = 1,
+                        }
+                    },
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    autoplay = true,
+                    audioTrack = "none"
+                },
+                new Image()
+                {
+                    overlayColor = "rgba(0,0,0,1)",
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    source = "${payload.templateData.properties.url}/EmptyPng?quality=90",
+                    opacity = 0.35
+                },
+                new AlexaHeadline()
+                {
+                    backgroundColor = "rgba(0,0,0,0.1)", primaryText = "Could you say that again?"
+                },
+                new AlexaFooter() {hintText = "Alexa, open help...", position = "absolute", bottom = "1vh"}
+            };
+
+
+            return await Task.FromResult(new Directive()
+            {
+                type = Directive.AplRenderDocument,
+                token = "",
+                document = new Document()
+                {
+                    theme = "light",
+                    import = Imports,
+                    resources = Resources,
+                    mainTemplate = new MainTemplate()
+                    {
+                        parameters = new List<string>() { "payload" },
+                        items = new List<IItem>()
+                        {
+                            new Container()
+                            {
+                                width  = "100vw",
+                                height = "100vh",
+                                items  = layout
+                            }
+                        }
+                    }
+                },
+                datasources = new Dictionary<string, IDataSource>() { {"templateData", dataSource } }
+            });
+        }
+
+        private async Task<IDirective> RenderGenericHeadlineRequestTemplate(IDataSource dataSource)
         {
             // ReSharper disable once UseObjectOrCollectionInitializer
             var layout = new List<VisualBaseItem>();
@@ -1099,7 +1093,7 @@ namespace AlexaController.Alexa
             layout.Add(new AlexaHeadline()
             {
                 backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = template.HeadlinePrimaryText
+                primaryText = "${payload.templateData.properties.HeadlinePrimaryText}"
             });
 
             layout.Add(new AlexaFooter()
@@ -1131,11 +1125,12 @@ namespace AlexaController.Alexa
                             }
                         }
                     }
-                }
+                },
+                datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource } }
             });
         }
 
-        private async Task<IDirective> RenderHelpTemplate()
+        private async Task<IDirective> RenderHelpTemplate(IDataSource dataSource)
         {
             var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
@@ -1411,15 +1406,15 @@ namespace AlexaController.Alexa
                         }
                     }
                 },
-                datasources = await DataSourceManager.Instance.GetHelpDataSourceAsync("templateData")
+                datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource } }//await DataSourceManager.Instance.GetHelpDataSourceAsync("templateData")
             });
         }
         
         //Create template components 
-        private static async Task<Frame> RenderComponent_PlayButton(BaseItem item, IAlexaSession session)
+        private static async Task<Frame> RenderComponent_PlayButton(MediaItem item, IAlexaSession session)
         {
             List<object> args = null;
-            switch (item.GetType().Name)
+            switch (item.type)
             {
                 case "Episode":
                 case "Movie":
@@ -1443,9 +1438,9 @@ namespace AlexaController.Alexa
                 {
                     new AlexaIconButton()
                     {
-                        vectorSource = item.GetType().Name == "Series" ?  MaterialVectorIcons.ListIcon : MaterialVectorIcons.PlayOutlineIcon,
+                        vectorSource = item.type == "Series" ?  MaterialVectorIcons.ListIcon : MaterialVectorIcons.PlayOutlineIcon,
                         buttonSize = "13vh",
-                        id = item.InternalId.ToString(),
+                        id = item.id.ToString(),
                         primaryAction = new Parallel()
                         {
                             commands = new List<ICommand>()
@@ -1519,7 +1514,7 @@ namespace AlexaController.Alexa
 
         }
 
-        private List<VisualBaseItem> RenderComponent_RoomButtonLayoutContainer(RenderDocumentQuery template)
+        private List<VisualBaseItem> RenderComponent_RoomButtonLayoutContainer()
         {
             var config = Plugin.Instance.Configuration;
             var roomButtons = new List<VisualBaseItem>();
@@ -1545,7 +1540,7 @@ namespace AlexaController.Alexa
                     {
                         new AlexaIconButton()
                         {
-                            id = template.baseItems[0].InternalId.ToString(),
+                            id = "${data.item.id}",
                             buttonSize = "72dp",
                             vectorSource = MaterialVectorIcons.CastIcon,
                             disabled = disabled,

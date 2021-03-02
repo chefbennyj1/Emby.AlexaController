@@ -7,17 +7,17 @@ namespace AlexaController.Alexa.Presentation.DataSources.Properties
     public class MediaItemProperties : IProperties
     {
         public string url                      { get; set; }
+        public RenderDocumentType documentType { get; set; }
         public List<SimilarItem> similarItems  { get; set; }
         public MediaItem item                  { get; set; }
         public List<MediaItem> items           { get; set; }
-        
     }
-}
 
     public class MediaItem
     {
         public string endTime             { get; set; }
         public string runtimeMinutes      { get; set; }
+        public bool isPlayed              { get; set; }
         public string primaryImageSource  { get; set; }
         public string tagLine             { get; set; }
         public string genres              { get; set; }
@@ -37,7 +37,8 @@ namespace AlexaController.Alexa.Presentation.DataSources.Properties
     public class SimilarItem
     {
         public string thumbImageSource { get; set; }
-        public long id                 { get; set; }
+        public long id { get; set; }
     }
+}
 
 

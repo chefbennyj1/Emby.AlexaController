@@ -19,6 +19,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
+            var dataSource = await DataSourceManager.Instance.GetNotUnderstood();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
@@ -26,10 +27,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 directives = new List<IDirective>()
                 {
                     await RenderDocumentDirectiveManager.Instance
-                        .GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
-                        {
-                            renderDocumentType = RenderDocumentType.NOT_UNDERSTOOD
-                        }, Session),
+                        .GetRenderDocumentDirectiveAsync(dataSource, Session),
                     await AudioDirectiveManager.Instance
                         .GetAudioDirectiveAsync(new AudioDirectiveQuery()
                         {

@@ -160,6 +160,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
+                var dataSource = await DataSourceManager.Instance.GetGenericHeadline(exception.Message);
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -171,12 +172,7 @@ namespace AlexaController.Api
                     directives = new List<IDirective>()
                     {
                         await RenderDocumentDirectiveManager.Instance
-                            .GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
-                            {
-                                renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
-                                HeadlinePrimaryText = exception.Message
-
-                            }, session)
+                            .GetRenderDocumentDirectiveAsync(dataSource, session)
                     }
                 }, session);
             }
@@ -222,18 +218,15 @@ namespace AlexaController.Api
                     }, null);
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-
+            var dataSource =
+                await DataSourceManager.Instance.GetGenericHeadline("Welcome to Home Theater Emby Controller");
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
-                    {
-                        HeadlinePrimaryText = "Welcome to Home Theater Emby Controller",
-                        renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE
-                    }, session),
+                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session),
                     await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
                     {
                         speechContent = SpeechContent.ON_LAUNCH,
@@ -267,6 +260,7 @@ namespace AlexaController.Api
             
             var instance = Activator.CreateInstance(type, paramArgs);
             return await (Task<string>)type.GetMethod("Response").Invoke(instance, null);
+
         }
     }
 }

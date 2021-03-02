@@ -4,6 +4,7 @@ namespace AlexaController.Alexa.Presentation.DataSources.Properties
 {
     public class HelpProperties : IProperties
     {
+        public RenderDocumentType documentType { get; set; } = RenderDocumentType.HELP;
         public List<HelpValue> helpContent => new List<HelpValue>()
         {
             new HelpValue() {value = "<b>Accessing Emby accounts based on your voice.</b>"},
@@ -48,6 +49,7 @@ namespace AlexaController.Alexa.Presentation.DataSources.Properties
             new HelpValue() {value = "This concludes the help section. Good luck!"},
         };
 
+        
 
         public class HelpValue
         {

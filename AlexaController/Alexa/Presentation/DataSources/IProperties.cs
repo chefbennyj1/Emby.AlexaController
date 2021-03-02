@@ -2,5 +2,6 @@
 {
     public interface IProperties
     {
+        RenderDocumentType documentType { get; set; }
     }
 }

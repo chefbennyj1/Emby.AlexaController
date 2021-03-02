@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Api;
 using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
@@ -34,25 +35,27 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
 
-            RenderDocumentQuery documentTemplateInfo = null;
+            IDataSource dataSource = null;
+
+            //RenderDocumentQuery documentTemplateInfo = null;
             AudioDirectiveQuery audioTemplateInfo = null;
             if (session.room is null)
             {
-                documentTemplateInfo = new RenderDocumentQuery()
-                {
-                    renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
-                    baseItems = new List<BaseItem>() {baseItem}
-                };
-
+                //documentTemplateInfo = new RenderDocumentQuery()
+                //{
+                //    renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
+                //    baseItems = new List<BaseItem>() {baseItem}
+                //};
+                dataSource = await DataSourceManager.Instance.GetRoomSelection(baseItem, session);
                 session.NowViewingBaseItem = baseItem;
-                AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
+                AlexaSessionManager.Instance.UpdateSession(session, dataSource);
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session)
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session)
                     }
 
                 }, session);
@@ -65,11 +68,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             Task.Run(() => ServerController.Instance.PlayMediaItemAsync(session, baseItem)).ConfigureAwait(false);
 #pragma warning restore 4014
 
-            documentTemplateInfo = new RenderDocumentQuery()
-            {
-                baseItems = new List<BaseItem>() {baseItem},
-                renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
-            };
+            //documentTemplateInfo = new RenderDocumentQuery()
+            //{
+            //    baseItems = new List<BaseItem>() {baseItem},
+            //    renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
+            //};
+
+            dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
 
             audioTemplateInfo = new AudioDirectiveQuery()
             {
@@ -83,21 +88,11 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             };
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
             var renderAudioDirective = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                //    {
-                //        type = SpeechResponseType.PLAY_MEDIA_ITEM, 
-                //        session = session, 
-                //        items = new List<BaseItem>() { baseItem }
-                //    }),
-                   
-                //},
                 SpeakUserName = true,
                 shouldEndSession = null,
                 directives = new List<IDirective>()

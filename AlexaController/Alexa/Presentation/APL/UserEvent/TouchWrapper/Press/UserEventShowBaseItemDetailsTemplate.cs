@@ -25,11 +25,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session        = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room           = session.room;
             
-            var documentTemplateInfo = new RenderDocumentQuery()
-            {
-                baseItems = new List<BaseItem>() {baseItem},
-                renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
-            };
+            //var documentTemplateInfo = new RenderDocumentQuery()
+            //{
+            //    baseItems = new List<BaseItem>() {baseItem},
+            //    renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
+            //};
+
+            var dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
 
             var renderAudioTemplateInfo = new AudioDirectiveQuery()
             {
@@ -46,7 +48,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             // Update session data
             session.NowViewingBaseItem = baseItem;
             session.room               = room;
-            AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
+            AlexaSessionManager.Instance.UpdateSession(session, dataSource);
             
             //if the user has requested an Emby client/room display during the session - display both if possible
             if (!(room is null))
@@ -63,20 +65,11 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
             var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                //    {
-                //        type = SpeechResponseType.BROWSE_ITEM, 
-                //        session = session, 
-                //        items =  new List<BaseItem>() { baseItem }
-                //    }),
-                //},
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {

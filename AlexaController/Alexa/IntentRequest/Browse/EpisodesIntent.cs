@@ -114,13 +114,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var documentTemplateInfo = new RenderDocumentQuery()
-            {
-                baseItems              = results,
-                renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle            = $"Season {seasonNumber}",
-                HeaderAttributionImage = season.Parent.HasImage(ImageType.Logo) ? $"/Items/{season.Parent.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
-            };
+            //var documentTemplateInfo = new RenderDocumentQuery()
+            //{
+            //    baseItems              = results,
+            //    renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
+            //    HeaderTitle            = $"Season {seasonNumber}",
+            //    HeaderAttributionImage = season.Parent.HasImage(ImageType.Logo) ? $"/Items/{season.Parent.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
+            //};
+
+            var dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results, season.Parent);
 
             renderAudioTemplateInfo = new AudioDirectiveQuery()
             {
@@ -135,11 +137,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             };
 
-
             Session.NowViewingBaseItem = season;
-            AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
+            AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
             var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

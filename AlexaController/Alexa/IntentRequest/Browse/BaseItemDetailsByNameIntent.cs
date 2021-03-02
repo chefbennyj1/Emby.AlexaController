@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Api;
 using AlexaController.Api.RequestData;
 using AlexaController.Api.ResponseModel;
@@ -45,6 +46,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
+            IDataSource dataSource = null;
             ServerController.Instance.Log.Info(searchName);
             
 #pragma warning disable 4014
@@ -93,18 +95,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch { }
 
+                dataSource =
+                    await DataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {result.OfficialRating}");
+
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(
-                            new RenderDocumentQuery()
-                            {
-                                renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
-                                HeadlinePrimaryText = $"Stop! Rated {result.OfficialRating}"
-
-                            }, Session),
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session),
                         await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
                             new AudioDirectiveQuery()
                             {
@@ -140,13 +139,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var documentTemplateInfo = new RenderDocumentQuery()
-            {
-                baseItems = new List<BaseItem>() { result },
-                renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
-                HeaderAttributionImage = result.HasImage(ImageType.Logo) ? $"/Items/{result.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
-            };
-            
+            //var documentTemplateInfo = new RenderDocumentQuery()
+            //{
+            //    baseItems = new List<BaseItem>() { result },
+            //    renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
+            //    HeaderAttributionImage = result.HasImage(ImageType.Logo) ? $"/Items/{result.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
+            //};
+
+            dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
+
             var renderAudioTemplateInfo = new AudioDirectiveQuery()
             {
                 speechContent = SpeechContent.BROWSE_ITEM,
@@ -160,9 +161,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             //Update Session
             Session.NowViewingBaseItem = result;
-            AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
+            AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
             var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             try

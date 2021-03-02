@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Api;
 using AlexaController.Api.RequestData;
 using AlexaController.Api.ResponseModel;
@@ -34,7 +35,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             }
-            catch { }
+            catch (Exception exception)
+            {
+                ServerController.Instance.Log.Error(exception.Message);
+            }
 
            
             if (Session.room is null && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
@@ -44,13 +48,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var slots             = intent.slots;
             var collectionRequest = slots.MovieCollection.value ?? slots.Movie.value;
             var context           = AlexaRequest.context;
-            var apiAccessToken    = context.System.apiAccessToken;
-            var requestId         = request.requestId;
-
             
-#pragma warning disable 4014
-            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse("One Moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
+
             ServerController.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
             ServerController.Instance.Log.Info(nameof(CollectionIntent) + " normalized request: " + collectionRequest);
@@ -58,7 +57,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var collection          = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems     = collection.Values.FirstOrDefault();
             var collectionBaseItem  = collection.Keys.FirstOrDefault();
-            
+
+            IDataSource dataSource = null;
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
             {
@@ -70,19 +70,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
                     }
 
+                    dataSource = await DataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {collectionBaseItem.OfficialRating}");
+                    
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(
-                                new RenderDocumentQuery()
-                                {
-                                    renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
-                                    HeadlinePrimaryText = "Stop!"
-
-                                }, Session),
+                            await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session),
+                                
                             await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
                                 new AudioDirectiveQuery()
                                 {
@@ -107,33 +104,18 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch (Exception exception)
                 {
-#pragma warning disable 4014
-                    Task.Run(() => 
-                            AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
-                                requestId))
-                        .ConfigureAwait(false);
-#pragma warning restore 4014
-                    await Task.Delay(1200);
-                    Session.room = null;
+                    ServerController.Instance.Log.Error(exception.Message);
                 }
             }
 
-            ServerController.Instance.Log.Info(nameof(CollectionIntent) + "Preparing collection base item: " + collectionBaseItem?.Name);
-
-            var textInfo = CultureInfo.CurrentCulture.TextInfo;
-            var documentTemplateInfo = new RenderDocumentQuery()
-            {
-                HeaderTitle            = textInfo.ToTitleCase(collectionBaseItem?.Name.ToLower() ?? throw new Exception("no collection item")),
-                renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                baseItems              = collectionItems,
-                HeaderAttributionImage = collectionBaseItem.HasImage(ImageType.Logo) ? $"/Items/{collectionBaseItem.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null 
-            };
+            
+            dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(collectionItems, collectionBaseItem);
 
             //Update Session
             Session.NowViewingBaseItem = collectionBaseItem;
-            AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
+            AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

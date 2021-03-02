@@ -35,10 +35,7 @@ namespace AlexaController.Alexa
                 {
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>()
-                        {
-                            "payload"
-                        },
+                        parameters = new List<string>() { "payload" },
                         item = new Mixer()
                         {
                             items = new List<AudioBaseItem>()
@@ -327,25 +324,39 @@ namespace AlexaController.Alexa
                     speech.Append($" scheduled to air over the next {(date - DateTime.Now).Days} days.");
                     speech.Append(InsertStrengthBreak(StrengthBreak.weak));
                    
-                    var schedule = query.items.DistinctBy(item => item.Parent.ParentId);
-                   
-                    foreach (var item in schedule)
-                    {
-                        speech.Append(StringNormalization.ValidateSpeechQueryString(item.Parent.Parent.Name));
-                        if (item.IndexNumber == 1)
-                        {
-                            speech.Append($" will premiere season {SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
-                            speech.Append(SayAsDate(Date.md, item.PremiereDate.Value.ToString("M/d"))); 
-                            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-                            speech.Append(" and ");
-                        }
+                    var schedule = query.items.DistinctBy(item => item.Parent.ParentId).ToList();
 
-                        
-                        speech.Append(" will air on ");
-                        speech.Append($"{item.PremiereDate.Value.DayOfWeek}'s");
-                         
+                    var dateGroup = schedule.GroupBy(s => s?.PremiereDate);
+
+                    foreach (var d in dateGroup)
+                    {
+                        speech.Append($"On {d.Key.Value.DayOfWeek}'s:");
                         speech.Append(InsertStrengthBreak(StrengthBreak.strong));
+                        var i = 1;
+                        foreach (var item in d)
+                        {
+                            speech.Append(StringNormalization.ValidateSpeechQueryString(item.Parent.Parent.Name));
+                            if (item.IndexNumber == 1)
+                            {
+                                speech.Append($" which will premiere season {SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
+                                speech.Append(SayAsDate(Date.md, d.Key.Value.ToString("M/d")));
+                                speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+                                //speech.Append(" and ");
+                            }
+                            speech.Append(", ");
+                            if (d.Count() > 1 && i == d.Count() -1)
+                            {
+                                speech.Append(" and ");
+                            }
+                            //speech.Append(" will air on ");
+                            //speech.Append($"{item.PremiereDate.Value.DayOfWeek}'s");
+                            
+                            i++;
+                        }
                     }
+
+
+                    
                     
                     speech.Append(
                         $"This completes the list of episodes scheduled for the next {(date - DateTime.Now).Days} days. ");
@@ -362,7 +373,7 @@ namespace AlexaController.Alexa
                     speech.Append(query.items?.Count > 1 ? query.items[0].GetType().Name + "s" : query.items?[0].GetType().Name);
 
                     var date = DateTime.Parse(query.args[0]);
-                    speech.Append($" added in the past {(date - DateTime.Now).Days} days. ");
+                    speech.Append($" added in the past {(date - DateTime.Now).Days * -1} days. ");
 
                     speech.Append(string.Join($", {InsertStrengthBreak(StrengthBreak.weak)}",
                         // ReSharper disable once AssignNullToNotNullAttribute

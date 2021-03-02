@@ -26,28 +26,16 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
+            var dataSource = await DataSourceManager.Instance.GetFollowUpQuestion("Which room did you want?");
             session.PersistedRequestContextData = alexaRequest;
-            AlexaSessionManager.Instance.UpdateSession(session, null);
+            AlexaSessionManager.Instance.UpdateSession(session, dataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                //    {
-                //        type = SpeechResponseType.ROOM_CONTEXT, 
-                //        session = session
-                //    })
-                //},
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
-                    {
-                        renderDocumentType  = RenderDocumentType.QUESTION_TEMPLATE,
-                        HeadlinePrimaryText = "Which room did you want?"
-
-                    }, session),
+                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session),
                     await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
                     {
                         speechContent = SpeechContent.ROOM_CONTEXT,
@@ -70,6 +58,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     string.Equals(r.Name, name, StringComparison.CurrentCultureIgnoreCase)) : null;
         }
 
+        //TODO user may have said "The Family Room", but the room is called "Family Room" - Remove the and try to compare room if needs be
         public Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;
@@ -78,7 +67,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             var config = Plugin.Instance.Configuration;
 
             string room = (slots.Room.value ?? session.room?.Name) ?? request.arguments[1];
-
+            
             if (string.IsNullOrEmpty(room)) throw new Exception("No room found");
 
             return ValidateRoomConfiguration(room, config)

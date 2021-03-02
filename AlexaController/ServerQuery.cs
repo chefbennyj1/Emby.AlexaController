@@ -47,6 +47,17 @@ namespace AlexaController
             return SessionManager.Sessions;
         }
 
+        public QueryResult<BaseItem> GetItemsResult(long id, string[] types, User user)
+        {
+            var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
+            {
+                Parent = LibraryManager.GetItemById(id),
+                IncludeItemTypes = types,
+                Recursive = true
+            });
+            return result;
+        }
+
         public QueryResult<BaseItem> GetItemsResult(BaseItem parent, string[] types, User user)
         {
             var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
@@ -266,7 +277,7 @@ namespace AlexaController
 
             return item.HasImage(ImageType.Primary) 
                 ? $"/Items/{ item.InternalId }/Images/primary?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;" 
-                : $"/Items/{ item.InternalId }/Images/backdrop?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
+                : $"/Items/{ item.Parent.Parent.InternalId }/Images/backdrop?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
         }
         
         public string GetBackdropImageSource(BaseItem item)
@@ -288,8 +299,21 @@ namespace AlexaController
 
         public string GetLogoImageSource(BaseItem item)
         {
+            long? id = null;
+            switch (item.GetType().Name)
+            {
+                default :
+                    id = item.InternalId;
+                    break;
+                case "Season":
+                    id = item.Parent.InternalId;
+                    break;
+                case "Episode":
+                    id = item.Parent.Parent.InternalId;
+                    break;
+            }
             return item.HasImage(ImageType.Logo)
-                ? $"/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
+                ? $"/Items/{id}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
         }
 
         public string GetVideoBackdropImageSource(BaseItem item)

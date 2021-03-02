@@ -1,8 +1,8 @@
 ﻿namespace AlexaController.Alexa
 {
-    // ReSharper disable once InconsistentNaming
+    // ReSharper disable twice InconsistentNaming
     public abstract class IntentResponseBase<IAlexaRequest, IAlexaSession>
     {
-        public IntentResponseBase(IAlexaRequest alexaRequest, IAlexaSession session) { }
+        protected IntentResponseBase(IAlexaRequest alexaRequest, IAlexaSession session) { }
     }
 }

@@ -119,6 +119,8 @@
                         }
                     ],
                     "samples": [
+                        "to {VisualModeTrigger} the {Movie} in the {Room}",
+                        "to {VisualModeTrigger} the {MovieCollection} in the {Room}",
                         "to {VisualModeTrigger} all the {Movie} movies",
                         "to {VisualModeTrigger} all the {Movie} movies in the {Room}",
                         "{VisualModeTrigger} the  {Movie} collection in the {Room}",
@@ -172,6 +174,7 @@
                         }
                     ],
                     "samples": [
+                        "to {VisualModeTrigger} the next up episode for {Series}",
                         "to {VisualModeTrigger} the next up episode for {Series} in the {Room}",
                         "to {VisualModeTrigger} next up for {Series} in the {Room}"
                     ]
@@ -348,10 +351,6 @@
                         {
                             "name": "Duration",
                             "type": "AMAZON.DURATION"
-                        },
-                        {
-                            "name": "MediaType",
-                            "type": "AMAZON.CreativeWorkType"
                         }
                     ],
                     "samples": [
@@ -443,16 +442,21 @@
                         {
                             "name": "Duration",
                             "type": "AMAZON.DURATION"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        },
+                        {
+                            "name": "TVAlernatives",
+                            "type": "LIST_OF_TV_ALTS"
                         }
                     ],
                     "samples": [
-                        "about upcoming TV episodes",
-                        "up coming TV episodes",
-                        "up coming Episodes",
-                        "about up coming Episodes",
-                        "about up coming TV Episodes",
-                        "about up coming TV episodes for the next {Duration}",
-                        "about up coming episode for the next {Duration}",
+                        "to {VisualModeTrigger} upcoming {TVAlernatives}",
+                        "about upcoming {TVAlernatives}",
+                        "what are up coming {TVAlernatives}",
+                        "about up coming {TVAlernatives} for the next {Duration}",
                         "what's on TV this {Duration}"
                     ]
                 },
@@ -503,6 +507,16 @@
                 {
                     "name": "LIST_OF_TV_ALTS",
                     "values": [
+                        {
+                            "name": {
+                                "value": "episodes"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "series"
+                            }
+                        },
                         {
                             "name": {
                                 "value": "television show"

@@ -26,19 +26,15 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var type     = baseItem.GetType().Name;
            
-           
             var results = ServerQuery.Instance.GetItemsResult(baseItem,
                 new[] { type == "Series" ? "Season" : "Episode" }, session.User);
 
-            var documentTemplateInfo = new RenderDocumentQuery()
-            {
-                baseItems          = results.Items.ToList(),
-                renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle        = type == "Season" ? $"{ baseItem.Parent.Name } > { baseItem.Name }" : baseItem.Name
-            };
-           
+            
+            var dataSource =
+                await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results.Items.ToList(), baseItem);
+
             session.NowViewingBaseItem = baseItem;
-            AlexaSessionManager.Instance.UpdateSession(session, documentTemplateInfo);
+            AlexaSessionManager.Instance.UpdateSession(session, dataSource);
             
             //if the user has requested an Emby client/room display during the session - display both if possible
             if (session.room != null)
@@ -55,7 +51,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

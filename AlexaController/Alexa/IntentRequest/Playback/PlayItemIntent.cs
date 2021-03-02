@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Api;
 using AlexaController.Api.RequestData;
 using AlexaController.Api.ResponseModel;
@@ -41,15 +42,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var intent         = request.intent;
             var slots          = intent.slots;
 
-            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-            //{
-            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-            //    session = Session
-            //});
-
-#pragma warning disable 4014
-            AlexaResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId).ConfigureAwait(false);
-#pragma warning restore 4014
+            IDataSource dataSource = null;
 
             BaseItem result = null;
             if (Session.NowViewingBaseItem is null)
@@ -81,14 +74,6 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                             }
                         })
                     }
-                    //outputSpeech = new OutputSpeech()
-                    //{
-                    //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    //    {
-                    //        type = SpeechResponseType.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
-                    //        session = Session
-                    //    }),
-                    //}
                 }, Session);
             }
             
@@ -101,19 +86,16 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {result.Name}.").ConfigureAwait(false);
                 }
 
+                dataSource =
+                    await DataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {result.OfficialRating}");
+
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(
-                            new RenderDocumentQuery()
-                            {
-                                renderDocumentType = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
-                                HeadlinePrimaryText = $"Stop! Rated {result.OfficialRating}"
-
-                            }, Session),
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session),
                         await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
                             new AudioDirectiveQuery()
                             {
@@ -155,11 +137,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            var documentTemplateInfo = new RenderDocumentQuery()
-            {
-                renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
-                baseItems = new List<BaseItem>() {result}
-            };
+            //var documentTemplateInfo = new RenderDocumentQuery()
+            //{
+            //    renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
+            //    baseItems = new List<BaseItem>() {result}
+            //};
+
+            dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
 
             var renderAudioTemplateInfo = new AudioDirectiveQuery()
             {
@@ -173,7 +157,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 }
             };
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
             var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

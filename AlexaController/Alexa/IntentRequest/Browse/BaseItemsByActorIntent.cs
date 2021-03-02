@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Api;
 using AlexaController.Api.RequestData;
 using AlexaController.Api.ResponseModel;
@@ -42,6 +43,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
+
+            IDataSource dataSource = null;
             //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
             //{
             //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
@@ -56,6 +59,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result is null)
             {
+                dataSource = await DataSourceManager.Instance.GetGenericHeadline("I was unable to find that actor.");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
@@ -67,12 +71,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(new RenderDocumentQuery()
-                        {
-                            HeadlinePrimaryText = "I was unable to find that actor.",
-                            renderDocumentType  = RenderDocumentType.GENERIC_HEADLINE_TEMPLATE,
-
-                        }, Session)
+                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
                     }
                 }, Session);
             }
@@ -115,13 +114,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var documentTemplateInfo = new RenderDocumentQuery()
-            {
-                baseItems          =  actorCollection ,
-                renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-                HeaderTitle        = $"Starring {phrase}",
-                //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
-            };
+            //var documentTemplateInfo = new RenderDocumentQuery()
+            //{
+            //    baseItems          =  actorCollection ,
+            //    renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
+            //    HeaderTitle        = $"Starring {phrase}",
+            //    //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
+            //};
+
+            dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
 
             var audioTemplateInfo = new AudioDirectiveQuery()
             {
@@ -139,9 +140,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //TODO: Fix session Update (it is only looking at one actor, might not matter)
             //Update Session
             Session.NowViewingBaseItem = actors[0];
-            AlexaSessionManager.Instance.UpdateSession(Session, documentTemplateInfo);
+            AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(documentTemplateInfo, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
             var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

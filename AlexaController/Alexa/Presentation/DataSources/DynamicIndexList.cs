@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
 
-namespace AlexaController.Alexa.Presentation.DataSourceModel
+namespace AlexaController.Alexa.Presentation.DataSources
 {
     public class DynamicIndexList : IDataSource
     {
@@ -20,6 +18,6 @@ namespace AlexaController.Alexa.Presentation.DataSourceModel
 
     public class DynamicIndexListProperties : IProperties
     {
-
+        public RenderDocumentType documentType { get; set; }
     }
 }
