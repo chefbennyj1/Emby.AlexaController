@@ -13,7 +13,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string when                     { get; set; }
         public List<VisualBaseItem> items      { get; set; }
         public VisualBaseItem item             { get; set; }
-        public DataBind bind                   { get; set; }
+        public List<DataBind> bind             { get; set; }
         public string width                    { get; set; }
         public string height                   { get; set; }
         public string maxHeight                { get; set; }
@@ -41,7 +41,7 @@ namespace AlexaController.Alexa.Presentation.APL.Components
     public class DataBind
     {
         public string name { get; set; }
-        public string value { get; set; }
+        public object value { get; set; }
     }
     
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AlexaController.Alexa.Presentation.APL.Commands
+﻿namespace AlexaController.Alexa.Presentation.APL.Commands
 {
     public interface ICommand
     {

@@ -146,7 +146,7 @@ namespace AlexaController.Alexa
                         scale = "best-fill",
                         position = "absolute",
                         source = "${payload.templateData.properties.url}${payload.templateData.properties.item.backdropImageSource}",
-                        filter = new List<IFilter>()
+                        filters = new List<IFilter>()
                         {
                             new Gradient()
                             {
@@ -626,7 +626,6 @@ namespace AlexaController.Alexa
             //Series - Season Count
             if (string.Equals(type, "Series"))
             {
-
                 layout.Add(new Container()
                 {
                     position = "absolute",
@@ -708,8 +707,8 @@ namespace AlexaController.Alexa
                     graphics = graphicsDictionary,
                     commands = new Dictionary<string, ICommand>()
                     {
-                        { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() },
-                        { nameof(Animations.FadeIn), await Animations.FadeIn() }
+                        { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() } ,
+                        { nameof(Animations.FadeIn), await Animations.FadeIn() } 
                     },
                     resources = Resources,
                     mainTemplate = new MainTemplate()
@@ -733,7 +732,7 @@ namespace AlexaController.Alexa
                                     },
                                     new Image()
                                     {
-                                        source = "${data.logoUrl}",//$"{Url}/Items/{template.baseItems[0].InternalId}/Images/logo?quality=90",
+                                        source = "${data.logoUrl}",
                                         width  = "55%",
                                         height = "25vh",
                                         left   = "20%",
@@ -751,10 +750,13 @@ namespace AlexaController.Alexa
                             },
                             new Container()
                             {
-                                bind = new DataBind()
+                                bind = new List<DataBind>()
                                 {
-                                    name = "data",
-                                    value = "${payload.templateData.properties}"
+                                    new DataBind()
+                                    {
+                                        name = "data",
+                                        value = "${payload.templateData.properties}"
+                                    },
                                 },
                                 width  = "100vw",
                                 height = "100vh",
@@ -763,7 +765,7 @@ namespace AlexaController.Alexa
                         }
                     }
                 },
-                datasources = new Dictionary<string, IDataSource>(){ {"templateData", dataSource } }//await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync("templateData", baseItem, session)
+                datasources = new Dictionary<string, IDataSource>(){ {"templateData", dataSource } }
             });
         }
 
@@ -854,10 +856,13 @@ namespace AlexaController.Alexa
                             new Container()
                             {
                                 width = "100vw",
-                                bind = new DataBind()
+                                bind = new List<DataBind>()
                                 {
-                                    name  = "data",
-                                    value = "${payload.templateData.properties}"
+                                    new DataBind()
+                                    {
+                                        name  = "data",
+                                        value = "${payload.templateData.properties}"
+                                    }
                                 },
                                 items = layout
                             }
@@ -1137,6 +1142,12 @@ namespace AlexaController.Alexa
                 {
                     "AlexaLarge", new AlexaVectorGraphic()
                     {
+                        parameters = new List<string>()
+                        {
+                            "strokeDashOffset",
+                            "fill",
+                            "stroke"
+                        },
                         height         = 235,
                         width          = 235,
                         viewportHeight = 25,
@@ -1146,9 +1157,15 @@ namespace AlexaController.Alexa
                             new VectorPath()
                             {
                                 pathData    = MaterialVectorIcons.Alexa,
-                                stroke      = "none",
-                                strokeWidth = 0,
-                                fill        = "rgba(20,200,255,1)",
+                                stroke      = "${stroke}",
+                                strokeWidth = 1,
+                                fill        = "${fill}",
+                                strokeDashArray = new List<string>()
+                                {
+                                    "${strokeDashOffset}",
+                                    "100"
+                                },
+                                strokeDashOffset = 0,//"rgba(20,200,255,1)",
                                 filters = new List<VectorFilter>()
                                 {
                                     new VectorFilter()
@@ -1167,6 +1184,12 @@ namespace AlexaController.Alexa
                 {
                     "EmbyLarge", new AlexaVectorGraphic()
                     {
+                        parameters = new List<string>()
+                        {
+                            "strokeDashOffset",
+                            "fill",
+                            "stroke"
+                        },
                         height         = 240,
                         width          = 240,
                         viewportHeight = 25,
@@ -1176,9 +1199,15 @@ namespace AlexaController.Alexa
                             new VectorPath()
                             {
                                 pathData    = MaterialVectorIcons.EmbyIcon,
-                                stroke      = "none",
-                                strokeWidth = 0.1,
-                                fill        = "rgba(81,201,39)",
+                                stroke      = "${stroke}",
+                                strokeWidth = 1,
+                                fill        = "${fill}",
+                                strokeDashArray = new List<string>()
+                                {
+                                    "${strokeDashOffset}",
+                                    "100"
+                                },
+                                strokeDashOffset = 0, //"rgba(81,201,39)",
                                 filters = new List<VectorFilter>()
                                 {
                                     new VectorFilter()
@@ -1243,9 +1272,10 @@ namespace AlexaController.Alexa
                     import = Imports,
                     resources = Resources,
                     graphics = graphicsDictionary,
-                    commands = new Dictionary<string, ICommand>()
+                    commands = new Dictionary<string,ICommand>()
                     {
-                        { nameof(Animations.FadeIn), await Animations.FadeIn() }
+                        { nameof(Animations.FadeIn),  await Animations.FadeIn() } ,
+                        
                     },
                     mainTemplate = new MainTemplate()
                     {
@@ -1278,20 +1308,173 @@ namespace AlexaController.Alexa
                                                 {
                                                     new VectorGraphic()
                                                     {
+                                                        bind = new List<DataBind>()
+                                                        {
+                                                            new DataBind()
+                                                            {
+                                                                name = "strokeDashOffset",
+                                                                value = 0
+                                                            },
+                                                            new DataBind()
+                                                            {
+                                                                name = "fill",
+                                                                value = "none"
+                                                            },
+                                                            new DataBind()
+                                                            {
+                                                                name = "stroke",
+                                                                value = "#00b0e6"
+                                                            }
+                                                        },
                                                         source = "AlexaLarge",
                                                         id = "logoAlexa",
+                                                        strokeDashOffset = "${strokeDashOffset}",
+                                                        fill = "${fill}",
+                                                        stroke = "${stroke}",
                                                         width = "50vw",
                                                         height = "50vh",
-                                                        opacity = 1
+                                                        opacity = 1,
+                                                        onMount = new List<ICommand>()
+                                                        {
+                                                            //Draw In, Fadeout
+                                                            new Sequential()
+                                                            {
+                                                                commands =  new List<ICommand>()
+                                                                {
+                                                                    //Draw
+                                                                    new Sequential()
+                                                                    {
+                                                                        repeatCount = 65,
+                                                                        commands = new List<ICommand>()
+                                                                        {
+                                                                            new SetValue()
+                                                                            {
+                                                                                property = "strokeDashOffset",
+                                                                                value = "${(strokeDashOffset + 1)}",
+                                                                                delay = 20
+                                                                            },
+                                                                            new SetValue()
+                                                                            {
+                                                                                when = "${strokeDashOffset > 64}",
+                                                                                property = "fill",
+                                                                                value = "#00b0e6",
+                                                                                delay = 20
+                                                                            },
+                                                                            new SetValue()
+                                                                            {
+                                                                                when = "${strokeDashOffset > 64}",
+                                                                                property = "stroke",
+                                                                                value = "none",
+                                                                                delay = 20
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    //Fade
+                                                                    new AnimateItem()
+                                                                    {
+                                                                        easing = "ease-in",
+                                                                        componentId = "logoAlexa",
+                                                                        duration = 1000,
+                                                                        delay = 1000,
+                                                                        value = new List<IValue>()
+                                                                        {
+                                                                            new OpacityValue()
+                                                                            {
+                                                                                @from = 1,
+                                                                                to = 0
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }                                                            
+                                                            
+                                                        }
                                                     },
                                                     new VectorGraphic()
                                                     {
+                                                        bind = new List<DataBind>()
+                                                        {
+                                                            new DataBind()
+                                                            {
+                                                                name = "strokeDashOffset",
+                                                                value = 0
+                                                            },
+                                                            new DataBind()
+                                                            {
+                                                                name = "fill",
+                                                                value = "none"
+                                                            },
+                                                            new DataBind()
+                                                            {
+                                                                name = "stroke",
+                                                                value = "rgba(81,201,39)"
+                                                            }
+                                                        },
                                                         source = "EmbyLarge",
+                                                        strokeDashOffset = "${strokeDashOffset}",
+                                                        fill = "${fill}",
+                                                        stroke = "${stroke}",
                                                         position = "absolute",
                                                         width = "30vw",
                                                         height = "50vh",
                                                         id = "logoEmby",
-                                                        opacity = 0
+                                                        opacity = 1,
+                                                        onMount = new List<ICommand>()
+                                                        {
+                                                            //Draw In, Fadeout
+                                                            new Sequential()
+                                                            {
+                                                                delay = 3000,
+                                                                commands = new List<ICommand>()
+                                                                {
+                                                                    //Draw
+                                                                    new Sequential()
+                                                                    {
+                                                                        repeatCount = 65,
+                                                                        commands = new List<ICommand>()
+                                                                        {
+                                                                            new SetValue()
+                                                                            {
+                                                                                property = "strokeDashOffset",
+                                                                                value = "${(strokeDashOffset + 1)}",
+                                                                                delay = 20
+                                                                            },
+                                                                            new SetValue()
+                                                                            {
+                                                                                when = "${strokeDashOffset > 64}",
+                                                                                property = "fill",
+                                                                                value = "rgba(81,201,39)",
+                                                                                delay = 20
+                                                                            },
+                                                                            new SetValue()
+                                                                            {
+                                                                                when = "${strokeDashOffset > 64}",
+                                                                                property = "stroke",
+                                                                                value = "none",
+                                                                                delay = 20
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    //Fade
+                                                                    new AnimateItem()
+                                                                    {
+                                                                        easing = "ease-in",
+                                                                        componentId = "logoEmby",
+                                                                        duration = 1000,
+                                                                        delay = 1000,
+                                                                        value = new List<IValue>()
+                                                                        {
+                                                                            new OpacityValue()
+                                                                            {
+                                                                                @from = 1,
+                                                                                to = 0
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }                                                            
+                                                            
+                                                        }
                                                     }
                                                 },
                                                 onMount = new List<ICommand>()
@@ -1300,55 +1483,12 @@ namespace AlexaController.Alexa
                                                     {
                                                         commands = new List<ICommand>()
                                                         {
-                                                            new AnimateItem()
-                                                            {
-                                                                easing = "ease-in",
-                                                                componentId = "logoAlexa",
-                                                                duration = 1000,
-                                                                delay = 2000,
-                                                                value = new List<IValue>()
-                                                                {
-                                                                    new OpacityValue()
-                                                                    {
-                                                                        @from = 1,
-                                                                        to = 0
-                                                                    }
-                                                                }
-                                                            },
-                                                            new AnimateItem()
-                                                            {
-                                                                easing = "ease-in",
-                                                                componentId = "logoEmby",
-                                                                duration = 1000,
-                                                                value = new List<IValue>()
-                                                                {
-                                                                    new OpacityValue()
-                                                                    {
-                                                                        @from = 0,
-                                                                        to = 1
-                                                                    }
-                                                                }
-                                                            },
-                                                            new AnimateItem()
-                                                            {
-                                                                easing = "ease-in",
-                                                                componentId = "logoFrame",
-                                                                duration = 1000,
-                                                                delay = 2000,
-                                                                value = new List<IValue>()
-                                                                {
-                                                                    new OpacityValue()
-                                                                    {
-                                                                        @from = 1,
-                                                                        to = 0
-                                                                    }
-                                                                }
-                                                            },
                                                             new SetValue()
                                                             {
                                                                 componentId = "logoFrame",
                                                                 property = "display",
-                                                                value = "none"
+                                                                value = "none",
+                                                                delay = 5500
                                                             }
                                                         }
                                                     }

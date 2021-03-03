@@ -11,6 +11,6 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string overlayColor { get; set; }
         public string scale                    { get; set; }
         public Gradient overlayGradient        { get; set; }
-        public List<IFilter> filter { get; set; }
+        public List<IFilter> filters { get; set; }
     }
 }

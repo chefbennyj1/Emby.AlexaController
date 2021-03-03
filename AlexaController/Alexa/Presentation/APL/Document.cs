@@ -15,7 +15,7 @@ namespace AlexaController.Alexa.Presentation.APL
         public List<ICommand> onMount                          { get; set; }
         public IMainTemplate mainTemplate                      { get; set; }
         public Dictionary<string, AlexaVectorGraphic> graphics { get; set; }
-        public Dictionary<string, ICommand> commands           { get; set; }
+        public Dictionary<string, ICommand> commands     { get; set; }
        
     }
     

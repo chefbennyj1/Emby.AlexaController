@@ -11,7 +11,7 @@ namespace AlexaController.Alexa.Presentation.APL.VectorGraphics
         public int width { get; set; }
         public int viewportHeight { get; set; }
         public int viewportWidth { get; set; }
-        public List<Parameter> parameters { get; set; }
+        public List<string> parameters { get; set; }
         public List<IVectorGraphic> items { get; set; }
     }
 

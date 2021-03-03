@@ -299,21 +299,21 @@ namespace AlexaController
 
         public string GetLogoImageSource(BaseItem item)
         {
-            long? id = null;
+            BaseItem itemData = null;
             switch (item.GetType().Name)
             {
                 default :
-                    id = item.InternalId;
+                    itemData = item;
                     break;
                 case "Season":
-                    id = item.Parent.InternalId;
+                    itemData = item.Parent;
                     break;
                 case "Episode":
-                    id = item.Parent.Parent.InternalId;
+                    itemData = item.Parent.Parent;
                     break;
             }
-            return item.HasImage(ImageType.Logo)
-                ? $"/Items/{id}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
+            return itemData.HasImage(ImageType.Logo)
+                ? $"/Items/{itemData.InternalId}Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
         }
 
         public string GetVideoBackdropImageSource(BaseItem item)
