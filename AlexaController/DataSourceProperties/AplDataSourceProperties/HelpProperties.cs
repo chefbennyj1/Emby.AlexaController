@@ -3,9 +3,9 @@ using AlexaController.Alexa.Presentation.DataSources;
 
 namespace AlexaController.DataSourceProperties.AplDataSourceProperties
 {
-    public class HelpProperties : IProperties
+    public class HelpProperties : BaseProperties
     {
-        public RenderDocumentType documentType { get; set; } = RenderDocumentType.HELP;
+        //public RenderDocumentType documentType { get; set; } = RenderDocumentType.HELP;
         public List<HelpValue> helpContent => new List<HelpValue>()
         {
             new HelpValue() {value = "<b>Accessing Emby accounts based on your voice.</b>"},

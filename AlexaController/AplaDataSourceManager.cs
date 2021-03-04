@@ -19,7 +19,7 @@ namespace AlexaController
 
         private static readonly Random RandomIndex = new Random();
 
-        public static  AplaDataSourceManager Instance { get; set; }
+        public static  AplaDataSourceManager Instance { get; private set; }
         
         public AplaDataSourceManager()
         {
@@ -418,7 +418,6 @@ namespace AlexaController
                 }
             };
         }
-        
 
         public async Task<IDataSource> UpComingEpisodes(List<BaseItem> items, DateTime date)
         {

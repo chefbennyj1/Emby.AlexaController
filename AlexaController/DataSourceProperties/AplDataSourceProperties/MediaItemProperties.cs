@@ -5,10 +5,10 @@ using AlexaController.Alexa.Presentation.DataSources;
 
 namespace AlexaController.DataSourceProperties.AplDataSourceProperties
 {
-    public class MediaItemProperties : IProperties
+    public class MediaItemProperties : BaseProperties
     {
         public string url                      { get; set; }
-        public RenderDocumentType documentType { get; set; }
+        //public RenderDocumentType documentType { get; set; }
         public List<SimilarItem> similarItems  { get; set; }
         public MediaItem item                  { get; set; }
         public List<MediaItem> items           { get; set; }

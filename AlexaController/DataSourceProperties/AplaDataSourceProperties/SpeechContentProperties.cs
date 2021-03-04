@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.DataSources;
-
-namespace AlexaController.DataSourceProperties.AplaDataSourceProperties
+﻿namespace AlexaController.DataSourceProperties.AplaDataSourceProperties
 {
     public enum SpeechPrefix
     {
@@ -14,10 +11,9 @@ namespace AlexaController.DataSourceProperties.AplaDataSourceProperties
         DEFAULT
     }
     
-    public class SpeechContentProperties : IProperties
+    public class SpeechContentProperties : BaseProperties
     {
         public string value { get; set; }
         public string audioUrl { get; set; }
-        public RenderDocumentType documentType { get; set; }
     }
 }

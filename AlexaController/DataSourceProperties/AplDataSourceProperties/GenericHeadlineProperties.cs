@@ -2,10 +2,10 @@
 
 namespace AlexaController.DataSourceProperties.AplDataSourceProperties
 {
-    public class GenericHeadlineProperties : IProperties
+    public class GenericHeadlineProperties : BaseProperties
     {
         public string HeadlinePrimaryText { get; set; }
-        public RenderDocumentType documentType { get; set; }
+        //public RenderDocumentType documentType { get; set; }
         public string url { get; set; }
     }
 }
