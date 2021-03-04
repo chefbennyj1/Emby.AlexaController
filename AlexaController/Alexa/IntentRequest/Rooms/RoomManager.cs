@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Configuration;
 using AlexaController.Session;
 
@@ -26,26 +26,18 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var dataSource = await DataSourceManager.Instance.GetFollowUpQuestion("Which room did you want?");
+            var aplDataSource = await AplDataSourceManager.Instance.GetFollowUpQuestion("Which room did you want?");
+            var aplaDataSource = await AplaDataSourceManager.Instance.RoomContext();
             session.PersistedRequestContextData = alexaRequest;
-            AlexaSessionManager.Instance.UpdateSession(session, dataSource);
+            AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session),
-                    await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
-                    {
-                        speechContent = SpeechContent.ROOM_CONTEXT,
-                        session = session,
-                        audio = new Audio()
-                        {
-                            source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                            
-                        }
-                    })
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session),
+                    await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
         }

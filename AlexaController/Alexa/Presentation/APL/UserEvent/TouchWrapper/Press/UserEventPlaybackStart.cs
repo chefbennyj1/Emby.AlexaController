@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -35,27 +35,22 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
 
-            IDataSource dataSource = null;
+            IDataSource aplDataSource = null;
+            IDataSource aplaDataSource = null;
 
-            //RenderDocumentQuery documentTemplateInfo = null;
-            AudioDirectiveQuery audioTemplateInfo = null;
+          
             if (session.room is null)
             {
-                //documentTemplateInfo = new RenderDocumentQuery()
-                //{
-                //    renderDocumentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
-                //    baseItems = new List<BaseItem>() {baseItem}
-                //};
-                dataSource = await DataSourceManager.Instance.GetRoomSelection(baseItem, session);
+                aplDataSource = await AplDataSourceManager.Instance.GetRoomSelection(baseItem, session);
                 session.NowViewingBaseItem = baseItem;
-                AlexaSessionManager.Instance.UpdateSession(session, dataSource);
+                AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session)
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session)
                     }
 
                 }, session);
@@ -68,28 +63,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             Task.Run(() => ServerController.Instance.PlayMediaItemAsync(session, baseItem)).ConfigureAwait(false);
 #pragma warning restore 4014
 
-            //documentTemplateInfo = new RenderDocumentQuery()
-            //{
-            //    baseItems = new List<BaseItem>() {baseItem},
-            //    renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
-            //};
+            
+            aplDataSource = await AplDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
+            aplaDataSource = await AplaDataSourceManager.Instance.PlayItem(baseItem);
+            
 
-            dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
-
-            audioTemplateInfo = new AudioDirectiveQuery()
-            {
-                speechContent = SpeechContent.PLAY_MEDIA_ITEM,
-                session = session, 
-                items = new List<BaseItem>() { baseItem },
-                audio = new Audio()
-                {
-                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                    
-                }
-            };
-
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
-            var renderAudioDirective = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session);
+            var renderAudioDirective = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

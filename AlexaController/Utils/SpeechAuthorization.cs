@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using IPerson = AlexaController.Api.RequestData.IPerson;
+using IPerson = AlexaController.Alexa.RequestModel.IPerson;
 
 namespace AlexaController.Utils
 {

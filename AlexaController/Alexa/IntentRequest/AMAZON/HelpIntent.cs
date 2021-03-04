@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
@@ -18,7 +18,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            var dataSource = await DataSourceManager.Instance.GetHelpDataSourceAsync();
+            var dataSource = await AplDataSourceManager.Instance.GetHelpDataSourceAsync();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
@@ -29,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
                 }
             }, Session);
         }

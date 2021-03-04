@@ -2,7 +2,7 @@
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using MediaBrowser.Controller.Entities;
-using IPerson = AlexaController.Api.RequestData.IPerson;
+using IPerson = AlexaController.Alexa.RequestModel.IPerson;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session

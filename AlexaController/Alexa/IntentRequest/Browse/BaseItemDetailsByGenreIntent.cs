@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -50,7 +50,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result.TotalRecordCount <= 0)
             {
-                dataSource = await DataSourceManager.Instance.GetGenericHeadline(
+                dataSource = await AplDataSourceManager.Instance.GetGenericHeadline(
                         "I was unable to find items. Does that genre exist?");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -63,7 +63,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName    = true,
                     directives       = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
                     }
                 }, Session);
             }
@@ -104,22 +104,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     phrase += $"{genres[i]}";
                 }
             }
-
-            //var documentTemplateInfo = new RenderDocumentQuery()
-            //{
-            //    baseItems =  result.Items.ToList() ,
-            //    renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-            //    HeaderTitle = $"{type} Genres: {phrase}",
-            //    //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
-            //};
-
-            dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList());
+            
+            dataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList());
 
             //Update Session
             Session.NowViewingBaseItem = result.Items[0];
             AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

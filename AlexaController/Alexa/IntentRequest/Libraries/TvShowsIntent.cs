@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
+using AlexaController.Alexa.RequestModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Libraries

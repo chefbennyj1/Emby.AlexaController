@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Model.Serialization;

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
+using AlexaController.Exceptions;
 using AlexaController.Session;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Entities;

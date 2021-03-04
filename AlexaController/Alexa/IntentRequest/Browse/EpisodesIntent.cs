@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.AudioFilters;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Model.Entities;
 
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -45,53 +45,24 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var context = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-
-            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-            //{
-            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-            //    session = Session
-            //});
-
-#pragma warning disable 4014
-            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
             
             var results = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
                 Session.NowViewingBaseItem, Session.User);
-
-            AudioDirectiveQuery renderAudioTemplateInfo = null;
             
+
+            IDataSource aplaDataSource = null;
 
             // User requested season/episode data that doesn't exist
             if (!results.Any())
             {
-                renderAudioTemplateInfo = new AudioDirectiveQuery()
-                {
-                    speechContent = SpeechContent.NO_SEASON_ITEM_EXIST,
-                    session = Session,
-                    args = new[] {seasonNumber},
-                    audio = new Audio()
-                    {
-                        source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                        filter = new List<IFilter>() { new Volume() { amount = 0.5} }
-                    }
-                };
+                aplaDataSource = await AplaDataSourceManager.Instance.NoItemExists(Session, seasonNumber);
+                
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
-                    //outputSpeech = new OutputSpeech()
-                    //{
-                    //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                    //    {
-                    //        type = SpeechResponseType.NO_SEASON_ITEM_EXIST, 
-                    //        session = Session, 
-                    //        args = new[] {seasonNumber}
-                    //    }),
-                        
-                    //},
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo)
+                        await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -113,35 +84,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     Session.room = null;
                 }
             }
-
-            //var documentTemplateInfo = new RenderDocumentQuery()
-            //{
-            //    baseItems              = results,
-            //    renderDocumentType     = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-            //    HeaderTitle            = $"Season {seasonNumber}",
-            //    HeaderAttributionImage = season.Parent.HasImage(ImageType.Logo) ? $"/Items/{season.Parent.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
-            //};
-
-            var dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results, season.Parent);
-
-            renderAudioTemplateInfo = new AudioDirectiveQuery()
-            {
-                speechContent = SpeechContent.BROWSE_ITEM,
-                session = Session,
-                items = new List<BaseItem>() { season },
-                args = new[] {seasonNumber},
-                audio = new Audio()
-                {
-                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                    
-                }
-            };
-
+            
+            var aplDataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results, season.Parent);
+            aplaDataSource = await AplaDataSourceManager.Instance.ItemBrowse(season, Session);
+           
             Session.NowViewingBaseItem = season;
-            AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
+            AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
-            var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session);
+            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Logging;
@@ -44,32 +44,23 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var apiAccessToken    = context.System.apiAccessToken;
             var requestId         = request.requestId;
 
-            IDataSource dataSource = null;
-            
+            IDataSource aplDataSource = null;
+            IDataSource aplaDataSource = null;
             var nextUpEpisode = ServerQuery.Instance.GetNextUpEpisode(slots.Series.value, Session.User);
             
             if (nextUpEpisode is null)
             {
-                dataSource =
-                    await DataSourceManager.Instance.GetGenericHeadline(
-                        "There doesn't seem to be a new episode available.");
+                aplDataSource = await AplDataSourceManager.Instance.GetGenericHeadline("There doesn't seem to be a new episode available.");
+                aplaDataSource = await AplaDataSourceManager.Instance.NoNextUpEpisodeAvailable();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session),
-                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
-                        {
-                            speechContent = SpeechContent.NO_NEXT_UP_EPISODE_AVAILABLE,
-                            session = Session,
-                            audio = new Audio()
-                            {
-                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                
-                            }
-                        })
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session),
+                        await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                     
                     }
                 }, Session);
             }
@@ -83,28 +74,17 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {nextUpEpisode.Name}.").ConfigureAwait(false);
                 }
 
-                dataSource =
-                    await DataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {nextUpEpisode.OfficialRating}"); 
-
+                aplDataSource =
+                    await AplDataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {nextUpEpisode.OfficialRating}");
+                aplaDataSource = await AplaDataSourceManager.Instance.ParentalControlNotAllowed(nextUpEpisode, Session);
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session),
-                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
-                            new AudioDirectiveQuery()
-                            {
-                                speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
-                                session = Session,
-                                items = new List<BaseItem>(){nextUpEpisode},
-                                audio = new Audio()
-                                {
-                                    source = "soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02",
-                                    
-                                }
-                            })
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session),
+                        await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -125,33 +105,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     Session.room = null;
                 }
             }
-
-            //var series = nextUpEpisode.Parent.Parent;
-            //var documentTemplateInfo = new RenderDocumentQuery()
-            //{
-            //    baseItems          = new List<BaseItem>() {nextUpEpisode},
-            //    renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
-            //    HeaderAttributionImage = series.HasImage(ImageType.Logo) ? $"/Items/{series.Id}/Images/logo?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
-            //};
-
-            dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(nextUpEpisode, Session);
-
-            var audioTemplateInfo = new AudioDirectiveQuery()
-            {
-                speechContent = SpeechContent.BROWSE_NEXT_UP_EPISODE,
-                session = Session,
-                audio = new Audio()
-                {
-                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                    
-                }
-            };
-
+            
+            aplDataSource = await AplDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(nextUpEpisode, Session);
+            aplaDataSource = await AplaDataSourceManager.Instance.BrowseNextUpEpisode(nextUpEpisode, Session);
+          
             Session.NowViewingBaseItem = nextUpEpisode;
-            AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
+            AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
-            var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session);
+            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

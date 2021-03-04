@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Controller.Session;
@@ -61,10 +61,7 @@ namespace AlexaController.Alexa.IntentRequest
             speech.Append(" active on the server.");
 
             return speech.ToString();
-            //return sessionInfos.Where(session => !string.IsNullOrEmpty(session.UserName))
-            //    .Aggregate(s, (current, session) => !current.Contains(session.UserName) //Don't duplicate the user message with two sessions
-            //        ? current + $"{session.UserName} has {sessionInfos.Count(ses => ses.UserName == session.UserName)} open " +
-            //          $"{ (sessionInfos.Count() > 1 ? "sessions" : "session") }. " : current + string.Empty);
+           
         }
     }
 }

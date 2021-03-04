@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using AlexaController.Utils;
 
@@ -32,6 +33,9 @@ namespace AlexaController.Alexa.IntentRequest
             var duration       = slots.Duration.value;
             var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
            
+            IDataSource aplDataSource = null;
+            IDataSource aplaDataSource = null;
+
             // Default will be 25 days ago unless given a time duration
             var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);
 
@@ -53,7 +57,8 @@ namespace AlexaController.Alexa.IntentRequest
                     SpeakUserName = true,
                 }, Session);
             }
-           
+
+            
 
             switch (Session.viewport)
             {
@@ -62,24 +67,14 @@ namespace AlexaController.Alexa.IntentRequest
                 case ViewportProfile.HUB_LANDSCAPE_MEDIUM:
                 case ViewportProfile.HUB_LANDSCAPE_LARGE:
                 {
-                    var dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
+                    
+                    aplDataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
+                    aplaDataSource = await AplaDataSourceManager.Instance.GetNewItemsApl(results, d);
+                       
+                        AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-                        var renderAudioTemplateInfo = new AudioDirectiveQuery()
-                        {
-                            speechContent = SpeechContent.NEW_ITEMS_APL,
-                            session = Session,
-                            items = results,
-                            args = new[] { d.ToLongDateString() },
-                            audio = new Audio()
-                            {
-                                source = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                            }
-                        };
-
-                        AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
-
-                        var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
-                        var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+                        var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session);
+                        var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
@@ -95,20 +90,14 @@ namespace AlexaController.Alexa.IntentRequest
                     }
                 default: //Voice only
                     {
-                        var renderAudioTemplateInfo = new AudioDirectiveQuery()
-                        {
-                            speechContent = SpeechContent.NEW_ITEMS_DISPLAY_NONE,
-                            session = Session, 
-                            items = results,
-                            args = new []{d.ToLongDateString()}
-                        };
+                        aplaDataSource = await AplaDataSourceManager.Instance.NewItemsAplaOnly(results, d);
 
-                        var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+                        var renderAudioDirective = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
                             shouldEndSession = true,
                             SpeakUserName = true,
-                            directives       = new List<IDirective>()
+                            directives = new List<IDirective>()
                             {
                                 renderAudioDirective
                             }

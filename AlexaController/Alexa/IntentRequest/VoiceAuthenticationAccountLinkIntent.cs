@@ -2,9 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 
@@ -27,34 +28,18 @@ namespace AlexaController.Alexa.IntentRequest
             var person        = context.System.person;
             var config        = Plugin.Instance.Configuration;
 
+            IDataSource aplaDataSource = null;
+
             if (person is null)
             {
+                aplaDataSource = await AplaDataSourceManager.Instance.VoiceAuthenticationAccountLinkError();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     SpeakUserName = true,
-                    //outputSpeech = new OutputSpeech()
-                    //{
-                    //    phrase             = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                    //    {
-                    //        type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR, 
-                    //        session = Session
-                    //    }),
-                        
-                    //},
                     directives = new List<IDirective>()
                     {
-                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
-                            new AudioDirectiveQuery()
-                            {
-                                speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_LINK_ERROR,
-                                session = Session,
-                                audio = new Audio()
-                                {
-                                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                    
-                                }
-                            })
+                        await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -63,31 +48,14 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
+                    aplaDataSource = await AplaDataSourceManager.Instance.VoiceAuthenticationExists(Session);
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
-                        //outputSpeech = new OutputSpeech()
-                        //{
-                        //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                        //    {
-                        //        type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_EXISTS, 
-                        //        session = Session
-                        //    }),
-                        //}
                         directives = new List<IDirective>()
                         {
-                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
-                            new AudioDirectiveQuery()
-                            {
-                                speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_EXISTS,
-                                session = Session,
-                                audio = new Audio()
-                                {
-                                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                    
-                                }
-                            })
+                            await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                         }
                     }, Session);
                 }
@@ -97,31 +65,15 @@ namespace AlexaController.Alexa.IntentRequest
             Task.Run(() => ServerController.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 #pragma warning restore 4014
 
+            aplaDataSource = await AplaDataSourceManager.Instance.VoiceAuthenticationAccountLinkSuccess(Session);
+
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
             {
                 shouldEndSession = true,
                 SpeakUserName = true,
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = await SpeechStrings.GetPhrase(new SpeechStringQuery()
-                //    {
-                //        type = SpeechResponseType.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS, 
-                //        session  = Session
-                //    }),
-                //},
                 directives = new List<IDirective>()
                 {
-                    await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
-                        new AudioDirectiveQuery()
-                        {
-                            speechContent = SpeechContent.VOICE_AUTHENTICATION_ACCOUNT_LINK_SUCCESS,
-                            session = Session,
-                            audio = new Audio()
-                            {
-                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                
-                            }
-                        })
+                    await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
 
             }, Session);

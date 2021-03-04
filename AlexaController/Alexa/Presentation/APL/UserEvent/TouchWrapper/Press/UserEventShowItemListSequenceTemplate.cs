@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 
@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             
             var dataSource =
-                await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results.Items.ToList(), baseItem);
+                await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results.Items.ToList(), baseItem);
 
             session.NowViewingBaseItem = baseItem;
             AlexaSessionManager.Instance.UpdateSession(session, dataSource);
@@ -51,7 +51,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

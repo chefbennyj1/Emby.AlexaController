@@ -7,9 +7,10 @@ using AlexaController.Alexa;
 using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Common.Net;
@@ -66,14 +67,17 @@ namespace AlexaController.Api
             if (SpeechAuthorization.Instance is null)
                 Activator.CreateInstance(typeof(SpeechAuthorization), user);
 
-            if (RenderDocumentDirectiveManager.Instance is null)
-                Activator.CreateInstance<RenderDocumentDirectiveManager>();
+            if (AplRenderDocumentDirectiveManager.Instance is null)
+                Activator.CreateInstance<AplRenderDocumentDirectiveManager>();
 
-            if (AudioDirectiveManager.Instance is null)
-                Activator.CreateInstance<AudioDirectiveManager>();
+            if (RenderAudioDirectiveManager.Instance is null)
+                Activator.CreateInstance<RenderAudioDirectiveManager>();
 
-            if (DataSourceManager.Instance is null)
-                Activator.CreateInstance<DataSourceManager>();
+            if (AplDataSourceManager.Instance is null)
+                Activator.CreateInstance<AplDataSourceManager>();
+
+            if (AplaDataSourceManager.Instance is null)
+                Activator.CreateInstance<AplaDataSourceManager>();
         }
 
         public async Task<object> Post(AlexaRequest data)
@@ -160,7 +164,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                var dataSource = await DataSourceManager.Instance.GetGenericHeadline(exception.Message);
+                var dataSource = await AplDataSourceManager.Instance.GetGenericHeadline(exception.Message);
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -171,7 +175,7 @@ namespace AlexaController.Api
 
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance
+                        await AplRenderDocumentDirectiveManager.Instance
                             .GetRenderDocumentDirectiveAsync(dataSource, session)
                     }
                 }, session);
@@ -194,10 +198,12 @@ namespace AlexaController.Api
         private static async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)
         {
             var context = alexaRequest.context;
-            
             var user = SpeechAuthorization.Instance.GetRecognizedPersonalizationProfileResult(context.System.person);
-            
+            IDataSource aplaDataSource = null;
+
             if (user is null)
+            {
+                aplaDataSource = await AplaDataSourceManager.Instance.PersonNotRecognized();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(
                     new Response()
                     {
@@ -205,38 +211,22 @@ namespace AlexaController.Api
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
-                            {
-                                speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
-                                audio = new Audio()
-                                {
-                                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                    
-                                }
-                            })
+                            await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                         }
                     }, null);
+            }
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-            var dataSource =
-                await DataSourceManager.Instance.GetGenericHeadline("Welcome to Home Theater Emby Controller");
+            var aplDataSource = await AplDataSourceManager.Instance.GetGenericHeadline("Welcome to Home Theater Emby Controller");
+            aplaDataSource = await AplaDataSourceManager.Instance.OnLaunch();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session),
-                    await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
-                    {
-                        speechContent = SpeechContent.ON_LAUNCH,
-                        session = session,
-                        audio = new Audio()
-                        {
-                            source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                            
-                        }
-                    })
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session),
+                    await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
         }

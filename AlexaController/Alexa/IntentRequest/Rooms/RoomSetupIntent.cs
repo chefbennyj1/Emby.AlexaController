@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 
@@ -22,21 +22,6 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
         public async Task<string> Response()
         {
-            var request           = AlexaRequest.request;
-            var context           = AlexaRequest.context;
-            var apiAccessToken    = context.System.apiAccessToken;
-            var requestId         = request.requestId;
-
-            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-            //{
-            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-            //    session = Session
-            //});
-
-#pragma warning disable 4014
-            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse("One moment please...", apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
-
             var room = Session.room;
 
             if (room is null)
@@ -44,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 Session.PersistedRequestContextData = AlexaRequest;
 
                 var dataSource =
-                    await DataSourceManager.Instance.GetGenericHeadline(
+                    await AplDataSourceManager.Instance.GetGenericHeadline(
                         "Please say the name of the room you want to setup.");
 
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
@@ -60,7 +45,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
                     }
 
                 }, Session);

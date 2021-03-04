@@ -1,12 +1,11 @@
 ﻿using System.Threading.Tasks;
+
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-    [Intent]
     public class GoHomeIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }

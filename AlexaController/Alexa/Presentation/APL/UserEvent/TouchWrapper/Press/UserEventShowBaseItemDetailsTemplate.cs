@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -24,31 +24,14 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var baseItem       = ServerQuery.Instance.GetItemById(source.id);
             var session        = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room           = session.room;
-            
-            //var documentTemplateInfo = new RenderDocumentQuery()
-            //{
-            //    baseItems = new List<BaseItem>() {baseItem},
-            //    renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE
-            //};
 
-            var dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
-
-            var renderAudioTemplateInfo = new AudioDirectiveQuery()
-            {
-                speechContent = SpeechContent.BROWSE_ITEM,
-                session = session,
-                items =  new List<BaseItem>() { baseItem },
-                audio = new Audio()
-                {
-                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                    
-                }
-            };
-
+            var aplDataSource = await AplDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
+            var aplaDataSource = await AplaDataSourceManager.Instance.ItemBrowse(baseItem, session);
+           
             // Update session data
             session.NowViewingBaseItem = baseItem;
             session.room               = room;
-            AlexaSessionManager.Instance.UpdateSession(session, dataSource);
+            AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
             
             //if the user has requested an Emby client/room display during the session - display both if possible
             if (!(room is null))
@@ -65,8 +48,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
-            var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session);
+            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

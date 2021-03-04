@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APL.Commands;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.AlexaProgressBar.Tick

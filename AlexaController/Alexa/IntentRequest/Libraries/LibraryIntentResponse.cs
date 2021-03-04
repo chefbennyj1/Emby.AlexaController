@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Exceptions;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.ResponseModel;
+using AlexaController.Exceptions;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -54,29 +54,13 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             //reset rePrompt data because we have fulfilled the request
             session.PersistedRequestContextData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
+            
 
-            //var documentTemplateInfo = new RenderDocumentQuery()
-            //{
-            //    baseItems = new List<BaseItem>() {result},
-            //    renderDocumentType = RenderDocumentType.BROWSE_LIBRARY_TEMPLATE
-            //};
+            var aplDataSource = await AplDataSourceManager.Instance.GetBrowseLibrary($"Showing the {result.Name} library");
+            var aplaDataSource = await AplaDataSourceManager.Instance.ItemBrowse(result, session);
 
-            var dataSource = await DataSourceManager.Instance.GetBrowseLibrary($"Showing the {result.Name} library");
-
-            var audioTemplateInfo = new AudioDirectiveQuery()
-            {
-                speechContent = SpeechContent.BROWSE_LIBRARY,
-                session = session,
-                items = new List<BaseItem>() { result },
-                audio = new Audio()
-                {
-                    source = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-
-                }
-            };
-
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
-            var renderAudioDirective = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session);
+            var renderAudioDirective = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

@@ -1,24 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
 
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-    [Intent]
+   
     public class CollectionIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -58,7 +55,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var collectionItems     = collection.Values.FirstOrDefault();
             var collectionBaseItem  = collection.Keys.FirstOrDefault();
 
-            IDataSource dataSource = null;
+            IDataSource aplDataSource = null;
+            IDataSource aplaDataSource = null;
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
             {
@@ -70,27 +68,18 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
                     }
 
-                    dataSource = await DataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {collectionBaseItem.OfficialRating}");
-                    
+                    aplDataSource = await AplDataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {collectionBaseItem.OfficialRating}");
+                    aplaDataSource = await AplaDataSourceManager.Instance.ParentalControlNotAllowed(collectionBaseItem, Session);
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session),
+                            await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session),
                                 
-                            await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
-                                new AudioDirectiveQuery()
-                                {
-                                    speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
-                                    session = Session, 
-                                    items   =  new List<BaseItem>(){ collectionBaseItem },
-                                    audio = new Audio()
-                                    {
-                                        source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                    }
-                                })
+                            await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                           
                         }
                     }, Session);
                 }
@@ -109,13 +98,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             
-            dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(collectionItems, collectionBaseItem);
+            aplDataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(collectionItems, collectionBaseItem);
 
             //Update Session
             Session.NowViewingBaseItem = collectionBaseItem;
-            AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
+            AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
@@ -19,26 +19,18 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            var dataSource = await DataSourceManager.Instance.GetNotUnderstood();
+            var aplDataSource = await AplDataSourceManager.Instance.GetNotUnderstood();
+            var aplaDataSource = await AplaDataSourceManager.Instance.NotUnderstood();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
                 
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveManager.Instance
-                        .GetRenderDocumentDirectiveAsync(dataSource, Session),
-                    await AudioDirectiveManager.Instance
-                        .GetAudioDirectiveAsync(new AudioDirectiveQuery()
-                        {
-                            speechContent = SpeechContent.NOT_UNDERSTOOD,
-                            session = Session,
-                            audio = new Audio()
-                            {
-                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                
-                            }
-                        })
+                    await AplRenderDocumentDirectiveManager.Instance
+                        .GetRenderDocumentDirectiveAsync(aplDataSource, Session),
+                    await RenderAudioDirectiveManager.Instance
+                        .GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);
         }

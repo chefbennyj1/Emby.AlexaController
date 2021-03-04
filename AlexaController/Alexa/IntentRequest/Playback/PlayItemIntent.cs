@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Logging;
@@ -42,7 +42,8 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var intent         = request.intent;
             var slots          = intent.slots;
 
-            IDataSource dataSource = null;
+            IDataSource aplDataSource = null;
+            IDataSource aplaDataSource = null;
 
             BaseItem result = null;
             if (Session.NowViewingBaseItem is null)
@@ -59,20 +60,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //Item doesn't exist in the library
             if (result is null)
             {
+                aplaDataSource = await AplaDataSourceManager.Instance.GenericItemDoesNotExists();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     directives = new List<IDirective>()
                     {
-                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(new AudioDirectiveQuery()
-                        {
-                            speechContent = SpeechContent.GENERIC_ITEM_NOT_EXISTS_IN_LIBRARY,
-                            audio = new Audio()
-                            {
-                                source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                
-                            }
-                        })
+                        await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -86,8 +80,10 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {result.Name}.").ConfigureAwait(false);
                 }
 
-                dataSource =
-                    await DataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {result.OfficialRating}");
+                aplDataSource =
+                    await AplDataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {result.OfficialRating}");
+
+                aplaDataSource = await AplaDataSourceManager.Instance.ParentalControlNotAllowed(result, Session);
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -95,28 +91,11 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session),
-                        await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(
-                            new AudioDirectiveQuery()
-                            {
-                                speechContent = SpeechContent.PARENTAL_CONTROL_NOT_ALLOWED,
-                                audio = new Audio()
-                                {
-                                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                                    
-                                }
-                            })
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session),
+                        await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    
                     }
-                    //outputSpeech = new OutputSpeech()
-                    //{
-                    //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                    //    {
-                    //        type    = SpeechResponseType.PARENTAL_CONTROL_NOT_ALLOWED, 
-                    //        session = Session, 
-                    //        items   = new List<BaseItem>() { result }
-                    //    }),
-                    //    sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
-                    //}
+                 
                 }, Session);
             }
 
@@ -137,40 +116,15 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            //var documentTemplateInfo = new RenderDocumentQuery()
-            //{
-            //    renderDocumentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
-            //    baseItems = new List<BaseItem>() {result}
-            //};
+            aplDataSource = await AplDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
 
-            dataSource = await DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
-
-            var renderAudioTemplateInfo = new AudioDirectiveQuery()
-            {
-                speechContent = SpeechContent.PLAY_MEDIA_ITEM,
-                session = Session,
-                items = new List<BaseItem>() { result },
-                audio = new Audio()
-                {
-                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                    
-                }
-            };
-
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
-            var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(renderAudioTemplateInfo);
+            aplaDataSource = await AplaDataSourceManager.Instance.PlayItem(result);
+           
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session);
+            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-                //    {
-                //        type = SpeechResponseType.PLAY_MEDIA_ITEM, 
-                //        session = Session, 
-                //        items = new List<BaseItem>() { result }
-                //    })
-                //},
                 SpeakUserName = true,
                 shouldEndSession = null,
                 directives = new List<IDirective>()

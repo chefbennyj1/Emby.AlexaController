@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
+using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Api.RequestData;
-using AlexaController.Api.ResponseModel;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -42,24 +42,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
-
-
-            IDataSource dataSource = null;
-            //var progressiveSpeech = await SpeechStrings.GetPhrase(new RenderAudioTemplate()
-            //{
-            //    type = SpeechResponseType.PROGRESSIVE_RESPONSE, 
-            //    session = Session
-            //});
-
-#pragma warning disable 4014
-            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse($"One moment please... looking for library items by {(slots.ActorName.slotValue.type == "List" ? " those actors." : " that actor.")}", apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
-
+            
+            IDataSource aplDataSource = null;
+            
             var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchNames);
 
             if (result is null)
             {
-                dataSource = await DataSourceManager.Instance.GetGenericHeadline("I was unable to find that actor.");
+                aplDataSource = await AplDataSourceManager.Instance.GetGenericHeadline("I was unable to find that actor.");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
@@ -71,7 +61,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session)
                     }
                 }, Session);
             }
@@ -94,64 +84,21 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var actors = result.Keys.FirstOrDefault();
             
             var actorCollection = result.Values.FirstOrDefault();
-
-            var phrase = "";
             
-            for (var i = 0; i <= actors?.Count -1; i++)
-            {
-                if (actors.Count - 1 > 0)
-                {
-                    if (i == actors.Count - 1)
-                    {
-                        phrase += $"and {actors[i].Name}.";
-                        break;
-                    }
-                    phrase += $"{actors[i].Name}, ";
-                }
-                else
-                {
-                    phrase += $"{actors[i].Name}";
-                }
-            }
+            aplDataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
 
-            //var documentTemplateInfo = new RenderDocumentQuery()
-            //{
-            //    baseItems          =  actorCollection ,
-            //    renderDocumentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
-            //    HeaderTitle        = $"Starring {phrase}",
-            //    //HeaderAttributionImage = actor.HasImage(ImageType.Primary) ? $"/Items/{actor?.Id}/Images/primary?quality=90&amp;maxHeight=708&amp;maxWidth=400&amp;" : null
-            //};
-
-            dataSource = await DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
-
-            var audioTemplateInfo = new AudioDirectiveQuery()
-            {
-                speechPrefix  = SpeechPrefix.COMPLIANCE,
-                speechContent = SpeechContent.BROWSE_ITEMS_BY_ACTOR,
-                args          = new []{ phrase },
-                session       = Session,
-                audio = new Audio()
-                {
-                    source ="soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
-                    
-                }
-            };
-
+            var aplaDataSource = await AplaDataSourceManager.Instance.BrowseItemByActor(actors);
+            
             //TODO: Fix session Update (it is only looking at one actor, might not matter)
             //Update Session
             Session.NowViewingBaseItem = actors[0];
-            AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
+            AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session);
-            var renderAudioDirective    = await AudioDirectiveManager.Instance.GetAudioDirectiveAsync(audioTemplateInfo);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session);
+            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                //outputSpeech = new OutputSpeech()
-                //{
-                //    phrase = $"Items starring {phrase}",
-                //    sound = "<audio src=\"soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13\"/>"
-                //},
                 shouldEndSession = null,
                 SpeakUserName = true,
                 directives = new List<IDirective>()
