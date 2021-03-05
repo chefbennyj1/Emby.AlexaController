@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AlexaController.Alexa.Presentation.APL.Components;
+﻿using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation
 {

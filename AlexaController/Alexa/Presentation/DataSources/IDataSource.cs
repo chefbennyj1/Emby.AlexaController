@@ -10,7 +10,6 @@ namespace AlexaController.Alexa.Presentation.DataSources
         string objectID { get; set; }
         string description { get; set; }
         IProperties properties { get; set; }
-        //RenderDocumentType documentType { get; set; }
         List<ITransformer> transformers { get; set; }
     }
 }

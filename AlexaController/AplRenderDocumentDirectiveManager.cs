@@ -11,7 +11,6 @@ using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.DataSourceProperties;
-using AlexaController.DataSourceProperties.AplDataSourceProperties;
 using AlexaController.Session;
 using IFilter  = AlexaController.Alexa.Presentation.APL.Components.VisualFilters.IFilter;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
@@ -109,7 +108,7 @@ namespace AlexaController
 
         public async Task<IDirective> GetRenderDocumentDirectiveAsync(IDataSource dataSource, IAlexaSession session)
         {
-            var properties = dataSource.properties;
+            var properties = (BaseProperties)dataSource.properties;
             switch (properties.documentType)
             {
                 case RenderDocumentType.BROWSE_LIBRARY_TEMPLATE     : return await RenderBrowseLibraryTemplate(dataSource, session);
@@ -129,7 +128,7 @@ namespace AlexaController
         private async Task<IDirective> RenderItemListSequenceTemplate(IDataSource dataSource, IAlexaSession session)
         {
             var layout           = new List<IItem>();
-            var properties       = (MediaItemProperties) dataSource.properties;
+            var properties       = (Properties<MediaItem>) dataSource.properties;
             var baseItems        = properties.items;
             var type             = baseItems[0].type;
             
@@ -286,7 +285,7 @@ namespace AlexaController
         private async Task<IDirective> RenderItemDetailsTemplate(IDataSource dataSource, IAlexaSession session)
         {
             const string leftColumnSpacing = "36vw";
-            var properties = (MediaItemProperties) dataSource.properties;
+            var properties = (Properties<MediaItem>) dataSource.properties;
             var baseItem = properties.item;
             var type     = baseItem.type;
             //var item     = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
@@ -300,7 +299,7 @@ namespace AlexaController
                 {
                     new Source()
                     {
-                        url         = "${data.url}${data.item.videoBackdropSource}",
+                        url = "${data.url}${data.item.videoBackdropSource}",
                         repeatCount = 0,
                     }
                 },
@@ -1508,7 +1507,7 @@ namespace AlexaController
                                         width         = "100vw",
                                         initialPage   = 0,
                                         navigation    = "forward-only",
-                                        data          = "${payload.templateData.properties.helpContent}",
+                                        data          = "${payload.templateData.properties.values}",
                                         items         = new List<VisualBaseItem>()
                                         {
                                             new Container()
@@ -1542,7 +1541,7 @@ namespace AlexaController
                                         id = "HelpPager",
                                         onPageChanged = new List<ICommand>()
                                         {
-                                            new SendEvent() { arguments = new List<object>() { nameof(HelpPager),  "${payload.templateData.properties.helpContent[event.source.value].value}" } }
+                                            new SendEvent() { arguments = new List<object>() { nameof(HelpPager),  "${payload.templateData.properties.values[event.source.value].value}" } }
                                         }
                                     }
                                 }

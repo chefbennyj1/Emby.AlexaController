@@ -1,4 +1,6 @@
-﻿namespace AlexaController.DataSourceProperties {
+﻿namespace AlexaController.DataSourceProperties 
+{
+
     public class MediaItem {
         public string endTime             { get; set; }
         public string runtimeMinutes      { get; set; }
@@ -16,6 +18,7 @@
         public string videoBackdropSource { get; set; }
         public string backdropImageSource { get; set; }
         public string logoImageSource     { get; set; }
+        public string thumbImageSource    { get; set; }
         public string videoOverlaySource  { get; set; }
     }
 }

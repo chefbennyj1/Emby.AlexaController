@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties.AplDataSourceProperties;
+using AlexaController.DataSourceProperties;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
@@ -25,7 +25,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             AlexaSessionManager.Instance.UpdateSession(session, currentPage, true);
 
-            var properties = (MediaItemProperties) previousPage.properties;
+            var properties = (Properties<MediaItem>) previousPage.properties;
             
             //if the user is controlling a client  session - go back on the client too.
             if (session.room != null)
