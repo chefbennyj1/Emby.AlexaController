@@ -35,7 +35,7 @@ namespace AlexaController
                             items = new List<AudioBaseItem>()
                             {
                                 new Speech() { content = "<speak>${payload.templateData.properties.value}</speak>" },
-                                new Audio() { source = "${payload.templateData.properties.audioUrl}" }
+                                new Audio()  { source = "${payload.templateData.properties.audioUrl}" }
                             }
                         }
                         

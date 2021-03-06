@@ -83,7 +83,8 @@ namespace AlexaController
                 overview            = item.Overview,
                 videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
                 backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item),
-                videoOverlaySource  = "/EmptyPng?quality=90"
+                videoOverlaySource  = "/EmptyPng?quality=90",
+                themeAudioSource    =  ServerQuery.Instance.GetThemeSongSource(item)
             };
 
             var similarItems = ServerQuery.Instance.GetSimilarItems(item);

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -18,22 +19,19 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var source   = request.source;
             var session  = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var baseItem = ServerQuery.Instance.GetItemById(source.id);
-
             
-#pragma warning disable 4014
-            Task.Run(() =>
-                    AlexaResponseClient.Instance.PostProgressiveResponse("One moment please...", AlexaRequest.context.System.apiAccessToken,
-                        request.requestId))
-                .ConfigureAwait(false);
-#pragma warning restore 4014
 
-            
+            var aplaDataSource = await AplaDataSourceManager.Instance.ReadItemOverview(baseItem);
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                outputSpeech = new OutputSpeech()
+                directives = new List<IDirective>()
                 {
-                    phrase = baseItem.Overview,
+                    await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 },
+                //outputSpeech = new OutputSpeech()
+                //{
+                //    phrase = baseItem.Overview,
+                //},
                 SpeakUserName = false,
                 shouldEndSession = null
 

@@ -342,6 +342,10 @@ namespace AlexaController
             return $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}";
         }
 
+        public string GetThemeSongSource(BaseItem item)
+        {
+            return item.ThemeSongIds.Length > 0 ? $"/Audio/{item.ThemeSongIds.FirstOrDefault().ToString()}/stream.mp3" : "";
+        }
         public void Dispose()
         {
             

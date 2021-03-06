@@ -109,238 +109,22 @@ namespace AlexaController
         public async Task<IDirective> GetRenderDocumentDirectiveAsync(IDataSource dataSource, IAlexaSession session)
         {
             var properties = (BaseProperties)dataSource.properties;
+            List<IItem> layout = null;
             switch (properties.documentType)
             {
-                case RenderDocumentType.GENERIC_VIEW                : return await RenderGenericViewTemplate(dataSource);
-                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : return await RenderItemDetailsTemplate(dataSource, session);
-                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : return await RenderItemListSequenceTemplate(dataSource, session);
-                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : return await RenderRoomSelectionTemplate(dataSource, session);
-                case RenderDocumentType.HELP                        : return await RenderHelpTemplate(dataSource);
-                case RenderDocumentType.NONE                        : return null;
+                case RenderDocumentType.GENERIC_VIEW                : layout = await RenderGenericViewLayout(dataSource); 
+                    break;
+                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : layout = await RenderItemDetailsLayout(dataSource, session); 
+                    break;
+                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : layout = await RenderItemListSequenceLayout(dataSource, session);
+                    break;
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : layout = await RenderRoomSelectionLayout(dataSource, session);
+                    break;
+                case RenderDocumentType.HELP                        : layout =  await RenderHelpView(dataSource);
+                    break;
                 default                                             : return null;
             }
-        }
 
-        //Create Render Document Template Directives 
-        private async Task<IDirective> RenderItemListSequenceTemplate(IDataSource dataSource, IAlexaSession session)
-        {
-            var layout           = new List<IItem>();
-            var properties       = (Properties<MediaItem>) dataSource.properties;
-            var baseItems        = properties.items;
-            var type             = baseItems[0].type;
-            
-            layout.Add(new Container()
-            {
-                id = "primary",
-                width = "100vw",
-                height = "100vh",
-                items = new List<VisualBaseItem>()
-                {
-                    new Image()
-                    {
-                        height = "100%",
-                        width = "100%",
-                        scale = "best-fill",
-                        position = "absolute",
-                        source = "${payload.templateData.properties.url}${payload.templateData.properties.item.backdropImageSource}",
-                        filters = new List<IFilter>()
-                        {
-                            new Gradient()
-                            {
-                                gradient = new GradientOptions()
-                                {
-                                   type = "linear",
-                                   colorRange = new List<string>()
-                                   {
-                                       "#000",
-                                       "rgba(0,0,0,0)"
-                                   },
-                                   inputRange = new List<double>()
-                                   {
-                                       0,
-                                       0.999
-                                   },
-                                   angle = 0
-                                }
-                            },
-                           new Blend()
-                           {
-                               mode = "color-burn",
-                               source = -2,
-                               destination = -1
-                           }
-                        }
-                    },
-                    new AlexaHeader()
-                    {
-                        //TODO: Do we really want a header title if there is an attribution image?
-                        //headerTitle            = "${payload.templateData.properties.item.name}",
-                        headerBackButton       = session.paging.canGoBack,
-                        headerDivider          = true,
-                        headerAttributionImage = "${payload.templateData.properties.url}${payload.templateData.properties.item.logoImageSource}"
-                    },
-                    new Sequence()
-                    {
-                        height                 = "100vh",
-                        width                  = "95vw",
-                        left                   = "5vw",
-                        scrollDirection        = "horizontal",
-                        data                   = "${payload.templateData.properties.items}",
-                        items                  = new List<VisualBaseItem>()
-                        {
-                            new TouchWrapper()
-                            {
-                                paddingTop = "8vh",
-                                id         = "${data.id}",
-                                onPress    = new Parallel()
-                                {
-                                   commands = new List<ICommand>()
-                                   {
-                                       new Command() { type = nameof(AnimationFactory.ScaleInOutOnPress) },
-                                       new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
-                                   }
-                               },
-                               items = new List<VisualBaseItem>()
-                               {
-                                   await RenderComponent_SequencePrimaryImageContainer(type)
-                               }
-                            }
-                        }
-                    },
-                    new AlexaFooter()
-                    {
-                        hintText = "",
-                        position = "absolute",
-                        bottom   = "1vh",
-                        id       = "hint",
-                        onMount  = new List<ICommand>()
-                        {
-                            new Sequential()
-                            {
-                                repeatCount = 15,
-                                commands = new List<ICommand>()
-                                {
-                                    new AnimateItem()
-                                    {
-                                        componentId = "hint",
-                                        duration    = 1020,
-                                        easing      = "ease-in",
-                                        value       = new List<IValue>()
-                                        {
-                                            new OpacityValue() { @from = 1, to = 0 }
-                                        },
-                                        delay = 5000
-                                    },
-                                    new SetValue()
-                                    {
-                                        componentId = "hint",
-                                        property    = "hintText",
-                                        value       =  "Try \"Alexa, Show The ${payload.templateData.properties.items[0].type}: ${payload.templateData.properties.items[Time.seconds(localTime/payload.templateData.properties.items.length) % payload.templateData.properties.items.length].name}\"",
-                                    },
-                                    new AnimateItem()
-                                    {
-                                        componentId = "hint",
-                                        duration    = 1020,
-                                        easing      = "ease-out",
-                                        value       = new List<IValue>()
-                                        {
-                                            new OpacityValue() { @from = 0, to = 1 }
-                                        },
-                                        delay = 2500
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            
-            return await Task.FromResult(new Directive()
-            {
-                type = Directive.AplRenderDocument,
-                token = "mediaItemSequence",
-                document = new Document()
-                {
-                    theme = "dark",
-                    import = Imports,
-                    onMount = new List<ICommand>(),
-                    resources = Resources,
-                    commands = new Dictionary<string, ICommand>()
-                    {
-                        { nameof(AnimationFactory.ScaleInOutOnPress), await AnimationFactory.ScaleInOutOnPress() }
-                    },
-                    mainTemplate = new MainTemplate()
-                    {
-                        parameters = new List<string>() { "payload" },
-                        items = layout
-                    }
-                },
-                datasources = new Dictionary<string, IDataSource>(){ {"templateData", dataSource } }
-            });
-        }
-
-        private async Task<IDirective> RenderItemDetailsTemplate(IDataSource dataSource, IAlexaSession session)
-        {
-            const string leftColumnSpacing = "36vw";
-            var properties = (Properties<MediaItem>) dataSource.properties;
-            var baseItem = properties.item;
-            var type     = baseItem.type;
-            //var item     = type.Equals("Season") ? baseItem.Parent : template.baseItems[0];
-
-            var layout   = new List<VisualBaseItem>();
-            const string token = "mediaItemDetails";
-            
-            layout.Add(new Video()
-            {
-                source = new List<Source>()
-                {
-                    new Source()
-                    {
-                        url = "${data.url}${data.item.videoBackdropSource}",
-                        repeatCount = 0,
-                    }
-                },
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                autoplay = true,
-                audioTrack = "none",
-                id = "${data.item.id}",
-                onEnd = new List<ICommand>()
-                {
-                    new SetValue()
-                    {
-                        componentId = "backdropOverlay",
-                        property    = "source",
-                        value       = "${data.url}${data.item.backdropImageSource}"
-                    },
-                    new SetValue()
-                    {
-                        componentId = "backdropOverlay",
-                        property    = "opacity",
-                        value       = 1
-                    },
-                    new SetValue()
-                    {
-                        componentId = "backdropOverlay",
-                        property    = "overlayColor",
-                        value       = "rgba(0,0,0,0.55)"
-                    }
-                }
-            });
-            layout.Add(new Image()
-            {
-                overlayColor = "rgba(0,0,0,1)",
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                source = "${data.url}${data.item.videoOverlaySource}",
-                opacity = 0.65,
-                id = "backdropOverlay"
-            });
-            
             var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
             {
                 {
@@ -357,7 +141,7 @@ namespace AlexaController
                                 pathData    = MaterialVectorIcons.CheckMark,
                                 stroke      = "none",
                                 strokeWidth = 1,
-                                fill        = baseItem.isPlayed ? "rgba(255,0,0,1)" : "white"
+                                fill        = "rgba(255,0,0,1)" 
                             }
                         }
                     }
@@ -418,538 +202,8 @@ namespace AlexaController
                             }
                         }
                     }
-                }
-            };
-
-            if (session.paging.canGoBack)
-            {
-                layout.Add(new AlexaIconButton()
-                {
-                    vectorSource = MaterialVectorIcons.Left,
-                    buttonSize = "15vh",
-                    position = "absolute",
-                    left = "2vw",
-                    color = "white",
-                    top = "-1vw",
-                    id = "goBack",
-                    primaryAction = new Parallel()
-                    {
-                        commands = new List<ICommand>()
-                        {
-                           new Command()
-                           {
-                               type = nameof(AnimationFactory.ScaleInOutOnPress)
-                           },
-                            new SendEvent() {arguments = new List<object>() {"goBack"}}
-                        }
-                    }
-                });
-            }
-
-            layout.Add(new Image()
-            {
-                id = "logo",
-                source = "${data.url}${data.item.logoImageSource}",
-                width = "12vw",
-                position = "absolute",
-                left = "85vw",
-            });
-            //Name
-            layout.Add(new Text()
-            {
-                text = "${data.item.name}",
-                style = "textStylePrimary",
-                left = leftColumnSpacing,
-                fontWeight = "100",
-                top = "15vh",
-                id = "baseItemName",
-                opacity = 1,
-
-            });
-            //Genres
-            layout.Add(new Text()
-            {
-                text = "${data.item.genres}",
-                left = leftColumnSpacing,
-                style = "textStyleBody",
-                top = "15vh",
-                width = "40vw",
-                height = "22dp",
-                fontSize = "18dp",
-                opacity = 1,
-                id = "genre",
-
-            });
-            //Rating - Runtime - End time
-            //Runtime span
-            layout.Add(new Text()
-            {
-                text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
-                left = leftColumnSpacing,
-                style = "textStyleBody",
-                top = "17vh",
-                width = "40vw",
-                height = "22dp",
-                fontSize = "18dp",
-                opacity = 1,
-                id = "rating",
-
-            });
-            //TagLines
-            layout.Add(new Text()
-            {
-                text = "${data.item.tagLine}",
-                style = "textStyleBody",
-                left = leftColumnSpacing,
-                top = "18vh",
-                height = "10dp",
-                width = "40vw",
-                fontSize = "22dp",
-                id = "tag",
-                display = !string.IsNullOrEmpty(baseItem.tagLine) ? "normal" : "none",
-                opacity = 1,
-            });
-            //Watched check-mark
-            layout.Add(new VectorGraphic()
-            {
-                source = "CheckMark",
-                left = "87vw",
-                position = "absolute",
-                top = "30vh"
-            });
-            //Overview
-            layout.Add(new TouchWrapper()
-            {
-                top = string.Equals(type, "Movie") ? "24vh" : "20vh",
-                left = leftColumnSpacing,
-                maxHeight = "20vh",
-                opacity = 1,
-                id = "${data.item.id}",
-                onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) } },
-                item = new Container()
-                {
-                    items = new List<VisualBaseItem>()
-                    {
-                        new Container()
-                        {
-                            direction = "row",
-                            items = new List<VisualBaseItem>()
-                            {
-                                new Text()
-                                {
-                                    fontSize = "22dp",
-                                    text     = "<b>Overview</b>",
-                                    style    = "textStyleBody",
-                                    width    = "35vw",
-                                    id       = "overviewHeader",
-                                    opacity  = 1,
-
-                                },
-                                new VectorGraphic()
-                                {
-                                    source  = "Audio",
-                                    right   = "20vw",
-                                    opacity = 1,
-                                    id      = "audioIcon",
-                                    top     = "5px",
-
-                                }
-                            }
-                        },
-                        new Text()
-                        {
-                            text      = "${data.item.overview}",
-                            style     = "textStyleBody",
-                            maxHeight = "20vh",
-                            id        = "overview",
-                            width     = "55vw",
-                            fontSize  = "20dp",
-                            opacity   = 1,
-
-                        }
-                    }
                 },
-
-            });
-            //Recommendations
-            layout.Add(new Container()
-            {
-                when = "${viewport.shape == 'rectangle' && viewport.mode == 'hub' && viewport.width > 960 && payload.templateData.properties.similarItems.length > 0}",
-                width = "50vw",
-                height = "250px",
-                top = "29vh",
-                left = "36vw",
-                opacity = 1,
-                items = new List<VisualBaseItem>()
-                {
-                    new Text()
-                    {
-                        text     = "Recommendations",
-                        style    = "textStylePrimary",
-                        fontSize = "20"
-                    },
-                    new Sequence()
-                    {
-                        width = "50vw",
-                        height = "250px",
-                        scrollDirection = "horizontal",
-                        data = "${payload.templateData.properties.similarItems}",
-                        items = new List<VisualBaseItem>()
-                        {
-                            new TouchWrapper()
-                            {
-                                width = "245px",
-                                id = "${data.id}",
-                                item = new Image()
-                                {
-                                    height = "140px",
-                                    width = "225px",
-                                    source = "${payload.templateData.properties.url}${data.thumbImageSource}",
-                                },
-                                onPress = new Parallel()
-                                {
-                                    commands = new List<ICommand>()
-                                    {
-                                        new Command() { type = nameof(AnimationFactory.ScaleInOutOnPress) },
-                                        new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-
-            });
-            //Series - Season Count
-            if (string.Equals(type, "Series"))
-            {
-                layout.Add(new Container()
-                {
-                    position = "absolute",
-                    left = "38vw",
-                    top = "78vh",
-                    direction = "row",
-                    items = new List<VisualBaseItem>()
-                    {
-                        new VectorGraphic()
-                        {
-                            id = "SeasonCarouselArrayIcon",
-                            source = "ArrayIcon"
-                        },
-                        new VectorGraphic()
-                        {
-                            id = "SeasonCarouselIcon",
-                            source = "Carousel",
-                            position = "absolute",
-                            opacity = 1
-                        },
-                        new Text()
-                        {
-                            style = "textStyleBody",
-                            fontSize = "23dp",
-                            left = "12dp",
-                            text = "<b>" +
-                                   ServerQuery.Instance.GetItemsResult(baseItem.id, new []{"Season"}, session.User)
-                                       .TotalRecordCount + "</b>"
-                        },
-                        new Text()
-                        {
-                            style = "textStyleBody",
-                            fontSize = "23dp",
-                            left = "24dp",
-                            width = "25vw",
-                            text = "Available Season(s)"
-                        }
-                    }
-                });
-            }
-            //Primary Image
-            layout.Add(new Container()
-            {
-                id = "primaryButton",
-                position = "absolute",
-                width = "38%",
-                height = "75vh",
-                top = "15vh",
-                opacity = 1,
-                items = new List<VisualBaseItem>()
-                {
-                    new Image()
-                    {
-                        source = "${data.url}${data.item.primaryImageSource}",
-                        scale  = "best-fit",
-                        height = "63vh",
-                        width  = "100%",
-                        id     = "primary"
-                    },
-                    await RenderComponent_PlayButton(baseItem, session)
-                }
-            });
-            layout.Add(new AlexaFooter()
-            {
-                hintText = type == "Series" ? "Try \"Alexa, show season one...\"" : "Try \"Alexa, play that...\"",
-                position = "absolute",
-                bottom = "1vh"
-            });
-
-            return await Task.FromResult(new Directive()
-            {
-                type = Directive.AplRenderDocument,
-                token = token,
-                document = new Document()
-                {
-                    theme = "dark",
-                    settings = new Settings() { idleTimeout = 120000 },
-                    import = Imports,
-                    graphics = graphicsDictionary,
-                    commands = new Dictionary<string, ICommand>()
-                    {
-                        { nameof(AnimationFactory.ScaleInOutOnPress), await AnimationFactory.ScaleInOutOnPress() } ,
-                        { nameof(AnimationFactory.FadeIn), await AnimationFactory.FadeIn() } 
-                    },
-                    resources = Resources,
-                    mainTemplate = new MainTemplate()
-                    {
-                        parameters = new List<string>() { "payload" },
-                        items = new List<IItem>()
-                        {
-                            new Container()
-                            {
-                                when   = "${viewport.shape == 'round'}",
-                                width  = "100vw",
-                                height = "100vh",
-                                items  = new List<VisualBaseItem>()
-                                {
-                                    new AlexaHeader()
-                                    {
-                                        headerTitle            = "",
-                                        headerAttributionImage = "",
-                                        headerBackButton       = true,
-                                        headerSubtitle         = session.User.Name,
-                                    },
-                                    new Image()
-                                    {
-                                        source = "${data.logoUrl}",
-                                        width  = "55%",
-                                        height = "25vh",
-                                        left   = "20%",
-                                        align  = "center"
-                                    },
-                                    new Text()
-                                    {
-                                        text     =  $"{(session.room != null ? session.room.Name : "")}",
-                                        left     = "10%",
-                                        width    = "85%",
-                                        height   = "5%",
-                                        fontSize = "16dp"
-                                    },
-                                }
-                            },
-                            new Container()
-                            {
-                                bind = new List<DataBind>()
-                                {
-                                    new DataBind()
-                                    {
-                                        name = "data",
-                                        value = "${payload.templateData.properties}"
-                                    },
-                                },
-                                width  = "100vw",
-                                height = "100vh",
-                                items  = layout,
-                            }
-                        }
-                    }
-                },
-                datasources = new Dictionary<string, IDataSource>(){ {"templateData", dataSource } }
-            });
-        }
-
-        private async Task<IDirective> RenderRoomSelectionTemplate(IDataSource dataSource, IAlexaSession session)
-        {
-            var layout = new List<VisualBaseItem>
-            {
-                new Video()
-                {
-                    source = new List<Source>()
-                    {
-                        new Source()
-                        {
-                            url = "${data.url}${data.item.videoBackdropSource}", repeatCount = 0,
-                        }
-                    },
-                    scale = "best-fill",
-                    width = "100vw",
-                    height = "100vh",
-                    position = "absolute",
-                    autoplay = true,
-                    audioTrack = "none",
-                    id = "${data.item.id}",
-                    onEnd = new List<ICommand>()
-                    {
-                        new SetValue()
-                        {
-                            componentId = "backdropOverlay",
-                            property = "source",
-                            value = "${data.url}${data.item.backdropImageSource}"
-                        },
-                        new SetValue() {componentId = "backdropOverlay", property = "opacity", value = 1},
-                        new SetValue()
-                        {
-                            componentId = "backdropOverlay",
-                            property = "overlayColor",
-                            value = "rgba(0,0,0,0.55)"
-                        }
-                    }
-                },
-                new Image()
-                {
-                    overlayColor = "rgba(0,0,0,1)",
-                    scale = "best-fill",
-                    width = "100vw",
-                    height = "100vh",
-                    position = "absolute",
-                    source = "${data.url}${data.item.videoOverlaySource}",
-                    opacity = 0.65,
-                    id = "backdropOverlay"
-                },
-                new AlexaHeader()
-                {
-                    headerBackButton = true,
-                    headerTitle = "${data.item.name}",
-                    headerSubtitle = $"{session.User.Name} Play On...",
-                    headerDivider = true
-                },
-                new Image()
-                {
-                    position = "absolute",
-                    source = "${data.url}${data.item.logoImageSource}",
-                    width = "25vw",
-                    height = "10vh",
-                    right = "5vw",
-                    bottom = "5vh"
-                }
-            };
-
-
-            var roomButtons = RenderComponent_RoomButtonLayoutContainer();
-            roomButtons.ForEach(b => layout.Add(b));
-
-            var view = new Directive()
-            {
-                type = Directive.AplRenderDocument,
-                token = "roomSelection",
-                document = new Document()
-                {
-                    theme = "dark",
-                    import = Imports,
-                    resources = Resources,
-                    mainTemplate = new MainTemplate()
-                    {
-                        parameters = new List<string>() { "payload" },
-                        items = new List<IItem>()
-                        {
-                            new Container()
-                            {
-                                width = "100vw",
-                                bind = new List<DataBind>()
-                                {
-                                    new DataBind()
-                                    {
-                                        name  = "data",
-                                        value = "${payload.templateData.properties}"
-                                    }
-                                },
-                                items = layout
-                            }
-                        }
-                    }
-                },
-                datasources = new Dictionary<string, IDataSource>(){ {"templateData", dataSource } }
-            };
-
-            return await Task.FromResult(view);
-        }
-        
-        private async Task<IDirective> RenderGenericViewTemplate(IDataSource dataSource)
-        {
-            // ReSharper disable once UseObjectOrCollectionInitializer
-            var layout = new List<VisualBaseItem>();
-            layout.Add(new Video()
-            {
-                source = new List<Source>()
-                {
-                    new Source()
-                    {
-                        url         = "${payload.templateData.properties.url}${payload.templateData.properties.videoUrl}", //$"{url}/particles",
-                        repeatCount = 1,
-                    }
-                },
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                autoplay = true,
-                audioTrack = "none"
-            });
-
-            layout.Add(new Image()
-            {
-                overlayColor = "rgba(0,0,0,1)",
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                source = "${payload.templateData.properties.url}/EmptyPng?quality=90",
-                opacity = 0.35
-            });
-
-            layout.Add(new AlexaHeadline()
-            {
-                backgroundColor = "rgba(0,0,0,0.1)",
-                primaryText = "${payload.templateData.properties.text}"
-            });
-
-            layout.Add(new AlexaFooter()
-            {
-                hintText = "Alexa, open help...",
-                position = "absolute",
-                bottom = "1vh"
-            });
-
-            return await Task.FromResult( new Directive()
-            {
-                type = Directive.AplRenderDocument,
-                token = "",
-                document = new Document()
-                {
-                    theme = "light",
-                    import = Imports,
-                    resources = Resources,
-                    mainTemplate = new MainTemplate()
-                    {
-                        parameters = new List<string>() { "payload" },
-                        items = new List<IItem>()
-                        {
-                            new Container()
-                            {
-                                width  = "100vw",
-                                height = "100vh",
-                                items  = layout
-                            }
-                        }
-                    }
-                },
-                datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource } }
-            });
-        }
-
-        private async Task<IDirective> RenderHelpTemplate(IDataSource dataSource)
-        {
-            var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
-            {
-                {
+                  {
                     "AlexaLarge", new AlexaVectorGraphic()
                     {
                         parameters = new List<string>()
@@ -1071,37 +325,697 @@ namespace AlexaController
                     }
                 }
             };
-            
+
             return await Task.FromResult(new Directive()
             {
                 type = Directive.AplRenderDocument,
-                token = "Help",
+                token = properties.documentType.ToString(),
                 document = new Document()
                 {
-                    theme = "dark",
+                    theme = "${payload.templateData.properties.theme}",
                     import = Imports,
                     resources = Resources,
                     graphics = graphicsDictionary,
-                    commands = new Dictionary<string,ICommand>()
+                    commands = new Dictionary<string, ICommand>()
                     {
-                        { nameof(AnimationFactory.FadeIn),  await AnimationFactory.FadeIn() },
-                        //{ nameof(AnimationFactory.AnimateSvgPath), await AnimationFactory.AnimateSvgPath() },
-                        //{ nameof(AnimationFactory.RemoveSvgStroke), await AnimationFactory.RemoveSvgStroke("${strokeDashOffset > 64}")},
-                        //{ "SvgFillBlue",  await AnimationFactory.AddSvgFill("${strokeDashOffset > 64}", "#00b0e6")},
-                        //{ "SvgFillGreen", await AnimationFactory.AddSvgFill("${strokeDashOffset > 64}", "rgba(81,201,39)")}
-                        
+                        { nameof(AnimationFactory.ScaleInOutOnPress), await AnimationFactory.ScaleInOutOnPress() },
+                        { nameof(AnimationFactory.FadeIn), await AnimationFactory.FadeIn() } 
                     },
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>() { "payload" },
+                        items = layout
+                    }
+                },
+                datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource } }
+            });
+        }
+        
+        private async Task<List<IItem>> RenderItemListSequenceLayout(IDataSource dataSource, IAlexaSession session)
+        {
+            var layout           = new List<IItem>();
+            var properties       = (Properties<MediaItem>) dataSource.properties;
+            var baseItems        = properties.items;
+            var type             = baseItems[0].type;
+            
+            layout.Add(new Container()
+            {
+                id = "primary",
+                width = "100vw",
+                height = "100vh",
+                items = new List<IItem>()
+                {
+                    new Image()
+                    {
+                        height = "100%",
+                        width = "100%",
+                        scale = "best-fill",
+                        position = "absolute",
+                        source = "${payload.templateData.properties.url}${payload.templateData.properties.item.backdropImageSource}",
+                        filters = new List<IFilter>()
+                        {
+                            new Gradient()
+                            {
+                                gradient = new GradientOptions()
+                                {
+                                   type = "linear",
+                                   colorRange = new List<string>()
+                                   {
+                                       "#000",
+                                       "rgba(0,0,0,0)"
+                                   },
+                                   inputRange = new List<double>()
+                                   {
+                                       0,
+                                       0.999
+                                   },
+                                   angle = 0
+                                }
+                            },
+                           new Blend()
+                           {
+                               mode = "color-burn",
+                               source = -2,
+                               destination = -1
+                           }
+                        }
+                    },
+                    new AlexaHeader()
+                    {
+                        //TODO: Do we really want a header title if there is an attribution image?
+                        //headerTitle            = "${payload.templateData.properties.item.name}",
+                        headerBackButton       = session.paging.canGoBack,
+                        headerDivider          = true,
+                        headerAttributionImage = "${payload.templateData.properties.url}${payload.templateData.properties.item.logoImageSource}"
+                    },
+                    new Sequence()
+                    {
+                        height                 = "100vh",
+                        width                  = "95vw",
+                        left                   = "5vw",
+                        scrollDirection        = "horizontal",
+                        data                   = "${payload.templateData.properties.items}",
+                        items                  = new List<IItem>()
+                        {
+                            new TouchWrapper()
+                            {
+                                paddingTop = "8vh",
+                                id         = "${data.id}",
+                                onPress    = new Parallel()
+                                {
+                                   commands = new List<ICommand>()
+                                   {
+                                       new Command() { type = nameof(AnimationFactory.ScaleInOutOnPress) },
+                                       new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
+                                   }
+                               },
+                                items = new List<IItem>()
+                               {
+                                   await RenderComponent_SequencePrimaryImageContainer(type)
+                               }
+                            }
+                        }
+                    },
+                    new AlexaFooter()
+                    {
+                        hintText = "",
+                        position = "absolute",
+                        bottom   = "1vh",
+                        id       = "hint",
+                        onMount  = new List<ICommand>()
+                        {
+                            new Sequential()
+                            {
+                                repeatCount = 15,
+                                commands = new List<ICommand>()
+                                {
+                                    new AnimateItem()
+                                    {
+                                        componentId = "hint",
+                                        duration    = 1020,
+                                        easing      = "ease-in",
+                                        value       = new List<IValue>()
+                                        {
+                                            new OpacityValue() { @from = 1, to = 0 }
+                                        },
+                                        delay = 5000
+                                    },
+                                    new SetValue()
+                                    {
+                                        componentId = "hint",
+                                        property    = "hintText",
+                                        value       =  "Try \"Alexa, Show The ${payload.templateData.properties.items[0].type}: ${payload.templateData.properties.items[Time.seconds(localTime/payload.templateData.properties.items.length) % payload.templateData.properties.items.length].name}\"",
+                                    },
+                                    new AnimateItem()
+                                    {
+                                        componentId = "hint",
+                                        duration    = 1020,
+                                        easing      = "ease-out",
+                                        value       = new List<IValue>()
+                                        {
+                                            new OpacityValue() { @from = 0, to = 1 }
+                                        },
+                                        delay = 2500
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            return layout;
+
+        }
+
+        private async Task<List<IItem>> RenderItemDetailsLayout(IDataSource dataSource, IAlexaSession session)
+        {
+            const string leftColumnSpacing = "36vw";
+            var properties = (Properties<MediaItem>) dataSource.properties;
+            var baseItem = properties.item;
+            var type     = baseItem.type;
+           
+            // ReSharper disable once UseObjectOrCollectionInitializer
+            var layout   = new List<IItem>();
+            
+            layout.Add(new Video()
+            {
+                source = new List<Source>()
+                {
+                    new Source()
+                    {
+                        url = "${data.url}${data.item.videoBackdropSource}",
+                        repeatCount = 0,
+                    }
+                },
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                autoplay = true,
+                audioTrack = "none",
+                id = "${data.item.id}",
+                onEnd = new List<ICommand>()
+                {
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "source",
+                        value       = "${data.url}${data.item.backdropImageSource}"
+                    },
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "opacity",
+                        value       = 1
+                    },
+                    new SetValue()
+                    {
+                        componentId = "backdropOverlay",
+                        property    = "overlayColor",
+                        value       = "rgba(0,0,0,0.55)"
+                    }
+                }
+            });
+            layout.Add(new Image()
+            {
+                overlayColor = "rgba(0,0,0,1)",
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                source = "${data.url}${data.item.videoOverlaySource}",
+                opacity = 0.65,
+                id = "backdropOverlay"
+            });
+            
+            if (session.paging.canGoBack)
+            {
+                layout.Add(new AlexaIconButton()
+                {
+                    vectorSource = MaterialVectorIcons.Left,
+                    buttonSize = "15vh",
+                    position = "absolute",
+                    left = "2vw",
+                    color = "white",
+                    top = "-1vw",
+                    id = "goBack",
+                    primaryAction = new Parallel()
+                    {
+                        commands = new List<ICommand>()
+                        {
+                           new Command()
+                           {
+                               type = nameof(AnimationFactory.ScaleInOutOnPress)
+                           },
+                            new SendEvent() {arguments = new List<object>() {"goBack"}}
+                        }
+                    }
+                });
+            }
+
+            layout.Add(new Image()
+            {
+                id = "logo",
+                source = "${data.url}${data.item.logoImageSource}",
+                width = "12vw",
+                position = "absolute",
+                left = "85vw",
+            });
+            //Name
+            layout.Add(new Text()
+            {
+                text = "${data.item.name}",
+                style = "textStylePrimary",
+                left = leftColumnSpacing,
+                fontWeight = "100",
+                top = "15vh",
+                id = "baseItemName",
+                opacity = 1,
+
+            });
+            //Genres
+            layout.Add(new Text()
+            {
+                text = "${data.item.genres}",
+                left = leftColumnSpacing,
+                style = "textStyleBody",
+                top = "15vh",
+                width = "40vw",
+                height = "22dp",
+                fontSize = "18dp",
+                opacity = 1,
+                id = "genre",
+
+            });
+            //Rating - Runtime - End time
+            //Runtime span
+            layout.Add(new Text()
+            {
+                text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
+                left = leftColumnSpacing,
+                style = "textStyleBody",
+                top = "17vh",
+                width = "40vw",
+                height = "22dp",
+                fontSize = "18dp",
+                opacity = 1,
+                id = "rating",
+
+            });
+            //TagLines
+            layout.Add(new Text()
+            {
+                text = "${data.item.tagLine}",
+                style = "textStyleBody",
+                left = leftColumnSpacing,
+                top = "18vh",
+                height = "10dp",
+                width = "40vw",
+                fontSize = "22dp",
+                id = "tag",
+                display = !string.IsNullOrEmpty(baseItem.tagLine) ? "normal" : "none",
+                opacity = 1,
+            });
+            //Watched check-mark
+            layout.Add(new VectorGraphic()
+            {
+                source = "CheckMark",
+                left = "87vw",
+                position = "absolute",
+                top = "30vh"
+            });
+            //Overview
+            layout.Add(new TouchWrapper()
+            {
+                top = string.Equals(type, "Movie") ? "24vh" : "20vh",
+                left = leftColumnSpacing,
+                maxHeight = "20vh",
+                opacity = 1,
+                id = "${data.item.id}",
+                onPress = new SendEvent() { arguments = new List<object>() { nameof(UserEventReadOverview) } },
+                item = new Container()
+                {
+                    items = new List<IItem>()
+                    {
+                        new Container()
+                        {
+                            direction = "row",
+                            items = new List<IItem>()
+                            {
+                                new Text()
+                                {
+                                    fontSize = "22dp",
+                                    text     = "<b>Overview</b>",
+                                    style    = "textStyleBody",
+                                    width    = "35vw",
+                                    id       = "overviewHeader",
+                                    opacity  = 1,
+
+                                },
+                                new VectorGraphic()
+                                {
+                                    source  = "Audio",
+                                    right   = "20vw",
+                                    opacity = 1,
+                                    id      = "audioIcon",
+                                    top     = "5px",
+
+                                }
+                            }
+                        },
+                        new Text()
+                        {
+                            text      = "${data.item.overview}",
+                            style     = "textStyleBody",
+                            maxHeight = "20vh",
+                            id        = "overview",
+                            width     = "55vw",
+                            fontSize  = "20dp",
+                            opacity   = 1,
+
+                        }
+                    }
+                },
+
+            });
+            //Recommendations
+            layout.Add(new Container()
+            {
+                when = "${viewport.shape == 'rectangle' && viewport.mode == 'hub' && viewport.width > 960 && payload.templateData.properties.similarItems.length > 0}",
+                width = "50vw",
+                height = "250px",
+                top = "29vh",
+                left = "36vw",
+                opacity = 1,
+                items = new List<IItem>()
+                {
+                    new Text()
+                    {
+                        text     = "Recommendations",
+                        style    = "textStylePrimary",
+                        fontSize = "20"
+                    },
+                    new Sequence()
+                    {
+                        width = "50vw",
+                        height = "250px",
+                        scrollDirection = "horizontal",
+                        data = "${payload.templateData.properties.similarItems}",
                         items = new List<IItem>()
+                        {
+                            new TouchWrapper()
+                            {
+                                width = "245px",
+                                id = "${data.id}",
+                                item = new Image()
+                                {
+                                    height = "140px",
+                                    width = "225px",
+                                    source = "${payload.templateData.properties.url}${data.thumbImageSource}",
+                                },
+                                onPress = new Parallel()
+                                {
+                                    commands = new List<ICommand>()
+                                    {
+                                        new Command() { type = nameof(AnimationFactory.ScaleInOutOnPress) },
+                                        new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+
+            });
+            //Series - Season Count
+            if (string.Equals(type, "Series"))
+            {
+                layout.Add(new Container()
+                {
+                    position = "absolute",
+                    left = "38vw",
+                    top = "78vh",
+                    direction = "row",
+                    items = new List<IItem>()
+                    {
+                        new VectorGraphic()
+                        {
+                            id = "SeasonCarouselArrayIcon",
+                            source = "ArrayIcon"
+                        },
+                        new VectorGraphic()
+                        {
+                            id = "SeasonCarouselIcon",
+                            source = "Carousel",
+                            position = "absolute",
+                            opacity = 1
+                        },
+                        new Text()
+                        {
+                            style = "textStyleBody",
+                            fontSize = "23dp",
+                            left = "12dp",
+                            text = "<b>" +
+                                   ServerQuery.Instance.GetItemsResult(baseItem.id, new []{"Season"}, session.User)
+                                       .TotalRecordCount + "</b>"
+                        },
+                        new Text()
+                        {
+                            style = "textStyleBody",
+                            fontSize = "23dp",
+                            left = "24dp",
+                            width = "25vw",
+                            text = "Available Season(s)"
+                        }
+                    }
+                });
+            }
+            //Primary Image
+            layout.Add(new Container()
+            {
+                id = "primaryButton",
+                position = "absolute",
+                width = "38%",
+                height = "75vh",
+                top = "15vh",
+                opacity = 1,
+                items = new List<IItem>()
+                {
+                    new Image()
+                    {
+                        source = "${data.url}${data.item.primaryImageSource}",
+                        scale  = "best-fit",
+                        height = "63vh",
+                        width  = "100%",
+                        id     = "primary"
+                    },
+                    await RenderComponent_PlayButton(baseItem, session)
+                }
+            });
+            layout.Add(new AlexaFooter()
+            {
+                hintText = type == "Series" ? "Try \"Alexa, show season one...\"" : "Try \"Alexa, play that...\"",
+                position = "absolute",
+                bottom = "1vh"
+            });
+
+            return await Task.FromResult(new List<IItem>()
+            {
+                new Container()
+                {
+                    when   = "${viewport.shape == 'round'}",
+                    width  = "100vw",
+                    height = "100vh",
+                    items  = new List<IItem>()
+                    {
+                        new AlexaHeader()
+                        {
+                            headerTitle            = "",
+                            headerAttributionImage = "",
+                            headerBackButton       = true,
+                            headerSubtitle         = session.User.Name,
+                        },
+                        new Image()
+                        {
+                            source = "${data.logoUrl}",
+                            width  = "55%",
+                            height = "25vh",
+                            left   = "20%",
+                            align  = "center"
+                        },
+                        new Text()
+                        {
+                            text     =  $"{(session.room != null ? session.room.Name : "")}",
+                            left     = "10%",
+                            width    = "85%",
+                            height   = "5%",
+                            fontSize = "16dp"
+                        },
+                    }
+                },
+                new Container()
+                {
+                    bind = new List<DataBind>()
+                    {
+                        new DataBind()
+                        {
+                            name = "data", 
+                            value = "${payload.templateData.properties}"
+                        },
+                    },
+                    width  = "100vw",
+                    height = "100vh",
+                    items  = layout,
+                }
+            });
+        }
+
+        private async Task<List<IItem>> RenderRoomSelectionLayout(IDataSource dataSource, IAlexaSession session)
+        {
+            var layout = new List<IItem>
+            {
+                new Video()
+                {
+                    source = new List<Source>()
+                    {
+                        new Source()
+                        {
+                            url = "${data.url}${data.item.videoBackdropSource}", repeatCount = 0,
+                        }
+                    },
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    autoplay = true,
+                    audioTrack = "none",
+                    id = "${data.item.id}",
+                    onEnd = new List<ICommand>()
+                    {
+                        new SetValue()
+                        {
+                            componentId = "backdropOverlay",
+                            property = "source",
+                            value = "${data.url}${data.item.backdropImageSource}"
+                        },
+                        new SetValue() {componentId = "backdropOverlay", property = "opacity", value = 1},
+                        new SetValue()
+                        {
+                            componentId = "backdropOverlay",
+                            property = "overlayColor",
+                            value = "rgba(0,0,0,0.55)"
+                        }
+                    }
+                },
+                new Image()
+                {
+                    overlayColor = "rgba(0,0,0,1)",
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    source = "${data.url}${data.item.videoOverlaySource}",
+                    opacity = 0.65,
+                    id = "backdropOverlay"
+                },
+                new AlexaHeader()
+                {
+                    headerBackButton = true,
+                    headerTitle = "${data.item.name}",
+                    headerSubtitle = $"{session.User.Name} Play On...",
+                    headerDivider = true
+                },
+                new Image()
+                {
+                    position = "absolute",
+                    source = "${data.url}${data.item.logoImageSource}",
+                    width = "25vw",
+                    height = "10vh",
+                    right = "5vw",
+                    bottom = "5vh"
+                }
+            };
+            var roomButtons = RenderComponent_RoomButtonLayoutContainer();
+            roomButtons.ForEach(b => layout.Add(b));
+
+            return await Task.FromResult(new List<IItem>()
+            {
+                new Container()
+                {
+                    width = "100vw",
+                    bind = new List<DataBind>()
+                    {
+                        new DataBind()
+                        {
+                            name  = "data",
+                            value = "${payload.templateData.properties}"
+                        }
+                    },
+                    items = layout
+                }
+            });
+        }
+        
+        private async Task<List<IItem>> RenderGenericViewLayout(IDataSource dataSource)
+        {
+            return await Task.FromResult(new List<IItem>
+            {
+                new Container()
+                {
+                    width  = "100vw",
+                    height = "100vh",
+                    items  = new List<IItem>()
+                    {
+                        new Video()
+                {
+                    source = new List<Source>()
+                    {
+                        new Source()
+                        {
+                            url =
+                                "${payload.templateData.properties.url}${payload.templateData.properties.videoUrl}",
+                            repeatCount = 1,
+                        }
+                    },
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    autoplay = true,
+                    audioTrack = "none"
+                },
+                        new Image()
+                {
+                    overlayColor = "rgba(0,0,0,1)",
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    source = "${payload.templateData.properties.url}/EmptyPng?quality=90",
+                    opacity = 0.35
+                },
+                        new AlexaHeadline()
+                {
+                    backgroundColor = "rgba(0,0,0,0.1)", primaryText = "${payload.templateData.properties.text}"
+                },
+                        new AlexaFooter() {hintText = "Alexa, open help...", position = "absolute", bottom = "1vh"}
+                    }
+                }
+            });
+
+        }
+
+        private async Task<List<IItem>> RenderHelpView(IDataSource dataSource)
+        {
+            return await Task.FromResult(new List<IItem>()
                         {
                             new Container()
                             {
                                 width  = "100vw",
                                 height = "100vh",
                                 id     = "helpPageContainer",
-                                items  = new List<VisualBaseItem>()
+                                items  = new List<IItem>()
                                 {
                                     new Frame()
                                     {
@@ -1109,7 +1023,7 @@ namespace AlexaController
                                         width = "100vw",
                                         height ="100vh",
                                         backgroundColor = "white",
-                                        items = new List<VisualBaseItem>()
+                                        items = new List<IItem>()
                                         {
                                             new Container()
                                             {
@@ -1118,7 +1032,7 @@ namespace AlexaController
                                                 justifyContent = "center",
                                                 width = "100vw",
                                                 height = "100vh",
-                                                items = new List<VisualBaseItem>()
+                                                items = new List<IItem>()
                                                 {
                                                     new VectorGraphic()
                                                     {
@@ -1318,14 +1232,14 @@ namespace AlexaController
                                         initialPage   = 0,
                                         navigation    = "forward-only",
                                         data          = "${payload.templateData.properties.values}",
-                                        items         = new List<VisualBaseItem>()
+                                        items         = new List<IItem>()
                                         {
                                             new Container()
                                             {
                                                 justifyContent = "center",
                                                 alignItems = "center",
                                                 direction = "column",
-                                                items = new List<VisualBaseItem>()
+                                                items = new List<IItem>()
                                                 {
                                                     new VectorGraphic()
                                                     {
@@ -1357,11 +1271,7 @@ namespace AlexaController
                                 }
 
                             }
-                        }
-                    }
-                },
-                datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource } }
-            });
+                        });
         }
         
         //Create template components 
@@ -1388,7 +1298,7 @@ namespace AlexaController
                 borderColor = "white",
                 borderRadius = "75px",
                 backgroundColor = "rgba(0,0,0,0.35)",
-                items = new List<VisualBaseItem>()
+                items = new List<IItem>()
                 {
                     new AlexaIconButton()
                     {
@@ -1417,7 +1327,7 @@ namespace AlexaController
                     {
                         height = "70vh",
                         width = "30vw",
-                        items = new List<VisualBaseItem>()
+                        items = new List<IItem>()
                         {
                             new Image()
                             {
@@ -1453,7 +1363,7 @@ namespace AlexaController
                 default:
                     return await Task.FromResult(new Container()
                     {
-                        items = new List<VisualBaseItem>()
+                        items = new List<IItem>()
                         {
                             new Image()
                             {
@@ -1468,10 +1378,10 @@ namespace AlexaController
 
         }
 
-        private List<VisualBaseItem> RenderComponent_RoomButtonLayoutContainer()
+        private List<IItem> RenderComponent_RoomButtonLayoutContainer()
         {
             var config = Plugin.Instance.Configuration;
-            var roomButtons = new List<VisualBaseItem>();
+            var roomButtons = new List<IItem>();
 
             if (config.Rooms is null) return roomButtons;
 
@@ -1490,7 +1400,7 @@ namespace AlexaController
                     direction = "row",
                     left = "15vw",
                     top = "10vh",
-                    items = new List<VisualBaseItem>()
+                    items = new List<IItem>()
                     {
                         new AlexaIconButton()
                         {

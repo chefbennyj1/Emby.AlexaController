@@ -15,7 +15,7 @@ namespace AlexaController
 {
     public class AplaDataSourceManager : Ssml
     {
-        public enum SpeechPrefix
+        private enum SpeechPrefix
         {
             REPOSE,
             APOLOGETIC,
@@ -49,7 +49,7 @@ namespace AlexaController
             ExpressiveInterjection("OK"),
             "Alright, ",
             SayWithEmotion("Yes, ... ", Emotion.excited, Intensity.medium),
-            "Yep, "
+            ""
         };
         private readonly List<string> Repose     = new List<string>()
         {
@@ -71,12 +71,32 @@ namespace AlexaController
         {
             "oh...",
             "umm... ",
-            $"{ExpressiveInterjection("wow")}...",
+            $"{ExpressiveInterjection("hmm")}...",
         };
+
+        public async Task<IDataSource> ReadItemOverview(BaseItem item)
+        {
+            var speech = new StringBuilder();
+            speech.Append(item.Name);
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+            speech.Append(item.Overview);
+            var audioUrl = await ServerQuery.Instance.GetLocalApiUrlAsync();
+            audioUrl += ServerQuery.Instance.GetThemeSongSource(item);
+            return await Task.FromResult(new DataSource()
+            {
+                properties = new Properties<string>()
+                {
+                    text     = speech.ToString(),
+                    audioUrl = audioUrl
+                }
+            });
+        }
 
         public async Task<IDataSource> PersonNotRecognized()
         {
             var speech = new StringBuilder();
+            speech.Append(GetSpeechPrefix(SpeechPrefix.REPOSE));
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("I don't recognize the current user.");
             speech.Append("Please go to the plugin configuration and link emby account personalization.");
             speech.Append("Or ask for help.");
@@ -148,6 +168,10 @@ namespace AlexaController
         public async Task<IDataSource> ItemBrowse(BaseItem item, IAlexaSession session)
         {
             var speech = new StringBuilder();
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+            speech.Append("Here is the ");
+            speech.Append(item.GetType().Name);
+            speech.Append(" ");
             var name = StringNormalization.ValidateSpeechQueryString(item.Name);
             var rating = item.OfficialRating;
             speech.Append(name);
@@ -511,6 +535,7 @@ namespace AlexaController
         public async Task<IDataSource> GetNewItemsApl(List<BaseItem> items, DateTime date)
         {
             var speech = new StringBuilder();
+            speech.Append(GetSpeechPrefix(SpeechPrefix.COMPLIANCE));
             speech.Append("There ");
             speech.Append(items?.Count > 1 ? "are" : "is");
             speech.Append(SayAsCardinal(items?.Count.ToString()));
@@ -548,10 +573,11 @@ namespace AlexaController
         public async Task<IDataSource> BrowseItemByActor(List<BaseItem> actors)
         {
             var speech = new StringBuilder();
+            speech.Append(GetSpeechPrefix(SpeechPrefix.COMPLIANCE));
             speech.Append("Items starring");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(string.Join(", ", actors));
-            speech.Append(string.Join(", and", actors, actors.Count -1, 1));
+            //speech.Append(string.Join(", and", actors, actors.Count -1, 1));
             return new DataSource()
             {
                 properties = new Properties<string>()
@@ -573,7 +599,7 @@ namespace AlexaController
                 case SpeechPrefix.NON_COMPLIANT : return Dysfluency[RandomIndex.Next(0, Dysfluency.Count)];
                 case SpeechPrefix.NONE          : return string.Empty;
                 case SpeechPrefix.DEFAULT       : return string.Empty;
-                default                          : return string.Empty;
+                default                         : return string.Empty;
             }
         }
     }
