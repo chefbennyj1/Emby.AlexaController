@@ -368,37 +368,11 @@ namespace AlexaController
                     new Image()
                     {
                         height = "100%",
+                        overlayColor = "rgba(0,0,0,0.65)",
                         width = "100%",
                         scale = "best-fill",
                         position = "absolute",
                         source = "${payload.templateData.properties.url}${payload.templateData.properties.item.backdropImageSource}",
-                        filters = new List<IFilter>()
-                        {
-                            new Gradient()
-                            {
-                                gradient = new GradientOptions()
-                                {
-                                   type = "linear",
-                                   colorRange = new List<string>()
-                                   {
-                                       "#000",
-                                       "rgba(0,0,0,0)"
-                                   },
-                                   inputRange = new List<double>()
-                                   {
-                                       0,
-                                       0.999
-                                   },
-                                   angle = 0
-                                }
-                            },
-                           new Blend()
-                           {
-                               mode = "color-burn",
-                               source = -2,
-                               destination = -1
-                           }
-                        }
                     },
                     new AlexaHeader()
                     {

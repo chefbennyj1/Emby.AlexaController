@@ -313,7 +313,7 @@ namespace AlexaController
                     break;
             }
             return itemData.HasImage(ImageType.Logo)
-                ? $"/Items/{itemData.InternalId}Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
+                ? $"/Items/{itemData.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
         }
 
         public string GetVideoBackdropImageSource(BaseItem item)
