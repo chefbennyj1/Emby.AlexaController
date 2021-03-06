@@ -68,7 +68,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
                     }
 
-                    aplDataSource = await AplDataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {collectionBaseItem.OfficialRating}");
+                    aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {collectionBaseItem.OfficialRating}", "/particles");
                     aplaDataSource = await AplaDataSourceManager.Instance.ParentalControlNotAllowed(collectionBaseItem, Session);
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {

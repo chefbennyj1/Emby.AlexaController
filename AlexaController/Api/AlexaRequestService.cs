@@ -164,7 +164,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                var dataSource = await AplDataSourceManager.Instance.GetGenericHeadline(exception.Message);
+                var dataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource(exception.Message, "/particles");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -191,7 +191,6 @@ namespace AlexaController.Api
         private async Task<string> OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request    = alexaRequest.request;
-            ServerController.Instance.Log.Info($"USEREVENT: {alexaRequest.request.source.type} {alexaRequest.request.source.handler}");
             return await GetResponseResult(Type.GetType($"AlexaController.Alexa.Presentation.APL.UserEvent.{request.source.type}.{request.source.handler}.{request.arguments[0]}"), alexaRequest, null);
         }
 
@@ -217,7 +216,7 @@ namespace AlexaController.Api
             }
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-            var aplDataSource = await AplDataSourceManager.Instance.GetGenericHeadline("Welcome to Home Theater Emby Controller");
+            var aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("Welcome to Home Theater Emby Controller", "/particles");
             aplaDataSource = await AplaDataSourceManager.Instance.OnLaunch();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

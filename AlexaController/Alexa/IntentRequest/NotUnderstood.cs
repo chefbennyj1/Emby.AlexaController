@@ -19,7 +19,7 @@ namespace AlexaController.Alexa.IntentRequest
         }
         public async Task<string> Response()
         {
-            var aplDataSource = await AplDataSourceManager.Instance.GetNotUnderstood();
+            var aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("Could you say that again?", "/Question");
             var aplaDataSource = await AplaDataSourceManager.Instance.NotUnderstood();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

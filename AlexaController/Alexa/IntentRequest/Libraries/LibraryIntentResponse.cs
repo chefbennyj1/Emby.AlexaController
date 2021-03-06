@@ -56,7 +56,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             AlexaSessionManager.Instance.UpdateSession(session, null);
             
 
-            var aplDataSource = await AplDataSourceManager.Instance.GetBrowseLibrary($"Showing the {result.Name} library");
+            var aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
             var aplaDataSource = await AplaDataSourceManager.Instance.ItemBrowse(result, session);
 
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session);

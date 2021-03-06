@@ -49,7 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result is null)
             {
-                aplDataSource = await AplDataSourceManager.Instance.GetGenericHeadline("I was unable to find that actor.");
+                aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that actor.", "/particles");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()

@@ -81,7 +81,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 }
 
                 aplDataSource =
-                    await AplDataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {result.OfficialRating}");
+                    await AplDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {result.OfficialRating}", "/particles");
 
                 aplaDataSource = await AplaDataSourceManager.Instance.ParentalControlNotAllowed(result, Session);
 

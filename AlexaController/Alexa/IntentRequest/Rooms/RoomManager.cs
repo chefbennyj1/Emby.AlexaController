@@ -26,7 +26,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var aplDataSource = await AplDataSourceManager.Instance.GetFollowUpQuestion("Which room did you want?");
+            var aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
             var aplaDataSource = await AplaDataSourceManager.Instance.RoomContext();
             session.PersistedRequestContextData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);

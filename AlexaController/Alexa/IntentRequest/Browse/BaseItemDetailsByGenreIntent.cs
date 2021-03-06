@@ -50,13 +50,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result.TotalRecordCount <= 0)
             {
-                dataSource = await AplDataSourceManager.Instance.GetGenericHeadline(
-                        "I was unable to find items. Does that genre exist?");
+                dataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that. Does that genre exist?", "/Question");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
                     {
-                        phrase = "I was unable to find items. Does that genre exist?",
+                        phrase = "I was unable to that. Does that genre exist?",
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,

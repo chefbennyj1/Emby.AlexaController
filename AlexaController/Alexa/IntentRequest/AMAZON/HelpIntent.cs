@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
@@ -20,7 +18,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            var dataSource = await AplDataSourceManager.Instance.GetHelpDataSourceAsync<string>();
+            var dataSource = await AplDataSourceManager.Instance.GetHelpDataSourceAsync();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()

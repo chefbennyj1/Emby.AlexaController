@@ -50,7 +50,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             
             if (nextUpEpisode is null)
             {
-                aplDataSource = await AplDataSourceManager.Instance.GetGenericHeadline("There doesn't seem to be a new episode available.");
+                aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("There doesn't seem to be a new episode available.", "/particles");
                 aplaDataSource = await AplaDataSourceManager.Instance.NoNextUpEpisodeAvailable();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -75,7 +75,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
 
                 aplDataSource =
-                    await AplDataSourceManager.Instance.GetGenericHeadline($"Stop! Rated {nextUpEpisode.OfficialRating}");
+                    await AplDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {nextUpEpisode.OfficialRating}", "/particles");
                 aplaDataSource = await AplaDataSourceManager.Instance.ParentalControlNotAllowed(nextUpEpisode, Session);
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {

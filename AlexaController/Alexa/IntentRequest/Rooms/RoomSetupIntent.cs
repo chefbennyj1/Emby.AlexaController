@@ -29,8 +29,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 Session.PersistedRequestContextData = AlexaRequest;
 
                 var dataSource =
-                    await AplDataSourceManager.Instance.GetGenericHeadline(
-                        "Please say the name of the room you want to setup.");
+                    await AplDataSourceManager.Instance.GetGenericViewDataSource("Please say the name of the room you want to setup.", "/particles");
 
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
 
