@@ -3,7 +3,7 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Sequence : VisualBaseItem
+    public class Sequence : VisualBaseComponent
     {
         public string scrollDirection { get; set; }
         public List<ICommand> onScroll  { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
+using AlexaController.Alexa.Presentation.APLA.AudioFilters;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
@@ -32,11 +33,12 @@ namespace AlexaController
                         parameters = new List<string>() { "payload" },
                         item = new Mixer()
                         {
-                            items = new List<AudioBaseItem>()
+                            items = new List<AudioBaseComponent>()
                             {
                                 new Speech() { content = "<speak>${payload.templateData.properties.value}</speak>" },
-                                new Audio()  { source = "${payload.templateData.properties.audioUrl}" }
-                            }
+                                new Audio()  { source = "${payload.templateData.properties.audioUrl}"}
+                            },
+                           
                         }
                         
                     }

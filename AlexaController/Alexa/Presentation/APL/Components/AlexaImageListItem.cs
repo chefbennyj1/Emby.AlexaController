@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaImageListItem : VisualBaseItem
+    public class AlexaImageListItem : VisualBaseComponent
     {
         public object type => nameof(AlexaImageListItem);
         public string defaultImageSource      { get; set; }

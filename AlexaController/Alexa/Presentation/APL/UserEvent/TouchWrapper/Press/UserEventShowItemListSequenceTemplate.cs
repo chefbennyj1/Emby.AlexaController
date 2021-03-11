@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.DataSourceProperties;
 using AlexaController.Session;
 
 
@@ -51,7 +52,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, session);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, session);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

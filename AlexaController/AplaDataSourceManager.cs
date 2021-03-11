@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.Presentation.DataSources.Transformers;
 using AlexaController.Alexa.SpeechSynthesis;
 using AlexaController.DataSourceProperties;
 using AlexaController.Session;
@@ -47,6 +48,7 @@ namespace AlexaController
         private readonly List<string> Compliance = new List<string>()
         {
             ExpressiveInterjection("OK"),
+            ExpressiveInterjection("absolutely "),
             "Alright, ",
             SayWithEmotion("Yes, ... ", Emotion.excited, Intensity.medium),
             ""
@@ -74,20 +76,21 @@ namespace AlexaController
             $"{ExpressiveInterjection("hmm")}...",
         };
 
+        
         public async Task<IDataSource> ReadItemOverview(BaseItem item)
         {
             var speech = new StringBuilder();
             speech.Append(item.Name);
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(item.Overview);
-            var audioUrl = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            audioUrl += ServerQuery.Instance.GetThemeSongSource(item);
+            //var audioUrl = await ServerQuery.Instance.GetLocalApiUrlAsync();
+            //audioUrl += ServerQuery.Instance.GetThemeSongSource(item);
             return await Task.FromResult(new DataSource()
             {
                 properties = new Properties<string>()
                 {
-                    text     = speech.ToString(),
-                    audioUrl = audioUrl
+                    value     = speech.ToString(),
+                    audioUrl = "soundbank://soundlibrary/computers/screens/screens_10"
                 }
             });
         }
@@ -102,7 +105,7 @@ namespace AlexaController
             speech.Append("Or ask for help.");
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -169,9 +172,13 @@ namespace AlexaController
         {
             var speech = new StringBuilder();
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append("Here is the ");
-            speech.Append(item.GetType().Name);
-            speech.Append(" ");
+            if (RandomIndex.NextDouble() > 0.5)
+            {
+                speech.Append("Here is the ");
+                speech.Append(item.GetType().Name);
+                speech.Append(" ");
+            }
+
             var name = StringNormalization.ValidateSpeechQueryString(item.Name);
             var rating = item.OfficialRating;
             speech.Append(name);
@@ -192,6 +199,7 @@ namespace AlexaController
                 {
                     properties = new Properties<string>()
                     {
+                        url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
                         value = speech.ToString(),
                         audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                     }
@@ -225,6 +233,7 @@ namespace AlexaController
                 {
                     properties = new Properties<string>()
                     {
+                        url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
                         value = speech.ToString(),
                         audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                     }
@@ -321,7 +330,7 @@ namespace AlexaController
             speech.Append(SayInDomain(Domain.music, "Which room did you want?"));
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl =  "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -338,7 +347,7 @@ namespace AlexaController
             speech.Append(session.room.Name);
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -356,7 +365,7 @@ namespace AlexaController
             speech.Append("in the library!");
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -373,7 +382,7 @@ namespace AlexaController
             speech.Append("Please look in the plugin configuration to map rooms to emby ready devices.");
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -391,7 +400,7 @@ namespace AlexaController
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -409,7 +418,7 @@ namespace AlexaController
             speech.Append("'s account");
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl =  "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -424,7 +433,7 @@ namespace AlexaController
             speech.Append("Please make sure you have allowed personalization in the Alexa app.");
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -444,7 +453,7 @@ namespace AlexaController
             speech.Append("Choose your emby account name and press save.");
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -499,7 +508,7 @@ namespace AlexaController
 
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -524,7 +533,7 @@ namespace AlexaController
                 items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -547,7 +556,7 @@ namespace AlexaController
 
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -562,7 +571,7 @@ namespace AlexaController
             speech.Append("There doesn't seem to be a new episode available for that series.");
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
@@ -580,7 +589,7 @@ namespace AlexaController
             //speech.Append(string.Join(", and", actors, actors.Count -1, 1));
             return new DataSource()
             {
-                properties = new Properties<string>()
+                properties = new DataSourceProperties.Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"

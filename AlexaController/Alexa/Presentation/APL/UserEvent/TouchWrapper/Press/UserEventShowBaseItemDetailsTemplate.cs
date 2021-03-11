@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.DataSourceProperties;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -48,7 +49,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, session);
             var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

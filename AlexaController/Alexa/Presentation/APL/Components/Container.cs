@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Container : VisualBaseItem
+    public class Container : VisualBaseComponent
     {
         public object type => nameof(Container);
         public string alignItems { get; set; }

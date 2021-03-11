@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -28,7 +30,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 directives = new List<IDirective>()
                 {
                     await AplRenderDocumentDirectiveManager.Instance
-                        .GetRenderDocumentDirectiveAsync(aplDataSource, Session),
+                        .GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, Session),
                     await RenderAudioDirectiveManager.Instance
                         .GetAudioDirectiveAsync(aplaDataSource)
                 }

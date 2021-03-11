@@ -114,6 +114,7 @@ namespace AlexaController.Alexa.Presentation.APL
                             }
                         }
                     },
+                    
                     new AnimateItem()
                     {
                         easing = "ease",

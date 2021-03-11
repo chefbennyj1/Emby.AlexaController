@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class VectorGraphic : VisualBaseItem
+    public class VectorGraphic : VisualBaseComponent
     {
         public object type => nameof(VectorGraphic);
         public string source { get; set; }

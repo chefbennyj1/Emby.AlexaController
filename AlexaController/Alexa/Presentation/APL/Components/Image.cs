@@ -4,7 +4,7 @@ using AlexaController.Alexa.Presentation.APL.Components.VisualFilters;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Image : VisualBaseItem
+    public class Image : VisualBaseComponent
     {
         public object type => nameof(Image);
         public string source                   { get; set; }

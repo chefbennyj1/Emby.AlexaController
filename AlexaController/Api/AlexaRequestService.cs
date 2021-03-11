@@ -8,6 +8,7 @@ using AlexaController.Alexa.IntentRequest;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
@@ -175,8 +176,7 @@ namespace AlexaController.Api
 
                     directives = new List<IDirective>()
                     {
-                        await AplRenderDocumentDirectiveManager.Instance
-                            .GetRenderDocumentDirectiveAsync(dataSource, session)
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(dataSource, session)
                     }
                 }, session);
             }
@@ -224,7 +224,7 @@ namespace AlexaController.Api
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, session),
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, session),
                     await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);

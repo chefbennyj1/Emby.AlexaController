@@ -68,7 +68,7 @@ namespace AlexaController
             });
             return result;
         }
-
+        
         public async Task<string> GetLocalApiUrlAsync()
         {
             return await Host.GetLocalApiUrl(CancellationToken.None);

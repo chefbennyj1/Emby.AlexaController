@@ -6,6 +6,7 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.DataSourceProperties;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -70,7 +71,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(aplDataSource, Session),
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session),
                     await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);

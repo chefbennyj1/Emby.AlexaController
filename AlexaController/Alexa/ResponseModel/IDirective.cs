@@ -12,6 +12,7 @@ namespace AlexaController.Alexa.ResponseModel
         IDocument document { get; set; }
         List<ICommand> commands { get; set; }
         Dictionary<string, IDataSource> datasources { get; set; }
+        Dictionary<string, IDocument> sources { get; set; }
         string speech { get; set; }
     }
 
@@ -26,7 +27,8 @@ namespace AlexaController.Alexa.ResponseModel
         public IDocument document                          { get; set; }
         public List<ICommand> commands                     { get; set; }
         public Dictionary<string, IDataSource> datasources { get; set; }
-        
+        public Dictionary<string, IDocument> sources { get; set; }
+
         //Progressive Response element
         public string speech                               { get; set; }
     }

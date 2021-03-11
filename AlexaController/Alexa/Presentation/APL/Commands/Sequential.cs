@@ -6,7 +6,7 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
     {
         public List<ICommand> commands { get; set; }
         public object type => nameof(Sequential);
-        public int repeatCount { get; set; }
+        public object repeatCount { get; set; }
         public bool screenLock { get; set; }
         public int delay { get; set; }
     }

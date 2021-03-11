@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaHeadline : VisualBaseItem
+    public class AlexaHeadline : VisualBaseComponent
     {
         public object type => nameof(AlexaHeadline);
         public string primaryText     { get; set; }

@@ -7,8 +7,6 @@ using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
 {
-
-    
     public interface IAlexaSession
     {
         User User                                         { get; set; }

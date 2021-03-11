@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class VerticalListItem : VisualBaseItem
+    public class VerticalListItem : VisualBaseComponent
     {
         public object type => nameof(VerticalListItem);
         public string image         { get; set; }

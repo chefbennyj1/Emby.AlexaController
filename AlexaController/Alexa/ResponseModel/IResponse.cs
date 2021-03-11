@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.ResponseModel
 {
-    public interface IResponse 
+    public interface IResponse
     {
         //IPerson person              { get; }
         bool SpeakUserName           { get; set; }

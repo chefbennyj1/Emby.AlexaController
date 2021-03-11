@@ -2,11 +2,11 @@
 
 namespace AlexaController.Alexa.Presentation.APLA.Components
 {
-    public class Selector : AudioBaseItem
+    public class Selector : AudioBaseComponent
     {
         public object type => nameof(Selector);
-        public List<AudioBaseItem> items { get; set; }
-        public AudioBaseItem item { get; set; }
+        public List<AudioBaseComponent> items { get; set; }
+        public AudioBaseComponent item { get; set; }
         /// <summary>
         /// normal, randomItem, randomData, randomItemRandomData
         /// </summary>

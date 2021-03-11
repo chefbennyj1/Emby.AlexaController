@@ -3,7 +3,7 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaButton : VisualBaseItem
+    public class AlexaButton : VisualBaseComponent
     {
         public object type => nameof(AlexaButton);
         public SendEvent primaryAction { get; set; }

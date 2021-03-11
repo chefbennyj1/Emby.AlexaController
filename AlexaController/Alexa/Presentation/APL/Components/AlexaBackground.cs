@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class AlexaBackground : VisualBaseItem
+    public class AlexaBackground : VisualBaseComponent
     {
         public object type => nameof(AlexaBackground);
 

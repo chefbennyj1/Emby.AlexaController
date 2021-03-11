@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.DataSourceProperties;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
@@ -29,7 +31,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync(dataSource, Session)
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<List<Value>>(dataSource, Session)
                 }
             }, Session);
         }

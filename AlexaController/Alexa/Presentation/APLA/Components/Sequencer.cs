@@ -4,10 +4,10 @@ using System.Text;
 
 namespace AlexaController.Alexa.Presentation.APLA.Components
 {
-    public class Sequencer : AudioBaseItem
+    public class Sequencer : AudioBaseComponent
     {
         public object type => nameof(Sequencer);
-        public List<AudioBaseItem> items { get; set; }
-        public AudioBaseItem item { get; set; }
+        public List<AudioBaseComponent> items { get; set; }
+        public AudioBaseComponent item { get; set; }
     }
 }

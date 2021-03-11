@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Text : VisualBaseItem
+    public class Text : VisualBaseComponent
     {
         public string textAlign { get; set; }
         public string textAlignVertical { get; set; }

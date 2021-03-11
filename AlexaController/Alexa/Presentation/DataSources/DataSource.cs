@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using AlexaController.Alexa.Presentation.DataSources.Properties;
+using AlexaController.Alexa.Presentation.DataSources.Transformers;
 
 namespace AlexaController.Alexa.Presentation.DataSources
 {

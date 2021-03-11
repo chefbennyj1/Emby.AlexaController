@@ -3,7 +3,7 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
-    public class Pager : VisualBaseItem
+    public class Pager : VisualBaseComponent
     {
         public string type => nameof(Pager);
         /// <summary>

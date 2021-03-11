@@ -14,7 +14,7 @@ namespace AlexaController.Api
     {
         public object img { get; set; }
     }
-
+    
     [Route("/EmptyPng", "Get", Summary = "Empty png resource for video backdrops")]
     public class EmptyPngImage : IReturn<object>
     {
@@ -62,6 +62,7 @@ namespace AlexaController.Api
             ResultFactory = resultFactory;
         }
 
+        
         public async Task<object> Get(NowShowingImage request) => 
             await Task.Factory.StartNew(() => 
                 GetEmbeddedResourceStream("nowShowing.png", "image/png"));
