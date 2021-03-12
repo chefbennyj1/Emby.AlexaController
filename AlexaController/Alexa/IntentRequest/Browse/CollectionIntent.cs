@@ -40,7 +40,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
            
-            if (!Session.hasRoom && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (!Session.hasRoom && !Session.supportsApl)  return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request           = AlexaRequest.request;
             var intent            = request.intent;

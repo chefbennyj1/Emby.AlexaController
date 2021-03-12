@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceProperties;
 using AlexaController.Session;
 using AlexaController.Utils;
-using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Logging;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -34,7 +32,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             catch { }
 
            
-            if (!Session.hasRoom && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (!Session.hasRoom && !Session.supportsApl) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request        = AlexaRequest.request;
             var intent         = request.intent;

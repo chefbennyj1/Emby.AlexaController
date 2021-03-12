@@ -1,15 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Exceptions;
 using AlexaController.Session;
-using MediaBrowser.Controller.Entities;
-
 
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
