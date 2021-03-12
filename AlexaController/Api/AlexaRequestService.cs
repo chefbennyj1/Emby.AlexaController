@@ -69,8 +69,8 @@ namespace AlexaController.Api
             if (AplRenderDocumentDirectiveManager.Instance is null)
                 Activator.CreateInstance<AplRenderDocumentDirectiveManager>();
 
-            if (RenderAudioDirectiveManager.Instance is null)
-                Activator.CreateInstance<RenderAudioDirectiveManager>();
+            if (AplaRenderDocumentDirectiveManager.Instance is null)
+                Activator.CreateInstance<AplaRenderDocumentDirectiveManager>();
 
             if (AplDataSourceManager.Instance is null)
                 Activator.CreateInstance<AplDataSourceManager>();
@@ -208,7 +208,7 @@ namespace AlexaController.Api
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                            await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                         }
                     }, null);
             }
@@ -223,7 +223,7 @@ namespace AlexaController.Api
                 directives = new List<IDirective>()
                 {
                     await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, session),
-                    await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
         }

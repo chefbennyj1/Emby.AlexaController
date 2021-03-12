@@ -61,7 +61,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     directives = new List<IDirective>()
                     {
                         await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, Session),
-                        await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                      
                     }
                 }, Session);
@@ -86,7 +86,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     directives = new List<IDirective>()
                     {
                         await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, Session),
-                        await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -115,7 +115,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderAudioDirective    = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

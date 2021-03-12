@@ -21,8 +21,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         public async Task<string> Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             try { session.room = RoomManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
-            //session.room = session.room;
-
+            
             var context = alexaRequest.context;
             // we need the room object to proceed because we will only show libraries on emby devices
 
@@ -56,7 +55,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             var aplaDataSource = await AplaDataSourceManager.Instance.ItemBrowse(result, session);
 
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session);
-            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderAudioDirective    = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

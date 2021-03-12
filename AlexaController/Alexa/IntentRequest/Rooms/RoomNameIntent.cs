@@ -14,10 +14,10 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
 
-        public RoomNameIntent(IAlexaRequest aR, IAlexaSession s) : base(aR, s)
+        public RoomNameIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
-            AlexaRequest = aR;
-            Session = s;
+            AlexaRequest = alexaRequest;
+            Session = session;
         }
 
         public async Task<string> Response()
@@ -34,24 +34,19 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {
-                try
-                {
-                    room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-                }
-                catch
-                {
-                   
-                }
+                try { room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+
                 if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room?.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     throw new Exception("That room is currently not configured to show media.");
                 }
 
                 if (!ServerQuery.Instance.GetCurrentSessions().ToList()
-                    .Exists(s => string.Equals(s.DeviceName,room?.DeviceName, StringComparison.CurrentCultureIgnoreCase)))
+                    .Exists(s => string.Equals(s.DeviceName, room?.DeviceName, StringComparison.CurrentCultureIgnoreCase)))
                 {
                     throw new DeviceUnavailableException("That device is currently unavailable.");
                 }
+                
             }
             else
             {
@@ -64,8 +59,9 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }
             
             Session.room = room;
+            Session.hasRoom = true;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
-            
+           
             //Use Reflection to load the proper Intent class - AlexaController.Alexa.IntentRequest.{intent.Name}
             var type = Type.GetType($"AlexaController.Alexa.IntentRequest.{ rePromptIntentName }");
 

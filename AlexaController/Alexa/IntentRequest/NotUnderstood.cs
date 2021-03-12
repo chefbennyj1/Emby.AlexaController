@@ -29,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest
                 directives = new List<IDirective>()
                 {
                      await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, Session),
-                     await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                     await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);
         }

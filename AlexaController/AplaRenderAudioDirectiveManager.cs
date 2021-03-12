@@ -11,11 +11,11 @@ using Document = AlexaController.Alexa.Presentation.APLA.Document;
 namespace AlexaController
 {
 
-    public class RenderAudioDirectiveManager : Ssml
+    public class AplaRenderDocumentDirectiveManager : Ssml
     {
-        public static RenderAudioDirectiveManager Instance { get; private set; }
+        public static AplaRenderDocumentDirectiveManager Instance { get; private set; }
         
-        public RenderAudioDirectiveManager()
+        public AplaRenderDocumentDirectiveManager()
         {
             Instance = this;
         }

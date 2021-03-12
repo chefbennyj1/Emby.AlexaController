@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using AlexaController.Alexa;
-using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using MediaBrowser.Controller.Session;
-using MediaBrowser.Model.Services;
+using System.Collections.Generic;
+using System.Linq;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -75,15 +72,15 @@ namespace AlexaController.Session
 
             IAlexaRequest persistedRequestData = null;
             IAlexaSession sessionInfo          = null;
-            Room room                          = null;
+            //Room room                          = null;
 
             if (OpenSessions.Exists(s => s.SessionId.Equals(amazonSession.sessionId)))
             {
                 sessionInfo = OpenSessions.FirstOrDefault(s => s.SessionId == amazonSession.sessionId);
 
                 persistedRequestData = sessionInfo?.PersistedRequestContextData;
-                room = sessionInfo?.room;
-               
+                //room = sessionInfo?.room;
+
                 // ReSharper disable once ComplexConditionExpression
                 if (!(person is null) && !(sessionInfo?.person is null))
                 {
@@ -93,7 +90,7 @@ namespace AlexaController.Session
                     }
                 }
 
-                // Someone else must have taken control of the Alexa session.
+
                 // Remove the session from the "OpenSessions" List, and rebuild the session with the new data
                 OpenSessions.RemoveAll(s => s.SessionId.Equals(alexaRequest.session.sessionId));
 
@@ -106,8 +103,8 @@ namespace AlexaController.Session
                 EchoDeviceId                = system.device.deviceId,
                 supportsApl                 = SupportsApl(alexaRequest),
                 person                      = person,
-                room                        = room,
-                hasRoom                     = !(room is null),
+                room                        = sessionInfo?.room,
+                hasRoom                     = !(sessionInfo?.room is null),
                 User                        = user,
                 viewport                    = GetCurrentViewport(alexaRequest),
                 PersistedRequestContextData = persistedRequestData,
@@ -119,13 +116,16 @@ namespace AlexaController.Session
             return sessionInfo;
         }
 
+        //TODO: data source object can be null IDataSource dataSource = null in params
         public void UpdateSession(IAlexaSession session, IDataSource dataSource, bool? isBack = null)
         {
             if (!(dataSource is null))
                 session = UpdateSessionPaging(session, dataSource, isBack);
 
             OpenSessions.RemoveAll(s => s.SessionId.Equals(session.SessionId));
+            
             OpenSessions.Add(session);
+            
         }
 
         private static IAlexaSession UpdateSessionPaging(IAlexaSession session, IDataSource dataSource, bool? isBack = null)

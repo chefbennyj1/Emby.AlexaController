@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 {
                     await AplRenderDocumentDirectiveManager.Instance
                         .GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, Session),
-                    await RenderAudioDirectiveManager.Instance
+                    await AplaRenderDocumentDirectiveManager.Instance
                         .GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);

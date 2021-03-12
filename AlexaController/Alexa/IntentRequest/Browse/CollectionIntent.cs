@@ -36,11 +36,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
             catch (Exception exception)
             {
+                Session.room = null;
                 ServerController.Instance.Log.Error(exception.Message);
             }
 
            
-            if (!Session.hasRoom && !Session.supportsApl)  return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (!Session.hasRoom && !Session.supportsApl) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request           = AlexaRequest.request;
             var intent            = request.intent;
@@ -80,7 +81,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         {
                             await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, Session),
                                 
-                            await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                            await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                            
                         }
                     }, Session);

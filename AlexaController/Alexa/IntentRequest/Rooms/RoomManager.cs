@@ -39,7 +39,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 directives       = new List<IDirective>()
                 {
                     await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
-                    await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
         }
