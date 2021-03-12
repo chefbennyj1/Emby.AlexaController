@@ -4,7 +4,6 @@ using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
-using AlexaController.Alexa.Presentation.APL.UserEvent.Pager.Page;
 using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Alexa.Presentation.APLA.Components;
@@ -354,7 +353,7 @@ namespace AlexaController
                             mainTemplate = new MainTemplate()
                             {
                                 parameters = new List<string>() { "payload" },
-                                item = new Audio()  { source = "soundbank://soundlibrary/computers/screens/screens_12" }
+                                item = new Audio()  { source = "soundbank://soundlibrary/camera/camera_15" }
                             }
                         }
                     }
@@ -479,10 +478,10 @@ namespace AlexaController
         {
             const string leftColumnSpacing = "36vw";
             var properties = (Properties<MediaItem>) dataSource.properties;
-            var baseItem = properties.item;
-            var type     = baseItem.type;
+            var mediaItem  = properties.item;
+            var type       = mediaItem.type;
            
-            // ReSharper disable once UseObjectOrCollectionInitializer
+            // ReSharper disable UseObjectOrCollectionInitializer
             var layout   = new List<IComponent>();
             //backdrop video and static images
             layout.Add(new Video()
@@ -621,7 +620,7 @@ namespace AlexaController
                 width = "40vw",
                 fontSize = "22dp",
                 id = "tag",
-                display = !string.IsNullOrEmpty(baseItem.tagLine) ? "normal" : "none",
+                display = !string.IsNullOrEmpty(mediaItem.tagLine) ? "normal" : "none",
                 opacity = 1,
             });
             //Watched check-mark
@@ -765,7 +764,7 @@ namespace AlexaController
                             fontSize = "23dp",
                             left = "12dp",
                             text = "<b>" +
-                                   ServerQuery.Instance.GetItemsResult(baseItem.id, new []{"Season"}, session.User)
+                                   ServerQuery.Instance.GetItemsResult(mediaItem.id, new []{"Season"}, session.User)
                                        .TotalRecordCount + "</b>"
                         },
                         new Text()
@@ -798,7 +797,7 @@ namespace AlexaController
                         width  = "100%",
                         id     = "primary"
                     },
-                    await RenderComponent_PlayButton(baseItem, session)
+                    await RenderComponent_PlayButton(mediaItem, session)
                 }
             });
             layout.Add(new AlexaFooter()

@@ -249,8 +249,7 @@ namespace AlexaController
                 MaxPremiereDate  = duration,
                 OrderBy          = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray()
             }));
-
-            //return await Task.FromResult(upComing.Items.ToList());
+            
         }
 
 
