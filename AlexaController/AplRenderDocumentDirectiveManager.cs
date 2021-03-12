@@ -955,37 +955,36 @@ namespace AlexaController
                     items  = new List<IComponent>()
                     {
                         new Video()
-                {
-                    source = new List<Source>()
-                    {
-                        new Source()
                         {
-                            url =
-                                "${payload.templateData.properties.url}${payload.templateData.properties.videoUrl}",
-                            repeatCount = 1,
-                        }
-                    },
-                    scale = "best-fill",
-                    width = "100vw",
-                    height = "100vh",
-                    position = "absolute",
-                    autoplay = true,
-                    audioTrack = "none"
-                },
+                            source = new List<Source>()
+                            {
+                                new Source()
+                                {
+                                    url = "${payload.templateData.properties.url}${payload.templateData.properties.videoUrl}",
+                                    repeatCount = 1,
+                                }
+                            },
+                            scale      = "best-fill",
+                            width      = "100vw",
+                            height     = "100vh",
+                            position   = "absolute",
+                            autoplay   = true,
+                            audioTrack = "none"
+                        },
                         new Image()
-                {
-                    overlayColor = "rgba(0,0,0,1)",
-                    scale = "best-fill",
-                    width = "100vw",
-                    height = "100vh",
-                    position = "absolute",
-                    source = "${payload.templateData.properties.url}/EmptyPng?quality=90",
-                    opacity = 0.35
-                },
+                        {
+                            overlayColor = "rgba(0,0,0,1)",
+                            scale        = "best-fill",
+                            width        = "100vw",
+                            height       = "100vh",
+                            position     = "absolute",
+                            source       = "${payload.templateData.properties.url}/EmptyPng?quality=90",
+                            opacity      = 0.35
+                        },
                         new AlexaHeadline()
-                {
-                    backgroundColor = "rgba(0,0,0,0.1)", primaryText = "${payload.templateData.properties.text}"
-                },
+                        {
+                            backgroundColor = "rgba(0,0,0,0.1)", primaryText = "${payload.templateData.properties.text}"
+                        },
                         new AlexaFooter() {hintText = "Alexa, open help...", position = "absolute", bottom = "1vh"}
                     }
                 }

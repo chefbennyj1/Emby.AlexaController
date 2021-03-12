@@ -26,7 +26,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         public async Task<string> Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             try { session.room = RoomManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
-            session.room = session.room;
+            //session.room = session.room;
 
             var context = alexaRequest.context;
             // we need the room object to proceed because we will only show libraries on emby devices
@@ -38,7 +38,6 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
                 return await RoomManager.Instance.RequestRoom(alexaRequest, session);
             }
 
-           
             var result = ServerQuery.Instance.GetItemById(ServerQuery.Instance.GetLibraryId(LibraryName));
 
             try
@@ -58,11 +57,11 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             AlexaSessionManager.Instance.UpdateSession(session, null);
             
 
-            var aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
+            var aplDataSource  = await AplDataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
             var aplaDataSource = await AplaDataSourceManager.Instance.ItemBrowse(result, session);
 
-            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, session);
-            var renderAudioDirective = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session);
+            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
             
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

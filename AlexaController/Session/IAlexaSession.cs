@@ -19,6 +19,7 @@ namespace AlexaController.Session
         BaseItem NowViewingBaseItem                       { get; set; }
         bool PlaybackStarted                              { get; set; }
         Room room                                         { get; set; }
+        bool hasRoom                                      { get; set; }
         Paging paging                                     { get; set; }
     }
 
@@ -33,7 +34,8 @@ namespace AlexaController.Session
         public IAlexaRequest PersistedRequestContextData                { get; set; }
         public BaseItem NowViewingBaseItem                              { get; set; }
         public bool PlaybackStarted                                     { get; set; }
-        public Room room                                                { get; set; } 
+        public Room room                                                { get; set; }
+        public bool hasRoom                                             { get; set; }
         public Paging paging                                            { get; set; }
     }
 }

@@ -28,7 +28,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
+            var aplDataSource  = await AplDataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
             var aplaDataSource = await AplaDataSourceManager.Instance.RoomContext();
             session.PersistedRequestContextData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
@@ -38,7 +38,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = false,
                 directives       = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, session),
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
                     await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
@@ -56,9 +56,9 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         public Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;
-            var intent = request.intent;
-            var slots = intent.slots;
-            var config = Plugin.Instance.Configuration;
+            var intent  = request.intent;
+            var slots   = intent.slots;
+            var config  = Plugin.Instance.Configuration;
 
             string room = (slots.Room.value ?? session.room?.Name) ?? request.arguments[1];
             

@@ -37,7 +37,7 @@ namespace AlexaController.Session
             SessionManager.PlaybackProgress += SessionManager_PlaybackProgress;
         }
 
-        private bool SupportsApl(IAlexaRequest alexaRequest)
+        private static bool SupportsApl(IAlexaRequest alexaRequest)
         {
             if (alexaRequest.context.Viewports is null) return false;
 
@@ -107,6 +107,7 @@ namespace AlexaController.Session
                 supportsApl                 = SupportsApl(alexaRequest),
                 person                      = person,
                 room                        = room,
+                hasRoom                     = !(room is null),
                 User                        = user,
                 viewport                    = GetCurrentViewport(alexaRequest),
                 PersistedRequestContextData = persistedRequestData,

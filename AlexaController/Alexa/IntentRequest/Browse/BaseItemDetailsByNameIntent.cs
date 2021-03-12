@@ -34,25 +34,25 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             catch { }
 
            
-            if (Session.room is null && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+            if (!Session.hasRoom && Equals(Session.supportsApl, false)) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
             var type           = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
-            var searchName     = (string)(slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
+            var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
             var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
 
-            IDataSource aplDataSource = null;
+            IDataSource aplDataSource  = null;
             IDataSource aplaDataSource = null;
 
             ServerController.Instance.Log.Info(searchName);
             
-#pragma warning disable 4014
-            Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse("One moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
+
+            //await Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse("One moment Please...", apiAccessToken, requestId)).ConfigureAwait(false);
+
             
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
@@ -79,7 +79,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 try
                 {
-                    if (Plugin.Instance.Configuration.EnableServerActivityLogNotifications)
+                    var config = Plugin.Instance.Configuration;
+                    if (config.EnableServerActivityLogNotifications)
                     {
                         await ServerController.Instance.CreateActivityEntry(LogSeverity.Warn,
                             $"{Session.User} attempted to view a restricted item.",
@@ -88,7 +89,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch { }
 
-                aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {result.OfficialRating}", "/particles");
+                aplDataSource  = await AplDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {result.OfficialRating}", "/particles");
 
                 aplaDataSource = await AplaDataSourceManager.Instance.ParentalControlNotAllowed(result, Session);
 

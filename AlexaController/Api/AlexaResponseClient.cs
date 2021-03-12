@@ -98,7 +98,7 @@ namespace AlexaController.Api
                 RequestHeaders     = { ["Authorization"] = "Bearer " + accessToken }
             };
             
-            await HttpClient.SendAsync(options, "POST").ConfigureAwait(false);
+            await HttpClient.SendAsync(options, "POST");
         }
 
     }

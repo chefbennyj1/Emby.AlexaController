@@ -25,22 +25,20 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            var request = AlexaRequest.request;
-            var slots = request.intent.slots;
+            var request       = AlexaRequest.request;
+            var slots         = request.intent.slots;
             var durationValue = slots.Duration.value;
-            var duration = durationValue is null ? DateTime.Now.AddDays(7) : DateTimeDurationSerializer.GetMaxPremiereDate(durationValue);
+            var duration      = durationValue is null ? DateTime.Now.AddDays(7) : DateTimeDurationSerializer.GetMaxPremiereDate(durationValue);
 
             var result = await ServerQuery.Instance.GetUpComingTvAsync(duration);
 
-            var aplDataSource =
-                await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
-
+            var aplDataSource  = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
             var aplaDataSource = await AplaDataSourceManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
            
             AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-            var renderAudioDirective = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderAudioDirective    = await RenderAudioDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

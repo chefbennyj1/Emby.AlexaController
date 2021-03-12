@@ -172,7 +172,7 @@ namespace AlexaController
         {
             var speech = new StringBuilder();
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            if (RandomIndex.NextDouble() > 0.5)
+            if (RandomIndex.NextDouble() > 0.5 && !item.IsFolder) //Don't describe the type of a library or collection parent folder.
             {
                 speech.Append("Here is the ");
                 speech.Append(item.GetType().Name);
@@ -180,17 +180,13 @@ namespace AlexaController
             }
 
             var name = StringNormalization.ValidateSpeechQueryString(item.Name);
-            var rating = item.OfficialRating;
-            speech.Append(name);
-            speech.Append(", ");
-            if (string.IsNullOrEmpty(rating))
+
+            if (!item.IsFolder) //Don't describe a rating of a library or collection parent folder.
             {
-                speech.Append("unrated");
-            }
-            else
-            {
-                speech.Append("Rated ");
-                speech.Append(rating);
+                var rating = item.OfficialRating;
+                speech.Append(name);
+                speech.Append(", ");
+                speech.Append(string.IsNullOrEmpty(rating) ? "unrated" : $"Rated {rating}");
             }
 
             if (session.room is null)
