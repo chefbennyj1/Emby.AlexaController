@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 
@@ -32,8 +33,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             var result = await ServerQuery.Instance.GetUpComingTvAsync(duration);
 
-            var aplDataSource  = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
-            var aplaDataSource = await AplaDataSourceManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
+            var aplDataSource  = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
+            var aplaDataSource = await AplAudioDataSourceManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
            
             AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 

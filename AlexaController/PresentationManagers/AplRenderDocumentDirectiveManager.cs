@@ -6,10 +6,12 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
 using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
+using AlexaController.Alexa.Presentation.APLA.AudioFilters;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 using Source   = AlexaController.Alexa.Presentation.APL.Components.Source;
@@ -24,7 +26,7 @@ using Video    = AlexaController.Alexa.Presentation.APL.Components.Video;
  * https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-image.html
  */
 
-namespace AlexaController
+namespace AlexaController.PresentationManagers
 {
     public class AplRenderDocumentDirectiveManager
     {
@@ -39,13 +41,13 @@ namespace AlexaController
         {
             new Import()
             {
-                name                          = "alexa-layouts",
-                version                       = "1.2.0"
+                name    = "alexa-layouts",
+                version = "1.2.0"
             },
             new Import()
             {
-                name                          = "alexa-viewport-profiles",
-                version                       = "1.1.0"
+                name    = "alexa-viewport-profiles",
+                version = "1.1.0"
             }
         };
 
@@ -103,22 +105,27 @@ namespace AlexaController
                 }
             }
         };
-
-        public async Task<IDirective> GetRenderDocumentDirectiveAsync<T>(IDataSource dataSource, IAlexaSession session) where T : class
+        
+        public async Task<IDirective> GetRenderDocumentDirectiveAsync<TProperties>(IDataSource dataSource, IAlexaSession session) where TProperties : class //where TDataSource : class
         {
-            var properties = (Properties<T>)dataSource.properties;
+            /*
+             * This needs to be refactored. If the type is passed to the DataSource, why does it have to be declared in the Properties as well?
+             */
+            var data       = dataSource as DataSource<TProperties>;
+            var properties = data?.properties as Properties<TProperties>;
+
             List<IComponent> layout = null;
-            switch (properties.documentType)
+            switch (properties?.documentType)
             {
                 case RenderDocumentType.GENERIC_VIEW                : layout = await RenderGenericViewLayout(dataSource); 
                     break;
                 case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : layout = await RenderItemDetailsLayout(dataSource, session); 
                     break;
-                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : layout = await RenderItemListSequenceLayout(dataSource, session);
+                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : layout = await RenderItemListSequenceLayout(dataSource , session);
                     break;
                 case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : layout = await RenderRoomSelectionLayout(dataSource, session);
                     break;
-                case RenderDocumentType.HELP                        : layout =  await RenderHelpView(dataSource);
+                case RenderDocumentType.HELP                        : layout = await RenderHelpViewLayout(dataSource);
                     break;
                 default                                             : return null;
             }
@@ -323,10 +330,9 @@ namespace AlexaController
                     }
                 }
             };
-
-            return await Task.FromResult(new Directive()
+            
+            return await Task.FromResult(new AplRenderDocumentDirective()
             {
-                type = Directive.AplRenderDocument,
                 token = properties.documentType.ToString(),
                 document = new Document()
                 {
@@ -353,7 +359,11 @@ namespace AlexaController
                             mainTemplate = new MainTemplate()
                             {
                                 parameters = new List<string>() { "payload" },
-                                item = new Audio()  { source = "soundbank://soundlibrary/camera/camera_15" }
+                                item = new Audio()  
+                                { 
+                                    source = "soundbank://soundlibrary/camera/camera_15", 
+                                    filter = new List<IFilter>() { new Volume() { amount = 0.2 } }
+                                }
                             }
                         }
                     }
@@ -361,12 +371,13 @@ namespace AlexaController
             });
         }
         
-        private async Task<List<IComponent>> RenderItemListSequenceLayout(IDataSource dataSource, IAlexaSession session)
+        private static async Task<List<IComponent>> RenderItemListSequenceLayout(IDataSource dataSource, IAlexaSession session)
         {
-            var layout           = new List<IComponent>();
-            var properties       = (Properties<MediaItem>) dataSource.properties;
-            var baseItems        = properties.items;
-            var type             = baseItems[0].type;
+            var layout = new List<IComponent>();
+            var data = dataSource as DataSource<MediaItem>;
+            var properties = data?.properties as Properties<MediaItem>;
+            var mediaItems = properties?.items;
+            var type = mediaItems?[0].type;
             
             layout.Add(new Container()
             {
@@ -377,12 +388,12 @@ namespace AlexaController
                 {
                     new Image()
                     {
-                        height = "100%",
+                        height       = "100%",
                         overlayColor = "rgba(0,0,0,0.65)",
-                        width = "100%",
-                        scale = "best-fill",
-                        position = "absolute",
-                        source = "${payload.templateData.properties.url}${payload.templateData.properties.item.backdropImageSource}",
+                        width        = "100%",
+                        scale        = "best-fill",
+                        position     = "absolute",
+                        source       = "${payload.templateData.properties.url}${payload.templateData.properties.item.backdropImageSource}",
                     },
                     new AlexaHeader()
                     {
@@ -474,12 +485,13 @@ namespace AlexaController
 
         }
 
-        private async Task<List<IComponent>> RenderItemDetailsLayout(IDataSource dataSource, IAlexaSession session)
+        private static async Task<List<IComponent>> RenderItemDetailsLayout(IDataSource dataSource, IAlexaSession session)
         {
             const string leftColumnSpacing = "36vw";
-            var properties = (Properties<MediaItem>) dataSource.properties;
-            var mediaItem  = properties.item;
-            var type       = mediaItem.type;
+            var data       = dataSource as DataSource<MediaItem>;
+            var properties = data?.properties as Properties<MediaItem>;
+            var mediaItem  = properties?.item;
+            var type       = mediaItem?.type;
            
             // ReSharper disable UseObjectOrCollectionInitializer
             var layout   = new List<IComponent>();
@@ -620,7 +632,7 @@ namespace AlexaController
                 width = "40vw",
                 fontSize = "22dp",
                 id = "tag",
-                display = !string.IsNullOrEmpty(mediaItem.tagLine) ? "normal" : "none",
+                display = !string.IsNullOrEmpty(mediaItem?.tagLine) ? "normal" : "none",
                 opacity = 1,
             });
             //Watched check-mark
@@ -944,7 +956,7 @@ namespace AlexaController
             });
         }
         
-        private async Task<List<IComponent>> RenderGenericViewLayout(IDataSource dataSource)
+        private static async Task<List<IComponent>> RenderGenericViewLayout(IDataSource dataSource)
         {
             return await Task.FromResult(new List<IComponent>
             {
@@ -992,7 +1004,7 @@ namespace AlexaController
 
         }
 
-        private async Task<List<IComponent>> RenderHelpView(IDataSource dataSource)
+        private static async Task<List<IComponent>> RenderHelpViewLayout(IDataSource dataSource)
         {
             return await Task.FromResult(new List<IComponent>()
             {

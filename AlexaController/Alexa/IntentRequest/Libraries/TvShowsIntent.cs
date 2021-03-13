@@ -10,7 +10,6 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
 
         public TvShowsIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {

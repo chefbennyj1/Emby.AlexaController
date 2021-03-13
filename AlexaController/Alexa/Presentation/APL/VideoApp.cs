@@ -14,9 +14,9 @@ namespace AlexaController.Alexa.Presentation.APL
         public Metadata metadata { get; set; }
     }
 
-    public class VideoApp : Directive
+    public class VideoApp //: Directive
     {
-        public new string type => "VideoApp.Launch";
+        //public new string type => "VideoApp.Launch";
         public VideoItem videoItem { get; set; }
     }
 }

@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 
 
@@ -32,7 +35,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             
             var dataSource =
-                await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results.Items.ToList(), baseItem);
+                await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results.Items.ToList(), baseItem);
 
             session.NowViewingBaseItem = baseItem;
             AlexaSessionManager.Instance.UpdateSession(session, dataSource);

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
 using AlexaController.Session;
@@ -82,10 +83,9 @@ namespace AlexaController.Api
             var response = new Response
             {
                 header = new Header() { requestId = requestId },
-                directive = new Directive()
+                directive = new VoiceSpeakDirective()
                 {
-                    speech = $"<speak>{speechOutput}</speak>",
-                    type   = "VoicePlayer.Speak"
+                    speech = $"<speak>{speechOutput}</speak>"
                 }
             };
 

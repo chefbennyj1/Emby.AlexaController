@@ -15,5 +15,11 @@ namespace AlexaController.Alexa.RequestModel
         public Source source { get; set; }
         public string dialogRequestId { get; set; }
 
+        public string token { get; set; }
+        public string correlationToken { get; set; }
+        public string listId { get; set; }
+        public int startIndex { get; set; }
+        public int count { get; set; }
+
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Presentation.DataSources.Properties;
 
-namespace AlexaController.DataSourceProperties
+namespace AlexaController.DataSourceManagers.DataSourceProperties
 {
     public class Properties<T> : BaseDataSourceProperties<T> where T :class
     {
@@ -15,7 +14,7 @@ namespace AlexaController.DataSourceProperties
         public List<T> similarItems     { get; set; }
         public List<Value> values              { get; set; }
     }
-    public class Value : IProperty
+    public class Value 
     {
         public string value { get; set; }
     }

@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APLA.Components;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -26,8 +29,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session        = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room           = session.room;
 
-            var aplDataSource = await AplDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
-            var aplaDataSource = await AplaDataSourceManager.Instance.ItemBrowse(baseItem, session);
+            var aplDataSource = await AplObjectDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
+            var aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(baseItem, session);
            
             // Update session data
             session.NowViewingBaseItem = baseItem;

@@ -5,7 +5,9 @@ using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -42,7 +44,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
           
             if (session.room is null)
             {
-                aplDataSource = await AplDataSourceManager.Instance.GetRoomSelection(baseItem, session);
+                aplDataSource = await AplObjectDataSourceManager.Instance.GetRoomSelection(baseItem, session);
                 session.NowViewingBaseItem = baseItem;
                 AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
 
@@ -65,8 +67,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 #pragma warning restore 4014
 
             
-            aplDataSource = await AplDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
-            aplaDataSource = await AplaDataSourceManager.Instance.PlayItem(baseItem);
+            aplDataSource = await AplObjectDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
+            aplaDataSource = await AplAudioDataSourceManager.Instance.PlayItem(baseItem);
             
 
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, session);

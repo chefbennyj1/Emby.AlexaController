@@ -6,6 +6,8 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.DataSourceManagers;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 
 
@@ -32,7 +34,7 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (person is null)
             {
-                aplaDataSource = await AplaDataSourceManager.Instance.VoiceAuthenticationAccountLinkError();
+                aplaDataSource = await AplAudioDataSourceManager.Instance.VoiceAuthenticationAccountLinkError();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -48,7 +50,7 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
-                    aplaDataSource = await AplaDataSourceManager.Instance.VoiceAuthenticationExists(Session);
+                    aplaDataSource = await AplAudioDataSourceManager.Instance.VoiceAuthenticationExists(Session);
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
                     {
                         shouldEndSession = true,
@@ -65,7 +67,7 @@ namespace AlexaController.Alexa.IntentRequest
             Task.Run(() => ServerController.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 #pragma warning restore 4014
 
-            aplaDataSource = await AplaDataSourceManager.Instance.VoiceAuthenticationAccountLinkSuccess(Session);
+            aplaDataSource = await AplAudioDataSourceManager.Instance.VoiceAuthenticationAccountLinkSuccess(Session);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
             {

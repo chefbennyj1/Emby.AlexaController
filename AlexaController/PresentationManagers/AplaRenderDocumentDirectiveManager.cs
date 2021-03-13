@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation;
-using AlexaController.Alexa.Presentation.APLA.AudioFilters;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
 using Document = AlexaController.Alexa.Presentation.APLA.Document;
 
-namespace AlexaController
+namespace AlexaController.PresentationManagers
 {
 
     public class AplaRenderDocumentDirectiveManager : Ssml
@@ -22,9 +22,8 @@ namespace AlexaController
 
         public async Task<IDirective> GetAudioDirectiveAsync(IDataSource dataSource)
         {
-            return await Task.FromResult(new Directive()
+            return await Task.FromResult(new AplaRenderDocumentDirective()
             {
-                type     = Directive.AplaRenderDocument,
                 token    = "AplSpeech",
                 document = new Document()
                 {

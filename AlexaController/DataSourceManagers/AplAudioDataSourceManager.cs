@@ -5,15 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.SpeechSynthesis;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Extensions;
 
-namespace AlexaController
+namespace AlexaController.DataSourceManagers
 {
-    public class AplaDataSourceManager : Ssml
+    public class AplAudioDataSourceManager : Ssml
     {
         private enum SpeechPrefix
         {
@@ -28,9 +28,9 @@ namespace AlexaController
 
         private static readonly Random RandomIndex = new Random();
 
-        public static  AplaDataSourceManager Instance { get; private set; }
+        public static  AplAudioDataSourceManager Instance { get; private set; }
         
-        public AplaDataSourceManager()
+        public AplAudioDataSourceManager()
         {
             Instance = this;
         }
@@ -84,7 +84,7 @@ namespace AlexaController
             speech.Append(item.Overview);
             //var audioUrl = await ServerQuery.Instance.GetLocalApiUrlAsync();
             //audioUrl += ServerQuery.Instance.GetThemeSongSource(item);
-            return await Task.FromResult(new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
@@ -102,14 +102,14 @@ namespace AlexaController
             speech.Append("I don't recognize the current user.");
             speech.Append("Please go to the plugin configuration and link emby account personalization.");
             speech.Append("Or ask for help.");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> OnLaunch()
@@ -118,14 +118,14 @@ namespace AlexaController
             speech.Append(GetSpeechPrefix(SpeechPrefix.GREETINGS));
             speech.Append(InsertStrengthBreak(StrengthBreak.strong));
             speech.Append("What media can I help you find.");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13",
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> NotUnderstood()
@@ -135,35 +135,37 @@ namespace AlexaController
             speech.Append("I misunderstood what you said.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(SayWithEmotion("Can you say that again?", Emotion.excited, Intensity.low));
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> NoItemExists(IAlexaSession session, string requestItem)
         {
-            var speech = new StringBuilder();
-            speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
+            var speech   = new StringBuilder();
             var baseItem = session.NowViewingBaseItem;
-            var name = StringNormalization.ValidateSpeechQueryString(baseItem.Name);
-            var index = baseItem.IndexNumber;
+            var name     = StringNormalization.ValidateSpeechQueryString(baseItem.Name);
+            var index    = baseItem.IndexNumber;
+
+            speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append(SpeechRate(Rate.fast, SayWithEmotion(name, Emotion.disappointed, Intensity.high)));
             speech.Append(ExpressiveInterjection(" doesn't contain "));
             speech.Append(requestItem);
             speech.Append(index);
-            return new DataSource()
+
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
 
         }
 
@@ -190,7 +192,7 @@ namespace AlexaController
 
             if (session.room is null)
             {
-                return new DataSource()
+                return await Task.FromResult(new DataSource<string>()
                 {
                     properties = new Properties<string>()
                     {
@@ -198,19 +200,20 @@ namespace AlexaController
                         value = speech.ToString(),
                         audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                     }
-                };
+                });
             }
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
-            return new DataSource()
+
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> BrowseNextUpEpisode(BaseItem item, IAlexaSession session)
@@ -224,7 +227,7 @@ namespace AlexaController
             speech.Append(item.Name);
             if (session.room is null)
             {
-                return new DataSource()
+                return await Task.FromResult(new DataSource<string>()
                 {
                     properties = new Properties<string>()
                     {
@@ -232,19 +235,19 @@ namespace AlexaController
                         value = speech.ToString(),
                         audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                     }
-                };
+                });
             }
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
         
         public async Task<IDataSource> DisplayMovieCollection(BaseItem item)
@@ -252,14 +255,15 @@ namespace AlexaController
             var speech = new StringBuilder();
             speech.Append("The ");
             speech.Append(item.Name);
-            return new DataSource()
+
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> BrowseLibrary(BaseItem item)
@@ -268,14 +272,14 @@ namespace AlexaController
             speech.Append("Here is the ");
             speech.Append(item.Name);
             speech.Append(" library.");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> ParentalControlNotAllowed(BaseItem item, IAlexaSession session)
@@ -287,14 +291,14 @@ namespace AlexaController
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(SayName(session.person));
             speech.Append("?");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> PlayItem(BaseItem item)
@@ -306,31 +310,32 @@ namespace AlexaController
             speech.Append(item.GetType().Name);
             speech.Append(InsertStrengthBreak(StrengthBreak.weak)); 
             speech.Append(item.Name);
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> RoomContext()
         {
             var speech = new StringBuilder();
-            speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
-            speech.Append(SayInDomain(Domain.conversational, "I didn't get the room you wish to view that."));
+            //speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
+            speech.Append(SayWithEmotion("I didn't get the room ", Emotion.disappointed, Intensity.high));
+            speech.Append("that you wish to view that.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append(SayInDomain(Domain.music, "Which room did you want?"));
-            return new DataSource()
+            speech.Append(SayWithEmotion("Which room did you want?", Emotion.excited, Intensity.medium));
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
-                    audioUrl =  "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
+                    audioUrl = "soundbank://soundlibrary/computers/screens/screens_11"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> PlayNextUpEpisode(BaseItem item, IAlexaSession session)
@@ -340,14 +345,14 @@ namespace AlexaController
             speech.Append(item.Parent.Parent.Name);
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> GenericItemDoesNotExists()
@@ -358,14 +363,14 @@ namespace AlexaController
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(ExpressiveInterjection("doesn't exist "));
             speech.Append("in the library!");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> NoDeviceConfiguration(IAlexaSession session)
@@ -375,14 +380,14 @@ namespace AlexaController
             speech.Append("There is no device configuration for ");
             speech.Append(session.room);
             speech.Append("Please look in the plugin configuration to map rooms to emby ready devices.");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> DeviceUnavailable(string deviceName)
@@ -393,14 +398,14 @@ namespace AlexaController
             speech.Append(SayWithEmotion("the device in the ", Emotion.disappointed, Intensity.medium));
             speech.Append(SayWithEmotion(deviceName, Emotion.disappointed, Intensity.medium));
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> VoiceAuthenticationExists(IAlexaSession session)
@@ -411,14 +416,14 @@ namespace AlexaController
             speech.Append("This profile is already linked to ");
             speech.Append(SayName(session.person));
             speech.Append("'s account");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl =  "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> VoiceAuthenticationAccountLinkError()
@@ -426,14 +431,14 @@ namespace AlexaController
             var speech = new StringBuilder();
             speech.Append("I was unable to learn your voice.");
             speech.Append("Please make sure you have allowed personalization in the Alexa app.");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> VoiceAuthenticationAccountLinkSuccess(IAlexaSession session)
@@ -446,14 +451,14 @@ namespace AlexaController
             speech.Append("You should now see the I.D. linked to your voice.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Choose your emby account name and press save.");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> UpComingEpisodes(List<BaseItem> items, DateTime date)
@@ -476,6 +481,8 @@ namespace AlexaController
 
             foreach (var d in dateGroup)
             {
+                // ReSharper disable once PossibleNullReferenceException
+                // ReSharper disable once PossibleInvalidOperationException
                 speech.Append($"On {d.Key.Value.DayOfWeek}'s:");
                 speech.Append(InsertStrengthBreak(StrengthBreak.strong));
                 var i = 1;
@@ -501,14 +508,14 @@ namespace AlexaController
             speech.Append(
                 $"This completes the list of episodes scheduled for the next {(date - DateTime.Now).Days} days. ");
 
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> NewItemsAplaOnly(List<BaseItem> items, DateTime date)
@@ -526,14 +533,14 @@ namespace AlexaController
             speech.Append(string.Join($", {InsertStrengthBreak(StrengthBreak.weak)}",
                 // ReSharper disable once AssignNullToNotNullAttribute
                 items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> GetNewItemsApl(List<BaseItem> items, DateTime date)
@@ -549,14 +556,14 @@ namespace AlexaController
             //var date = DateTime.Parse(.args[0]);
             speech.Append($" added in the past {(date - DateTime.Now).Days *-1} days.");
 
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> NoNextUpEpisodeAvailable()
@@ -564,14 +571,14 @@ namespace AlexaController
             var speech = new StringBuilder();
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append("There doesn't seem to be a new episode available for that series.");
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
 
         public async Task<IDataSource> BrowseItemByActor(List<BaseItem> actors)
@@ -582,14 +589,14 @@ namespace AlexaController
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(string.Join(", ", actors));
             //speech.Append(string.Join(", and", actors, actors.Count -1, 1));
-            return new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
-                properties = new DataSourceProperties.Properties<string>()
+                properties = new Properties<string>()
                 {
                     value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
-            };
+            });
         }
         
         private string GetSpeechPrefix(SpeechPrefix prefix)

@@ -7,7 +7,9 @@ using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 
@@ -68,8 +70,8 @@ namespace AlexaController.Alexa.IntentRequest
                 case ViewportProfile.HUB_LANDSCAPE_LARGE:
                 {
                     
-                    aplDataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
-                    aplaDataSource = await AplaDataSourceManager.Instance.GetNewItemsApl(results, d);
+                    aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
+                    aplaDataSource = await AplAudioDataSourceManager.Instance.GetNewItemsApl(results, d);
                        
                         AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
@@ -90,7 +92,7 @@ namespace AlexaController.Alexa.IntentRequest
                     }
                 default: //Voice only
                     {
-                        aplaDataSource = await AplaDataSourceManager.Instance.NewItemsAplaOnly(results, d);
+                        aplaDataSource = await AplAudioDataSourceManager.Instance.NewItemsAplaOnly(results, d);
 
                         var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

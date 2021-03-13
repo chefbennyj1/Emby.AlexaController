@@ -8,6 +8,8 @@ using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Configuration;
+using AlexaController.DataSourceManagers;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
@@ -28,8 +30,8 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var aplDataSource  = await AplDataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
-            var aplaDataSource = await AplaDataSourceManager.Instance.RoomContext();
+            var aplDataSource  = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
+            var aplaDataSource = await AplAudioDataSourceManager.Instance.RoomContext();
             session.PersistedRequestContextData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
 

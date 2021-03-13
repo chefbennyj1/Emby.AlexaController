@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.APL.Commands;
+using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -26,9 +27,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    new Directive()
-                    {
-                        type = "Alexa.Presentation.APL.ExecuteCommands",
+                    new ExecuteCommandsDirective()
+                    {                        
                         token = arguments[1],
                         commands = new List<ICommand>()
                         {

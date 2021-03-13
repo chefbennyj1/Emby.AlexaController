@@ -1,9 +1,8 @@
-﻿using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
+﻿using AlexaController.Alexa.Presentation.DataSources.Properties;
 
-namespace AlexaController.DataSourceProperties 
+namespace AlexaController.DataSourceManagers.DataSourceProperties 
 {
-    public class MediaItem : IProperty
+    public class MediaItem 
     {
         public string endTime             { get; set; }
         public string runtimeMinutes      { get; set; }

@@ -8,7 +8,9 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -29,6 +31,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             try
             {
                 Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+                Session.hasRoom = !(Session.room is null);
             }
             catch { }
 
@@ -50,7 +53,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result is null)
             {
-                aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that actor.", "/particles");
+                aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that actor.", "/particles");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
@@ -67,7 +70,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }, Session);
             }
 
-            if (!(Session.room is null))
+            if (Session.hasRoom)
                 try
                 {
                     await ServerController.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault().FirstOrDefault());
@@ -86,9 +89,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             
             var actorCollection = result.Values.FirstOrDefault();
             
-            aplDataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
+            aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
 
-            var aplaDataSource = await AplaDataSourceManager.Instance.BrowseItemByActor(actors);
+            var aplaDataSource = await AplAudioDataSourceManager.Instance.BrowseItemByActor(actors);
             
             //TODO: Fix session Update (it is only looking at one actor, might not matter)
             //Update Session

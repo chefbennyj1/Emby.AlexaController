@@ -8,7 +8,9 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Controller.Entities;
@@ -33,6 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             try
             {
                 Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+                Session.hasRoom = !(Session.room is null);
             }
             catch (Exception exception)
             {
@@ -71,15 +74,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
                     }
 
-                    aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {collectionBaseItem.OfficialRating}", "/particles");
-                    aplaDataSource = await AplaDataSourceManager.Instance.ParentalControlNotAllowed(collectionBaseItem, Session);
+                    aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {collectionBaseItem.OfficialRating}", "/particles");
+                    aplaDataSource = await AplAudioDataSourceManager.Instance.ParentalControlNotAllowed(collectionBaseItem, Session);
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, Session),
+                            await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
                                 
                             await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                            
@@ -88,7 +91,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            if (!(Session.room is null))
+            if (Session.hasRoom)
             {
                 try
                 {
@@ -100,8 +103,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            
-            aplDataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(collectionItems, collectionBaseItem);
+            //aplDataSource = await AplDynamicListDataSourceManager.Instance.GetDynamicListSequenceItemDataSourceAsync(collectionItems, collectionBaseItem);
+            aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(collectionItems, collectionBaseItem);
 
             //Update Session
             Session.NowViewingBaseItem = collectionBaseItem;
@@ -113,7 +116,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 outputSpeech = new OutputSpeech()
                 {
-                    phrase = $"{collectionBaseItem.Name}",
+                    phrase = $"{collectionBaseItem?.Name}",
                 },
                 shouldEndSession = null,
                 directives = new List<IDirective>()

@@ -6,7 +6,9 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -43,7 +45,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
             if (nextUpEpisode is null)
             {
-                aplaDataSource = await AplaDataSourceManager.Instance.GenericItemDoesNotExists();
+                aplaDataSource = await AplAudioDataSourceManager.Instance.GenericItemDoesNotExists();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -64,8 +66,8 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            var aplDataSource = await AplDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(nextUpEpisode, Session);
-            aplaDataSource = await AplaDataSourceManager.Instance.PlayNextUpEpisode(nextUpEpisode, Session);
+            var aplDataSource = await AplObjectDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(nextUpEpisode, Session);
+            aplaDataSource = await AplAudioDataSourceManager.Instance.PlayNextUpEpisode(nextUpEpisode, Session);
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = true,

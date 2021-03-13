@@ -9,7 +9,9 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
@@ -33,6 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             try
             {
                 Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+                Session.hasRoom = !(Session.room is null);
             }
             catch { }
 
@@ -56,7 +59,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             // User requested season/episode data that doesn't exist
             if (!results.Any())
             {
-                aplaDataSource = await AplaDataSourceManager.Instance.NoItemExists(Session, seasonNumber);
+                aplaDataSource = await AplAudioDataSourceManager.Instance.NoItemExists(Session, seasonNumber);
                 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -71,7 +74,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var seasonId = results[0].Parent.InternalId;
             var season = ServerQuery.Instance.GetItemById(seasonId);
 
-            if (!(Session.room is null))
+            if (Session.hasRoom)
             {
                 try
                 {
@@ -86,8 +89,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
             
-            var aplDataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results, season.Parent);
-            aplaDataSource = await AplaDataSourceManager.Instance.ItemBrowse(season, Session);
+            IDataSource aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results, season.Parent);
+            aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(season, Session);
            
             Session.NowViewingBaseItem = season;
             AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);

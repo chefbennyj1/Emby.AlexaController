@@ -10,6 +10,8 @@ using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
+using AlexaController.DataSourceManagers;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Common.Net;
@@ -72,11 +74,14 @@ namespace AlexaController.Api
             if (AplaRenderDocumentDirectiveManager.Instance is null)
                 Activator.CreateInstance<AplaRenderDocumentDirectiveManager>();
 
-            if (AplDataSourceManager.Instance is null)
-                Activator.CreateInstance<AplDataSourceManager>();
+            if (AplObjectDataSourceManager.Instance is null)
+                Activator.CreateInstance<AplObjectDataSourceManager>();
 
-            if (AplaDataSourceManager.Instance is null)
-                Activator.CreateInstance<AplaDataSourceManager>();
+            if (AplAudioDataSourceManager.Instance is null)
+                Activator.CreateInstance<AplAudioDataSourceManager>();
+
+            if (AplDynamicListDataSourceManager.Instance is null)
+                Activator.CreateInstance<AplDynamicListDataSourceManager>();
         }
 
         public async Task<object> Post(AlexaRequest data)
@@ -90,22 +95,26 @@ namespace AlexaController.Api
                 
                 switch (alexaRequest.request.type)
                 {
-                    case "Alexa.Presentation.APL.UserEvent"    : return await OnUserEvent(alexaRequest);
-                    case "IntentRequest"                       : return await OnIntentRequest(alexaRequest);
-                    case "SessionEndedRequest"                 : return await OnSessionEndRequest(alexaRequest);
-                    case "LaunchRequest"                       : return await OnLaunchRequest(alexaRequest);
-                    case "System.ExceptionEncountered"         : return await OnExceptionEncountered();
-                    default                                    : return await OnDefault();
+                    case "Alexa.Presentation.APL.UserEvent"         : return await OnUserEvent(alexaRequest);
+                    case "Alexa.Presentation.APL.LoadIndexListData" : return await OnLoadIndexListData(alexaRequest);
+                    case "IntentRequest"                            : return await OnIntentRequest(alexaRequest);
+                    case "SessionEndedRequest"                      : return await OnSessionEndRequest(alexaRequest);
+                    case "LaunchRequest"                            : return await OnLaunchRequest(alexaRequest);
+                    case "System.ExceptionEncountered"              : return await OnExceptionEncountered();
+                    default                                         : return await OnDefault();
                 }
             }
         }
 
-
+        private async Task<string> OnLoadIndexListData(IAlexaRequest alexaRequest)
+        {
+            return await Task.FromResult("");
+        }
         private async Task<string> OnExceptionEncountered()
         {
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                outputSpeech     = new OutputSpeech(){phrase = "I have encountered an error."},
+                outputSpeech     = new OutputSpeech(){ phrase = "I have encountered an error." },
                 shouldEndSession = true,
                 SpeakUserName    = true
             }, null);
@@ -163,7 +172,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                var dataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource(exception.Message, "/particles");
+                var dataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource(exception.Message, "/particles");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -174,7 +183,7 @@ namespace AlexaController.Api
 
                     directives = new List<IDirective>()
                     {
-                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(dataSource, session)
+                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, session)
                     }
                 }, session);
             }
@@ -200,7 +209,7 @@ namespace AlexaController.Api
 
             if (user is null)
             {
-                aplaDataSource = await AplaDataSourceManager.Instance.PersonNotRecognized();
+                aplaDataSource = await AplAudioDataSourceManager.Instance.PersonNotRecognized();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(
                     new Response()
                     {
@@ -214,15 +223,15 @@ namespace AlexaController.Api
             }
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-            var aplDataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("Welcome to Home Theater Emby Controller", "/particles");
-            aplaDataSource = await AplaDataSourceManager.Instance.OnLaunch();
+            var aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("Welcome to Home Theater Emby Controller", "/particles");
+            aplaDataSource = await AplAudioDataSourceManager.Instance.OnLaunch();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<IProperty>(aplDataSource, session),
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
                     await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);

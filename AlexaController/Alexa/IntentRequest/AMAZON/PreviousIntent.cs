@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON

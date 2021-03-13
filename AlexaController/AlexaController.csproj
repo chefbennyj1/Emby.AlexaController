@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 <PropertyGroup> <TargetFrameworks>netstandard2.0;</TargetFrameworks> <AssemblyVersion>1.0.0.2</AssemblyVersion> <FileVersion>1.0.0.3</FileVersion> </PropertyGroup>
 
@@ -16,6 +16,7 @@
   <None Remove="MoviesLibrary.mp4" />
   <None Remove="particles.mp4" />
   <None Remove="Resources\MovingFloor.mp4" />
+  <None Remove="Session\gda30zyd.gx1~" />
   <None Remove="thumb.gif" />
   <None Remove="thumb.jpg" />
   <None Remove="Utils\ttd3km1d.3sb~" />
@@ -39,5 +40,9 @@
 </ItemGroup>
 
 <ItemGroup> <PackageReference Include="mediabrowser.server.core" Version="4.5.0.28" /> <PackageReference Include="Newtonsoft.Json" Version="12.0.3" /> <PackageReference Include="System.Memory" Version="4.5.4" /> </ItemGroup>
+
+<ItemGroup>
+  <Folder Include="Alexa\Presentation\APL\UserEvent\Pager\Page\" />
+</ItemGroup>
 
 </Project>

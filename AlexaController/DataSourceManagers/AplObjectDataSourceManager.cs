@@ -3,17 +3,17 @@ using System.Globalization;
 using System.Threading.Tasks;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Presentation.DataSources.Transformers;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
-namespace AlexaController
+namespace AlexaController.DataSourceManagers
 {
-    public class AplDataSourceManager
+    public class AplObjectDataSourceManager
     {
-        public static AplDataSourceManager Instance { get; private set; }
+        public static AplObjectDataSourceManager Instance { get; private set; }
 
-        public AplDataSourceManager()
+        public AplObjectDataSourceManager()
         {
             Instance = this;
         }
@@ -51,7 +51,7 @@ namespace AlexaController
                 };
             }
 
-            return await Task.FromResult(new DataSource()
+            return await Task.FromResult(new DataSource<MediaItem>()
             {
                 properties = new Properties<MediaItem>()
                 {
@@ -105,7 +105,7 @@ namespace AlexaController
                 thumbImageSource = ServerQuery.Instance.GetThumbImageSource(r)
             }));
 
-            return await Task.FromResult(new DataSource()
+            return await Task.FromResult(new DataSource<MediaItem>()
             {
                 properties = new Properties<MediaItem>()
                 {
@@ -172,7 +172,7 @@ namespace AlexaController
                  new Value() {value = "This concludes the help section. Good luck!"},
             };
 
-            return await Task.FromResult(new DataSource()
+            return await Task.FromResult(new DataSource<List<Value>>()
             {
                 properties = new Properties<List<Value>>
                 {
@@ -192,7 +192,7 @@ namespace AlexaController
         
         public async Task<IDataSource> GetGenericViewDataSource(string text, string videoUrl)
         {
-            return await Task.FromResult(new DataSource()
+            return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()
                 {
@@ -204,9 +204,9 @@ namespace AlexaController
             });
         }
         
-        public async Task<IDataSource> GetRoomSelection(BaseItem item, IAlexaSession session)
+        public async Task<IDataSource> GetRoomSelection(BaseItem item, IAlexaSession session) 
         {
-            return await Task.FromResult(new DataSource()
+            return await Task.FromResult(new DataSource<MediaItem>()
             {
                 properties = new Properties<MediaItem>()
                 {

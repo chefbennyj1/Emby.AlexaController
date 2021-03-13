@@ -7,7 +7,9 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceProperties;
+using AlexaController.DataSourceManagers;
+using AlexaController.DataSourceManagers.DataSourceProperties;
+using AlexaController.PresentationManagers;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -29,6 +31,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             try
             {
                 Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+                Session.hasRoom = !(Session.room is null);
             }
             catch { }
             
@@ -51,7 +54,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result.TotalRecordCount <= 0)
             {
-                dataSource = await AplDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that. Does that genre exist?", "/Question");
+                dataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that. Does that genre exist?", "/Question");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
@@ -68,7 +71,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }, Session);
             }
 
-            if (!(Session.room is null))
+            if (Session.hasRoom)
             {
                 try
                 {
@@ -105,7 +108,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
             
-            dataSource = await AplDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList());
+            dataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList());
 
             //Update Session
             Session.NowViewingBaseItem = result.Items[0];
