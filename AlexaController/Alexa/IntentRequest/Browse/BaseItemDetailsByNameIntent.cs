@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceManagers;
@@ -14,7 +15,8 @@ using MediaBrowser.Model.Logging;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-  
+    [Intent]
+    // ReSharper disable once UnusedType.Global
     public class BaseItemDetailsByNameIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -27,26 +29,20 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            try
+            Session.room    = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.hasRoom = !(Session.room is null);
+            if (!Session.hasRoom && !Session.supportsApl) 
             {
-                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-                Session.hasRoom = !(Session.room is null);
+                Session.PersistedRequestContextData = AlexaRequest;
+                AlexaSessionManager.Instance.UpdateSession(Session, null);
+                return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             }
-            catch { }
-
-           
-            if (!Session.hasRoom && !Session.supportsApl) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
             var type           = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
             var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
-           
-            IDataSource aplDataSource  = null;
-            IDataSource aplaDataSource = null;
-
-            ServerController.Instance.Log.Info(searchName);
             
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
@@ -55,6 +51,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
             
+            IDataSource aplDataSource;
+            IDataSource aplaDataSource;
+
             if (result is null)
             {
                 aplaDataSource = await AplAudioDataSourceManager.Instance.NoItemExists(Session, searchName);
@@ -83,8 +82,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch { }
 
-                aplDataSource  = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {result.OfficialRating}", "/particles");
-
+                aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {result.OfficialRating}", "/particles");
                 aplaDataSource = await AplAudioDataSourceManager.Instance.ParentalControlNotAllowed(result, Session);
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
@@ -97,7 +95,6 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     }
                 }, Session);
             }
-            
 
             if (Session.hasRoom)
             {
@@ -108,13 +105,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 catch (Exception exception)
                 {
                     ServerController.Instance.Log.Error(exception.Message);
-                    await Task.Delay(1200);
-                    Session.room = null;
                 }
             }
 
             aplDataSource = await AplObjectDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
-
             aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(result, Session);
 
             //Update Session

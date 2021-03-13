@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
@@ -14,6 +13,7 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class VoiceAuthenticationAccountLinkIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -30,7 +30,7 @@ namespace AlexaController.Alexa.IntentRequest
             var person        = context.System.person;
             var config        = Plugin.Instance.Configuration;
 
-            IDataSource aplaDataSource = null;
+            IDataSource aplaDataSource;
 
             if (person is null)
             {

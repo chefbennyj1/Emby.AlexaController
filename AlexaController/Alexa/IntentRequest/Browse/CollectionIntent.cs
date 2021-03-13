@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceManagers;
@@ -13,7 +11,6 @@ using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
-using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Logging;
 
 
@@ -32,30 +29,21 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            try
+            Session.room    = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.hasRoom = !(Session.room is null);
+            if (!Session.hasRoom && !Session.supportsApl) 
             {
-                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-                Session.hasRoom = !(Session.room is null);
+                Session.PersistedRequestContextData = AlexaRequest;
+                AlexaSessionManager.Instance.UpdateSession(Session, null);
+                return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             }
-            catch (Exception exception)
-            {
-                Session.room = null;
-                ServerController.Instance.Log.Error(exception.Message);
-            }
-
-           
-            if (!Session.hasRoom && !Session.supportsApl) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request           = AlexaRequest.request;
             var intent            = request.intent;
             var slots             = intent.slots;
             var collectionRequest = slots.MovieCollection.value ?? slots.Movie.value;
-            var context           = AlexaRequest.context;
-            
-
-            ServerController.Instance.Log.Info(nameof(CollectionIntent) + " request: " + collectionRequest);
+           
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
-            ServerController.Instance.Log.Info(nameof(CollectionIntent) + " normalized request: " + collectionRequest);
             
             var collection          = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems     = collection.Values.FirstOrDefault();
@@ -63,6 +51,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             IDataSource aplDataSource = null;
             IDataSource aplaDataSource = null;
+
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
             {

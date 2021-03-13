@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceManagers;
 using AlexaController.Exceptions;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
-
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
@@ -23,19 +21,17 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
 
         public async Task<string> Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            try { session.room = RoomManager.Instance.ValidateRoom(alexaRequest, session); } catch { }
-            
-            var context = alexaRequest.context;
-            // we need the room object to proceed because we will only show libraries on emby devices
-
-            if (session.room is null || (session.room is null && context.Viewport is null))
+            session.room    = RoomManager.Instance.ValidateRoom(alexaRequest, session);
+            session.hasRoom = !(session.room is null);
+            if (!session.hasRoom && !session.supportsApl) 
             {
                 session.PersistedRequestContextData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session, null);
                 return await RoomManager.Instance.RequestRoom(alexaRequest, session);
             }
 
-            var result = ServerQuery.Instance.GetItemById(ServerQuery.Instance.GetLibraryId(LibraryName));
+            var libraryId = ServerQuery.Instance.GetLibraryId(LibraryName);
+            var result    = ServerQuery.Instance.GetItemById(libraryId);
 
             try
             {
@@ -52,11 +48,9 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             //reset rePrompt data because we have fulfilled the request
             session.PersistedRequestContextData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
-            
 
-            var aplDataSource  = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
-            var aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(result, session);
-
+            var aplDataSource           = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
+            var aplaDataSource          = await AplAudioDataSourceManager.Instance.ItemBrowse(result, session);
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session);
             var renderAudioDirective    = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
             

@@ -16,6 +16,7 @@ using AlexaController.Utils;
 namespace AlexaController.Alexa.IntentRequest
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class NewItemsIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -35,8 +36,8 @@ namespace AlexaController.Alexa.IntentRequest
             var duration       = slots.Duration.value;
             var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
            
-            IDataSource aplDataSource = null;
-            IDataSource aplaDataSource = null;
+            IDataSource aplDataSource;
+            IDataSource aplaDataSource;
 
             // Default will be 25 days ago unless given a time duration
             var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);

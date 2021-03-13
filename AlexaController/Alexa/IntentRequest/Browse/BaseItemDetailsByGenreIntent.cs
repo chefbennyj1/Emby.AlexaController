@@ -25,18 +25,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session      { get; }
-
         public async Task<string> Response()
         {
-            try
+            Session.room    = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.hasRoom = !(Session.room is null);
+            if (!Session.hasRoom && !Session.supportsApl) 
             {
-                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-                Session.hasRoom = !(Session.room is null);
+                Session.PersistedRequestContextData = AlexaRequest;
+                AlexaSessionManager.Instance.UpdateSession(Session, null);
+                return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             }
-            catch { }
-            
-
-            if (!Session.hasRoom && !Session.supportsApl) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request        = AlexaRequest.request;
             var intent         = request.intent;
@@ -44,13 +42,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
             var slotGenres     = slots.Genre;
             var genres         = GetGenreList(slotGenres);
-            var context        = AlexaRequest.context;
-            var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
             
             var result = ServerQuery.Instance.GetBaseItemsByGenre(new [] { type }, genres.ToArray());
 
-            IDataSource dataSource = null;
+            IDataSource dataSource;
 
             if (result.TotalRecordCount <= 0)
             {
@@ -79,15 +74,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch (Exception exception)
                 {
-                    await Task.Run(() =>
-                            AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken,
-                                requestId))
-                        .ConfigureAwait(false);
-                    await Task.Delay(1200);
-                    Session.room = null;
+                    ServerController.Instance.Log.Error(exception.Message);
                 }
             }
-
 
             var phrase = "";
             

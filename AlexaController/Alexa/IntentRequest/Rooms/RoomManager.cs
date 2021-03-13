@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.APLA.Components;
-using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Configuration;
@@ -46,15 +43,15 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }, session);
         }
 
+       
         public Room GetRoomByName(string name)
         {
             var config = Plugin.Instance.Configuration;
-            return ValidateRoomConfiguration(name, config)
+            return HasRoomConfiguration(name, config)
                 ? config.Rooms.FirstOrDefault(r =>
                     string.Equals(r.Name, name, StringComparison.CurrentCultureIgnoreCase)) : null;
         }
-
-        //TODO user may have said "The Family Room", but the room is called "Family Room" - Remove the and try to compare room if needs be
+        
         public Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;
@@ -62,17 +59,22 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             var slots   = intent.slots;
             var config  = Plugin.Instance.Configuration;
 
-            string room = (slots.Room.value ?? session.room?.Name) ?? request.arguments[1];
-            
-            if (string.IsNullOrEmpty(room)) throw new Exception("No room found");
+            if (!(slots.Room is null))        
+                return !HasRoomConfiguration(slots.Room.value, config) 
+                    ? null 
+                    : config.Rooms.FirstOrDefault(r => string.Equals(r.Name, slots.Room.value, StringComparison.CurrentCultureIgnoreCase));
 
-            return ValidateRoomConfiguration(room, config)
-                ? config.Rooms.FirstOrDefault(r =>
-                    string.Equals(r.Name, room, StringComparison.CurrentCultureIgnoreCase)) : null;
+            if (!(session.room is null)) return session.room;
 
+            if (!(request.arguments is null)) 
+                return !HasRoomConfiguration(request.arguments[1], config) 
+                    ? null 
+                    : config.Rooms.FirstOrDefault(r => string.Equals(r.Name, request.arguments[1], StringComparison.CurrentCultureIgnoreCase));
+
+            return null;
         }
 
-        private static bool ValidateRoomConfiguration(string name, PluginConfiguration config)
+        private static bool HasRoomConfiguration(string name, PluginConfiguration config)
         {
             return config.Rooms.Exists(r => string.Equals(r.Name, name,
                 StringComparison.InvariantCultureIgnoreCase));

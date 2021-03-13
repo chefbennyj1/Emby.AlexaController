@@ -16,6 +16,7 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class BaseItemsByActorIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -28,32 +29,29 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            try
+            Session.room    = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.hasRoom = !(Session.room is null);
+            if (!Session.hasRoom && !Session.supportsApl) 
             {
-                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-                Session.hasRoom = !(Session.room is null);
+                Session.PersistedRequestContextData = AlexaRequest;
+                AlexaSessionManager.Instance.UpdateSession(Session, null);
+                return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             }
-            catch { }
-
-            
-            if (!Session.hasRoom && !Session.supportsApl)  return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
-
             var searchNames    = GetActorList(slots);
-            var context        = AlexaRequest.context;
-            var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
             
-            IDataSource aplDataSource = null;
-            
+            IDataSource aplDataSource;
+            IDataSource aplaDataSource;
+
             var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchNames);
 
             if (result is null)
             {
                 aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that actor.", "/particles");
+                
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
@@ -71,27 +69,22 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             if (Session.hasRoom)
+            {
                 try
                 {
                     await ServerController.Instance.BrowseItemAsync(Session, result.Keys.FirstOrDefault().FirstOrDefault());
                 }
                 catch (Exception exception)
                 {
-                    await Task.Run(() => 
-                        AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, 
-                            requestId))
-                        .ConfigureAwait(false);
-                    await Task.Delay(1200);
-                    Session.room = null;
+                    ServerController.Instance.Log.Error(exception.Message);
                 }
+            }
 
-            var actors = result.Keys.FirstOrDefault();
-            
+            var actors          = result.Keys.FirstOrDefault();
             var actorCollection = result.Values.FirstOrDefault();
             
-            aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
-
-            var aplaDataSource = await AplAudioDataSourceManager.Instance.BrowseItemByActor(actors);
+            aplDataSource  = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
+            aplaDataSource = await AplAudioDataSourceManager.Instance.BrowseItemByActor(actors);
             
             //TODO: Fix session Update (it is only looking at one actor, might not matter)
             //Update Session

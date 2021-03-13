@@ -4,6 +4,7 @@ using AlexaController.Api;
 using MediaBrowser.Controller.Session;
 using System.Collections.Generic;
 using System.Linq;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -90,7 +91,6 @@ namespace AlexaController.Session
                     }
                 }
 
-
                 // Remove the session from the "OpenSessions" List, and rebuild the session with the new data
                 OpenSessions.RemoveAll(s => s.SessionId.Equals(alexaRequest.session.sessionId));
 
@@ -103,7 +103,7 @@ namespace AlexaController.Session
                 EchoDeviceId                = system.device.deviceId,
                 supportsApl                 = SupportsApl(alexaRequest),
                 person                      = person,
-                room                        = sessionInfo?.room,
+                room                        = sessionInfo?.room ?? new Room(),
                 hasRoom                     = !(sessionInfo?.room is null),
                 User                        = user,
                 viewport                    = GetCurrentViewport(alexaRequest),

@@ -1,16 +1,17 @@
 ﻿using System.Threading.Tasks;
-
+using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
+    [Intent]
+    // ReSharper disable once UnusedType.Global
     public class GoHomeIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
 
         public GoHomeIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {

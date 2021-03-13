@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
@@ -14,6 +15,7 @@ using AlexaController.Utils;
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class UpComingTv : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -33,21 +35,21 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             var result = await ServerQuery.Instance.GetUpComingTvAsync(duration);
 
-            var aplDataSource  = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
-            var aplaDataSource = await AplAudioDataSourceManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
-           
+            IDataSource aplDataSource;
+            IDataSource aplaDataSource;
+
+            aplDataSource  = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
+            aplaDataSource = await AplAudioDataSourceManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
+
             AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
-
-            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-            var renderAudioDirective    = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
-
+            
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    renderDocumentDirective,
-                    renderAudioDirective
+                    await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource),
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
                 }
 
             }, Session);

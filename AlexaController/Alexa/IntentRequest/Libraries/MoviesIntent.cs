@@ -6,6 +6,7 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class MoviesIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
@@ -10,7 +9,6 @@ using AlexaController.DataSourceManagers;
 using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
-using MediaBrowser.Controller.Entities;
 
 
 namespace AlexaController.Alexa.IntentRequest.Playback

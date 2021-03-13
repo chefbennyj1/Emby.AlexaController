@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.APLA.AudioFilters;
-using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
@@ -13,7 +11,6 @@ using AlexaController.DataSourceManagers;
 using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
-using MediaBrowser.Controller.Entities;
 
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -32,29 +29,27 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
         public async Task<string> Response()
         {
-            try
+            Session.room    = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.hasRoom = !(Session.room is null);
+            if (!Session.hasRoom && !Session.supportsApl) 
             {
-                Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-                Session.hasRoom = !(Session.room is null);
+                Session.PersistedRequestContextData = AlexaRequest;
+                AlexaSessionManager.Instance.UpdateSession(Session, null);
+                return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             }
-            catch { }
-
-            
-            if (!Session.hasRoom && !Session.supportsApl) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request        = AlexaRequest.request;
             var intent         = request.intent;
             var slots          = intent.slots;
             var seasonNumber   = slots.SeasonNumber.value;
-            var context = AlexaRequest.context;
+            var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
             var requestId      = request.requestId;
             
-            var results = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber),
-                Session.NowViewingBaseItem, Session.User);
+            var results = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber), Session.NowViewingBaseItem, Session.User);
             
-
-            IDataSource aplaDataSource = null;
+            IDataSource aplaDataSource;
+            IDataSource aplDataSource;
 
             // User requested season/episode data that doesn't exist
             if (!results.Any())
@@ -89,7 +84,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
             
-            IDataSource aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results, season.Parent);
+            aplDataSource  = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results, season.Parent);
             aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(season, Session);
            
             Session.NowViewingBaseItem = season;

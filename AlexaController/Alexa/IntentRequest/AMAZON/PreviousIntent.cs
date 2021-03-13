@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
@@ -10,6 +12,7 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class PreviousIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -23,20 +26,28 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         public async Task<string> Response()
         {
             var sessionPaging = Session.paging;
-            var previousPage  = sessionPaging.pages[sessionPaging.currentPage - 1];
-            var currentPage   = sessionPaging.pages[sessionPaging.currentPage];
-
+            var previousPage  = sessionPaging.pages[sessionPaging.currentPage - 1] as DataSource<MediaItem>;
+            var currentPage   = sessionPaging.pages[sessionPaging.currentPage] as DataSource<MediaItem>;
             AlexaSessionManager.Instance.UpdateSession(Session, currentPage, true);
-
-            //if the user has requested an Emby client/room display during the session - go back on both if possible
+            
+            var properties = previousPage?.properties as Properties<MediaItem>;
+           
+            //if the user is controlling a client  session - go back on the client too.
             // ReSharper disable once InvertIf
-            if (Session.room != null)
+            if (Session.hasRoom)
+            {
                 try
                 {
 #pragma warning disable 4014
-                    ServerController.Instance.BrowseItemAsync(Session,ServerQuery.Instance.GetItemById(Session.NowViewingBaseItem.Parent.InternalId)).ConfigureAwait(false);
+                    Task.Run(() => ServerController.Instance.BrowseItemAsync(Session, ServerQuery.Instance.GetItemById(properties?.item.id)))
+                        .ConfigureAwait(false);
 #pragma warning restore 4014
-                } catch { }
+                }
+                catch (Exception exception)
+                {
+                    ServerController.Instance.Log.Error(exception.Message);
+                }
+            }
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
