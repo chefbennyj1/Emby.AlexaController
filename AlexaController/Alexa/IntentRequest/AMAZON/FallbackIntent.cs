@@ -25,13 +25,10 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
-                
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance
-                        .GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
-                    await AplaRenderDocumentDirectiveManager.Instance
-                        .GetAudioDirectiveAsync(aplaDataSource)
+                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
+                    await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);
         }

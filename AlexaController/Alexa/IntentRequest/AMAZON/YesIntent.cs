@@ -7,6 +7,7 @@ using AlexaController.Session;
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class YesIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }

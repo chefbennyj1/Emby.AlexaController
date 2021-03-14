@@ -181,6 +181,7 @@ namespace AlexaController.DataSourceManagers
             }
 
             var name = StringNormalization.ValidateSpeechQueryString(item.Name);
+            
             speech.Append(name);
 
             if (!item.IsFolder) //Don't describe a rating of a library or collection folder.

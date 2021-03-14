@@ -22,7 +22,7 @@ using Video    = AlexaController.Alexa.Presentation.APL.Components.Video;
 
 /*
  * Echo Display Devices use the **LAN address** for Images when using the skill on the same network as emby server (ex. 192.168.X.XXX:8096)
- * We do not need to serve media requests over https like the documentation implies.
+ * We do not need to serve media requests over https like the documentation implies while using APL 1.1.
  * https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-image.html
  */
 
@@ -106,7 +106,7 @@ namespace AlexaController.PresentationManagers
             }
         };
         
-        public async Task<IDirective> GetRenderDocumentDirectiveAsync<TProperties>(IDataSource dataSource, IAlexaSession session) where TProperties : class //where TDataSource : class
+        public async Task<IDirective> GetRenderDocumentDirectiveAsync<TProperties>(IDataSource dataSource, IAlexaSession session) where TProperties : class 
         {
             /*
              * This needs to be refactored. If the type is passed to the DataSource, why does it have to be declared in the Properties as well?
@@ -845,7 +845,7 @@ namespace AlexaController.PresentationManagers
                         },
                         new Text()
                         {
-                            text     =  $"{(session.room != null ? session.room.Name : "")}",
+                            text     =  $"{(session.hasRoom ? session.room.Name : "")}",
                             left     = "10%",
                             width    = "85%",
                             height   = "5%",
@@ -853,6 +853,7 @@ namespace AlexaController.PresentationManagers
                         },
                     }
                 },
+                //TODO: Add pager - swipe to actors, swipe to chapters
                 new Container()
                 {
                     bind = new List<DataBind>()
@@ -1475,5 +1476,6 @@ namespace AlexaController.PresentationManagers
                 default: return new List<object>() { nameof(UserEventShowItemListSequenceTemplate) };
             }
         }
+
     }
 }
