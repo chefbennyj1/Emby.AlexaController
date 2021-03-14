@@ -1,7 +1,5 @@
-﻿using System;
+﻿using AlexaController.Alexa.Presentation.APL.Components;
 using System.Collections.Generic;
-using System.Text;
-using AlexaController.Alexa.Presentation.APL.Components;
 
 namespace AlexaController.Alexa.Presentation.APL.VectorGraphics
 {

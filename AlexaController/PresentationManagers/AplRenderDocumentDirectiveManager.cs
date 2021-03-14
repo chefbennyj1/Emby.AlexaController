@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
+﻿using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
@@ -13,6 +11,8 @@ using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 using Source   = AlexaController.Alexa.Presentation.APL.Components.Source;
 using Text     = AlexaController.Alexa.Presentation.APL.Components.Text;
@@ -105,29 +105,34 @@ namespace AlexaController.PresentationManagers
                 }
             }
         };
-        
-        public async Task<IDirective> GetRenderDocumentDirectiveAsync<TProperties>(IDataSource dataSource, IAlexaSession session) where TProperties : class 
+
+        public async Task<IDirective> GetRenderDocumentDirectiveAsync<TProperties>(IDataSource dataSource, IAlexaSession session) where TProperties : class
         {
             /*
              * This needs to be refactored. If the type is passed to the DataSource, why does it have to be declared in the Properties as well?
              */
-            var data       = dataSource as DataSource<TProperties>;
+            var data = dataSource as DataSource<TProperties>;
             var properties = data?.properties as Properties<TProperties>;
 
             List<IComponent> layout = null;
             switch (properties?.documentType)
             {
-                case RenderDocumentType.GENERIC_VIEW                : layout = await RenderGenericViewLayout(dataSource); 
+                case RenderDocumentType.GENERIC_VIEW:
+                    layout = await RenderGenericViewLayout(dataSource);
                     break;
-                case RenderDocumentType.ITEM_DETAILS_TEMPLATE       : layout = await RenderItemDetailsLayout(dataSource, session); 
+                case RenderDocumentType.ITEM_DETAILS_TEMPLATE:
+                    layout = await RenderItemDetailsLayout(dataSource, session);
                     break;
-                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE : layout = await RenderItemListSequenceLayout(dataSource , session);
+                case RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE:
+                    layout = await RenderItemListSequenceLayout(dataSource, session);
                     break;
-                case RenderDocumentType.ROOM_SELECTION_TEMPLATE     : layout = await RenderRoomSelectionLayout(dataSource, session);
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE:
+                    layout = await RenderRoomSelectionLayout(dataSource, session);
                     break;
-                case RenderDocumentType.HELP                        : layout = await RenderHelpViewLayout(dataSource);
+                case RenderDocumentType.HELP:
+                    layout = await RenderHelpViewLayout(dataSource);
                     break;
-                default                                             : return null;
+                default: return null;
             }
 
             var graphicsDictionary = new Dictionary<string, AlexaVectorGraphic>
@@ -146,7 +151,7 @@ namespace AlexaController.PresentationManagers
                                 pathData    = MaterialVectorIcons.CheckMark,
                                 stroke      = "none",
                                 strokeWidth = 1,
-                                fill        = "rgba(255,0,0,1)" 
+                                fill        = "rgba(255,0,0,1)"
                             }
                         }
                     }
@@ -239,11 +244,11 @@ namespace AlexaController.PresentationManagers
                                 {
                                     new VectorFilter()
                                     {
-                                        type = VectorFilterType.DropShadow,
-                                        color = "rgba(0,0,0,0.375)",
+                                        type             = VectorFilterType.DropShadow,
+                                        color            = "rgba(0,0,0,0.375)",
                                         horizontalOffset = 0.005,
-                                        verticalOffset = 0.005,
-                                        radius = 1
+                                        verticalOffset   = 0.005,
+                                        radius           = 1
                                     }
                                 }
                             }
@@ -330,7 +335,7 @@ namespace AlexaController.PresentationManagers
                     }
                 }
             };
-            
+
             return await Task.FromResult(new AplRenderDocumentDirective()
             {
                 token = properties.documentType.ToString(),
@@ -343,7 +348,7 @@ namespace AlexaController.PresentationManagers
                     commands = new Dictionary<string, ICommand>()
                     {
                         { nameof(AnimationFactory.ScaleInOutOnPress), await AnimationFactory.ScaleInOutOnPress() },
-                        { nameof(AnimationFactory.FadeIn), await AnimationFactory.FadeIn() } 
+                        { nameof(AnimationFactory.FadeIn), await AnimationFactory.FadeIn() }
                     },
                     mainTemplate = new MainTemplate()
                     {
@@ -359,9 +364,9 @@ namespace AlexaController.PresentationManagers
                             mainTemplate = new MainTemplate()
                             {
                                 parameters = new List<string>() { "payload" },
-                                item = new Audio()  
-                                { 
-                                    source = "soundbank://soundlibrary/camera/camera_15", 
+                                item = new Audio()
+                                {
+                                    source = "soundbank://soundlibrary/camera/camera_15",
                                     filter = new List<IFilter>() { new Volume() { amount = 0.2 } }
                                 }
                             }
@@ -370,7 +375,7 @@ namespace AlexaController.PresentationManagers
                 }
             });
         }
-        
+
         private static async Task<List<IComponent>> RenderItemListSequenceLayout(IDataSource dataSource, IAlexaSession session)
         {
             var layout = new List<IComponent>();
@@ -378,7 +383,7 @@ namespace AlexaController.PresentationManagers
             var properties = data?.properties as Properties<MediaItem>;
             var mediaItems = properties?.items;
             var type = mediaItems?[0].type;
-            
+
             layout.Add(new Container()
             {
                 id = "primary",
@@ -425,7 +430,7 @@ namespace AlexaController.PresentationManagers
                                        new Command() { type = nameof(AnimationFactory.ScaleInOutOnPress) },
                                        new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
                                    }
-                                }, 
+                                },
                                 items = new List<IComponent>()
                                {
                                    await RenderComponent_SequencePrimaryImageContainer(type)
@@ -488,13 +493,13 @@ namespace AlexaController.PresentationManagers
         private static async Task<List<IComponent>> RenderItemDetailsLayout(IDataSource dataSource, IAlexaSession session)
         {
             const string leftColumnSpacing = "36vw";
-            var data       = dataSource as DataSource<MediaItem>;
+            var data = dataSource as DataSource<MediaItem>;
             var properties = data?.properties as Properties<MediaItem>;
-            var mediaItem  = properties?.item;
-            var type       = mediaItem?.type;
-           
+            var mediaItem = properties?.item;
+            var type = mediaItem?.type;
+
             // ReSharper disable UseObjectOrCollectionInitializer
-            var layout   = new List<IComponent>();
+            var layout = new List<IComponent>();
             //backdrop video and static images
             layout.Add(new Video()
             {
@@ -506,13 +511,13 @@ namespace AlexaController.PresentationManagers
                         repeatCount = 0,
                     }
                 },
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                autoplay = true,
+                scale      = "best-fill",
+                width      = "100vw",
+                height     = "100vh",
+                position   = "absolute",
+                autoplay   = true,
                 audioTrack = "none",
-                id = "${data.item.id}",
+                id         = "${data.item.id}",
                 onEnd = new List<ICommand>()
                 {
                     new SetValue()
@@ -538,26 +543,26 @@ namespace AlexaController.PresentationManagers
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                source = "${data.url}${data.item.videoOverlaySource}",
-                opacity = 0.65,
-                id = "backdropOverlay"
+                scale        = "best-fill",
+                width        = "100vw",
+                height       = "100vh",
+                position     = "absolute",
+                source       = "${data.url}${data.item.videoOverlaySource}",
+                opacity      = 0.65,
+                id           = "backdropOverlay"
             });
-            
+
             if (session.paging.canGoBack)
             {
                 layout.Add(new AlexaIconButton()
                 {
                     vectorSource = MaterialVectorIcons.Left,
-                    buttonSize = "15vh",
-                    position = "absolute",
-                    left = "2vw",
-                    color = "white",
-                    top = "-1vw",
-                    id = "goBack",
+                    buttonSize   = "15vh",
+                    position     = "absolute",
+                    left         = "2vw",
+                    color        = "white",
+                    top          = "-1vw",
+                    id           = "goBack",
                     primaryAction = new Parallel()
                     {
                         commands = new List<ICommand>()
@@ -646,14 +651,14 @@ namespace AlexaController.PresentationManagers
             //Overview
             layout.Add(new TouchWrapper()
             {
-                top       = string.Equals(type, "Movie") ? "24vh" : "20vh",
-                left      = leftColumnSpacing,
+                top = string.Equals(type, "Movie") ? "24vh" : "20vh",
+                left = leftColumnSpacing,
                 maxHeight = "20vh",
-                opacity   = 1,
-                id        = "overview_${data.item.id}",
-                speech    = "${data.item.readOverview}",
-                onPress   = new SpeakItem() { componentId = "overview_${data.item.id}"},
-                item      = new Container()
+                opacity = 1,
+                id = "overview_${data.item.id}",
+                speech = "${data.item.readOverview}",
+                onPress = new SpeakItem() { componentId = "overview_${data.item.id}" },
+                item = new Container()
                 {
                     items = new List<IComponent>()
                     {
@@ -860,7 +865,7 @@ namespace AlexaController.PresentationManagers
                     {
                         new DataBind()
                         {
-                            name = "data", 
+                            name = "data",
                             value = "${payload.templateData.properties}"
                         },
                     },
@@ -956,7 +961,7 @@ namespace AlexaController.PresentationManagers
                 }
             });
         }
-        
+
         private static async Task<List<IComponent>> RenderGenericViewLayout(IDataSource dataSource)
         {
             return await Task.FromResult(new List<IComponent>
@@ -1113,8 +1118,8 @@ namespace AlexaController.PresentationManagers
                                                             }
                                                         }
                                                     }
-                                                }                                                            
-                                                            
+                                                }
+
                                             }
                                         },
                                         new VectorGraphic()
@@ -1199,8 +1204,8 @@ namespace AlexaController.PresentationManagers
                                                             }
                                                         }
                                                     }
-                                                }                                                            
-                                                
+                                                }
+
                                             }
                                         }
                                     },
@@ -1297,7 +1302,7 @@ namespace AlexaController.PresentationManagers
                 }
             });
         }
-        
+
         //Create template components 
         private static async Task<Frame> RenderComponent_PlayButton(MediaItem item, IAlexaSession session)
         {
@@ -1329,7 +1334,7 @@ namespace AlexaController.PresentationManagers
                         vectorSource = item.type == "Series" ?  MaterialVectorIcons.ListIcon : MaterialVectorIcons.PlayOutlineIcon,
                         buttonSize = "13vh",
                         id = item.id.ToString(),
-                       
+
                         primaryAction = new Sequential()
                         {
                             commands = new List<ICommand>()
@@ -1342,8 +1347,8 @@ namespace AlexaController.PresentationManagers
                                     }
                                 },
                                 new SendEvent() { arguments = args },
-                                
-                                
+
+
                             }
                         }
                     }

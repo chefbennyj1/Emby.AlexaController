@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
+using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.Directives
 {
     public class UpdateIndexListDataDirective : IDirective
-    { 
+    {
         public string type => "Alexa.Presentation.APL.UpdateIndexListData";
         public Dictionary<string, IDataSource> datasources { get; set; }
         public string token { get; set; }

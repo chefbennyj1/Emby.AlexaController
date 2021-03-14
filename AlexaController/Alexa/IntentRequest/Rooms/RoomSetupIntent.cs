@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceManagers;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
@@ -17,7 +15,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
+
         public RoomSetupIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
@@ -53,7 +51,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
                 }, Session);
             }
-            
+
             var response = await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = true,

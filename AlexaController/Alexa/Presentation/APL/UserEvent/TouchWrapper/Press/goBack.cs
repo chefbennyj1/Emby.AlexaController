@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
@@ -14,7 +14,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
     public class goBack : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        
+
         public goBack(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;
@@ -24,12 +24,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
 
             var previousPage = session.paging.pages[session.paging.currentPage - 1] as DataSource<MediaItem>;
-            var currentPage  = session.paging.pages[session.paging.currentPage] as DataSource<MediaItem>;
+            var currentPage = session.paging.pages[session.paging.currentPage] as DataSource<MediaItem>;
 
             AlexaSessionManager.Instance.UpdateSession(session, currentPage, true);
 
             var properties = previousPage?.properties as Properties<MediaItem>;
-           
+
             //if the user is controlling a client  session - go back on the client too.
             if (session.hasRoom)
             {

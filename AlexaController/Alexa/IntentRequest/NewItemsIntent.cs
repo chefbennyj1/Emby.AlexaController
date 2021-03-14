@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.Viewport;
@@ -12,6 +8,10 @@ using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest
 {
@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.IntentRequest
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
+
 
         public NewItemsIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
@@ -31,11 +31,11 @@ namespace AlexaController.Alexa.IntentRequest
 
         public async Task<string> Response()
         {
-            var request        = AlexaRequest.request;
-            var slots          = request.intent.slots;
-            var duration       = slots.Duration.value;
-            var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
-           
+            var request = AlexaRequest.request;
+            var slots = request.intent.slots;
+            var duration = slots.Duration.value;
+            var type = slots.MovieAlternatives.value is null ? "Series" : "Movie";
+
             IDataSource aplDataSource;
             IDataSource aplaDataSource;
 
@@ -61,7 +61,7 @@ namespace AlexaController.Alexa.IntentRequest
                 }, Session);
             }
 
-            
+
 
             switch (Session.viewport)
             {
@@ -69,21 +69,21 @@ namespace AlexaController.Alexa.IntentRequest
                 case ViewportProfile.HUB_LANDSCAPE_SMALL:
                 case ViewportProfile.HUB_LANDSCAPE_MEDIUM:
                 case ViewportProfile.HUB_LANDSCAPE_LARGE:
-                {
-                    
-                    aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
-                    aplaDataSource = await AplAudioDataSourceManager.Instance.GetNewItemsApl(results, d);
-                       
+                    {
+
+                        aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
+                        aplaDataSource = await AplAudioDataSourceManager.Instance.GetNewItemsApl(results, d);
+
                         AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
                         var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-                        var renderAudioDirective    = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+                        var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
                             shouldEndSession = null,
                             SpeakUserName = true,
-                            directives       = new List<IDirective>()
+                            directives = new List<IDirective>()
                             {
                                 renderDocumentDirective,
                                 renderAudioDirective

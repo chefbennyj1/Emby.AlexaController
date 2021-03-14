@@ -10,6 +10,6 @@ namespace AlexaController.Alexa.Presentation.APLA.Components
         /// <summary>
         /// normal, randomItem, randomData, randomItemRandomData
         /// </summary>
-        public string strategy { get; set; } 
+        public string strategy { get; set; }
     }
 }

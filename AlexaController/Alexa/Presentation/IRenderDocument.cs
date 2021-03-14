@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL.Commands;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.ResponseModel;
+using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation
 {
-    public interface IRenderDocument 
+    public interface IRenderDocument
     {
         string token { get; set; }
         IDocument document { get; set; }

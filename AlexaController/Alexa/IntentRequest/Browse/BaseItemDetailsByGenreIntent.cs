@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
@@ -11,6 +7,10 @@ using AlexaController.DataSourceManagers;
 using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -20,30 +20,30 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         public BaseItemDetailsByGenreIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
-            Session      = session;
+            Session = session;
         }
 
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaSession Session      { get; }
+        public IAlexaSession Session { get; }
         public async Task<string> Response()
         {
-            Session.room    = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             Session.hasRoom = !(Session.room is null);
-            if (!Session.hasRoom && !Session.supportsApl) 
+            if (!Session.hasRoom && !Session.supportsApl)
             {
                 Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
                 return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
-            var request        = AlexaRequest.request;
-            var intent         = request.intent;
-            var slots          = intent.slots;
-            var type           = slots.MovieAlternatives.value is null ? "Series" : "Movie";
-            var slotGenres     = slots.Genre;
-            var genres         = GetGenreList(slotGenres);
-            
-            var result = ServerQuery.Instance.GetBaseItemsByGenre(new [] { type }, genres.ToArray());
+            var request = AlexaRequest.request;
+            var intent = request.intent;
+            var slots = intent.slots;
+            var type = slots.MovieAlternatives.value is null ? "Series" : "Movie";
+            var slotGenres = slots.Genre;
+            var genres = GetGenreList(slotGenres);
+
+            var result = ServerQuery.Instance.GetBaseItemsByGenre(new[] { type }, genres.ToArray());
 
             IDataSource dataSource;
 
@@ -58,8 +58,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
-                    SpeakUserName    = true,
-                    directives       = new List<IDirective>()
+                    SpeakUserName = true,
+                    directives = new List<IDirective>()
                     {
                         await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session)
                     }
@@ -79,8 +79,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             var phrase = "";
-            
-            for (var i = 0; i <= genres.Count -1; i++)
+
+            for (var i = 0; i <= genres.Count - 1; i++)
             {
                 if (genres.Count - 1 > 0)
                 {
@@ -96,7 +96,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     phrase += $"{genres[i]}";
                 }
             }
-            
+
             dataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList());
 
             //Update Session
@@ -104,7 +104,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session);
-            
+
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
@@ -126,9 +126,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         {
             switch (slotGenres.slotValue.type)
             {
-                case "Simple" : return new List<string>() { slotGenres.value };
-                case "List"   : return slotGenres.slotValue.values.Select(v => v.value).ToList();
-                default       : return null;
+                case "Simple": return new List<string>() { slotGenres.value };
+                case "List": return slotGenres.slotValue.values.Select(v => v.value).ToList();
+                default: return null;
             }
         }
     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
@@ -12,42 +8,46 @@ using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Model.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
-   
+
     public class CollectionIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaSession Session      { get; }
+        public IAlexaSession Session { get; }
 
         public CollectionIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
-            Session      = session;
+            Session = session;
         }
         public async Task<string> Response()
         {
-            Session.room    = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             Session.hasRoom = !(Session.room is null);
-            if (!Session.hasRoom && !Session.supportsApl) 
+            if (!Session.hasRoom && !Session.supportsApl)
             {
                 Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
                 return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
-            var request           = AlexaRequest.request;
-            var intent            = request.intent;
-            var slots             = intent.slots;
+            var request = AlexaRequest.request;
+            var intent = request.intent;
+            var slots = intent.slots;
             var collectionRequest = slots.MovieCollection.value ?? slots.Movie.value;
-           
+
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
-            
-            var collection          = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
-            var collectionItems     = collection.Values.FirstOrDefault();
-            var collectionBaseItem  = collection.Keys.FirstOrDefault();
+
+            var collection = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
+            var collectionItems = collection.Values.FirstOrDefault();
+            var collectionBaseItem = collection.Keys.FirstOrDefault();
 
             IDataSource aplDataSource = null;
             IDataSource aplaDataSource = null;
@@ -72,9 +72,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         directives = new List<IDirective>()
                         {
                             await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
-                                
+
                             await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
-                           
+
                         }
                     }, Session);
                 }
@@ -117,5 +117,5 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
     }
 }
-   
+
 

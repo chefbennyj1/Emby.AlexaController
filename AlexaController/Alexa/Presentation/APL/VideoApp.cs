@@ -1,6 +1,4 @@
-﻿using AlexaController.Alexa.ResponseModel;
-
-namespace AlexaController.Alexa.Presentation.APL
+﻿namespace AlexaController.Alexa.Presentation.APL
 {
     public class Metadata
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AlexaController.Alexa.RequestModel
 {
-    public class Request 
+    public class Request
     {
         public string type { get; set; }
         public string requestId { get; set; }

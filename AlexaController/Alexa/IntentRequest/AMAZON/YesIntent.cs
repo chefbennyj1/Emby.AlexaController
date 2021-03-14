@@ -1,8 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Api;
 using AlexaController.Session;
+using System;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
@@ -12,13 +12,13 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
+
 
         public YesIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;
             Session = session;
-           
+
         }
         public async Task<string> Response()
         {

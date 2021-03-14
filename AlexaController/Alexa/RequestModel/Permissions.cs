@@ -2,6 +2,6 @@
 {
     public class Permissions
     {
-        public string consentToken                     { get; set; }
+        public string consentToken { get; set; }
     }
 }

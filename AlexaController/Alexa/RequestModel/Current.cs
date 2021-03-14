@@ -2,6 +2,6 @@
 {
     public class Current
     {
-        public Size size                               { get; set; }
+        public Size size { get; set; }
     }
 }

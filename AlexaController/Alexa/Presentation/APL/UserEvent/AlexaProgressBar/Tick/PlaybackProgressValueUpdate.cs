@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.APL.Commands;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.AlexaProgressBar.Tick
 {
@@ -18,9 +18,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.AlexaProgressBar.Tick
         }
         public async Task<string> Response()
         {
-            var request   = AlexaRequest.request;
+            var request = AlexaRequest.request;
             var arguments = request.arguments;
-            var session   = AlexaSessionManager.Instance.GetSession(AlexaRequest);
+            var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,

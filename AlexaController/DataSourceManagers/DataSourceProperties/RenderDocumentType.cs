@@ -1,6 +1,6 @@
 ﻿namespace AlexaController.DataSourceManagers.DataSourceProperties
 {
-    public enum RenderDocumentType 
+    public enum RenderDocumentType
     {
         GENERIC_VIEW,
         ITEM_DETAILS_TEMPLATE,

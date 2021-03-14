@@ -1,7 +1,7 @@
 ﻿namespace AlexaController.Alexa.ResponseModel
 {
-    public class Reprompt 
+    public class Reprompt
     {
-        public OutputSpeech outputSpeech { get; set; } 
+        public OutputSpeech outputSpeech { get; set; }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.APL.Commands;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 
 namespace AlexaController.Alexa.Presentation.APL
@@ -114,7 +114,7 @@ namespace AlexaController.Alexa.Presentation.APL
                             }
                         }
                     },
-                    
+
                     new AnimateItem()
                     {
                         easing = "ease",
@@ -167,6 +167,6 @@ namespace AlexaController.Alexa.Presentation.APL
                 }
             });
         }
-        
+
     }
 }

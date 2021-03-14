@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using MediaBrowser.Controller.Entities;
-
-namespace AlexaController.DataSourceManagers
+﻿namespace AlexaController.DataSourceManagers
 {
     public class AplDynamicListDataSourceManager
     {
@@ -32,13 +24,13 @@ namespace AlexaController.DataSourceManagers
 
         //    }));
 
-            //return await Task.FromResult(new DynamicIndexListDataSource<MediaItem>()
-            //{
-            //    items = mediaItems,
-            //    startIndex = 0,
-            //    minimumInclusiveIndex = 0,
-            //    listId = type
-//            //});
-//        }
+        //return await Task.FromResult(new DynamicIndexListDataSource<MediaItem>()
+        //{
+        //    items = mediaItems,
+        //    startIndex = 0,
+        //    minimumInclusiveIndex = 0,
+        //    listId = type
+        //            //});
+        //        }
     }
 }

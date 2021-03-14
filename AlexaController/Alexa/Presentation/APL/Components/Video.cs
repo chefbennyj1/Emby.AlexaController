@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL.Commands;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
+using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {
@@ -13,10 +13,10 @@ namespace AlexaController.Alexa.Presentation.APL.Components
     {
         public object type => nameof(Video);
         public List<Source> source { get; set; }
-        public bool autoplay       { get; set; }
-        public string scale        { get; set; }
-        public string audioTrack   { get; set; }
-        public List<ICommand> onEnd  { get; set; }
+        public bool autoplay { get; set; }
+        public string scale { get; set; }
+        public string audioTrack { get; set; }
+        public List<ICommand> onEnd { get; set; }
 
     }
 }

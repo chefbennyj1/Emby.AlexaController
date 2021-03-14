@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
@@ -9,6 +7,8 @@ using AlexaController.DataSourceManagers;
 using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 namespace AlexaController.Alexa.IntentRequest.Playback
@@ -18,11 +18,11 @@ namespace AlexaController.Alexa.IntentRequest.Playback
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
+
         public PlayNextUpEpisodeIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
-            Session      = session;
+            Session = session;
         }
         public async Task<string> Response()
         {
@@ -30,13 +30,13 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             try
             {
                 Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
-            } 
+            }
             catch { }
             if (Session.room is null) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
-            
-            var request       = AlexaRequest.request;
-            var intent        = request.intent;
-            var slots         = intent.slots;
+
+            var request = AlexaRequest.request;
+            var intent = request.intent;
+            var slots = intent.slots;
             var nextUpEpisode = ServerQuery.Instance.GetNextUpEpisode(slots.Series.value, Session?.User);
 
             IDataSource aplaDataSource = null;
@@ -50,9 +50,9 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     directives = new List<IDirective>()
                     {
                         await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
-                      
+
                     }
-                  
+
                 }, Session);
             }
 
@@ -60,7 +60,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Task.Run(() => ServerController.Instance.PlayMediaItemAsync(Session, nextUpEpisode)).ConfigureAwait(false);
 #pragma warning restore 4014
 
-           
+
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AlexaController.Alexa.ResponseModel;
+﻿using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Configuration;
 using AlexaController.DataSourceManagers;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
@@ -27,7 +27,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var aplDataSource  = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
+            var aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
             var aplaDataSource = await AplAudioDataSourceManager.Instance.RoomContext();
             session.PersistedRequestContextData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
@@ -35,7 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
-                directives       = new List<IDirective>()
+                directives = new List<IDirective>()
                 {
                     await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
                     await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
@@ -43,7 +43,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             }, session);
         }
 
-       
+
         public Room GetRoomByName(string name)
         {
             var config = Plugin.Instance.Configuration;
@@ -51,24 +51,24 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 ? config.Rooms.FirstOrDefault(r =>
                     string.Equals(r.Name, name, StringComparison.CurrentCultureIgnoreCase)) : null;
         }
-        
+
         public Room ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var request = alexaRequest.request;
-            var intent  = request.intent;
-            var slots   = intent.slots;
-            var config  = Plugin.Instance.Configuration;
+            var intent = request.intent;
+            var slots = intent.slots;
+            var config = Plugin.Instance.Configuration;
 
-            if (!(slots.Room is null))        
-                return !HasRoomConfiguration(slots.Room.value, config) 
-                    ? null 
+            if (!(slots.Room is null))
+                return !HasRoomConfiguration(slots.Room.value, config)
+                    ? null
                     : config.Rooms.FirstOrDefault(r => string.Equals(r.Name, slots.Room.value, StringComparison.CurrentCultureIgnoreCase));
 
             if (!(session.room is null)) return session.room;
 
-            if (!(request.arguments is null)) 
-                return !HasRoomConfiguration(request.arguments[1], config) 
-                    ? null 
+            if (!(request.arguments is null))
+                return !HasRoomConfiguration(request.arguments[1], config)
+                    ? null
                     : config.Rooms.FirstOrDefault(r => string.Equals(r.Name, request.arguments[1], StringComparison.CurrentCultureIgnoreCase));
 
             return null;

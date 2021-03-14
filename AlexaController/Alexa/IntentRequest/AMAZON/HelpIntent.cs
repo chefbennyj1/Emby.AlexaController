@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceManagers;
-using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Value = AlexaController.DataSourceManagers.DataSourceProperties.Value;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
+    [Intent]
+    // ReSharper disable once UnusedType.Global
     public class HelpIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }

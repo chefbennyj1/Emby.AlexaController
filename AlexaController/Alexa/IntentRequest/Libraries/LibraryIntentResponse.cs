@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceManagers;
 using AlexaController.Exceptions;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
-    public class LibraryIntentResponse 
+    public class LibraryIntentResponse
     {
         private string LibraryName { get; }
 
@@ -21,9 +21,9 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
 
         public async Task<string> Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            session.room    = RoomManager.Instance.ValidateRoom(alexaRequest, session);
+            session.room = RoomManager.Instance.ValidateRoom(alexaRequest, session);
             session.hasRoom = !(session.room is null);
-            if (!session.hasRoom && !session.supportsApl) 
+            if (!session.hasRoom && !session.supportsApl)
             {
                 session.PersistedRequestContextData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session, null);
@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             }
 
             var libraryId = ServerQuery.Instance.GetLibraryId(LibraryName);
-            var result    = ServerQuery.Instance.GetItemById(libraryId);
+            var result = ServerQuery.Instance.GetItemById(libraryId);
 
             try
             {
@@ -49,15 +49,15 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             session.PersistedRequestContextData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
-            var aplDataSource           = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
-            var aplaDataSource          = await AplAudioDataSourceManager.Instance.ItemBrowse(result, session);
+            var aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
+            var aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(result, session);
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session);
-            var renderAudioDirective    = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
-            
+            var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
-                directives       = new List<IDirective>()
+                directives = new List<IDirective>()
                 {
                     renderDocumentDirective,
                     renderAudioDirective

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL.Commands;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
+using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.APL.Components
 {

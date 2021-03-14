@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.APL.Commands;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.Sequence.onScroll
@@ -12,7 +11,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Sequence.onScroll
     public class SequenceOnScroll : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        
+
         public SequenceOnScroll(IAlexaRequest alexaRequest)
         {
             AlexaRequest = alexaRequest;

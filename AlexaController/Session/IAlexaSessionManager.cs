@@ -1,10 +1,10 @@
-﻿using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using MediaBrowser.Controller.Session;
 using System.Collections.Generic;
 using System.Linq;
-using AlexaController.Alexa.IntentRequest.Rooms;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -26,12 +26,12 @@ namespace AlexaController.Session
         private static Dictionary<string, long> PlaybackPositions = new Dictionary<string, long>();
 
         private ISessionManager SessionManager { get; }
-        
+
         public AlexaSessionManager(ISessionManager sessionManager)
         {
             Instance = this;
             SessionManager = sessionManager;
-            SessionManager.PlaybackStopped  += SessionManager_PlaybackStopped;
+            SessionManager.PlaybackStopped += SessionManager_PlaybackStopped;
             SessionManager.PlaybackProgress += SessionManager_PlaybackProgress;
         }
 
@@ -43,7 +43,7 @@ namespace AlexaController.Session
             var viewportProfile = viewportUtility.GetViewportProfile(alexaRequest.context.Viewport);
             if (viewportProfile == ViewportProfile.UNKNOWN_VIEWPORT_PROFILE) return false;
 
-            return viewportUtility.ViewportSizeIsLessThen(viewportProfile, ViewportProfile.TV_LANDSCAPE_MEDIUM) && 
+            return viewportUtility.ViewportSizeIsLessThen(viewportProfile, ViewportProfile.TV_LANDSCAPE_MEDIUM) &&
                    Equals(alexaRequest.context.Viewports[0].type, "APL");
         }
 
@@ -66,13 +66,13 @@ namespace AlexaController.Session
                 return OpenSessions.FirstOrDefault(s => s.SessionId == alexaRequest.session.sessionId);
             }
 
-            var context       = alexaRequest.context;
-            var system        = context.System;
-            var person        = system.person;
+            var context = alexaRequest.context;
+            var system = context.System;
+            var person = system.person;
             var amazonSession = alexaRequest.session;
 
             IAlexaRequest persistedRequestData = null;
-            IAlexaSession sessionInfo          = null;
+            IAlexaSession sessionInfo = null;
             //Room room                          = null;
 
             if (OpenSessions.Exists(s => s.SessionId.Equals(amazonSession.sessionId)))
@@ -95,20 +95,20 @@ namespace AlexaController.Session
                 OpenSessions.RemoveAll(s => s.SessionId.Equals(alexaRequest.session.sessionId));
 
             }
-            
+
             // Sync AMAZON session Id with our own.
             sessionInfo = new AlexaSession()
             {
-                SessionId                   = amazonSession.sessionId,
-                EchoDeviceId                = system.device.deviceId,
-                supportsApl                 = SupportsApl(alexaRequest),
-                person                      = person,
-                room                        = sessionInfo?.room ?? new Room(),
-                hasRoom                     = !(sessionInfo?.room is null),
-                User                        = user,
-                viewport                    = GetCurrentViewport(alexaRequest),
+                SessionId = amazonSession.sessionId,
+                EchoDeviceId = system.device.deviceId,
+                supportsApl = SupportsApl(alexaRequest),
+                person = person,
+                room = sessionInfo?.room ?? new Room(),
+                hasRoom = !(sessionInfo?.room is null),
+                User = user,
+                viewport = GetCurrentViewport(alexaRequest),
                 PersistedRequestContextData = persistedRequestData,
-                paging                      = new Paging { pages = new Dictionary<int, IDataSource>() }
+                paging = new Paging { pages = new Dictionary<int, IDataSource>() }
             };
 
             OpenSessions.Add(sessionInfo);
@@ -123,9 +123,9 @@ namespace AlexaController.Session
                 session = UpdateSessionPaging(session, dataSource, isBack);
 
             OpenSessions.RemoveAll(s => s.SessionId.Equals(session.SessionId));
-            
+
             OpenSessions.Add(session);
-            
+
         }
 
         private static IAlexaSession UpdateSessionPaging(IAlexaSession session, IDataSource dataSource, bool? isBack = null)
@@ -136,7 +136,7 @@ namespace AlexaController.Session
                 session.paging.currentPage -= 1;
 
                 if (session.paging.pages.Count <= 1) session.paging.canGoBack = false;
-                
+
                 return session;
             }
 
@@ -162,7 +162,7 @@ namespace AlexaController.Session
             return session;
 
         }
-        
+
         private void SessionManager_PlaybackStopped(object sender, MediaBrowser.Controller.Library.PlaybackStopEventArgs e)
         {
             var deviceName = e.DeviceName;
@@ -187,7 +187,7 @@ namespace AlexaController.Session
             sessionToUpdate.PlaybackStarted = false;
             UpdateSession(sessionToUpdate, null);
         }
-        
+
         private void SessionManager_PlaybackProgress(object sender, MediaBrowser.Controller.Library.PlaybackProgressEventArgs e)
         {
             var deviceName = e.DeviceName;

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Api;
 using AlexaController.Exceptions;
 using AlexaController.Session;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
@@ -23,15 +23,15 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         public async Task<string> Response()
         {
             var request = AlexaRequest.request;
-            var intent  = request.intent;
-            var slots   = intent.slots;
-           
+            var intent = request.intent;
+            var slots = intent.slots;
+
             // ReSharper disable once TooManyChainedReferences
-            var rePromptIntent     = Session.PersistedRequestContextData.request.intent;
+            var rePromptIntent = Session.PersistedRequestContextData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
-            
+
             Room room = null;
-            
+
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {
                 try { room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
@@ -46,7 +46,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 {
                     throw new DeviceUnavailableException("That device is currently unavailable.");
                 }
-                
+
             }
             else
             {
@@ -55,13 +55,13 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
                 //Give a Room object with the Setup Name back to the RoomSetupIntent Class through the Session object.
                 //Leave it to the  configuration JavaScript to finish saving the new room set up device information.
-                room = new Room(){ Name = slots.Room.value }; 
+                room = new Room() { Name = slots.Room.value };
             }
-            
+
             Session.room = room;
             Session.hasRoom = true;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
-           
+
             //Use Reflection to load the proper Intent class - AlexaController.Alexa.IntentRequest.{intent.Name}
             var type = Type.GetType($"AlexaController.Alexa.IntentRequest.{ rePromptIntentName }");
 
@@ -71,7 +71,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             {
                 return await GetResponseResult(type, Session.PersistedRequestContextData, Session);
             }
-            catch 
+            catch
             {
                 throw new Exception("Room Name Error");
             }
@@ -85,7 +85,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
 
             var instance = Activator.CreateInstance(@namespace, paramArgs);
             // ReSharper disable once PossibleNullReferenceException
-            return await (Task<string>) @namespace.GetMethod("Response")?.Invoke(instance, null);
+            return await (Task<string>)@namespace.GetMethod("Response")?.Invoke(instance, null);
 
         }
     }

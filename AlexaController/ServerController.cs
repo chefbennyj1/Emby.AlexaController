@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AlexaController.Exceptions;
+﻿using AlexaController.Exceptions;
 using AlexaController.Session;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Entities;
@@ -13,31 +9,35 @@ using MediaBrowser.Controller.TV;
 using MediaBrowser.Model.Activity;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Session;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AlexaController
 {
     public class ServerController : IServerEntryPoint
     {
-        private IServerApplicationHost Host            { get; }
-        private IUserManager UserManager               { get; }
-        private ILibraryManager LibraryManager         { get; }
-        private ITVSeriesManager TvSeriesManager       { get; }
-        private ISessionManager SessionManager         { get; }
-        private IActivityManager ActivityManager       { get; set; }
-        public ILogger Log                            { get; }
-        public static ServerController Instance        { get; private set; }
+        private IServerApplicationHost Host { get; }
+        private IUserManager UserManager { get; }
+        private ILibraryManager LibraryManager { get; }
+        private ITVSeriesManager TvSeriesManager { get; }
+        private ISessionManager SessionManager { get; }
+        private IActivityManager ActivityManager { get; set; }
+        public ILogger Log { get; }
+        public static ServerController Instance { get; private set; }
 
         // ReSharper disable once TooManyDependencies
         public ServerController(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IActivityManager activityManager, IUserManager userManager)
         {
-            Host            = host;
-            LibraryManager  = libMan;
+            Host = host;
+            LibraryManager = libMan;
             TvSeriesManager = tvMan;
-            SessionManager  = sesMan;
-            UserManager     = userManager;
+            SessionManager = sesMan;
+            UserManager = userManager;
             ActivityManager = activityManager;
-            Log             = logMan.GetLogger(Plugin.Instance.Name);
-            Instance        = this;
+            Log = logMan.GetLogger(Plugin.Instance.Name);
+            Instance = this;
         }
 
         public async Task SendMessageToPluginConfigurationPage<T>(string name, T data)
@@ -50,18 +50,18 @@ namespace AlexaController
         {
             await Task.Run(() => ActivityManager.Create(new ActivityLogEntry()
             {
-                Date     = DateTimeOffset.Now,
-                Id       = new Random().Next(1000, 9999),
+                Date = DateTimeOffset.Now,
+                Id = new Random().Next(1000, 9999),
                 Overview = overview,
-                UserId   = UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator)?.Id.ToString(),
-                Name     = name,
-                Type     = "Alert",
-                ItemId   = "",
+                UserId = UserManager.Users.FirstOrDefault(u => u.Policy.IsAdministrator)?.Id.ToString(),
+                Name = name,
+                Type = "Alert",
+                ItemId = "",
                 Severity = logSeverity
             }));
         }
 
-         // ReSharper disable once TooManyArguments
+        // ReSharper disable once TooManyArguments
         private async Task BrowseHome(string room, User user, string deviceId = null, SessionInfo session = null)
         {
             try

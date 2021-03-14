@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.SpeechSynthesis;
 using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AlexaController.DataSourceManagers
 {
@@ -28,8 +28,8 @@ namespace AlexaController.DataSourceManagers
 
         private static readonly Random RandomIndex = new Random();
 
-        public static  AplAudioDataSourceManager Instance { get; private set; }
-        
+        public static AplAudioDataSourceManager Instance { get; private set; }
+
         public AplAudioDataSourceManager()
         {
             Instance = this;
@@ -52,7 +52,7 @@ namespace AlexaController.DataSourceManagers
             SayWithEmotion("Yes, ... ", Emotion.excited, Intensity.medium),
             ""
         };
-        private readonly List<string> Repose     = new List<string>()
+        private readonly List<string> Repose = new List<string>()
         {
             "One moment...",
             "One moment please...",
@@ -61,7 +61,7 @@ namespace AlexaController.DataSourceManagers
             "I can do that... just a moment...",
             ""
         };
-        private readonly List<string> Greetings  = new List<string>()
+        private readonly List<string> Greetings = new List<string>()
         {
             "Hey",
             "Hi",
@@ -75,7 +75,7 @@ namespace AlexaController.DataSourceManagers
             $"{ExpressiveInterjection("hmm")}...",
         };
 
-        
+
         public async Task<IDataSource> ReadItemOverview(BaseItem item)
         {
             var speech = new StringBuilder();
@@ -88,7 +88,7 @@ namespace AlexaController.DataSourceManagers
             {
                 properties = new Properties<string>()
                 {
-                    value     = speech.ToString(),
+                    value = speech.ToString(),
                     audioUrl = "soundbank://soundlibrary/computers/screens/screens_10"
                 }
             });
@@ -147,10 +147,10 @@ namespace AlexaController.DataSourceManagers
 
         public async Task<IDataSource> NoItemExists(IAlexaSession session, string requestItem)
         {
-            var speech   = new StringBuilder();
+            var speech = new StringBuilder();
             var baseItem = session.NowViewingBaseItem;
-            var name     = StringNormalization.ValidateSpeechQueryString(baseItem.Name);
-            var index    = baseItem.IndexNumber;
+            var name = StringNormalization.ValidateSpeechQueryString(baseItem.Name);
+            var index = baseItem.IndexNumber;
 
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append(SpeechRate(Rate.fast, SayWithEmotion(name, Emotion.disappointed, Intensity.high)));
@@ -181,7 +181,7 @@ namespace AlexaController.DataSourceManagers
             }
 
             var name = StringNormalization.ValidateSpeechQueryString(item.Name);
-            
+
             speech.Append(name);
 
             if (!item.IsFolder) //Don't describe a rating of a library or collection folder.
@@ -250,7 +250,7 @@ namespace AlexaController.DataSourceManagers
                 }
             });
         }
-        
+
         public async Task<IDataSource> DisplayMovieCollection(BaseItem item)
         {
             var speech = new StringBuilder();
@@ -309,7 +309,7 @@ namespace AlexaController.DataSourceManagers
             speech.Append(item.ProductionYear);
             speech.Append(" ");
             speech.Append(item.GetType().Name);
-            speech.Append(InsertStrengthBreak(StrengthBreak.weak)); 
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(item.Name);
             return await Task.FromResult(new DataSource<string>()
             {
@@ -422,7 +422,7 @@ namespace AlexaController.DataSourceManagers
                 properties = new Properties<string>()
                 {
                     value = speech.ToString(),
-                    audioUrl =  "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
+                    audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
                 }
             });
         }
@@ -555,7 +555,7 @@ namespace AlexaController.DataSourceManagers
             speech.Append(items?.Count > 1 ? items[0].GetType().Name + "s" : items?[0].GetType().Name);
 
             //var date = DateTime.Parse(.args[0]);
-            speech.Append($" added in the past {(date - DateTime.Now).Days *-1} days.");
+            speech.Append($" added in the past {(date - DateTime.Now).Days * -1} days.");
 
             return await Task.FromResult(new DataSource<string>()
             {
@@ -599,19 +599,19 @@ namespace AlexaController.DataSourceManagers
                 }
             });
         }
-        
+
         private string GetSpeechPrefix(SpeechPrefix prefix)
         {
             switch (prefix)
             {
-                case SpeechPrefix.COMPLIANCE    : return Compliance[RandomIndex.Next(0, Compliance.Count)];
-                case SpeechPrefix.APOLOGETIC    : return SayWithEmotion(Apologetic[RandomIndex.Next(0, Apologetic.Count)], Emotion.disappointed, Intensity.medium);
-                case SpeechPrefix.REPOSE        : return Repose[RandomIndex.Next(0, Repose.Count)];
-                case SpeechPrefix.GREETINGS     : return Greetings[RandomIndex.Next(0, Greetings.Count)];
-                case SpeechPrefix.NON_COMPLIANT : return Dysfluency[RandomIndex.Next(0, Dysfluency.Count)];
-                case SpeechPrefix.NONE          : return string.Empty;
-                case SpeechPrefix.DEFAULT       : return string.Empty;
-                default                         : return string.Empty;
+                case SpeechPrefix.COMPLIANCE: return Compliance[RandomIndex.Next(0, Compliance.Count)];
+                case SpeechPrefix.APOLOGETIC: return SayWithEmotion(Apologetic[RandomIndex.Next(0, Apologetic.Count)], Emotion.disappointed, Intensity.medium);
+                case SpeechPrefix.REPOSE: return Repose[RandomIndex.Next(0, Repose.Count)];
+                case SpeechPrefix.GREETINGS: return Greetings[RandomIndex.Next(0, Greetings.Count)];
+                case SpeechPrefix.NON_COMPLIANT: return Dysfluency[RandomIndex.Next(0, Dysfluency.Count)];
+                case SpeechPrefix.NONE: return string.Empty;
+                case SpeechPrefix.DEFAULT: return string.Empty;
+                default: return string.Empty;
             }
         }
     }

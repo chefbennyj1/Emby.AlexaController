@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
-using AlexaController.Alexa.Presentation.DataSources.Transformers;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-
-namespace AlexaController.Alexa.Presentation.DataSources
+﻿namespace AlexaController.Alexa.Presentation.DataSources
 {
     //public class DynamicIndexListDataSource<T> : IDataSource<T> 
     //{

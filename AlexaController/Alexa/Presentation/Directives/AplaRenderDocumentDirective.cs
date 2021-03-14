@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL.Commands;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
+using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.Directives
 {
-    public class AplaRenderDocumentDirective : IRenderDocument, IDirective 
+    public class AplaRenderDocumentDirective : IRenderDocument, IDirective
     {
         public string type => "Alexa.Presentation.APLA.RenderDocument";
         public string token { get; set; }

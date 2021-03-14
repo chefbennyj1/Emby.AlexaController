@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.DataSourceManagers;
 using AlexaController.PresentationManagers;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 
 namespace AlexaController.Alexa.IntentRequest
@@ -18,7 +18,7 @@ namespace AlexaController.Alexa.IntentRequest
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
+
         public VoiceAuthenticationAccountLinkIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
@@ -26,9 +26,9 @@ namespace AlexaController.Alexa.IntentRequest
         }
         public async Task<string> Response()
         {
-            var context       = AlexaRequest.context;
-            var person        = context.System.person;
-            var config        = Plugin.Instance.Configuration;
+            var context = AlexaRequest.context;
+            var person = context.System.person;
+            var config = Plugin.Instance.Configuration;
 
             IDataSource aplaDataSource;
 

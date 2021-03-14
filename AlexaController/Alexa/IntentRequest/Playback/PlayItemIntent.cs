@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
@@ -12,6 +9,9 @@ using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable once ComplexConditionExpression
@@ -24,25 +24,25 @@ namespace AlexaController.Alexa.IntentRequest.Playback
         //If no room is requested in the PlayItemIntent intent, we follow up immediately to get a room value from 'RoomName' intent. 
 
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaSession Session      { get; }
-        
+        public IAlexaSession Session { get; }
+
         public PlayItemIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
-            Session      = session;
+            Session = session;
         }
 
         public async Task<string> Response()
         {
             try { Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
             if (Session.room is null) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
-            
-            var request        = AlexaRequest.request;
-            var context        = AlexaRequest.context;
+
+            var request = AlexaRequest.request;
+            var context = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
-            var intent         = request.intent;
-            var slots          = intent.slots;
+            var requestId = request.requestId;
+            var intent = request.intent;
+            var slots = intent.slots;
 
             IDataSource aplDataSource = null;
             IDataSource aplaDataSource = null;
@@ -58,7 +58,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             {
                 result = Session.NowViewingBaseItem;
             }
-            
+
             //Item doesn't exist in the library
             if (result is null)
             {
@@ -72,7 +72,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     }
                 }, Session);
             }
-            
+
             //Parental Control check for baseItem
             if (!result.IsParentalAllowed(Session.User))
             {
@@ -95,9 +95,9 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     {
                         await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
                         await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
-                    
+
                     }
-                 
+
                 }, Session);
             }
 
@@ -121,9 +121,9 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             aplDataSource = await AplObjectDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
 
             aplaDataSource = await AplAudioDataSourceManager.Instance.PlayItem(result);
-           
+
             var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-            var renderAudioDirective    = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

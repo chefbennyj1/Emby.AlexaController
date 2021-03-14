@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
-using AlexaController.Api;
+﻿using AlexaController.Api;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa
 {
-    public interface IUserEventResponse 
+    public interface IUserEventResponse
     {
         IAlexaRequest AlexaRequest { get; }
-        Task<string> Response(); 
+        Task<string> Response();
     }
 }

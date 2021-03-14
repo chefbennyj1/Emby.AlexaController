@@ -1,26 +1,26 @@
-﻿using MediaBrowser.Common.Plugins;
+﻿using AlexaController.Configuration;
 using MediaBrowser.Common.Configuration;
+using MediaBrowser.Common.Plugins;
+using MediaBrowser.Model.Drawing;
+using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using System;
 using System.Collections.Generic;
-using MediaBrowser.Model.Drawing;
 using System.IO;
-using AlexaController.Configuration;
-using MediaBrowser.Model.Plugins;
 
 namespace AlexaController
 {
-    public class Plugin: BasePlugin<PluginConfiguration>, IHasThumbImage, IHasWebPages
+    public class Plugin : BasePlugin<PluginConfiguration>, IHasThumbImage, IHasWebPages
     {
         public static Plugin Instance { get; private set; }
-        
-        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer): base(applicationPaths, xmlSerializer)
+
+        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer) : base(applicationPaths, xmlSerializer)
         {
             Instance = this;
         }
 
-        public override Guid Id            => new Guid("6995F8F3-FD4C-4CB6-A8F4-99A1D8828199");
-        public override string Name        => "Amazon Alexa";
+        public override Guid Id => new Guid("6995F8F3-FD4C-4CB6-A8F4-99A1D8828199");
+        public override string Name => "Amazon Alexa";
         public override string Description => "End Point for Alexa Skill";
 
         public IEnumerable<PluginPageInfo> GetPages() => new[]
@@ -37,9 +37,9 @@ namespace AlexaController
                 Name                 = "AlexaPluginConfigurationPageJS",
                 EmbeddedResourcePath = GetType().Namespace + ".Configuration.AlexaPluginConfigurationPage.js"
             }
-            
+
         };
-        
+
         public Stream GetThumbImage()
         {
             var type = GetType();

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL.Components.VisualFilters;
+﻿using AlexaController.Alexa.Presentation.APL.Components.VisualFilters;
+using System.Collections.Generic;
 
 
 namespace AlexaController.Alexa.Presentation.APL.Components
@@ -15,6 +15,6 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string type { get; set; }
         public List<string> colorRange { get; set; }
         public List<double> inputRange { get; set; }
-        public int angle               { get; set; }
+        public int angle { get; set; }
     }
 }

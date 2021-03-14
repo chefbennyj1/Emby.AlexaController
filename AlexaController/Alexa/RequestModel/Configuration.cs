@@ -2,6 +2,6 @@
 {
     public class Configuration
     {
-        public Current current                         { get; set; }
+        public Current current { get; set; }
     }
 }

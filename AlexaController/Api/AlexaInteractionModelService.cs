@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using MediaBrowser.Model.Serialization;
+using MediaBrowser.Model.Services;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using MediaBrowser.Model.Serialization;
-using MediaBrowser.Model.Services;
 
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable MethodNameNotMeaningful
@@ -36,7 +36,7 @@ namespace AlexaController.Api
                     using (var reader = new StreamReader(stream))
                     {
                         return JsonSerializer.SerializeToString(new AlexaInteractionModel()
-                            { InteractionModel = reader.ReadToEnd() });
+                        { InteractionModel = reader.ReadToEnd() });
                     }
             return string.Empty;
         }

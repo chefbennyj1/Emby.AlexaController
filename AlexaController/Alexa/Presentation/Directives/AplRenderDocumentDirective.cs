@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL.Commands;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
+using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.Directives
 {

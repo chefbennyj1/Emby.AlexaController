@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AlexaController.Alexa.Presentation.APL.Components
+﻿namespace AlexaController.Alexa.Presentation.APL.Components
 {
     public class Container : VisualBaseComponent
     {
@@ -10,11 +8,11 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         /// <summary>
         /// column (default), row
         /// </summary>
-        public string direction  { get; set; }
+        public string direction { get; set; }
         /// <summary>
         /// wrap, noWrap (default), wrapReverse
         /// </summary>
         public string wrap { get; set; }
-        
+
     }
 }

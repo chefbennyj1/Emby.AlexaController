@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.APL.Commands;
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
 {
     public class VideoOnEnd : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-        
+
 
         public VideoOnEnd(IAlexaRequest alexaRequest)
         {
@@ -28,7 +28,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
                 directives = new List<IDirective>()
                 {
                     new ExecuteCommandsDirective()
-                    {                        
+                    {
                         token = arguments[1],
                         commands = new List<ICommand>()
                         {

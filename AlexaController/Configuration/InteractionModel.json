@@ -491,6 +491,27 @@
                         "to {VisualModeTrigger} {Genre} {MovieAlternatives} ",
                         "to {VisualModeTrigger} {Genre} {TVAlternatives} "
                     ]
+                },
+                {
+                    "name": "Browse_DisplayItemFromEchoShowToDevice",
+                    "slots": [
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
+                        },
+                        {
+                            "name": "Room",
+                            "type": "AMAZON.Room"
+                        },
+                        {
+                            "name": "Anaphor",
+                            "type": "AMAZON.Anaphor"
+                        }
+                    ],
+                    "samples": [
+                        "{VisualModeTrigger} {Anaphor} in the {Room}",
+                        "{VisualModeTrigger} in the {Room}"
+                    ]
                 }
             ],
             "types": [

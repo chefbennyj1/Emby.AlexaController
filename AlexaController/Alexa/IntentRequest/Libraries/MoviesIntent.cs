@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Api;
 using AlexaController.Session;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
@@ -19,7 +19,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
         }
         public async Task<string> Response()
         {
-            return await new LibraryIntentResponse("Movies").Response(AlexaRequest, Session); 
+            return await new LibraryIntentResponse("Movies").Response(AlexaRequest, Session);
         }
     }
 }

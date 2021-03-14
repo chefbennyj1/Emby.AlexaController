@@ -5,10 +5,10 @@ namespace AlexaController.Alexa.RequestModel
     // ReSharper disable once InconsistentNaming
     public class slotData
     {
-        public string name          { get; set; }
-        public string value         { get; set; }
+        public string name { get; set; }
+        public string value { get; set; }
         public string canUnderstand { get; set; }
-        public string canFulfill    { get; set; }
+        public string canFulfill { get; set; }
         public SlotValue slotValue { get; set; }
     }
 
@@ -16,12 +16,12 @@ namespace AlexaController.Alexa.RequestModel
     {
         public string type { get; set; }
         public string value { get; set; }
-        public List<Value> values { get; set; } 
+        public List<Value> values { get; set; }
     }
 
     public class Value
     {
-        public string type { get; set; } 
-        public string value { get; set; } 
+        public string type { get; set; }
+        public string value { get; set; }
     }
 }

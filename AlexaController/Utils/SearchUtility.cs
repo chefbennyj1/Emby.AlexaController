@@ -1,36 +1,35 @@
-﻿using System;
+﻿using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Library;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Library;
-using MediaBrowser.Model.Extensions;
 
 // ReSharper disable once ExcessiveIndentation
 
 namespace AlexaController.Utils
 {
-    public class SearchUtility 
+    public class SearchUtility
     {
         private ILibraryManager LibraryManager { get; }
-        private IUserManager UserManager       { get; }
+        private IUserManager UserManager { get; }
 
-        protected SearchUtility(ILibraryManager libMan, IUserManager userManager) 
+        protected SearchUtility(ILibraryManager libMan, IUserManager userManager)
         {
             LibraryManager = libMan;
-            UserManager    = userManager;
+            UserManager = userManager;
         }
-                
+
         public BaseItem QuerySpeechResultItem(string searchName, string[] type)
         {
             ServerController.Instance.Log.Info("Beginning item search");
 
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {
-                Name             = searchName,
-                Recursive        = true,
+                Name = searchName,
+                Recursive = true,
                 IncludeItemTypes = type,
-                User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
-               
+                User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+
             });
 
             //Remove "The" from search Term
@@ -41,21 +40,22 @@ namespace AlexaController.Utils
                     if (searchName.ToLower().StartsWith("the "))
                     {
                         var query = searchName.Substring(4);
-                        
+
                         var queryResult = LibraryManager.QueryItems(new InternalItemsQuery
                         {
-                            Name             = query,
+                            Name = query,
                             IncludeItemTypes = type,
-                            User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+                            User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                         });
 
                         if (queryResult.Items.Any())
                         {
-                            
+
                             return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(query)));
                         }
                     }
-                } catch { }
+                }
+                catch { }
             }
 
             //Remove "The" from BaseItem Name
@@ -66,7 +66,7 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     Recursive = true,
-                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+                    User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
@@ -114,12 +114,12 @@ namespace AlexaController.Utils
                     }
                 }
             }
-            
+
             //Return items that start with the first two letters of search term, removing proceeding  "the"
             if (!result.Any())
             {
                 var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0);
-                
+
                 ServerController.Instance.Log.Info($"Final Search hit: {searchName}");
 
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
@@ -132,28 +132,28 @@ namespace AlexaController.Utils
 
                 if (queryResult.Items.Any())
                 {
-                    
-                    foreach(var item in queryResult.Items)
+
+                    foreach (var item in queryResult.Items)
                     {
                         // The user may have used the phrase "part 2", the movie name is "part ii"
                         if (item.Name.ToLower().Replace(" ii", " 2").Equals(searchName))
                         {
-                           return item;
+                            return item;
                         }
 
                         if (item.Name.ToLower().Replace(" iii", " 3").Equals(searchName))
                         {
-                           return item;
+                            return item;
                         }
 
                         if (item.Name.ToLower().Replace(" iv", " 4").Equals(searchName))
                         {
-                           return item;
+                            return item;
                         }
 
                         if (item.Name.ToLower().Replace(" v", " 5").Equals(searchName))
                         {
-                           return item;
+                            return item;
                         }
                         if (item.Name.ToLower().Replace("part ii", "2").Equals(searchName))
                         {
@@ -166,7 +166,7 @@ namespace AlexaController.Utils
 
                         if (item.Name.ToLower().Replace("part iv", "4").Equals(searchName))
                         {
-                           return item;
+                            return item;
                         }
 
                         if (item.Name.ToLower().Replace("part v", "5").Equals(searchName))
@@ -174,7 +174,7 @@ namespace AlexaController.Utils
                             return item;
                         }
 
-                        
+
 
                         if (NormalizeQueryString(item.Name).Contains(NormalizeQueryString(searchName)))
                         {
@@ -182,10 +182,10 @@ namespace AlexaController.Utils
                         }
 
                     }
-                    
+
                 }
             }
-            
+
             if (!result.Any()) //split name "" - Starts with string first and second word
             {
                 var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4) : searchName;
@@ -194,13 +194,13 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     Recursive = true,
-                    SearchTerm       = query,
-                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+                    SearchTerm = query,
+                    User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
-                    
+
                     return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(searchName)));
                 }
             }
@@ -208,18 +208,18 @@ namespace AlexaController.Utils
             if (!result.Any())
             {
                 var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0, 2);
-                
+
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
                     Recursive = true,
-                    NameStartsWith   = query,
-                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+                    NameStartsWith = query,
+                    User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
-                   
+
                     return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
                 }
             }
@@ -233,13 +233,13 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     Recursive = true,
-                    NameStartsWith   = query,
-                    User             = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+                    NameStartsWith = query,
+                    User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
-                    
+
                     return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
                 }
             }
@@ -249,7 +249,7 @@ namespace AlexaController.Utils
                 return null;
             }
 
-            
+
             return LibraryManager.GetItemById(result.FirstOrDefault());
         }
 

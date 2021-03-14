@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AlexaController.Alexa.Presentation.APL.Components
+﻿namespace AlexaController.Alexa.Presentation.APL.Components
 {
     public class AlexaFooter : VisualBaseComponent
     {

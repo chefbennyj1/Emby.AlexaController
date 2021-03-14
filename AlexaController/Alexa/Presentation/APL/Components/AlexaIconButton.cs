@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AlexaController.Alexa.Presentation.APL.Components
+﻿namespace AlexaController.Alexa.Presentation.APL.Components
 {
     public class AlexaIconButton : VisualBaseComponent
     {
@@ -12,6 +10,6 @@ namespace AlexaController.Alexa.Presentation.APL.Components
         public string vectorSource { get; set; }
         public string buttonSize { get; set; }
 
-        
+
     }
 }

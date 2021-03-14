@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AlexaController.Alexa.Presentation.APLA.Components
+﻿namespace AlexaController.Alexa.Presentation.APLA.Components
 {
     public class Silence
     {

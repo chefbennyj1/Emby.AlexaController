@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Presentation.DataSources.Transformers;
 using AlexaController.DataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 
 namespace AlexaController.DataSourceManagers
 {
@@ -17,7 +17,7 @@ namespace AlexaController.DataSourceManagers
         {
             Instance = this;
         }
-        
+
         public async Task<IDataSource> GetSequenceItemsDataSourceAsync(List<BaseItem> collectionItems, BaseItem collection = null)
         {
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
@@ -28,13 +28,13 @@ namespace AlexaController.DataSourceManagers
 
             collectionItems.ForEach(i => mediaItems.Add(new MediaItem()
             {
-                type                = type,
-                primaryImageSource  = ServerQuery.Instance.GetPrimaryImageSource(i),
+                type = type,
+                primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(i),
                 backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(i),
-                id                  = i.InternalId,
-                name                = i.Name,
-                index               = type == "Episode" ? $"Episode {i.IndexNumber}" : string.Empty,
-                premiereDate        = i.PremiereDate?.ToString("D")
+                id = i.InternalId,
+                name = i.Name,
+                index = type == "Episode" ? $"Episode {i.IndexNumber}" : string.Empty,
+                premiereDate = i.PremiereDate?.ToString("D")
 
             }));
 
@@ -43,11 +43,11 @@ namespace AlexaController.DataSourceManagers
             {
                 mediaItem = new MediaItem()
                 {
-                    name                = textInfo.ToTitleCase(collection.Name.ToLower()),
-                    logoImageSource     = ServerQuery.Instance.GetLogoImageSource(collection),
+                    name = textInfo.ToTitleCase(collection.Name.ToLower()),
+                    logoImageSource = ServerQuery.Instance.GetLogoImageSource(collection),
                     backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(collection),
-                    id                  = collection.InternalId,
-                    genres              = ServerQuery.Instance.GetGenres(collection)
+                    id = collection.InternalId,
+                    genres = ServerQuery.Instance.GetGenres(collection)
                 };
             }
 
@@ -76,23 +76,23 @@ namespace AlexaController.DataSourceManagers
         {
             var mediaItem = new MediaItem()
             {
-                type                = item.GetType().Name,
-                isPlayed            = item.IsPlayed(session.User),
-                primaryImageSource  = ServerQuery.Instance.GetPrimaryImageSource(item),
-                id                  = item.InternalId,
-                name                = item.Name,
-                premiereDate        = item.ProductionYear.ToString(),
-                officialRating      = item.OfficialRating,
-                tagLine             = item.Tagline,
-                runtimeMinutes      = ServerQuery.Instance.GetRunTime(item),
-                endTime             = ServerQuery.Instance.GetEndTime(item),
-                genres              = ServerQuery.Instance.GetGenres(item),
-                logoImageSource     = ServerQuery.Instance.GetLogoImageSource(item),
-                overview            = item.Overview,
+                type = item.GetType().Name,
+                isPlayed = item.IsPlayed(session.User),
+                primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(item),
+                id = item.InternalId,
+                name = item.Name,
+                premiereDate = item.ProductionYear.ToString(),
+                officialRating = item.OfficialRating,
+                tagLine = item.Tagline,
+                runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
+                endTime = ServerQuery.Instance.GetEndTime(item),
+                genres = ServerQuery.Instance.GetGenres(item),
+                logoImageSource = ServerQuery.Instance.GetLogoImageSource(item),
+                overview = item.Overview,
                 videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
                 backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item),
-                videoOverlaySource  = "/EmptyPng?quality=90",
-                themeAudioSource    =  ServerQuery.Instance.GetThemeSongSource(item)
+                videoOverlaySource = "/EmptyPng?quality=90",
+                themeAudioSource = ServerQuery.Instance.GetThemeSongSource(item)
             };
 
             var similarItems = ServerQuery.Instance.GetSimilarItems(item);
@@ -109,10 +109,10 @@ namespace AlexaController.DataSourceManagers
             {
                 properties = new Properties<MediaItem>()
                 {
-                    url          = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
                     documentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
                     similarItems = recommendedItems,
-                    item         = mediaItem
+                    item = mediaItem
                 },
                 transformers = new List<ITransformer>()
                 {
@@ -189,7 +189,7 @@ namespace AlexaController.DataSourceManagers
                 }
             });
         }
-        
+
         public async Task<IDataSource> GetGenericViewDataSource(string text, string videoUrl)
         {
             return await Task.FromResult(new DataSource<string>()
@@ -197,14 +197,14 @@ namespace AlexaController.DataSourceManagers
                 properties = new Properties<string>()
                 {
                     documentType = RenderDocumentType.GENERIC_VIEW,
-                    text         = text,
-                    url          = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                    videoUrl     = videoUrl
+                    text = text,
+                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                    videoUrl = videoUrl
                 }
             });
         }
-        
-        public async Task<IDataSource> GetRoomSelection(BaseItem item, IAlexaSession session) 
+
+        public async Task<IDataSource> GetRoomSelection(BaseItem item, IAlexaSession session)
         {
             return await Task.FromResult(new DataSource<MediaItem>()
             {
@@ -214,19 +214,19 @@ namespace AlexaController.DataSourceManagers
                     documentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
                     item = new MediaItem()
                     {
-                        type                = item.GetType().Name,
-                        isPlayed            = item.IsPlayed(session.User),
-                        primaryImageSource  = ServerQuery.Instance.GetPrimaryImageSource(item),
-                        id                  = item.InternalId,
-                        name                = item.Name,
-                        premiereDate        = item.ProductionYear.ToString(),
-                        officialRating      = item.OfficialRating,
-                        tagLine             = item.Tagline,
-                        runtimeMinutes      = ServerQuery.Instance.GetRunTime(item),
-                        endTime             = ServerQuery.Instance.GetEndTime(item),
-                        genres              = ServerQuery.Instance.GetGenres(item),
-                        logoImageSource     = ServerQuery.Instance.GetLogoImageSource(item),
-                        overview            = item.Overview,
+                        type = item.GetType().Name,
+                        isPlayed = item.IsPlayed(session.User),
+                        primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(item),
+                        id = item.InternalId,
+                        name = item.Name,
+                        premiereDate = item.ProductionYear.ToString(),
+                        officialRating = item.OfficialRating,
+                        tagLine = item.Tagline,
+                        runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
+                        endTime = ServerQuery.Instance.GetEndTime(item),
+                        genres = ServerQuery.Instance.GetGenres(item),
+                        logoImageSource = ServerQuery.Instance.GetLogoImageSource(item),
+                        overview = item.Overview,
                         videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
                         backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item)
                     }

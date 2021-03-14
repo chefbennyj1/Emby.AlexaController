@@ -2,8 +2,8 @@
 {
     public interface ITransformer
     {
-        string inputPath   { get; set; }
-        string outputName  { get; set; }
+        string inputPath { get; set; }
+        string outputName { get; set; }
         string transformer { get; }
     }
 }

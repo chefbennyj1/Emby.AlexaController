@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AlexaController.Alexa.Presentation.DataSources;
+﻿using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
+using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.Directives
 {
@@ -20,7 +18,7 @@ namespace AlexaController.Alexa.Presentation.Directives
 
         public string maximumInclusiveIndex { get; set; }
         public List<object> items { get; set; }
-        
+
         public Dictionary<string, IDataSource> datasources { get; set; }
     }
 }

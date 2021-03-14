@@ -20,37 +20,37 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
 
     public class From
     {
-        public string translateY  { get; set; }
-        public string translateX  { get; set; }
+        public string translateY { get; set; }
+        public string translateX { get; set; }
         public string perspective { get; set; }
-        public int? rotate        { get; set; }
+        public int? rotate { get; set; }
         public double scaleX { get; set; } = 1;
         public double scaleY { get; set; } = 1;
-        public double skewX       { get; set; }
-        public double skewY       { get; set; }
+        public double skewX { get; set; }
+        public double skewY { get; set; }
     }
 
     public class To
     {
-        public string translateY  { get; set; }
-        public string translateX  { get; set; }
+        public string translateY { get; set; }
+        public string translateX { get; set; }
         public string perspective { get; set; }
-        public int? rotate        { get; set; }
+        public int? rotate { get; set; }
         public double scaleX { get; set; } = 1;
         public double scaleY { get; set; } = 1;
-        public double skewX       { get; set; } 
-        public double skewY       { get; set; }
+        public double skewX { get; set; }
+        public double skewY { get; set; }
     }
 
     public interface IValue
     {
-        
+
     }
 
     public class Value : IValue
     {
-       
-       
+
+
     }
 
     public class AnimateItem : ICommand

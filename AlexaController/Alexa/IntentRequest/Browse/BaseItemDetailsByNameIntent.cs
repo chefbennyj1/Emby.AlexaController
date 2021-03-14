@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
@@ -12,6 +9,9 @@ using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Model.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
+
         public BaseItemDetailsByNameIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
@@ -29,28 +29,28 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            Session.room    = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
             Session.hasRoom = !(Session.room is null);
-            if (!Session.hasRoom && !Session.supportsApl) 
+            if (!Session.hasRoom && !Session.supportsApl)
             {
                 Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
                 return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
-            var request        = AlexaRequest.request;
-            var intent         = request.intent;
-            var slots          = intent.slots;
-            var type           = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
-            var searchName     = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
-            
+            var request    = AlexaRequest.request;
+            var intent     = request.intent;
+            var slots      = intent.slots;
+            var type       = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
+            var searchName = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
+
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
 
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
-            
+
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
-            
+
             IDataSource aplDataSource;
             IDataSource aplaDataSource;
 
@@ -108,7 +108,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            aplDataSource = await AplObjectDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
+            aplDataSource  = await AplObjectDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
             aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(result, Session);
 
             //Update Session

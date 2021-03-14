@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
+﻿using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.Presentation.DataSources.Transformers;
+using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.DataSources
 {
     public class DataSource<T> : IDataSource where T : class
     {
-        public object type { get; set;  }
+        public object type { get; set; }
         // ReSharper disable once InconsistentNaming
         public string objectID { get; set; }
         public string description { get; set; }
