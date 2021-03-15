@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class CancelIntent : IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-
-
+        
         public CancelIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;

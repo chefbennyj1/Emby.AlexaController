@@ -67,20 +67,17 @@ namespace AlexaController.Api
             if (SpeechAuthorization.Instance is null)
                 Activator.CreateInstance(typeof(SpeechAuthorization), user);
 
-            if (APL_RenderDocumentManager.Instance is null)
-                Activator.CreateInstance<APL_RenderDocumentManager>();
-
-            if (APLA_RenderDocumentManager.Instance is null)
-                Activator.CreateInstance<APLA_RenderDocumentManager>();
-
+            if (RenderDocumentDirectiveFactory.Instance is null)
+                Activator.CreateInstance<RenderDocumentDirectiveFactory>();
+            
             if (APL_DataSourceManager.Instance is null)
                 Activator.CreateInstance<APL_DataSourceManager>();
 
             if (APLA_DataSourceManager.Instance is null)
                 Activator.CreateInstance<APLA_DataSourceManager>();
 
-            if (APL_DynamicListDataSourceManager.Instance is null)
-                Activator.CreateInstance<APL_DynamicListDataSourceManager>();
+            //if (APL_DynamicListDataSourceManager.Instance is null)
+            //    Activator.CreateInstance<APL_DynamicListDataSourceManager>();
         }
 
         public async Task<object> Post(AlexaRequest data)
@@ -142,9 +139,7 @@ namespace AlexaController.Api
                             outputSpeech = new OutputSpeech()
                             {
                                 phrase = "You are not a recognized user. Please take moment to register your voice profile.",
-
                             }
-
                         }, null);
                 }
 
@@ -185,7 +180,7 @@ namespace AlexaController.Api
 
                     directives = new List<IDirective>()
                     {
-                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, session)
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, session)
                     }
                 }, session);
             }
@@ -219,7 +214,7 @@ namespace AlexaController.Api
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                            await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                         }
                     }, null);
             }
@@ -235,8 +230,8 @@ namespace AlexaController.Api
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
-                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
+                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
         }

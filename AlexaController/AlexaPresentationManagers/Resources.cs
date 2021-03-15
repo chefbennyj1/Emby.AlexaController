@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using AlexaController.Alexa.Presentation.APL;
 
-namespace AlexaController.AlexaPresentationManagers.Resources
+namespace AlexaController.AlexaPresentationManagers
 {
-    public static class ResourceFactory
+    public static class Resources
     {
-        public static readonly List<Resource> Resources = new List<Resource>()
+        public static List<IResource> GetResources => new List<IResource>()
         {
             new Resource()
             {

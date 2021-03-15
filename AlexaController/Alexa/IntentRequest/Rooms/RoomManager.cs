@@ -37,8 +37,8 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
-                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
+                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
         }

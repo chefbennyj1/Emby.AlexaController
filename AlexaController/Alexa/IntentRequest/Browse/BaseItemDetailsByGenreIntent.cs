@@ -61,7 +61,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session)
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session)
                     }
                 }, Session);
             }
@@ -103,7 +103,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = result.Items[0];
             AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
-            var renderDocumentDirective = await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

@@ -41,7 +41,7 @@ namespace AlexaController.Alexa.IntentRequest
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -57,7 +57,7 @@ namespace AlexaController.Alexa.IntentRequest
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                            await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                         }
                     }, Session);
                 }
@@ -75,7 +75,7 @@ namespace AlexaController.Alexa.IntentRequest
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
 
             }, Session);

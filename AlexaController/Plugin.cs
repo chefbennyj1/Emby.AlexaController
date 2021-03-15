@@ -29,8 +29,8 @@ namespace AlexaController
             {
                 Name                 = "AlexaPluginConfigurationPage",
                 EmbeddedResourcePath = GetType().Namespace + ".Configuration.AlexaPluginConfigurationPage.html",
-                EnableInMainMenu = true,
-                DisplayName = "Alexa"
+                EnableInMainMenu     = true,
+                DisplayName          = "Alexa"
             },
             new PluginPageInfo
             {

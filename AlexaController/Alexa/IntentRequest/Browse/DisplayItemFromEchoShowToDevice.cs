@@ -47,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             var aplaDataSource       = await APLA_DataSourceManager.Instance.ItemBrowse(Session.NowViewingBaseItem, Session);
-            var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

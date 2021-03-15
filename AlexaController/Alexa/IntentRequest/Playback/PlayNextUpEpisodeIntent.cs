@@ -49,7 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     shouldEndSession = true,
                     directives = new List<IDirective>()
                     {
-                        await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
 
                     }
 
@@ -71,8 +71,8 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
-                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session),
-                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session),
+                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);
         }

@@ -1,11 +1,9 @@
 ﻿using AlexaController.Exceptions;
 using AlexaController.Session;
-using MediaBrowser.Controller;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
-using MediaBrowser.Controller.TV;
 using MediaBrowser.Model.Activity;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Session;
@@ -18,26 +16,20 @@ namespace AlexaController
 {
     public class ServerController : IServerEntryPoint
     {
-        private IServerApplicationHost Host { get; }
-        private IUserManager UserManager { get; }
-        private ILibraryManager LibraryManager { get; }
-        private ITVSeriesManager TvSeriesManager { get; }
-        private ISessionManager SessionManager { get; }
+        private IUserManager UserManager         { get; }
+        private ISessionManager SessionManager   { get; }
         private IActivityManager ActivityManager { get; set; }
-        public ILogger Log { get; }
-        public static ServerController Instance { get; private set; }
+        public ILogger Log                       { get; }
+        public static ServerController Instance  { get; private set; }
 
         // ReSharper disable once TooManyDependencies
-        public ServerController(ILogManager logMan, ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IActivityManager activityManager, IUserManager userManager)
+        public ServerController(ILogManager logMan, ISessionManager sesMan, IActivityManager activityManager, IUserManager userManager)
         {
-            Host = host;
-            LibraryManager = libMan;
-            TvSeriesManager = tvMan;
-            SessionManager = sesMan;
-            UserManager = userManager;
+            SessionManager  = sesMan;
+            UserManager     = userManager;
             ActivityManager = activityManager;
-            Log = logMan.GetLogger(Plugin.Instance.Name);
-            Instance = this;
+            Log             = logMan.GetLogger(Plugin.Instance.Name);
+            Instance        = this;
         }
 
         public async Task SendMessageToPluginConfigurationPage<T>(string name, T data)
@@ -81,30 +73,10 @@ namespace AlexaController
                 throw new Exception("I was unable to browse to the home page.");
             }
         }
-
-        public async Task GoBack(string room, User user)
-        {
-            try
-            {
-                var deviceId = ServerQuery.Instance.GetDeviceIdFromRoomName(room);
-                var session = ServerQuery.Instance.GetSession(deviceId);
-
-                await SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
-                {
-                    Name = "Back",
-                    ControllingUserId = user.Id.ToString(),
-
-                }, CancellationToken.None);
-            }
-            catch
-            {
-
-            }
-        }
-
+        
         public async Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request)
         {
-            var deviceId = string.Empty;
+            string deviceId;
             try
             {
                 deviceId = ServerQuery.Instance.GetDeviceIdFromRoomName(alexaSession.room.Name);
@@ -179,13 +151,13 @@ namespace AlexaController
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            
         }
 
         // ReSharper disable once MethodNameNotMeaningful
         public void Run()
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

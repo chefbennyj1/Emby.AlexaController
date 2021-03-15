@@ -76,8 +76,8 @@ namespace AlexaController.Alexa.IntentRequest
 
                         AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-                        var renderDocumentDirective = await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-                        var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+                        var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
+                        var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
@@ -95,7 +95,7 @@ namespace AlexaController.Alexa.IntentRequest
                     {
                         aplaDataSource = await APLA_DataSourceManager.Instance.NewItemsAplaOnly(results, d);
 
-                        var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+                        var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
                             shouldEndSession = true,

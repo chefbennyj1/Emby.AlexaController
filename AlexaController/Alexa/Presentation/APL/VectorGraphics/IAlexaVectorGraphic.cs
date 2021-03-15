@@ -2,7 +2,19 @@
 
 namespace AlexaController.Alexa.Presentation.APL.VectorGraphics
 {
-    public class AlexaVectorGraphic
+    public interface IAlexaVectorGraphic
+    {
+        string type { get; }
+        string version { get; }
+        int height { get; set; }
+        int width { get; set; }
+        int viewportHeight { get; set; }
+        int viewportWidth { get; set; }
+        List<string> parameters { get; set; }
+        List<IVectorGraphic> items { get; set; }
+    }
+
+    public class AlexaVectorGraphic : IAlexaVectorGraphic
     {
         public string type => "AVG";
         public string version => "1.0";

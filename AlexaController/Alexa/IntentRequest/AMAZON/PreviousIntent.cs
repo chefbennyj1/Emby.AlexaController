@@ -13,12 +13,12 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
     // ReSharper disable once UnusedType.Global
-    public class PreviousIntent : IIntentResponse
+    public class PreviousIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>,IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
 
-        public PreviousIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public PreviousIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;
@@ -26,8 +26,8 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         public async Task<string> Response()
         {
             var sessionPaging = Session.paging;
-            var previousPage = sessionPaging.pages[sessionPaging.currentPage - 1] as DataSource<MediaItem>;
-            var currentPage = sessionPaging.pages[sessionPaging.currentPage] as DataSource<MediaItem>;
+            var previousPage  = sessionPaging.pages[sessionPaging.currentPage - 1] as DataSource<MediaItem>;
+            var currentPage   = sessionPaging.pages[sessionPaging.currentPage] as DataSource<MediaItem>;
             AlexaSessionManager.Instance.UpdateSession(Session, currentPage, true);
 
             var properties = previousPage?.properties as Properties<MediaItem>;
@@ -54,7 +54,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(previousPage, Session)
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(previousPage, Session)
                 }
 
             }, Session);

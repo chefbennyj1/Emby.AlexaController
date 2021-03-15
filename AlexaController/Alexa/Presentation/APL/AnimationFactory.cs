@@ -5,7 +5,7 @@ using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 
 namespace AlexaController.Alexa.Presentation.APL
 {
-    public class AnimationFactory
+    public class Animations
     {
         public static async Task<ICommand> FadeOut(string componentId = null, int? duration = null, int? delay = null)
         {

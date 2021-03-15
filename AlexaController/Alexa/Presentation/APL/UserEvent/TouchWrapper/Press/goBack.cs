@@ -46,7 +46,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(previousPage, session);
+            var renderDocumentDirective = RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(previousPage, session);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using AlexaController.Alexa.Presentation.APL;
 
-namespace AlexaController.AlexaPresentationManagers.Imports
+namespace AlexaController.AlexaPresentationManagers
 {
-    public static class ImportsFactory
+    public static class Imports
     {
-        public static readonly List<Import> Imports = new List<Import>()
+        public static List<IImport> GetImports => new List<IImport>()
         {
             new Import()
             {

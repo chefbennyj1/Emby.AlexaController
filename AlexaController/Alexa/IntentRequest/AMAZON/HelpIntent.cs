@@ -35,7 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<List<Value>>(dataSource, Session)
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<List<Value>>(dataSource, Session)
                 }
             }, Session);
         }

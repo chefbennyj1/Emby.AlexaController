@@ -46,7 +46,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, Session)
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, Session)
                     }
 
                 }, Session);

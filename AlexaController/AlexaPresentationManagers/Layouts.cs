@@ -11,9 +11,9 @@ using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 
-namespace AlexaController.AlexaPresentationManagers.Layouts
+namespace AlexaController.AlexaPresentationManagers
 {
-    public abstract class LayoutFactory
+    public abstract class Layouts
     {
         protected static async Task<List<IComponent>> RenderItemListSequenceLayout(IDataSource dataSource, IAlexaSession session)
         {
@@ -66,7 +66,7 @@ namespace AlexaController.AlexaPresentationManagers.Layouts
                                    commands = new List<ICommand>()
                                    {
                                        new SpeakItem() { componentId = "${data.id}" },
-                                       new Command()   { type = nameof(AnimationFactory.ScaleInOutOnPress) },
+                                       new Command()   { type = nameof(Animations.ScaleInOutOnPress) },
                                        new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
                                    }
                                 },
@@ -90,7 +90,7 @@ namespace AlexaController.AlexaPresentationManagers.Layouts
                                 repeatCount = 15,
                                 commands = new List<ICommand>()
                                 {
-                                    await AnimationFactory.FadeOut("hint", 1020, 5000),
+                                    await Animations.FadeOut("hint", 1020, 5000),
                                     new SetValue()
                                     {
                                         componentId = "hint",
@@ -99,7 +99,7 @@ namespace AlexaController.AlexaPresentationManagers.Layouts
                                                        "${payload.templateData.properties.items[Time.seconds(localTime/payload.templateData.properties.items.length) " +
                                                        "% payload.templateData.properties.items.length].name}\"",
                                     },
-                                    await AnimationFactory.FadeIn("hint", 1020, 2500)
+                                    await Animations.FadeIn("hint", 1020, 2500)
                                 }
                             }
                         }
@@ -184,11 +184,11 @@ namespace AlexaController.AlexaPresentationManagers.Layouts
                     color        = "white",
                     top          = "-1vw",
                     id           = "goBack",
-                    primaryAction = new Alexa.Presentation.APL.Commands.Parallel()
+                    primaryAction = new Parallel()
                     {
                         commands = new List<ICommand>()
                         {
-                           new Command() { type = nameof(AnimationFactory.ScaleInOutOnPress) },
+                           new Command() { type = nameof(Animations.ScaleInOutOnPress) },
                            new SendEvent() { arguments = new List<object>() { "goBack" } }
                         }
                     }
@@ -356,11 +356,11 @@ namespace AlexaController.AlexaPresentationManagers.Layouts
                                     width = "225px",
                                     source = "${payload.templateData.properties.url}${data.thumbImageSource}",
                                 },
-                                onPress = new Alexa.Presentation.APL.Commands.Parallel()
+                                onPress = new Parallel()
                                 {
                                     commands = new List<ICommand>()
                                     {
-                                        new Command() { type = nameof(AnimationFactory.ScaleInOutOnPress) },
+                                        new Command() { type = nameof(Animations.ScaleInOutOnPress) },
                                         new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
                                     }
                                 }
@@ -688,7 +688,7 @@ namespace AlexaController.AlexaPresentationManagers.Layouts
                                                             }
                                                         },
                                                         //Fade
-                                                        await AnimationFactory.FadeOut("logoAlexa", 1000, 1000)
+                                                        await Animations.FadeOut("logoAlexa", 1000, 1000)
                                                     }
                                                 }
 
@@ -759,7 +759,7 @@ namespace AlexaController.AlexaPresentationManagers.Layouts
                                                                 }
                                                             }
                                                         },
-                                                        await AnimationFactory.FadeOut("logoEmby", 1000, 1000)
+                                                        await Animations.FadeOut("logoEmby", 1000, 1000)
                                                     }
                                                 }
 
@@ -900,7 +900,7 @@ namespace AlexaController.AlexaPresentationManagers.Layouts
                                 {
                                     commands = new List<ICommand>()
                                     {
-                                        new Command()   { type = nameof(AnimationFactory.ScaleInOutOnPress) },
+                                        new Command()   { type = nameof(Animations.ScaleInOutOnPress) },
                                     }
                                 },
                                 new SendEvent() { arguments = args },

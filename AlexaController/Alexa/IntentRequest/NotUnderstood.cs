@@ -27,8 +27,8 @@ namespace AlexaController.Alexa.IntentRequest
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                     await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
-                     await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                     await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
+                     await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);
         }

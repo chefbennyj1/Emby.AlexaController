@@ -4,7 +4,6 @@ namespace AlexaController.Alexa.ResponseModel
 {
     public interface IResponse
     {
-        //IPerson person              { get; }
         bool SpeakUserName { get; set; }
         OutputSpeech outputSpeech { get; }
         Reprompt reprompt { get; set; }
@@ -17,7 +16,6 @@ namespace AlexaController.Alexa.ResponseModel
 
     public class Response : IResponse
     {
-        //public IPerson person              { get; set; }
         public OutputSpeech outputSpeech { get; set; }
         public Reprompt reprompt { get; set; }
         public Card card { get; set; } = null;

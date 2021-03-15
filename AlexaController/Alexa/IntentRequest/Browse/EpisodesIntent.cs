@@ -61,7 +61,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -90,8 +90,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.NowViewingBaseItem = season;
             AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-            var renderDocumentDirective = await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-            var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
+            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

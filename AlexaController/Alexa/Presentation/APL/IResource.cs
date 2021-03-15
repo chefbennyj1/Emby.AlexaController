@@ -1,7 +1,14 @@
 ﻿namespace AlexaController.Alexa.Presentation.APL
 {
+    public interface IResource
+    {
+        string description { get; set; }
+        Colors colors { get; set; }
+        string when { get; set; }
+        Dimensions dimensions { get; set; }
+    }
 
-    public class Resource
+    public class Resource : IResource
     {
         public string description { get; set; }
         public Colors colors { get; set; }

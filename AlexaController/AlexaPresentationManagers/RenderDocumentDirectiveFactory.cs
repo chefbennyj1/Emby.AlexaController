@@ -9,27 +9,21 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers.Imports;
-using AlexaController.AlexaPresentationManagers.Layouts;
-using AlexaController.AlexaPresentationManagers.Resources;
-using AlexaController.AlexaPresentationManagers.VectorGraphics;
 using AlexaController.Session;
 
-// ReSharper disable twice InconsistentNaming
-
 /*
- * Echo Display Devices use the **LAN address** for Images when using the skill on the same network as emby server (ex. 192.168.X.XXX:8096)
+ * Echo Display Devices use the **LAN address** for Images when using the skill on the same network as emby service (ex. 192.168.X.XXX:8096)
  * We do not need to serve media requests over https like the documentation implies while using APL 1.1.
  * https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-image.html
  */
 
 namespace AlexaController.AlexaPresentationManagers
 {
-    public class APL_RenderDocumentManager : LayoutFactory
+    public class RenderDocumentDirectiveFactory : Layouts
     {
-        public static APL_RenderDocumentManager Instance { get; private set; }
+        public static RenderDocumentDirectiveFactory Instance { get; private set; }
 
-        public APL_RenderDocumentManager()
+        public RenderDocumentDirectiveFactory()
         {
             Instance = this;
         }
@@ -63,16 +57,17 @@ namespace AlexaController.AlexaPresentationManagers
             return await Task.FromResult(new AplRenderDocumentDirective()
             {
                 token = properties.documentType.ToString(),
-                document = new Document()
+                // ReSharper disable once RedundantNameQualifier
+                document = new Alexa.Presentation.APL.Document()
                 {
                     theme     = "${payload.templateData.properties.theme}",
-                    import    = ImportsFactory.Imports,
-                    resources = ResourceFactory.Resources,
-                    graphics  = VectorGraphicsFactory.VectorGraphics,
+                    import    = Imports.GetImports,
+                    resources = Resources.GetResources,
+                    graphics  = VectorGraphics.GetVectorGraphics,
                     commands  = new Dictionary<string, ICommand>()
                     {
-                        { nameof(AnimationFactory.ScaleInOutOnPress), await AnimationFactory.ScaleInOutOnPress() },
-                        { nameof(AnimationFactory.FadeIn), await AnimationFactory.FadeIn() }
+                        { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() },
+                        { nameof(Animations.FadeIn), await Animations.FadeIn() }
                     },
                     mainTemplate = new MainTemplate()
                     {
@@ -100,5 +95,28 @@ namespace AlexaController.AlexaPresentationManagers
             });
         }
 
+        public async Task<IDirective> GetAudioDirectiveAsync(IDataSource dataSource)
+        {
+            return await Task.FromResult(new AplaRenderDocumentDirective()
+            {
+                token = "AplAudioSpeech",
+                document = new Alexa.Presentation.APLA.Document()
+                {
+                    mainTemplate = new MainTemplate()
+                    {
+                        parameters = new List<string>() {"payload"},
+                        item = new Mixer()
+                        {
+                            items = new List<AudioBaseComponent>()
+                            {
+                                new Speech() {content = "<speak>${payload.templateData.properties.value}</speak>"},
+                                new Audio() {source = "${payload.templateData.properties.audioUrl}"}
+                            }
+                        }
+                    }
+                },
+                datasources = new Dictionary<string, IDataSource>() {{"templateData", dataSource}}
+            });
+        }
     }
 }

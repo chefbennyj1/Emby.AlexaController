@@ -57,8 +57,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
-                        await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
+                        await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
 
                     }
                 }, Session);
@@ -82,8 +82,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
-                        await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
+                        await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -112,8 +112,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource),
-                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
+                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource),
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
                 }
 
             }, Session);

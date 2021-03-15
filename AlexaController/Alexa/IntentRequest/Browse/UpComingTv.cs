@@ -48,8 +48,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource),
-                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
+                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource),
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
                 }
 
             }, Session);

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 
-namespace AlexaController.AlexaPresentationManagers.VectorGraphics
+namespace AlexaController.AlexaPresentationManagers
 {
-    public static class VectorGraphicsFactory
+    public static class VectorGraphics
     {
-        public static readonly Dictionary<string, AlexaVectorGraphic> VectorGraphics = new Dictionary<string, AlexaVectorGraphic>
+        public static Dictionary<string, IAlexaVectorGraphic> GetVectorGraphics => new Dictionary<string, IAlexaVectorGraphic>
         {
             {
                 "CheckMark", new AlexaVectorGraphic()

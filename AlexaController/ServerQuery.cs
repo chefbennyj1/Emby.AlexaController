@@ -19,27 +19,26 @@ using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController
 {
-
     // ReSharper disable once ClassTooBig
     public class ServerQuery : SearchUtility, IServerEntryPoint
     {
-        private IServerApplicationHost Host { get; }
-        private IUserManager UserManager { get; }
-        private ILibraryManager LibraryManager { get; }
+        private IServerApplicationHost Host      { get; }
+        private IUserManager UserManager         { get; }
+        private ILibraryManager LibraryManager   { get; }
         private ITVSeriesManager TvSeriesManager { get; }
-        private ISessionManager SessionManager { get; }
+        private ISessionManager SessionManager   { get; }
 
         public static ServerQuery Instance { get; private set; }
 
         // ReSharper disable once TooManyDependencies
         public ServerQuery(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IUserManager userManager) : base(libMan, userManager)
         {
-            Host = host;
-            LibraryManager = libMan;
+            Host            = host;
+            LibraryManager  = libMan;
             TvSeriesManager = tvMan;
-            SessionManager = sesMan;
-            UserManager = userManager;
-            Instance = this;
+            SessionManager  = sesMan;
+            UserManager     = userManager;
+            Instance        = this;
         }
 
         public IEnumerable<SessionInfo> GetCurrentSessions()
@@ -62,9 +61,9 @@ namespace AlexaController
         {
             var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
             {
-                Parent = parent,
+                Parent           = parent,
                 IncludeItemTypes = types,
-                Recursive = true
+                Recursive        = true
             });
             return result;
         }
@@ -78,10 +77,10 @@ namespace AlexaController
         {
             var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
             {
-                Parent = parent,
-                IncludeItemTypes = new[] { "Episode" },
+                Parent            = parent,
+                IncludeItemTypes  = new[] { "Episode" },
                 ParentIndexNumber = seasonNumber,
-                Recursive = true
+                Recursive         = true
             });
             return result.Items.ToList();
         }
@@ -120,13 +119,13 @@ namespace AlexaController
             var result = QuerySpeechResultItem(collectionName, new[] { "BoxSet" });
 
             ServerController.Instance.Log.Info("Search found collection item: " + result.Name);
-            var users = UserManager.Users;
+            var users         = UserManager.Users;
             var administrator = users.FirstOrDefault(u => u.Policy.IsAdministrator);
-            var collection = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
+            var collection    = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
             {
-                ListIds = new[] { result.InternalId },
+                ListIds        = new[] { result.InternalId },
                 EnableAutoSort = true,
-                OrderBy = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray(),
+                OrderBy        = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray(),
 
             });
 
@@ -140,11 +139,11 @@ namespace AlexaController
             var results = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 IncludeItemTypes = new[] { "Movie" },
-                User = user,
-                MinDateCreated = duration,
-                Limit = 20,
-                EnableAutoSort = true,
-                OrderBy = new[] { ItemSortBy.DateCreated }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Descending)).ToArray()
+                User             = user,
+                MinDateCreated   = duration,
+                Limit            = 20,
+                EnableAutoSort   = true,
+                OrderBy          = new[] { ItemSortBy.DateCreated }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Descending)).ToArray()
             });
 
             return results.Select(id => LibraryManager.GetItemById(id)).ToList();
@@ -156,11 +155,11 @@ namespace AlexaController
             var results = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 IncludeItemTypes = new[] { "Episode" },
-                User = user,
-                MinDateCreated = duration,
-                IsPlayed = false,
-                EnableAutoSort = true,
-                OrderBy = new[] { ItemSortBy.DateCreated }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Descending)).ToArray()
+                User             = user,
+                MinDateCreated   = duration,
+                IsPlayed         = false,
+                EnableAutoSort   = true,
+                OrderBy          = new[] { ItemSortBy.DateCreated }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Descending)).ToArray()
             });
 
             return results.Select(id => LibraryManager.GetItemById(id).Parent.Parent).Distinct().ToList();
@@ -202,10 +201,10 @@ namespace AlexaController
         {
             return LibraryManager.GetItemsResult(new InternalItemsQuery()
             {
-                Genres = genres,
+                Genres           = genres,
                 IncludeItemTypes = type,
-                Recursive = true,
-                Limit = 15
+                Recursive        = true,
+                Limit            = 15
             });
         }
 
@@ -215,25 +214,24 @@ namespace AlexaController
 
             foreach (var actor in actorNames)
             {
-                var actorName = StringNormalization.ValidateSpeechQueryString(actor);
+                var actorName  = StringNormalization.ValidateSpeechQueryString(actor);
                 var actorQuery = LibraryManager.GetItemsResult(new InternalItemsQuery()
                 {
                     IncludeItemTypes = new[] { "Person" },
-                    SearchTerm = actorName,
-                    Recursive = true
+                    SearchTerm       = actorName,
+                    Recursive        = true
                 });
 
                 if (actorQuery.TotalRecordCount <= 0) continue;
 
                 actors.Add(actorQuery.Items[0]);
             }
-
-
+            
             var query = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
             {
                 IncludeItemTypes = new[] { "Series", "Movie" },
-                Recursive = true,
-                PersonIds = actors.Select(a => a.InternalId).ToArray()
+                Recursive        = true,
+                PersonIds        = actors.Select(a => a.InternalId).ToArray()
             });
 
             return new Dictionary<List<BaseItem>, List<BaseItem>>() { { actors, query.Items.ToList() } };
@@ -244,14 +242,13 @@ namespace AlexaController
         {
             return await Task.FromResult(LibraryManager.GetItemsResult(new InternalItemsQuery()
             {
-                MinPremiereDate = DateTime.Now.AddDays(-1),
+                MinPremiereDate  = DateTime.Now.AddDays(-1),
                 IncludeItemTypes = new[] { "Episode" },
-                MaxPremiereDate = duration,
-                OrderBy = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray()
+                MaxPremiereDate  = duration,
+                OrderBy          = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray()
             }));
 
         }
-
 
         public string GetRunTime(BaseItem baseItem)
         {
@@ -268,7 +265,6 @@ namespace AlexaController
 
         public string GetPrimaryImageSource(BaseItem item)
         {
-
             if (item.GetType().Name != "Episode")
             {
                 return $"/Items/{item.InternalId}/Images/primary?quality=90&amp;maxHeight=1008&amp;maxWidth=700&amp;";
@@ -281,7 +277,6 @@ namespace AlexaController
 
         public string GetBackdropImageSource(BaseItem item)
         {
-
             switch (item.GetType().Name)
             {
                 case "Episode": return $"/Items/{item.Parent.Parent.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
@@ -293,26 +288,24 @@ namespace AlexaController
         public string GetThumbImageSource(BaseItem item)
         {
             var internalId = item.InternalId;
-            return $"/Items/{internalId}/Images/thumb?quality=90&maxWidth=225";
+            return item.HasImage(ImageType.Thumb) 
+                ? $"/Items/{internalId}/Images/thumb?quality=90&maxWidth=225" 
+                : $"/Items/{internalId}/Images/backdrop?quality=90&maxWidth=225";
         }
 
         public string GetLogoImageSource(BaseItem item)
         {
-            BaseItem itemData = null;
             switch (item.GetType().Name)
             {
-                default:
-                    itemData = item;
-                    break;
                 case "Season":
-                    itemData = item.Parent;
+                    item = item.Parent;
                     break;
                 case "Episode":
-                    itemData = item.Parent.Parent;
+                    item = item.Parent.Parent;
                     break;
             }
-            return itemData.HasImage(ImageType.Logo)
-                ? $"/Items/{itemData.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
+            return item.HasImage(ImageType.Logo)
+                ? $"/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
         }
 
         public string GetVideoBackdropImageSource(BaseItem item)
@@ -323,9 +316,9 @@ namespace AlexaController
 
         public List<BaseItem> GetSimilarItems(BaseItem item)
         {
-            var users = UserManager.Users;
+            var users         = UserManager.Users;
             var administrator = users.FirstOrDefault(u => u.Policy.IsAdministrator);
-            var similarQuery = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
+            var similarQuery  = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
             {
                 SimilarTo = item,
                 Recursive = true,
@@ -333,7 +326,6 @@ namespace AlexaController
             });
 
             return similarQuery.Items.Take(4).ToList();
-
         }
 
         public string GetGenres(BaseItem item)

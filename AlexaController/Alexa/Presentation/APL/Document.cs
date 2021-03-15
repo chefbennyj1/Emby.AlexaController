@@ -10,11 +10,11 @@ namespace AlexaController.Alexa.Presentation.APL
         public string version => "1.1";
         public Settings settings { get; set; }
         public string theme { get; set; }
-        public List<Import> import { get; set; }
-        public List<Resource> resources { get; set; }
+        public List<IImport> import { get; set; }
+        public List<IResource> resources { get; set; }
         public List<ICommand> onMount { get; set; }
         public IMainTemplate mainTemplate { get; set; }
-        public Dictionary<string, AlexaVectorGraphic> graphics { get; set; }
+        public Dictionary<string, IAlexaVectorGraphic> graphics { get; set; }
         public Dictionary<string, ICommand> commands { get; set; }
 
     }
