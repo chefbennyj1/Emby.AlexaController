@@ -1,21 +1,19 @@
-﻿using AlexaController.Alexa.Presentation;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
-using AlexaController.Alexa.SpeechSynthesis;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Document = AlexaController.Alexa.Presentation.APLA.Document;
 
-namespace AlexaController.PresentationManagers
+namespace AlexaController.AlexaPresentationManagers
 {
-
-    public class AplaRenderDocumentDirectiveManager : Ssml
+    public class APLA_RenderDocumentManager 
     {
-        public static AplaRenderDocumentDirectiveManager Instance { get; private set; }
+        public static APLA_RenderDocumentManager Instance { get; private set; }
 
-        public AplaRenderDocumentDirectiveManager()
+        public APLA_RenderDocumentManager()
         {
             Instance = this;
         }
@@ -24,7 +22,7 @@ namespace AlexaController.PresentationManagers
         {
             return await Task.FromResult(new AplaRenderDocumentDirective()
             {
-                token = "AplSpeech",
+                token = "AplAudioSpeech",
                 document = new Document()
                 {
                     mainTemplate = new MainTemplate()
@@ -35,11 +33,9 @@ namespace AlexaController.PresentationManagers
                             items = new List<AudioBaseComponent>()
                             {
                                 new Speech() { content = "<speak>${payload.templateData.properties.value}</speak>" },
-                                new Audio()  { source = "${payload.templateData.properties.audioUrl}"}
-                            },
-
+                                new Audio()  { source  = "${payload.templateData.properties.audioUrl}"}
+                            }
                         }
-
                     }
                 },
                 datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource } }

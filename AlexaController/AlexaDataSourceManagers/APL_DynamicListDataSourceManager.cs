@@ -1,9 +1,9 @@
-﻿namespace AlexaController.DataSourceManagers
+﻿namespace AlexaController.AlexaDataSourceManagers
 {
-    public class AplDynamicListDataSourceManager
+    public class APL_DynamicListDataSourceManager
     {
-        public static AplDynamicListDataSourceManager Instance { get; set; }
-        public AplDynamicListDataSourceManager()
+        public static APL_DynamicListDataSourceManager Instance { get; set; }
+        public APL_DynamicListDataSourceManager()
         {
             Instance = this;
         }

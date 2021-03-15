@@ -1,19 +1,19 @@
-﻿using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Presentation.DataSources.Transformers;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using AlexaController.Session;
-using MediaBrowser.Controller.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.Presentation.DataSources.Transformers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.Session;
+using MediaBrowser.Controller.Entities;
 
-namespace AlexaController.DataSourceManagers
+namespace AlexaController.AlexaDataSourceManagers
 {
-    public class AplObjectDataSourceManager
+    public class APL_DataSourceManager
     {
-        public static AplObjectDataSourceManager Instance { get; private set; }
+        public static APL_DataSourceManager Instance { get; private set; }
 
-        public AplObjectDataSourceManager()
+        public APL_DataSourceManager()
         {
             Instance = this;
         }
@@ -56,7 +56,7 @@ namespace AlexaController.DataSourceManagers
                 properties = new Properties<MediaItem>()
                 {
                     url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                    documentType = RenderDocumentType.ITEM_LIST_SEQUENCE_TEMPLATE,
+                    documentType = RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE,
                     items = mediaItems,
                     item = mediaItem
                 },
@@ -76,23 +76,23 @@ namespace AlexaController.DataSourceManagers
         {
             var mediaItem = new MediaItem()
             {
-                type = item.GetType().Name,
-                isPlayed = item.IsPlayed(session.User),
-                primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(item),
-                id = item.InternalId,
-                name = item.Name,
-                premiereDate = item.ProductionYear.ToString(),
-                officialRating = item.OfficialRating,
-                tagLine = item.Tagline,
-                runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
-                endTime = ServerQuery.Instance.GetEndTime(item),
-                genres = ServerQuery.Instance.GetGenres(item),
-                logoImageSource = ServerQuery.Instance.GetLogoImageSource(item),
-                overview = item.Overview,
+                type                = item.GetType().Name,
+                isPlayed            = item.IsPlayed(session.User),
+                primaryImageSource  = ServerQuery.Instance.GetPrimaryImageSource(item),
+                id                  = item.InternalId,
+                name                = item.Name,
+                premiereDate        = item.ProductionYear.ToString(),
+                officialRating      = item.OfficialRating,
+                tagLine             = item.Tagline,
+                runtimeMinutes      = ServerQuery.Instance.GetRunTime(item),
+                endTime             = ServerQuery.Instance.GetEndTime(item),
+                genres              = ServerQuery.Instance.GetGenres(item),
+                logoImageSource     = ServerQuery.Instance.GetLogoImageSource(item),
+                overview            = item.Overview,
                 videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
                 backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item),
-                videoOverlaySource = "/EmptyPng?quality=90",
-                themeAudioSource = ServerQuery.Instance.GetThemeSongSource(item)
+                videoOverlaySource  = "/EmptyPng?quality=90",
+                themeAudioSource    = ServerQuery.Instance.GetThemeSongSource(item)
             };
 
             var similarItems = ServerQuery.Instance.GetSimilarItems(item);
@@ -110,7 +110,7 @@ namespace AlexaController.DataSourceManagers
                 properties = new Properties<MediaItem>()
                 {
                     url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                    documentType = RenderDocumentType.ITEM_DETAILS_TEMPLATE,
+                    documentType = RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE,
                     similarItems = recommendedItems,
                     item = mediaItem
                 },
@@ -176,7 +176,7 @@ namespace AlexaController.DataSourceManagers
             {
                 properties = new Properties<List<Value>>
                 {
-                    documentType = RenderDocumentType.HELP,
+                    documentType = RenderDocumentType.HELP_TEMPLATE,
                     values = helpContent
                 },
                 transformers = new List<ITransformer>()
@@ -196,7 +196,7 @@ namespace AlexaController.DataSourceManagers
             {
                 properties = new Properties<string>()
                 {
-                    documentType = RenderDocumentType.GENERIC_VIEW,
+                    documentType = RenderDocumentType.GENERIC_VIEW_TEMPLATE,
                     text = text,
                     url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
                     videoUrl = videoUrl

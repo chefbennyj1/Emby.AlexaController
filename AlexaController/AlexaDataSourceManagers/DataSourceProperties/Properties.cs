@@ -1,7 +1,7 @@
-﻿using AlexaController.Alexa.Presentation.DataSources.Properties;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using AlexaController.Alexa.Presentation.DataSources.Properties;
 
-namespace AlexaController.DataSourceManagers.DataSourceProperties
+namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
 {
     public class Properties<T> : BaseDataSourceProperties<T> where T : class
     {

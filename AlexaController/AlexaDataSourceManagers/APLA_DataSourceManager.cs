@@ -1,19 +1,19 @@
-﻿using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.SpeechSynthesis;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using AlexaController.Session;
-using AlexaController.Utils;
-using MediaBrowser.Controller.Entities;
-using MediaBrowser.Model.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.SpeechSynthesis;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.Session;
+using AlexaController.Utils;
+using MediaBrowser.Controller.Entities;
+using MediaBrowser.Model.Extensions;
 
-namespace AlexaController.DataSourceManagers
+namespace AlexaController.AlexaDataSourceManagers
 {
-    public class AplAudioDataSourceManager : Ssml
+    public class APLA_DataSourceManager : Ssml
     {
         private enum SpeechPrefix
         {
@@ -28,9 +28,9 @@ namespace AlexaController.DataSourceManagers
 
         private static readonly Random RandomIndex = new Random();
 
-        public static AplAudioDataSourceManager Instance { get; private set; }
+        public static APLA_DataSourceManager Instance { get; private set; }
 
-        public AplAudioDataSourceManager()
+        public APLA_DataSourceManager()
         {
             Instance = this;
         }
@@ -40,7 +40,6 @@ namespace AlexaController.DataSourceManagers
             "I'm Sorry about this.",
             "Apologies.",
             "I apologize.",
-            "I'm sorry about this.",
             "I'm Sorry.",
             ""
         };
@@ -75,15 +74,13 @@ namespace AlexaController.DataSourceManagers
             $"{ExpressiveInterjection("hmm")}...",
         };
 
-
         public async Task<IDataSource> ReadItemOverview(BaseItem item)
         {
             var speech = new StringBuilder();
             speech.Append(item.Name);
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(item.Overview);
-            //var audioUrl = await ServerQuery.Instance.GetLocalApiUrlAsync();
-            //audioUrl += ServerQuery.Instance.GetThemeSongSource(item);
+            
             return await Task.FromResult(new DataSource<string>()
             {
                 properties = new Properties<string>()

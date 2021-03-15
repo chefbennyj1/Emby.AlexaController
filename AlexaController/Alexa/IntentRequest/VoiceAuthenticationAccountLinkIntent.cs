@@ -2,12 +2,12 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaPresentationManagers;
 
 
 namespace AlexaController.Alexa.IntentRequest
@@ -34,14 +34,14 @@ namespace AlexaController.Alexa.IntentRequest
 
             if (person is null)
             {
-                aplaDataSource = await AplAudioDataSourceManager.Instance.VoiceAuthenticationAccountLinkError();
+                aplaDataSource = await APLA_DataSourceManager.Instance.VoiceAuthenticationAccountLinkError();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                     }
                 }, Session);
             }
@@ -50,14 +50,14 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
-                    aplaDataSource = await AplAudioDataSourceManager.Instance.VoiceAuthenticationExists(Session);
+                    aplaDataSource = await APLA_DataSourceManager.Instance.VoiceAuthenticationExists(Session);
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
                     {
                         shouldEndSession = true,
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                            await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                         }
                     }, Session);
                 }
@@ -67,7 +67,7 @@ namespace AlexaController.Alexa.IntentRequest
             Task.Run(() => ServerController.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 #pragma warning restore 4014
 
-            aplaDataSource = await AplAudioDataSourceManager.Instance.VoiceAuthenticationAccountLinkSuccess(Session);
+            aplaDataSource = await APLA_DataSourceManager.Instance.VoiceAuthenticationAccountLinkSuccess(Session);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
             {
@@ -75,7 +75,7 @@ namespace AlexaController.Alexa.IntentRequest
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
 
             }, Session);

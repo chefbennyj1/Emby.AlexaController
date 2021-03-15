@@ -3,14 +3,14 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -49,7 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result.TotalRecordCount <= 0)
             {
-                dataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that. Does that genre exist?", "/Question");
+                dataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that. Does that genre exist?", "/Question");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
@@ -61,7 +61,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session)
+                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session)
                     }
                 }, Session);
             }
@@ -97,13 +97,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            dataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList());
+            dataSource = await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList());
 
             //Update Session
             Session.NowViewingBaseItem = result.Items[0];
             AlexaSessionManager.Instance.UpdateSession(Session, dataSource);
 
-            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session);
+            var renderDocumentDirective = await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(dataSource, Session);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

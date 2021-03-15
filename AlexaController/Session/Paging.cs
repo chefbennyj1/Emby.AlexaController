@@ -1,7 +1,6 @@
 ﻿using AlexaController.Alexa.Presentation.DataSources;
 using System.Collections.Generic;
 
-
 namespace AlexaController.Session
 {
     public class Paging

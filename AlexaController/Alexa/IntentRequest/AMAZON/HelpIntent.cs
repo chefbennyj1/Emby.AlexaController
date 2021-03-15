@@ -1,12 +1,12 @@
 ﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Value = AlexaController.DataSourceManagers.DataSourceProperties.Value;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaPresentationManagers;
+using Value = AlexaController.AlexaDataSourceManagers.DataSourceProperties.Value;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
@@ -24,7 +24,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            var dataSource = await AplObjectDataSourceManager.Instance.GetHelpDataSourceAsync();
+            var dataSource = await APL_DataSourceManager.Instance.GetHelpDataSourceAsync();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
@@ -35,7 +35,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<List<Value>>(dataSource, Session)
+                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<List<Value>>(dataSource, Session)
                 }
             }, Session);
         }

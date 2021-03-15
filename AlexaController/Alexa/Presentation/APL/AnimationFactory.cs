@@ -7,14 +7,14 @@ namespace AlexaController.Alexa.Presentation.APL
 {
     public class AnimationFactory
     {
-        public static async Task<ICommand> FadeOutItem(string componentId, int duration, int? delay = null)
+        public static async Task<ICommand> FadeOut(string componentId = null, int? duration = null, int? delay = null)
         {
             return await Task.FromResult(new AnimateItem()
             {
                 componentId = componentId,
                 easing = "ease-in",
                 duration = duration,
-                delay = delay ?? 0,
+                delay = delay,
                 value = new List<IValue>()
                 {
                     new OpacityValue()
@@ -26,14 +26,15 @@ namespace AlexaController.Alexa.Presentation.APL
             });
         }
 
-        public static async Task<ICommand> FadeIn()
+        public static async Task<ICommand> FadeIn(string componentId = null, int? duration = null, int? delay = null)
         {
             return await Task.FromResult(
                 new AnimateItem()
                 {
+                    componentId = componentId,
                     easing = "ease-in",
-                    duration = 500,
-                    delay = 0,
+                    duration = duration ?? 500,
+                    delay = delay,
                     value = new List<IValue>()
                     {
                         new OpacityValue() { @from = 0, to = 1 }

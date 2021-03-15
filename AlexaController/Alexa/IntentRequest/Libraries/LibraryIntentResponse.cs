@@ -1,12 +1,12 @@
 ﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
 using AlexaController.Exceptions;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Libraries
 {
@@ -49,10 +49,10 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             session.PersistedRequestContextData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
-            var aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
-            var aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(result, session);
-            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session);
-            var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var aplDataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource($"Showing the {result.Name} library", "/MoviesLibrary");
+            var aplaDataSource = await APLA_DataSourceManager.Instance.ItemBrowse(result, session);
+            var renderDocumentDirective = await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session);
+            var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

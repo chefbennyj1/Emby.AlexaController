@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaPresentationManagers;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -46,8 +46,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 ServerController.Instance.Log.Error(exception.Message);
             }
 
-            var aplaDataSource       = await AplAudioDataSourceManager.Instance.ItemBrowse(Session.NowViewingBaseItem, Session);
-            var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var aplaDataSource       = await APLA_DataSourceManager.Instance.ItemBrowse(Session.NowViewingBaseItem, Session);
+            var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

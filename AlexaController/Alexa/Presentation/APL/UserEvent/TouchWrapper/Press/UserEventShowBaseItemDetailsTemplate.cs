@@ -1,11 +1,11 @@
 ﻿using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
@@ -26,8 +26,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room = session.room;
 
-            var aplDataSource = await AplObjectDataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
-            var aplaDataSource = await AplAudioDataSourceManager.Instance.ItemBrowse(baseItem, session);
+            var aplDataSource = await APL_DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
+            var aplaDataSource = await APLA_DataSourceManager.Instance.ItemBrowse(baseItem, session);
 
             // Update session data
             session.NowViewingBaseItem = baseItem;
@@ -49,8 +49,8 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, session);
-            var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderDocumentDirective = await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, session);
+            var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

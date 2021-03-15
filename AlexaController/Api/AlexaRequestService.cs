@@ -4,8 +4,6 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
-using AlexaController.DataSourceManagers;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Common.Net;
@@ -17,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaPresentationManagers;
 
 // ReSharper disable once TooManyDependencies
 // ReSharper disable once PossibleNullReferenceException
@@ -26,31 +26,31 @@ namespace AlexaController.Api
     public interface IAlexaRequest
     {
         AmazonSession session { get; set; }
-        Request request { get; set; }
-        Context context { get; set; }
-        string version { get; set; }
-        Event @event { get; set; }
+        Request request       { get; set; }
+        Context context       { get; set; }
+        string version        { get; set; }
+        Event @event          { get; set; }
     }
 
     [Route("/Alexa", "POST", Summary = "Alexa End Point")]
     public class AlexaRequest : IRequiresRequestStream, IAlexaRequest
     {
-        public Stream RequestStream { get; set; }
+        public Stream RequestStream  { get; set; }
         public AmazonSession session { get; set; }
-        public Request request { get; set; }
-        public Context context { get; set; }
-        public string version { get; set; }
-        public Event @event { get; set; }
+        public Request request       { get; set; }
+        public Context context       { get; set; }
+        public string version        { get; set; }
+        public Event @event          { get; set; }
     }
 
+    // ReSharper disable once UnusedType.Global
     public class AlexaRequestService : IService
     {
         private IJsonSerializer JsonSerializer { get; }
 
         private readonly Func<Intent, bool> IsVoiceAuthenticationAccountLinkRequest = intent => intent.name == "VoiceAuthenticationAccountLink";
         private readonly Func<Intent, bool> IsRoomNameIntentRequest = intent => intent.name == "Rooms_RoomNameIntent";
-
-
+        
         public AlexaRequestService(IJsonSerializer json, IHttpClient client, IUserManager user, ISessionManager sessionManager)
         {
             JsonSerializer = json;
@@ -67,20 +67,20 @@ namespace AlexaController.Api
             if (SpeechAuthorization.Instance is null)
                 Activator.CreateInstance(typeof(SpeechAuthorization), user);
 
-            if (AplRenderDocumentDirectiveManager.Instance is null)
-                Activator.CreateInstance<AplRenderDocumentDirectiveManager>();
+            if (APL_RenderDocumentManager.Instance is null)
+                Activator.CreateInstance<APL_RenderDocumentManager>();
 
-            if (AplaRenderDocumentDirectiveManager.Instance is null)
-                Activator.CreateInstance<AplaRenderDocumentDirectiveManager>();
+            if (APLA_RenderDocumentManager.Instance is null)
+                Activator.CreateInstance<APLA_RenderDocumentManager>();
 
-            if (AplObjectDataSourceManager.Instance is null)
-                Activator.CreateInstance<AplObjectDataSourceManager>();
+            if (APL_DataSourceManager.Instance is null)
+                Activator.CreateInstance<APL_DataSourceManager>();
 
-            if (AplAudioDataSourceManager.Instance is null)
-                Activator.CreateInstance<AplAudioDataSourceManager>();
+            if (APLA_DataSourceManager.Instance is null)
+                Activator.CreateInstance<APLA_DataSourceManager>();
 
-            if (AplDynamicListDataSourceManager.Instance is null)
-                Activator.CreateInstance<AplDynamicListDataSourceManager>();
+            if (APL_DynamicListDataSourceManager.Instance is null)
+                Activator.CreateInstance<APL_DynamicListDataSourceManager>();
         }
 
         public async Task<object> Post(AlexaRequest data)
@@ -94,28 +94,29 @@ namespace AlexaController.Api
 
                 switch (alexaRequest.request.type)
                 {
-                    case "Alexa.Presentation.APL.UserEvent": return await OnUserEvent(alexaRequest);
-                    case "Alexa.Presentation.APL.LoadIndexListData": return await OnLoadIndexListData(alexaRequest);
-                    case "IntentRequest": return await OnIntentRequest(alexaRequest);
-                    case "SessionEndedRequest": return await OnSessionEndRequest(alexaRequest);
-                    case "LaunchRequest": return await OnLaunchRequest(alexaRequest);
-                    case "System.ExceptionEncountered": return await OnExceptionEncountered();
-                    default: return await OnDefault();
+                    case "Alexa.Presentation.APL.UserEvent"         : return await OnUserEvent(alexaRequest);
+                    //case "Alexa.Presentation.APL.LoadIndexListData" : return await OnLoadIndexListData(alexaRequest);
+                    case "IntentRequest"                            : return await OnIntentRequest(alexaRequest);
+                    case "SessionEndedRequest"                      : return await OnSessionEndRequest(alexaRequest);
+                    case "LaunchRequest"                            : return await OnLaunchRequest(alexaRequest);
+                    case "System.ExceptionEncountered"              : return await OnExceptionEncountered();
+                    default                                         : return await OnDefault();
                 }
             }
         }
 
-        private async Task<string> OnLoadIndexListData(IAlexaRequest alexaRequest)
-        {
-            return await Task.FromResult("");
-        }
+        //private async Task<string> OnLoadIndexListData(IAlexaRequest alexaRequest)
+        //{
+        //    return await Task.FromResult("");
+        //}
         private async Task<string> OnExceptionEncountered()
         {
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                outputSpeech = new OutputSpeech() { phrase = "I have encountered an error." },
+                outputSpeech     = new OutputSpeech() { phrase = "I have encountered an error." },
                 shouldEndSession = true,
-                SpeakUserName = true
+                SpeakUserName    = true
+
             }, null);
         }
 
@@ -124,10 +125,10 @@ namespace AlexaController.Api
             IAlexaSession session = null;
 
             var request = alexaRequest.request;
-            var intent = request.intent;
+            var intent  = request.intent;
             var context = alexaRequest.context;
-            var system = context.System;
-            var person = system.person;
+            var system  = context.System;
+            var person  = system.person;
 
             if (!IsVoiceAuthenticationAccountLinkRequest(intent)) // create a session
             {
@@ -161,17 +162,19 @@ namespace AlexaController.Api
 
             try
             {
-                //Amazon Alexa Custom SKill Console does not allow "." in skill names.
-                //This would make creating namespace paths easier.
-                //Instead we save the skill name with "_", which replaces the "." in the reflected path to the corresponding .cs file.
-                //Replace the "_" (underscore) with a "." (period) to create the proper reflection path to the corresponding IntentRequest file.
+                /*
+                * Amazon Alexa Custom SKill Console does not allow "." in skill names.
+                * This would make creating namespace paths easier.
+                * Instead we save the skill name with "_", which replaces the "." in the reflected path to the corresponding .cs file.
+                * Replace the "_" (underscore) with a "." (period) to create the proper reflection path to the corresponding IntentRequest file.
+                */
                 var intentName = intent.name.Replace("_", ".");
 
                 return await GetResponseResult(Type.GetType($"AlexaController.Alexa.IntentRequest.{intentName}"), alexaRequest, session);
             }
             catch (Exception exception)
             {
-                var dataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource(exception.Message, "/particles");
+                var dataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource(exception.Message, "/particles");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -182,7 +185,7 @@ namespace AlexaController.Api
 
                     directives = new List<IDirective>()
                     {
-                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, session)
+                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, session)
                     }
                 }, session);
             }
@@ -204,11 +207,11 @@ namespace AlexaController.Api
         {
             var context = alexaRequest.context;
             var user = SpeechAuthorization.Instance.GetRecognizedPersonalizationProfileResult(context.System.person);
-            IDataSource aplaDataSource = null;
+            IDataSource aplaDataSource;
 
             if (user is null)
             {
-                aplaDataSource = await AplAudioDataSourceManager.Instance.PersonNotRecognized();
+                aplaDataSource = await APLA_DataSourceManager.Instance.PersonNotRecognized();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(
                     new Response()
                     {
@@ -216,22 +219,24 @@ namespace AlexaController.Api
                         SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                            await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                         }
                     }, null);
             }
 
-            var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-            var aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("Welcome to Home Theater Emby Controller", "/particles");
-            aplaDataSource = await AplAudioDataSourceManager.Instance.OnLaunch();
+            var session       = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
+            var aplDataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource("Welcome to Home Theater Emby Controller", "/particles");
+
+            aplaDataSource = await APLA_DataSourceManager.Instance.OnLaunch();
+
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
-                    await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
+                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
         }

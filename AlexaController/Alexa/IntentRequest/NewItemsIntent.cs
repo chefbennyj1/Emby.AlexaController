@@ -3,15 +3,15 @@ using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest
 {
@@ -71,13 +71,13 @@ namespace AlexaController.Alexa.IntentRequest
                 case ViewportProfile.HUB_LANDSCAPE_LARGE:
                     {
 
-                        aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
-                        aplaDataSource = await AplAudioDataSourceManager.Instance.GetNewItemsApl(results, d);
+                        aplDataSource = await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
+                        aplaDataSource = await APLA_DataSourceManager.Instance.GetNewItemsApl(results, d);
 
                         AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-                        var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-                        var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+                        var renderDocumentDirective = await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
+                        var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
@@ -93,9 +93,9 @@ namespace AlexaController.Alexa.IntentRequest
                     }
                 default: //Voice only
                     {
-                        aplaDataSource = await AplAudioDataSourceManager.Instance.NewItemsAplaOnly(results, d);
+                        aplaDataSource = await APLA_DataSourceManager.Instance.NewItemsAplaOnly(results, d);
 
-                        var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+                        var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
                         return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                         {
                             shouldEndSession = true,

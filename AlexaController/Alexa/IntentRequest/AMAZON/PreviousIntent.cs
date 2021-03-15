@@ -2,12 +2,12 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
@@ -54,7 +54,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(previousPage, Session)
+                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(previousPage, Session)
                 }
 
             }, Session);

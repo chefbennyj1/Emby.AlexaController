@@ -2,15 +2,15 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using AlexaController.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -38,8 +38,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             IDataSource aplDataSource;
             IDataSource aplaDataSource;
 
-            aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
-            aplaDataSource = await AplAudioDataSourceManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
+            aplDataSource = await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
+            aplaDataSource = await APLA_DataSourceManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
 
             AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
@@ -48,8 +48,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource),
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
+                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource),
+                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
                 }
 
             }, Session);

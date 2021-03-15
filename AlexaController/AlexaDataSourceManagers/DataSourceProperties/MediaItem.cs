@@ -1,4 +1,4 @@
-﻿namespace AlexaController.DataSourceManagers.DataSourceProperties
+﻿namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
 {
     public class MediaItem
     {

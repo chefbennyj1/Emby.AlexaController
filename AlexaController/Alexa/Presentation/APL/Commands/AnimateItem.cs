@@ -57,11 +57,11 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
     {
         public object type => nameof(AnimateItem);
         public string easing { get; set; }
-        public double duration { get; set; }
+        public double? duration { get; set; }
         public string componentId { get; set; }
         public List<IValue> value { get; set; }
 
         public bool screenLock { get; set; }
-        public int delay { get; set; }
+        public int? delay { get; set; }
     }
 }

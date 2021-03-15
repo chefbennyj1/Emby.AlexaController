@@ -1,11 +1,11 @@
 ﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaPresentationManagers;
 
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 Session.PersistedRequestContextData = AlexaRequest;
 
                 var dataSource =
-                    await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("Please say the name of the room you want to setup.", "/particles");
+                    await APL_DataSourceManager.Instance.GetGenericViewDataSource("Please say the name of the room you want to setup.", "/particles");
 
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
 
@@ -46,7 +46,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, Session)
+                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, Session)
                     }
 
                 }, Session);

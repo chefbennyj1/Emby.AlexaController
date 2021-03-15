@@ -1,10 +1,10 @@
 ﻿using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest
 {
@@ -20,15 +20,15 @@ namespace AlexaController.Alexa.IntentRequest
         }
         public async Task<string> Response()
         {
-            var aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("Could you say that again?", "/Question");
-            var aplaDataSource = await AplAudioDataSourceManager.Instance.NotUnderstood();
+            var aplDataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource("Could you say that again?", "/Question");
+            var aplaDataSource = await APLA_DataSourceManager.Instance.NotUnderstood();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                     await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
-                     await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                     await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
+                     await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);
         }

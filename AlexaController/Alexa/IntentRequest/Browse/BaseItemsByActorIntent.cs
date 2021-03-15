@@ -3,14 +3,14 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
-using AlexaController.DataSourceManagers;
-using AlexaController.DataSourceManagers.DataSourceProperties;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -49,7 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result is null)
             {
-                aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that actor.", "/particles");
+                aplDataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource("I was unable to find that actor.", "/particles");
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -62,7 +62,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     SpeakUserName = true,
                     directives = new List<IDirective>()
                     {
-                        await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
+                        await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
                     }
                 }, Session);
             }
@@ -82,16 +82,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var actors = result.Keys.FirstOrDefault();
             var actorCollection = result.Values.FirstOrDefault();
 
-            aplDataSource = await AplObjectDataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
-            aplaDataSource = await AplAudioDataSourceManager.Instance.BrowseItemByActor(actors);
+            aplDataSource = await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(actorCollection);
+            aplaDataSource = await APLA_DataSourceManager.Instance.BrowseItemByActor(actors);
 
             //TODO: Fix session Update (it is only looking at one actor, might not matter)
             //Update Session
             Session.NowViewingBaseItem = actors[0];
             AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
 
-            var renderDocumentDirective = await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-            var renderAudioDirective = await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderDocumentDirective = await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
+            var renderAudioDirective = await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

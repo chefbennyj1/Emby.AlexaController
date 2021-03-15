@@ -1,13 +1,13 @@
 ﻿using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Configuration;
-using AlexaController.DataSourceManagers;
-using AlexaController.PresentationManagers;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
@@ -27,8 +27,8 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         }
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
-            var aplDataSource = await AplObjectDataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
-            var aplaDataSource = await AplAudioDataSourceManager.Instance.RoomContext();
+            var aplDataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource("Which room did you want?", "/Question");
+            var aplaDataSource = await APLA_DataSourceManager.Instance.RoomContext();
             session.PersistedRequestContextData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
 
@@ -37,8 +37,8 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await AplRenderDocumentDirectiveManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
-                    await AplaRenderDocumentDirectiveManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await APL_RenderDocumentManager.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
+                    await APLA_RenderDocumentManager.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, session);
         }
