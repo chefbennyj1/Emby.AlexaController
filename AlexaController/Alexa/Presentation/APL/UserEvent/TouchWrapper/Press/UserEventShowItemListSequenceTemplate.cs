@@ -34,7 +34,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
 
             var dataSource =
-                await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results.Items.ToList(), baseItem);
+                await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(results.Items.ToList(), baseItem);
 
             session.NowViewingBaseItem = baseItem;
             AlexaSessionManager.Instance.UpdateSession(session, dataSource);

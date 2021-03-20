@@ -29,32 +29,29 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
         public async Task<string> Response()
         {
-            Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
             {
                 Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
-                return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+                return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
-            var request = AlexaRequest.request;
-            var intent = request.intent;
-            var slots = intent.slots;
-            var seasonNumber = slots.SeasonNumber.value;
-            var context = AlexaRequest.context;
+            var request        = AlexaRequest.request;
+            var intent         = request.intent;
+            var slots          = intent.slots;
+            var seasonNumber   = slots.SeasonNumber.value;
+            var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
-            var requestId = request.requestId;
+            var requestId      = request.requestId;
 
             var results = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber), Session.NowViewingBaseItem, Session.User);
-
-            IDataSource aplaDataSource;
-            IDataSource aplDataSource;
-
+            
             // User requested season/episode data that doesn't exist
             if (!results.Any())
             {
-                aplaDataSource = await APLA_DataSourceManager.Instance.NoItemExists(Session, seasonNumber);
+                var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.NoItemExists();
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -84,19 +81,19 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            aplDataSource = await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results, season.Parent);
-            aplaDataSource = await APLA_DataSourceManager.Instance.ItemBrowse(season, Session);
+            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(results, season.Parent);
+            var aplaDataSource1 = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(season, Session);
 
             Session.NowViewingBaseItem = season;
-            AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
+            AlexaSessionManager.Instance.UpdateSession(Session, sequenceLayoutProperties);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(sequenceLayoutProperties, Session);
+            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource1);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
-                SpeakUserName = true,
+                
                 directives = new List<IDirective>()
                 {
                     renderDocumentDirective,

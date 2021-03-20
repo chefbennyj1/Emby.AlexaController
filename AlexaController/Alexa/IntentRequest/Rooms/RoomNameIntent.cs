@@ -3,12 +3,12 @@ using AlexaController.Api;
 using AlexaController.Exceptions;
 using AlexaController.Session;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class RoomNameIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -23,28 +23,23 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         public async Task<string> Response()
         {
             var request = AlexaRequest.request;
-            var intent = request.intent;
-            var slots = intent.slots;
+            var intent  = request.intent;
+            var slots   = intent.slots;
 
             // ReSharper disable once TooManyChainedReferences
             var rePromptIntent = Session.PersistedRequestContextData.request.intent;
             var rePromptIntentName = rePromptIntent.name.Replace("_", ".");
 
-            Room room = null;
+            Room room;
 
             if (rePromptIntentName != "Rooms.RoomSetupIntent")
             {
-                try { room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+                room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); //returns null or a room
 
-                if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room?.Name, StringComparison.InvariantCultureIgnoreCase)))
+                //if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room?.Name, StringComparison.InvariantCultureIgnoreCase)))
+                if(room is null)
                 {
-                    throw new Exception("That room is currently not configured to show media.");
-                }
-
-                if (!ServerQuery.Instance.GetCurrentSessions().ToList()
-                    .Exists(s => string.Equals(s.DeviceName, room?.DeviceName, StringComparison.CurrentCultureIgnoreCase)))
-                {
-                    throw new DeviceUnavailableException("That device is currently unavailable.");
+                    throw new DeviceUnavailableException("That rooms device is currently unavailable to display media.");
                 }
 
             }

@@ -38,9 +38,6 @@ namespace AlexaController.Api
         // ReSharper disable once FlagArgument
         public async Task<string> BuildAlexaResponseAsync(IResponse response, IAlexaSession session)
         {
-            // ReSharper disable once ComplexConditionExpression
-            var person = !(session.person is null) && response.SpeakUserName ? Ssml.SayName(session.person) : "";
-
             if (!(response.outputSpeech is null))
             {
                 var outputSpeech = response.outputSpeech;
@@ -48,7 +45,6 @@ namespace AlexaController.Api
                 var speech = new StringBuilder();
 
                 speech.Append(outputSpeech.sound);
-                speech.Append(person);
                 speech.Append(Ssml.InsertStrengthBreak(StrengthBreak.strong));
                 speech.Append(outputSpeech.phrase);
 
@@ -90,6 +86,7 @@ namespace AlexaController.Api
             };
 
             var json = JsonSerializer.SerializeToString(response);
+            ServerController.Instance.Log.Info(json.ToString());
             var options = new HttpRequestOptions
             {
                 Url = "https://api.amazonalexa.com/v1/directives",

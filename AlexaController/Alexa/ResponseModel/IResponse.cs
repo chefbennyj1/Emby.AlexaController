@@ -4,7 +4,7 @@ namespace AlexaController.Alexa.ResponseModel
 {
     public interface IResponse
     {
-        bool SpeakUserName { get; set; }
+        //bool SpeakUserName { get; set; }
         OutputSpeech outputSpeech { get; }
         Reprompt reprompt { get; set; }
         Card card { get; set; }
@@ -21,7 +21,7 @@ namespace AlexaController.Alexa.ResponseModel
         public Card card { get; set; } = null;
         public object shouldEndSession { get; set; }
         public List<IDirective> directives { get; set; }
-        public bool SpeakUserName { get; set; }
+        //public bool SpeakUserName { get; set; }
         // Progressive Response elements
         public Header header { get; set; }
         public IDirective directive { get; set; }

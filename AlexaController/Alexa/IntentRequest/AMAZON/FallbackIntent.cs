@@ -4,6 +4,7 @@ using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
@@ -20,14 +21,14 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            var aplDataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource("Could you say that again?", "/Question");
-            var aplaDataSource = await APLA_DataSourceManager.Instance.NotUnderstood();
+            var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("Could you say that again?", "/Question");
+            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.NotUnderstood();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
                     await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);

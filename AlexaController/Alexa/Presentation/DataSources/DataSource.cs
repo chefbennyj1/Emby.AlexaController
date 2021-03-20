@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.DataSources
 {
-    public class DataSource<T> : IDataSource where T : class
+    public class DataSource : IDataSource 
     {
         public object type { get; set; }
         // ReSharper disable once InconsistentNaming
         public string objectID { get; set; }
         public string description { get; set; }
-        public IProperties<T> properties { get; set; }
+        public IProperties properties { get; set; }
         public List<ITransformer> transformers { get; set; }
 
 

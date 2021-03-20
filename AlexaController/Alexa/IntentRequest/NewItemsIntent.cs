@@ -31,14 +31,11 @@ namespace AlexaController.Alexa.IntentRequest
 
         public async Task<string> Response()
         {
-            var request = AlexaRequest.request;
-            var slots = request.intent.slots;
+            var request  = AlexaRequest.request;
+            var slots    = request.intent.slots;
             var duration = slots.Duration.value;
-            var type = slots.MovieAlternatives.value is null ? "Series" : "Movie";
-
-            IDataSource aplDataSource;
-            IDataSource aplaDataSource;
-
+            var type     = slots.MovieAlternatives.value is null ? "Series" : "Movie";
+            
             // Default will be 25 days ago unless given a time duration
             var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);
 
@@ -57,57 +54,29 @@ namespace AlexaController.Alexa.IntentRequest
                         phrase = $"No new { type } have been added."
                     },
                     shouldEndSession = true,
-                    SpeakUserName = true,
+                    
                 }, Session);
             }
 
+            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(results);
+            var newLibraryItemsAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.NewLibraryItems(results, d, Session);
 
+            AlexaSessionManager.Instance.UpdateSession(Session, sequenceLayoutProperties);
 
-            switch (Session.viewport)
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(sequenceLayoutProperties, Session);
+            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(newLibraryItemsAudioProperties);
+
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                case ViewportProfile.HUB_ROUND_SMALL:
-                case ViewportProfile.HUB_LANDSCAPE_SMALL:
-                case ViewportProfile.HUB_LANDSCAPE_MEDIUM:
-                case ViewportProfile.HUB_LANDSCAPE_LARGE:
-                    {
+                shouldEndSession = null,
+                            
+                directives = new List<IDirective>()
+                {
+                    renderDocumentDirective,
+                    renderAudioDirective
+                }
 
-                        aplDataSource = await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(results);
-                        aplaDataSource = await APLA_DataSourceManager.Instance.GetNewItemsApl(results, d);
-
-                        AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
-
-                        var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-                        var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
-
-                        return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
-                        {
-                            shouldEndSession = null,
-                            SpeakUserName = true,
-                            directives = new List<IDirective>()
-                            {
-                                renderDocumentDirective,
-                                renderAudioDirective
-                            }
-
-                        }, Session);
-                    }
-                default: //Voice only
-                    {
-                        aplaDataSource = await APLA_DataSourceManager.Instance.NewItemsAplaOnly(results, d);
-
-                        var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
-                        return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
-                        {
-                            shouldEndSession = true,
-                            SpeakUserName = true,
-                            directives = new List<IDirective>()
-                            {
-                                renderAudioDirective
-                            }
-
-                        }, Session);
-                    }
-            }
+            }, Session);
         }
     }
 }

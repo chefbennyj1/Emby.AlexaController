@@ -34,8 +34,8 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
         public async Task<string> Response()
         {
-            try { Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
-            if (Session.room is null) return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+            try { Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+            if (Session.room is null) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
 
             var request = AlexaRequest.request;
             var context = AlexaRequest.context;
@@ -43,10 +43,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var requestId = request.requestId;
             var intent = request.intent;
             var slots = intent.slots;
-
-            IDataSource aplDataSource = null;
-            IDataSource aplaDataSource = null;
-
+            
             BaseItem result = null;
             if (Session.NowViewingBaseItem is null)
             {
@@ -62,7 +59,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //Item doesn't exist in the library
             if (result is null)
             {
-                aplaDataSource = await APLA_DataSourceManager.Instance.GenericItemDoesNotExists();
+                var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.NoItemExists();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -82,18 +79,18 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                         $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {result.Name}.").ConfigureAwait(false);
                 }
 
-                aplDataSource =
-                    await APL_DataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {result.OfficialRating}", "/particles");
+                var genericLayoutProperties =
+                    await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {result.OfficialRating}", "/particles");
 
-                aplaDataSource = await APLA_DataSourceManager.Instance.ParentalControlNotAllowed(result, Session);
+                var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.ParentalControlNotAllowed(result, Session);
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
-                    SpeakUserName = true,
+                    
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
                         await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
 
                     }
@@ -118,16 +115,16 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            aplDataSource = await APL_DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(result, Session);
+            var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(result, Session);
 
-            aplaDataSource = await APLA_DataSourceManager.Instance.PlayItem(result);
+            var aplaDataSource1 = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(result);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
-            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(detailLayoutProperties, Session);
+            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource1);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                SpeakUserName = true,
+                
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {

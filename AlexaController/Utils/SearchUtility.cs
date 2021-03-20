@@ -3,6 +3,7 @@ using MediaBrowser.Controller.Library;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AlexaController.Exceptions;
 
 // ReSharper disable once ExcessiveIndentation
 
@@ -22,7 +23,7 @@ namespace AlexaController.Utils
         public BaseItem QuerySpeechResultItem(string searchName, string[] type)
         {
             ServerController.Instance.Log.Info("Beginning item search");
-
+            ServerController.Instance.Log.Info($"Search: {searchName} Type: {type[0]}");
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 Name = searchName,
@@ -118,7 +119,7 @@ namespace AlexaController.Utils
             //Return items that start with the first two letters of search term, removing proceeding  "the"
             if (!result.Any())
             {
-                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0);
+                //var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0);
 
                 ServerController.Instance.Log.Info($"Final Search hit: {searchName}");
 
@@ -173,8 +174,7 @@ namespace AlexaController.Utils
                         {
                             return item;
                         }
-
-
+                        
 
                         if (NormalizeQueryString(item.Name).Contains(NormalizeQueryString(searchName)))
                         {
@@ -248,7 +248,6 @@ namespace AlexaController.Utils
             {
                 return null;
             }
-
 
             return LibraryManager.GetItemById(result.FirstOrDefault());
         }

@@ -35,13 +35,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             var result = await ServerQuery.Instance.GetUpComingTvAsync(duration);
 
-            IDataSource aplDataSource;
-            IDataSource aplaDataSource;
+            //IDataSource aplDataSource;
+            //IDataSource aplaDataSource;
 
-            aplDataSource = await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(result.Items.ToList(), null);
-            aplaDataSource = await APLA_DataSourceManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
+            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(result.Items.ToList(), null);
+            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
 
-            AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
+            AlexaSessionManager.Instance.UpdateSession(Session, sequenceLayoutProperties);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
@@ -49,7 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 directives = new List<IDirective>()
                 {
                     await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource),
-                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session)
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(sequenceLayoutProperties, Session)
                 }
 
             }, Session);

@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.AlexaPresentationManagers;
 
 // ReSharper disable once TooManyDependencies
@@ -61,8 +62,8 @@ namespace AlexaController.Api
             if (AlexaSessionManager.Instance is null)
                 Activator.CreateInstance(typeof(AlexaSessionManager), sessionManager);
 
-            if (RoomManager.Instance is null)
-                Activator.CreateInstance<RoomManager>();
+            if (RoomContextManager.Instance is null)
+                Activator.CreateInstance<RoomContextManager>();
 
             if (SpeechAuthorization.Instance is null)
                 Activator.CreateInstance(typeof(SpeechAuthorization), user);
@@ -70,11 +71,11 @@ namespace AlexaController.Api
             if (RenderDocumentDirectiveFactory.Instance is null)
                 Activator.CreateInstance<RenderDocumentDirectiveFactory>();
             
-            if (APL_DataSourceManager.Instance is null)
-                Activator.CreateInstance<APL_DataSourceManager>();
+            if (DataSourceLayoutPropertiesManager.Instance is null)
+                Activator.CreateInstance<DataSourceLayoutPropertiesManager>();
 
-            if (APLA_DataSourceManager.Instance is null)
-                Activator.CreateInstance<APLA_DataSourceManager>();
+            if (DataSourceAudioSpeechPropertiesManager.Instance is null)
+                Activator.CreateInstance<DataSourceAudioSpeechPropertiesManager>();
 
             //if (APL_DynamicListDataSourceManager.Instance is null)
             //    Activator.CreateInstance<APL_DynamicListDataSourceManager>();
@@ -112,8 +113,6 @@ namespace AlexaController.Api
             {
                 outputSpeech     = new OutputSpeech() { phrase = "I have encountered an error." },
                 shouldEndSession = true,
-                SpeakUserName    = true
-
             }, null);
         }
 
@@ -169,7 +168,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                var dataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource(exception.Message, "/particles");
+                var dataSource = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync(exception.Message, "/particles");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -202,36 +201,34 @@ namespace AlexaController.Api
         {
             var context = alexaRequest.context;
             var user = SpeechAuthorization.Instance.GetRecognizedPersonalizationProfileResult(context.System.person);
-            IDataSource aplaDataSource;
+            //IDataSource aplaDataSource;
 
             if (user is null)
             {
-                aplaDataSource = await APLA_DataSourceManager.Instance.PersonNotRecognized();
+                var personNotRecognizedAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.PersonNotRecognized();
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(
                     new Response()
                     {
                         shouldEndSession = true,
-                        SpeakUserName = true,
                         directives = new List<IDirective>()
                         {
-                            await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                            await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(personNotRecognizedAudioProperties)
                         }
                     }, null);
             }
 
             var session       = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-            var aplDataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource("Welcome to Home Theater Emby Controller", "/particles");
+            var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("Welcome to Home Theater Emby Controller", "/particles");
 
-            aplaDataSource = await APLA_DataSourceManager.Instance.OnLaunch();
+            var skillLaunchedAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.OnLaunch();
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                SpeakUserName = true,
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, session),
-                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(genericLayoutProperties, session),
+                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(skillLaunchedAudioProperties)
                 }
             }, session);
         }

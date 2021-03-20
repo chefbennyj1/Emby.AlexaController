@@ -5,6 +5,7 @@ using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.AlexaPresentationManagers;
 using Value = AlexaController.AlexaDataSourceManagers.DataSourceProperties.Value;
 
@@ -24,7 +25,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            var dataSource = await APL_DataSourceManager.Instance.GetHelpDataSourceAsync();
+            var dataSource = await DataSourceLayoutPropertiesManager.Instance.GetHelpViewPropertiesAsync();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()
@@ -32,7 +33,6 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                     phrase = "Welcome to home theater help. In a moment, swipe left and follow the help instructions.",
                 },
                 shouldEndSession = null,
-                SpeakUserName = true,
                 directives = new List<IDirective>()
                 {
                     await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<List<Value>>(dataSource, Session)

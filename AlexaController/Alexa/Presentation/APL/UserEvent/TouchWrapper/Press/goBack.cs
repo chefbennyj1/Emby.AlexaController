@@ -23,12 +23,12 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
         {
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
 
-            var previousPage = session.paging.pages[session.paging.currentPage - 1] as DataSource<MediaItem>;
-            var currentPage = session.paging.pages[session.paging.currentPage] as DataSource<MediaItem>;
+            var previousPage = session.paging.pages[session.paging.currentPage - 1];
+            var currentPage = session.paging.pages[session.paging.currentPage];
 
             AlexaSessionManager.Instance.UpdateSession(session, currentPage, true);
 
-            var properties = previousPage?.properties as Properties<MediaItem>;
+            //var properties = previousPage?.properties as Properties<MediaItem>;
 
             //if the user is controlling a client  session - go back on the client too.
             if (session.hasRoom)
@@ -36,7 +36,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 try
                 {
 #pragma warning disable 4014
-                    Task.Run(() => ServerController.Instance.BrowseItemAsync(session, ServerQuery.Instance.GetItemById(properties?.item.id)))
+                    Task.Run(() => ServerController.Instance.BrowseItemAsync(session, ServerQuery.Instance.GetItemById(previousPage?.item.id)))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
                 }

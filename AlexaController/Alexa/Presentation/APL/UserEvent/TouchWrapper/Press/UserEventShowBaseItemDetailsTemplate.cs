@@ -26,13 +26,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room = session.room;
 
-            var aplDataSource  = await APL_DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
-            var aplaDataSource = await APLA_DataSourceManager.Instance.ItemBrowse(baseItem, session);
+            var baseItemDetailViewProperties  = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(baseItem, session);
+            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(baseItem, session);
 
             // Update session data
             session.NowViewingBaseItem = baseItem;
             session.room = room;
-            AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
+            AlexaSessionManager.Instance.UpdateSession(session, baseItemDetailViewProperties);
 
             //has the user requested an Emby client/room display during the session - display both if possible
             if (!(room is null))
@@ -49,7 +49,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                 }
             }
 
-            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, session);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(baseItemDetailViewProperties, session);
             var renderAudioDirective    = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

@@ -4,13 +4,14 @@ using AlexaController.Api;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.AlexaPresentationManagers;
 
 
 namespace AlexaController.Alexa.IntentRequest.Rooms
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class RoomSetupIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
@@ -30,8 +31,8 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
             {
                 Session.PersistedRequestContextData = AlexaRequest;
 
-                var dataSource =
-                    await APL_DataSourceManager.Instance.GetGenericViewDataSource("Please say the name of the room you want to setup.", "/particles");
+                var genericLayoutProperties =
+                    await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("Please say the name of the room you want to setup.", "/particles");
 
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
 
@@ -46,7 +47,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                     shouldEndSession = false,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(dataSource, Session)
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session)
                     }
 
                 }, Session);

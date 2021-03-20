@@ -34,24 +34,24 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var baseItem = ServerQuery.Instance.GetItemById(source.id);
 
-            session.room = session.room ?? RoomManager.Instance.GetRoomByName(request.arguments[1]);
+            session.room = session.room ?? RoomContextManager.Instance.GetRoomByName(request.arguments[1]);
 
-            IDataSource aplDataSource = null;
-            IDataSource aplaDataSource = null;
+            //IDataSource aplDataSource = null;
+            //IDataSource aplaDataSource = null;
 
 
             if (session.room is null)
             {
-                aplDataSource = await APL_DataSourceManager.Instance.GetRoomSelection(baseItem, session);
+                var roomSelectionViewProperties = await DataSourceLayoutPropertiesManager.Instance.GetRoomSelectionViewPropertiesAsync(baseItem, session);
                 session.NowViewingBaseItem = baseItem;
-                AlexaSessionManager.Instance.UpdateSession(session, aplDataSource);
+                AlexaSessionManager.Instance.UpdateSession(session, roomSelectionViewProperties);
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, session)
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(roomSelectionViewProperties, session)
                     }
 
                 }, session);
@@ -65,16 +65,16 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 #pragma warning restore 4014
 
 
-            aplDataSource = await APL_DataSourceManager.Instance.GetBaseItemDetailsDataSourceAsync(baseItem, session);
-            aplaDataSource = await APLA_DataSourceManager.Instance.PlayItem(baseItem);
+            var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(baseItem, session);
+            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(baseItem);
 
 
-            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, session);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(detailLayoutProperties, session);
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                SpeakUserName = true,
+                
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {

@@ -7,8 +7,11 @@
             /*
              * Put common Alexa speech mis-recognitions here
              */
-
-            input = input.EndsWith(" in") ? input.Substring(0, input.Length - 3) : input;
+            try
+            {
+                input = input.EndsWith(" in") ? input.Substring(0, input.Length - 3) : input;
+            }catch{}
+           
             input = input.EndsWith(" junior") ? input.Replace("junior", "jr.") : input;
             return input
                 .Replace("&", " and")

@@ -2,7 +2,7 @@
 
 namespace AlexaController.Alexa.Presentation.DataSources.Properties
 {
-    public abstract class BaseDataSourceProperties<T> : IProperties<T> where T : class
+    public abstract class BaseDataSourceProperties<T> : IProperties where T : class
     {
         public T item { get; set; }
         public List<T> items { get; set; }

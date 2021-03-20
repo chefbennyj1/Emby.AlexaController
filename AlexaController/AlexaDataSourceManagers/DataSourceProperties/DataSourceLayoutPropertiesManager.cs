@@ -1,24 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Presentation.DataSources.Transformers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 
-namespace AlexaController.AlexaDataSourceManagers
+namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
 {
-    public class APL_DataSourceManager
+    public class DataSourceLayoutPropertiesManager
     {
-        public static APL_DataSourceManager Instance { get; private set; }
+        public static DataSourceLayoutPropertiesManager Instance { get; private set; }
 
-        public APL_DataSourceManager()
+        public DataSourceLayoutPropertiesManager()
         {
             Instance = this;
         }
 
-        public async Task<IDataSource> GetSequenceItemsDataSourceAsync(List<BaseItem> collectionItems, BaseItem collection = null)
+        public async Task<Properties<MediaItem>> GetSequenceViewPropertiesAsync(List<BaseItem> collectionItems, BaseItem collection = null)
         {
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
             var mediaItems = new List<MediaItem>();
@@ -51,28 +48,16 @@ namespace AlexaController.AlexaDataSourceManagers
                 };
             }
 
-            return await Task.FromResult(new DataSource<MediaItem>()
+            return await Task.FromResult(new Properties<MediaItem>()
             {
-                properties = new Properties<MediaItem>()
-                {
-                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                    documentType = RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE,
-                    items = mediaItems,
-                    item = mediaItem
-                },
-                transformers = new List<ITransformer>()
-                {
-                    new AplaSpeechTransformer()
-                    {
-                        template = "buttonPressEffectApla",
-                        outputName = "buttonPressEffect"
-                    }
-                }
-
+                url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                documentType = RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE,
+                items = mediaItems,
+                item = mediaItem
             });
         }
 
-        public async Task<IDataSource> GetBaseItemDetailsDataSourceAsync(BaseItem item, IAlexaSession session)
+        public async Task<Properties<MediaItem>> GetBaseItemDetailViewPropertiesAsync(BaseItem item, IAlexaSession session)
         {
             var mediaItem = new MediaItem()
             {
@@ -105,28 +90,17 @@ namespace AlexaController.AlexaDataSourceManagers
                 thumbImageSource = ServerQuery.Instance.GetThumbImageSource(r)
             }));
 
-            return await Task.FromResult(new DataSource<MediaItem>()
+            return await Task.FromResult(new Properties<MediaItem>()
             {
-                properties = new Properties<MediaItem>()
-                {
-                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                    documentType = RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE,
-                    similarItems = recommendedItems,
-                    item = mediaItem
-                },
-                transformers = new List<ITransformer>()
-                {
-                    new TextToSpeechTransformer()
-                    {
-                        inputPath = "item.overview",
-                        outputName = "readOverview"
-                    }
-                }
+                url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                documentType = RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE,
+                similarItems = recommendedItems,
+                item = mediaItem
             });
 
         }
 
-        public async Task<IDataSource> GetHelpDataSourceAsync()
+        public async Task<Properties<List<Value>>> GetHelpViewPropertiesAsync()
         {
             var helpContent = new List<Value>()
             {
@@ -172,67 +146,50 @@ namespace AlexaController.AlexaDataSourceManagers
                  new Value() {value = "This concludes the help section. Good luck!"},
             };
 
-            return await Task.FromResult(new DataSource<List<Value>>()
+            return await Task.FromResult(new Properties<List<Value>>
             {
-                properties = new Properties<List<Value>>
-                {
-                    documentType = RenderDocumentType.HELP_TEMPLATE,
-                    values = helpContent
-                },
-                transformers = new List<ITransformer>()
-                {
-                    new TextToSpeechTransformer()
-                    {
-                        inputPath = "values[*].value",
-                        outputName = "helpPhrase"
-                    }
-                }
+                documentType = RenderDocumentType.HELP_TEMPLATE,
+                values = helpContent
             });
         }
 
-        public async Task<IDataSource> GetGenericViewDataSource(string text, string videoUrl)
+        public async Task<Properties<string>> GetGenericViewPropertiesAsync(string text, string videoUrl)
         {
-            return await Task.FromResult(new DataSource<string>()
+            return await Task.FromResult(new Properties<string>()
             {
-                properties = new Properties<string>()
-                {
-                    documentType = RenderDocumentType.GENERIC_VIEW_TEMPLATE,
-                    text = text,
-                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                    videoUrl = videoUrl
-                }
+                documentType = RenderDocumentType.GENERIC_VIEW_TEMPLATE,
+                text = text,
+                url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                videoUrl = videoUrl
             });
         }
 
-        public async Task<IDataSource> GetRoomSelection(BaseItem item, IAlexaSession session)
+        public async Task<Properties<MediaItem>> GetRoomSelectionViewPropertiesAsync(BaseItem item, IAlexaSession session)
         {
-            return await Task.FromResult(new DataSource<MediaItem>()
+            return await Task.FromResult(new Properties<MediaItem>()
             {
-                properties = new Properties<MediaItem>()
+                url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                documentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
+                item = new MediaItem()
                 {
-                    url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                    documentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
-                    item = new MediaItem()
-                    {
-                        type = item.GetType().Name,
-                        isPlayed = item.IsPlayed(session.User),
-                        primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(item),
-                        id = item.InternalId,
-                        name = item.Name,
-                        premiereDate = item.ProductionYear.ToString(),
-                        officialRating = item.OfficialRating,
-                        tagLine = item.Tagline,
-                        runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
-                        endTime = ServerQuery.Instance.GetEndTime(item),
-                        genres = ServerQuery.Instance.GetGenres(item),
-                        logoImageSource = ServerQuery.Instance.GetLogoImageSource(item),
-                        overview = item.Overview,
-                        videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
-                        backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item)
-                    }
+                    type = item.GetType().Name,
+                    isPlayed = item.IsPlayed(session.User),
+                    primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(item),
+                    id = item.InternalId,
+                    name = item.Name,
+                    premiereDate = item.ProductionYear.ToString(),
+                    officialRating = item.OfficialRating,
+                    tagLine = item.Tagline,
+                    runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
+                    endTime = ServerQuery.Instance.GetEndTime(item),
+                    genres = ServerQuery.Instance.GetGenres(item),
+                    logoImageSource = ServerQuery.Instance.GetLogoImageSource(item),
+                    overview = item.Overview,
+                    videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
+                    backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item)
                 }
             });
         }
-
+        
     }
 }

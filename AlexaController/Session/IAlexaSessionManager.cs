@@ -5,6 +5,7 @@ using AlexaController.Api;
 using MediaBrowser.Controller.Session;
 using System.Collections.Generic;
 using System.Linq;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -13,7 +14,7 @@ namespace AlexaController.Session
     {
         void EndSession(IAlexaRequest alexaRequest);
         IAlexaSession GetSession(IAlexaRequest alexaRequest, User user = null);
-        void UpdateSession(IAlexaSession session, IDataSource dataSource, bool? isBack = null);
+        void UpdateSession(IAlexaSession session, Properties<MediaItem> properties, bool? isBack = null);
         double GetPlaybackProgressTicks(IAlexaSession alexaSession);
     }
 
@@ -66,9 +67,9 @@ namespace AlexaController.Session
                 return OpenSessions.FirstOrDefault(s => s.SessionId == alexaRequest.session.sessionId);
             }
 
-            var context = alexaRequest.context;
-            var system = context.System;
-            var person = system.person;
+            var context       = alexaRequest.context;
+            var system        = context.System;
+            var person        = system.person;
             var amazonSession = alexaRequest.session;
 
             IAlexaRequest persistedRequestData = null;
@@ -83,13 +84,13 @@ namespace AlexaController.Session
                 //room = sessionInfo?.room;
 
                 // ReSharper disable once ComplexConditionExpression
-                if (!(person is null) && !(sessionInfo?.person is null))
-                {
-                    if (string.Equals(sessionInfo.person.personId, person.personId))
-                    {
-                        return sessionInfo; // It is the same person speaking - return the sessionInfo.
-                    }
-                }
+                //if (!(person is null) && !(sessionInfo?.person is null))
+                //{
+                //    if (string.Equals(sessionInfo.person.personId, person.personId))
+                //    {
+                //        return sessionInfo; // It is the same person speaking - return the sessionInfo.
+                //    }
+                //}
 
                 // Remove the session from the "OpenSessions" List, and rebuild the session with the new data
                 OpenSessions.RemoveAll(s => s.SessionId.Equals(alexaRequest.session.sessionId));
@@ -103,12 +104,12 @@ namespace AlexaController.Session
                 EchoDeviceId = system.device.deviceId,
                 supportsApl = SupportsApl(alexaRequest),
                 person = person,
-                room = sessionInfo?.room ?? new Room(),
+                room = sessionInfo?.room,
                 hasRoom = !(sessionInfo?.room is null),
                 User = user,
                 viewport = GetCurrentViewport(alexaRequest),
                 PersistedRequestContextData = persistedRequestData,
-                paging = new Paging { pages = new Dictionary<int, IDataSource>() }
+                paging = new Paging { pages = new Dictionary<int, Properties<MediaItem>>() }
             };
 
             OpenSessions.Add(sessionInfo);
@@ -117,10 +118,10 @@ namespace AlexaController.Session
         }
 
         //TODO: data source object can be null IDataSource dataSource = null in params
-        public void UpdateSession(IAlexaSession session, IDataSource dataSource, bool? isBack = null)
+        public void UpdateSession(IAlexaSession session, Properties<MediaItem> properties, bool? isBack = null)
         {
-            if (!(dataSource is null))
-                session = UpdateSessionPaging(session, dataSource, isBack);
+            if (!(properties is null))
+                session = UpdateSessionPaging(session, properties, isBack);
 
             OpenSessions.RemoveAll(s => s.SessionId.Equals(session.SessionId));
 
@@ -128,7 +129,7 @@ namespace AlexaController.Session
 
         }
 
-        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, IDataSource dataSource, bool? isBack = null)
+        private static IAlexaSession UpdateSessionPaging(IAlexaSession session, Properties<MediaItem> properties, bool? isBack = null)
         {
             if (isBack == true)
             {
@@ -145,16 +146,16 @@ namespace AlexaController.Session
             {
                 //set the pages dictionary with page 1
                 session.paging.currentPage = 1;
-                session.paging.pages.Add(session.paging.currentPage, dataSource);
+                session.paging.pages.Add(session.paging.currentPage, properties);
 
                 return session;
             }
 
-            if (!session.paging.pages.ContainsValue(dataSource))
+            if (!session.paging.pages.ContainsValue(properties))
             {
                 session.paging.currentPage += 1;
                 session.paging.canGoBack = true;
-                session.paging.pages.Add(session.paging.currentPage, dataSource);
+                session.paging.pages.Add(session.paging.currentPage, properties);
 
                 return session;
             }

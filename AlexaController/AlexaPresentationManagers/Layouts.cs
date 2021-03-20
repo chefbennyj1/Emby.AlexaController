@@ -6,20 +6,19 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
 using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
-using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.Session;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 
 namespace AlexaController.AlexaPresentationManagers
 {
-    public abstract class Layouts
+    public static class Layouts
     {
-        protected static async Task<List<IComponent>> RenderItemListSequenceLayout(IDataSource dataSource, IAlexaSession session)
+        public static async Task<List<IComponent>> RenderItemListSequenceLayout(Properties<MediaItem> properties, IAlexaSession session)
         {
             var layout     = new List<IComponent>();
-            var data       = dataSource as DataSource<MediaItem>;
-            var properties = data?.properties as Properties<MediaItem>;
+            //var data       = dataSource as DataSource;
+            //var properties = data?.properties as Properties<MediaItem>;
             var mediaItems = properties?.items;
             var type       = mediaItems?[0].type;
 
@@ -111,11 +110,11 @@ namespace AlexaController.AlexaPresentationManagers
 
         }
 
-        protected static async Task<List<IComponent>> RenderItemDetailsLayout(IDataSource dataSource, IAlexaSession session)
+        public static async Task<List<IComponent>> RenderItemDetailsLayout(Properties<MediaItem> properties, IAlexaSession session)
         {
             const string leftColumnSpacing = "36vw";
-            var data       = dataSource as DataSource<MediaItem>;
-            var properties = data?.properties as Properties<MediaItem>;
+            //var data       = dataSource as DataSource;
+            //var properties = data?.properties as Properties<MediaItem>;
             var mediaItem  = properties?.item;
             var type       = mediaItem?.type;
 
@@ -462,7 +461,7 @@ namespace AlexaController.AlexaPresentationManagers
             });
         }
 
-        protected static async Task<List<IComponent>> RenderRoomSelectionLayout(IDataSource dataSource, IAlexaSession session)
+        public static async Task<List<IComponent>> RenderRoomSelectionLayout(IAlexaSession session)
         {
             var layout = new List<IComponent>
             {
@@ -548,7 +547,7 @@ namespace AlexaController.AlexaPresentationManagers
             });
         }
 
-        protected static async Task<List<IComponent>> RenderGenericViewLayout(IDataSource dataSource)
+        public static async Task<List<IComponent>> RenderGenericViewLayout()
         {
             return await Task.FromResult(new List<IComponent>
             {
@@ -596,7 +595,7 @@ namespace AlexaController.AlexaPresentationManagers
 
         }
 
-        protected static async Task<List<IComponent>> RenderHelpViewLayout(IDataSource dataSource)
+        public static async Task<List<IComponent>> RenderHelpViewLayout()
         {
             return await Task.FromResult(new List<IComponent>()
             {

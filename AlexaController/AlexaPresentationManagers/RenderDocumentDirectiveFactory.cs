@@ -6,6 +6,7 @@ using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APLA.AudioFilters;
 using AlexaController.Alexa.Presentation.APLA.Components;
 using AlexaController.Alexa.Presentation.DataSources;
+using AlexaController.Alexa.Presentation.DataSources.Transformers;
 using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
@@ -19,7 +20,7 @@ using AlexaController.Session;
 
 namespace AlexaController.AlexaPresentationManagers
 {
-    public class RenderDocumentDirectiveFactory : Layouts
+    public class RenderDocumentDirectiveFactory 
     {
         public static RenderDocumentDirectiveFactory Instance { get; private set; }
 
@@ -28,31 +29,48 @@ namespace AlexaController.AlexaPresentationManagers
             Instance = this;
         }
 
-        public async Task<IDirective> GetRenderDocumentDirectiveAsync<TProperties>(IDataSource dataSource, IAlexaSession session) where TProperties : class
+        public async Task<IDirective> GetRenderDocumentDirectiveAsync<T>(Properties<T> properties, IAlexaSession session) where T : class
         {
-            var data       = dataSource as DataSource<TProperties>;
-            var properties = data?.properties as Properties<TProperties>;
+            List<IComponent> layout;
 
-            List<IComponent> layout = null;
+            var dataSource = new DataSourceBuilder();
+            dataSource.Add(properties);
+
             switch (properties?.documentType)
             {
                 case RenderDocumentType.GENERIC_VIEW_TEMPLATE:
-                    layout = await RenderGenericViewLayout(dataSource);
+                    layout = await Layouts.RenderGenericViewLayout();
                     break;
                 case RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE:
-                    layout = await RenderItemDetailsLayout(dataSource, session);
+                    layout = await Layouts.RenderItemDetailsLayout(properties as Properties<MediaItem>, session);
+                    dataSource.Add(new TextToSpeechTransformer()
+                    {
+                        inputPath  = "item.overview",
+                        outputName = "readOverview"
+                    });
                     break;
                 case RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE:
-                    layout = await RenderItemListSequenceLayout(dataSource, session);
+                    layout = await Layouts.RenderItemListSequenceLayout(properties as Properties<MediaItem>, session);
+                    dataSource.Add(new AplaSpeechTransformer()
+                    {
+                        template   = "buttonPressEffectApla",
+                        outputName = "buttonPressEffect"
+                    });
                     break;
                 case RenderDocumentType.ROOM_SELECTION_TEMPLATE:
-                    layout = await RenderRoomSelectionLayout(dataSource, session);
+                    layout = await Layouts.RenderRoomSelectionLayout(session);
                     break;
                 case RenderDocumentType.HELP_TEMPLATE:
-                    layout = await RenderHelpViewLayout(dataSource);
+                    layout = await Layouts.RenderHelpViewLayout();
+                    dataSource.Add(new TextToSpeechTransformer()
+                    {
+                        inputPath  = "values[*].value",
+                        outputName = "helpPhrase"
+                    });
                     break;
                 default: return null;
             }
+
             
             return await Task.FromResult(new AplRenderDocumentDirective()
             {
@@ -75,7 +93,7 @@ namespace AlexaController.AlexaPresentationManagers
                         items = layout
                     }
                 },
-                datasources = new Dictionary<string, IDataSource>() { { "templateData", dataSource } },
+                datasources = new Dictionary<string, IDataSource>() { { "templateData", await dataSource.Create() } },
                 sources     = new Dictionary<string, IDocument>()
                 {
                     { "buttonPressEffectApla", new Alexa.Presentation.APLA.Document()
@@ -95,8 +113,11 @@ namespace AlexaController.AlexaPresentationManagers
             });
         }
 
-        public async Task<IDirective> GetAudioDirectiveAsync(IDataSource dataSource)
+        public async Task<IDirective> GetAudioDirectiveAsync(Properties<string> properties)
         {
+            var dataSource = new DataSourceBuilder();
+            dataSource.Add(properties);
+
             return await Task.FromResult(new AplaRenderDocumentDirective()
             {
                 token = "AplAudioSpeech",
@@ -104,18 +125,18 @@ namespace AlexaController.AlexaPresentationManagers
                 {
                     mainTemplate = new MainTemplate()
                     {
-                        parameters = new List<string>() {"payload"},
+                        parameters = new List<string>() { "payload" },
                         item = new Mixer()
                         {
                             items = new List<AudioBaseComponent>()
                             {
-                                new Speech() {content = "<speak>${payload.templateData.properties.value}</speak>"},
-                                new Audio() {source = "${payload.templateData.properties.audioUrl}"}
+                                new Speech() { content = "<speak>${payload.templateData.properties.value}</speak>" },
+                                new Audio() { source = "${payload.templateData.properties.audioUrl}" }
                             }
                         }
                     }
                 },
-                datasources = new Dictionary<string, IDataSource>() {{"templateData", dataSource}}
+                datasources = new Dictionary<string, IDataSource>() { { "templateData", await dataSource.Create() } }
             });
         }
     }

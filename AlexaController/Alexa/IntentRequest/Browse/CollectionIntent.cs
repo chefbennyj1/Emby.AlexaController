@@ -1,5 +1,4 @@
 ﻿using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers;
 using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.AlexaPresentationManagers;
 
@@ -29,13 +27,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            await AlexaResponseClient.Instance.PostProgressiveResponse("OK.",
+                AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
+
+            Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
             {
                 Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
-                return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+                return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
             var request = AlexaRequest.request;
@@ -48,10 +49,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var collection = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems = collection.Values.FirstOrDefault();
             var collectionBaseItem = collection.Keys.FirstOrDefault();
-
-            IDataSource aplDataSource = null;
-            IDataSource aplaDataSource = null;
-
+            
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
             {
@@ -63,15 +61,15 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                             $"{Session.User} attempted to view a restricted item.", $"{Session.User} attempted to view {collectionBaseItem.Name}.").ConfigureAwait(false);
                     }
 
-                    aplDataSource = await APL_DataSourceManager.Instance.GetGenericViewDataSource($"Stop! Rated {collectionBaseItem.OfficialRating}", "/particles");
-                    aplaDataSource = await APLA_DataSourceManager.Instance.ParentalControlNotAllowed(collectionBaseItem, Session);
+                    var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {collectionBaseItem.OfficialRating}", "/particles");
+                    var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.ParentalControlNotAllowed(collectionBaseItem, Session);
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
                         shouldEndSession = true,
-                        SpeakUserName = true,
+                        
                         directives = new List<IDirective>()
                         {
-                            await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(aplDataSource, Session),
+                            await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
                             await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
 
                         }
@@ -91,14 +89,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            //aplDataSource = await AplDynamicListDataSourceManager.Instance.GetDynamicListSequenceItemDataSourceAsync(collectionItems, collectionBaseItem);
-            aplDataSource = await APL_DataSourceManager.Instance.GetSequenceItemsDataSourceAsync(collectionItems, collectionBaseItem);
+            var  sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(collectionItems, collectionBaseItem);
 
             //Update Session
             Session.NowViewingBaseItem = collectionBaseItem;
-            AlexaSessionManager.Instance.UpdateSession(Session, aplDataSource);
+            AlexaSessionManager.Instance.UpdateSession(Session, sequenceLayoutProperties);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(aplDataSource, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(sequenceLayoutProperties, Session);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

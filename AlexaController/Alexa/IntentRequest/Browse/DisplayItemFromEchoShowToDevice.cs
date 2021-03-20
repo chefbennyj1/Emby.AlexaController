@@ -5,6 +5,7 @@ using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.AlexaDataSourceManagers;
+using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using AlexaController.AlexaPresentationManagers;
 using AlexaController.Api;
 using AlexaController.Session;
@@ -26,13 +27,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
        
         public async Task<string> Response()
         {
-            Session.room = RoomManager.Instance.ValidateRoom(AlexaRequest, Session);
+            Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
             {
                 Session.PersistedRequestContextData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
-                return await RoomManager.Instance.RequestRoom(AlexaRequest, Session);
+                return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
             AlexaSessionManager.Instance.UpdateSession(Session, null);
@@ -46,13 +47,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 ServerController.Instance.Log.Error(exception.Message);
             }
 
-            var aplaDataSource       = await APLA_DataSourceManager.Instance.ItemBrowse(Session.NowViewingBaseItem, Session);
+            var aplaDataSource       = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(Session.NowViewingBaseItem, Session);
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
-                SpeakUserName = true,
+                
                 directives = new List<IDirective>()
                 {
                     renderAudioDirective

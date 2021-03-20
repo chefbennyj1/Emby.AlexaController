@@ -26,11 +26,11 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         public async Task<string> Response()
         {
             var sessionPaging = Session.paging;
-            var previousPage  = sessionPaging.pages[sessionPaging.currentPage - 1] as DataSource<MediaItem>;
-            var currentPage   = sessionPaging.pages[sessionPaging.currentPage] as DataSource<MediaItem>;
+            var previousPage  = sessionPaging.pages[sessionPaging.currentPage - 1];
+            var currentPage   = sessionPaging.pages[sessionPaging.currentPage];
             AlexaSessionManager.Instance.UpdateSession(Session, currentPage, true);
 
-            var properties = previousPage?.properties as Properties<MediaItem>;
+            var properties = previousPage as Properties<MediaItem>;
 
             //if the user is controlling a client  session - go back on the client too.
             // ReSharper disable once InvertIf
@@ -54,7 +54,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(previousPage, Session)
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(previousPage, Session)
                 }
 
             }, Session);
