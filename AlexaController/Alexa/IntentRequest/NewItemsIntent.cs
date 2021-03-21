@@ -1,17 +1,14 @@
-﻿using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
-using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using AlexaController.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest
 {
@@ -31,11 +28,11 @@ namespace AlexaController.Alexa.IntentRequest
 
         public async Task<string> Response()
         {
-            var request  = AlexaRequest.request;
-            var slots    = request.intent.slots;
+            var request = AlexaRequest.request;
+            var slots = request.intent.slots;
             var duration = slots.Duration.value;
-            var type     = slots.MovieAlternatives.value is null ? "Series" : "Movie";
-            
+            var type = slots.MovieAlternatives.value is null ? "Series" : "Movie";
+
             // Default will be 25 days ago unless given a time duration
             var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);
 
@@ -54,7 +51,7 @@ namespace AlexaController.Alexa.IntentRequest
                         phrase = $"No new { type } have been added."
                     },
                     shouldEndSession = true,
-                    
+
                 }, Session);
             }
 
@@ -63,13 +60,13 @@ namespace AlexaController.Alexa.IntentRequest
 
             AlexaSessionManager.Instance.UpdateSession(Session, sequenceLayoutProperties);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(sequenceLayoutProperties, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(sequenceLayoutProperties, Session);
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(newLibraryItemsAudioProperties);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
-                            
+
                 directives = new List<IDirective>()
                 {
                     renderDocumentDirective,

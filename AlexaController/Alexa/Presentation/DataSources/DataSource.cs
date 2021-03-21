@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace AlexaController.Alexa.Presentation.DataSources
 {
-    public class DataSource : IDataSource 
+    public class DataSource : IDataSource
     {
         public object type { get; set; }
         // ReSharper disable once InconsistentNaming

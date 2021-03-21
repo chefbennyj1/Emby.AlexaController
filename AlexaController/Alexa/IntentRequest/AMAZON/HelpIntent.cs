@@ -1,13 +1,12 @@
 ﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
-using Value = AlexaController.AlexaDataSourceManagers.DataSourceProperties.Value;
+using Value = AlexaController.EmbyAplDataSourceManagement.Value;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {

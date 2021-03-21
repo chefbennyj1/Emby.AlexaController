@@ -1,4 +1,4 @@
-﻿namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
+﻿namespace AlexaController.EmbyAplDataSourceManagement.PropertyModels
 {
     public class MediaItem
     {
@@ -21,5 +21,6 @@
         public string logoImageSource { get; set; }
         public string thumbImageSource { get; set; }
         public string videoOverlaySource { get; set; }
+        public int? TotalRecordCount { get; set; }
     }
 }

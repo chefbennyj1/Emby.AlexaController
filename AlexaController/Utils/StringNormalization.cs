@@ -10,8 +10,9 @@
             try
             {
                 input = input.EndsWith(" in") ? input.Substring(0, input.Length - 3) : input;
-            }catch{}
-           
+            }
+            catch { }
+
             input = input.EndsWith(" junior") ? input.Replace("junior", "jr.") : input;
             return input
                 .Replace("&", " and")

@@ -1,19 +1,19 @@
-﻿using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
     [Intent]
     // ReSharper disable once UnusedType.Global
-    public class PreviousIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>,IIntentResponse
+    public class PreviousIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
@@ -26,8 +26,8 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         public async Task<string> Response()
         {
             var sessionPaging = Session.paging;
-            var previousPage  = sessionPaging.pages[sessionPaging.currentPage - 1];
-            var currentPage   = sessionPaging.pages[sessionPaging.currentPage];
+            var previousPage = sessionPaging.pages[sessionPaging.currentPage - 1];
+            var currentPage = sessionPaging.pages[sessionPaging.currentPage];
             AlexaSessionManager.Instance.UpdateSession(Session, currentPage, true);
 
             var properties = previousPage as Properties<MediaItem>;

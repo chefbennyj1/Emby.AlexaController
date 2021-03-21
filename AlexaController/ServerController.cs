@@ -16,20 +16,20 @@ namespace AlexaController
 {
     public class ServerController : IServerEntryPoint
     {
-        private IUserManager UserManager         { get; }
-        private ISessionManager SessionManager   { get; }
+        private IUserManager UserManager { get; }
+        private ISessionManager SessionManager { get; }
         private IActivityManager ActivityManager { get; set; }
-        public ILogger Log                       { get; }
-        public static ServerController Instance  { get; private set; }
+        public ILogger Log { get; }
+        public static ServerController Instance { get; private set; }
 
         // ReSharper disable once TooManyDependencies
         public ServerController(ILogManager logMan, ISessionManager sesMan, IActivityManager activityManager, IUserManager userManager)
         {
-            SessionManager  = sesMan;
-            UserManager     = userManager;
+            SessionManager = sesMan;
+            UserManager = userManager;
             ActivityManager = activityManager;
-            Log             = logMan.GetLogger(Plugin.Instance.Name);
-            Instance        = this;
+            Log = logMan.GetLogger(Plugin.Instance.Name);
+            Instance = this;
         }
 
         public async Task SendMessageToPluginConfigurationPage<T>(string name, T data)
@@ -73,7 +73,7 @@ namespace AlexaController
                 throw new Exception("I was unable to browse to the home page.");
             }
         }
-        
+
         public async Task BrowseItemAsync(IAlexaSession alexaSession, BaseItem request)
         {
             string deviceId;
@@ -151,13 +151,13 @@ namespace AlexaController
 
         public void Dispose()
         {
-            
+
         }
 
         // ReSharper disable once MethodNameNotMeaningful
         public void Run()
         {
-            
+
         }
     }
 }

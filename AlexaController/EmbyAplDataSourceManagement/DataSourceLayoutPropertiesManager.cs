@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
+﻿using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 
-namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
+namespace AlexaController.EmbyAplDataSourceManagement
 {
     public class DataSourceLayoutPropertiesManager
     {
@@ -56,28 +57,28 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
                 item = mediaItem
             });
         }
-
         public async Task<Properties<MediaItem>> GetBaseItemDetailViewPropertiesAsync(BaseItem item, IAlexaSession session)
         {
             var mediaItem = new MediaItem()
             {
-                type                = item.GetType().Name,
-                isPlayed            = item.IsPlayed(session.User),
-                primaryImageSource  = ServerQuery.Instance.GetPrimaryImageSource(item),
-                id                  = item.InternalId,
-                name                = item.Name,
-                premiereDate        = item.ProductionYear.ToString(),
-                officialRating      = item.OfficialRating,
-                tagLine             = item.Tagline,
-                runtimeMinutes      = ServerQuery.Instance.GetRunTime(item),
-                endTime             = ServerQuery.Instance.GetEndTime(item),
-                genres              = ServerQuery.Instance.GetGenres(item),
-                logoImageSource     = ServerQuery.Instance.GetLogoImageSource(item),
-                overview            = item.Overview,
+                type = item.GetType().Name,
+                isPlayed = item.IsPlayed(session.User),
+                primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(item),
+                id = item.InternalId,
+                name = item.Name,
+                premiereDate = item.ProductionYear.ToString(),
+                officialRating = item.OfficialRating,
+                tagLine = item.Tagline,
+                runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
+                endTime = ServerQuery.Instance.GetEndTime(item),
+                genres = ServerQuery.Instance.GetGenres(item),
+                logoImageSource = ServerQuery.Instance.GetLogoImageSource(item),
+                overview = item.Overview,
                 videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
                 backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item),
-                videoOverlaySource  = "/EmptyPng?quality=90",
-                themeAudioSource    = ServerQuery.Instance.GetThemeSongSource(item)
+                videoOverlaySource = "/EmptyPng?quality=90",
+                themeAudioSource = ServerQuery.Instance.GetThemeSongSource(item),
+                TotalRecordCount = item.GetType().Name == "Series" ? ServerQuery.Instance.GetItemsResult(item.InternalId, new[] { "Season" }, session.User).TotalRecordCount : 0
             };
 
             var similarItems = ServerQuery.Instance.GetSimilarItems(item);
@@ -99,7 +100,6 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             });
 
         }
-
         public async Task<Properties<List<Value>>> GetHelpViewPropertiesAsync()
         {
             var helpContent = new List<Value>()
@@ -152,7 +152,6 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
                 values = helpContent
             });
         }
-
         public async Task<Properties<string>> GetGenericViewPropertiesAsync(string text, string videoUrl)
         {
             return await Task.FromResult(new Properties<string>()
@@ -163,7 +162,6 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
                 videoUrl = videoUrl
             });
         }
-
         public async Task<Properties<MediaItem>> GetRoomSelectionViewPropertiesAsync(BaseItem item, IAlexaSession session)
         {
             return await Task.FromResult(new Properties<MediaItem>()
@@ -190,6 +188,6 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
                 }
             });
         }
-        
+
     }
 }

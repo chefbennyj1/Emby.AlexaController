@@ -1,17 +1,15 @@
 ﻿using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable once ComplexConditionExpression
@@ -43,7 +41,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             var requestId = request.requestId;
             var intent = request.intent;
             var slots = intent.slots;
-            
+
             BaseItem result = null;
             if (Session.NowViewingBaseItem is null)
             {
@@ -87,7 +85,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
-                    
+
                     directives = new List<IDirective>()
                     {
                         await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
@@ -124,7 +122,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-                
+
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {

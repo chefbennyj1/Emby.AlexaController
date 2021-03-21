@@ -2,13 +2,13 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -30,7 +30,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //    AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
 
             Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
-            
+
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
             {
@@ -39,18 +39,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
-            var request    = AlexaRequest.request;
-            var intent     = request.intent;
-            var slots      = intent.slots;
-            var type       = slots.MovieAlternatives.value is null ? "Series" : "Movie";
+            var request = AlexaRequest.request;
+            var intent = request.intent;
+            var slots = intent.slots;
+            var type = slots.MovieAlternatives.value is null ? "Series" : "Movie";
             var slotGenres = slots.Genre;
-            
+
             var genres = GetGenreList(slotGenres);
 
             var result = ServerQuery.Instance.GetBaseItemsByGenre(new[] { type }, genres.ToArray());
-
-            //IDataSource dataSource;
-
+            
             if (result.TotalRecordCount <= 0)
             {
                 var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("I was unable to find that. Does that genre exist?", "/Question");

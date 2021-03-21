@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL;
+﻿using AlexaController.Alexa.Presentation.APL;
+using System.Collections.Generic;
 
-namespace AlexaController.AlexaPresentationManagers
+namespace AlexaController.EmbyAplManagement
 {
     public static class Imports
     {
-        public static List<IImport> GetImports => new List<IImport>()
+        public static List<IImport> RenderImportsList => new List<IImport>()
         {
             new Import()
             {

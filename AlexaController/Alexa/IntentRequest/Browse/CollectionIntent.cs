@@ -1,6 +1,9 @@
 ﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Model.Logging;
@@ -8,8 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -49,7 +50,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var collection = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems = collection.Values.FirstOrDefault();
             var collectionBaseItem = collection.Keys.FirstOrDefault();
-            
+
             //Parental Control check for baseItem
             if (!(collectionBaseItem is null))
             {
@@ -66,7 +67,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
                         shouldEndSession = true,
-                        
+
                         directives = new List<IDirective>()
                         {
                             await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
@@ -89,7 +90,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var  sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(collectionItems, collectionBaseItem);
+            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(collectionItems, collectionBaseItem);
 
             //Update Session
             Session.NowViewingBaseItem = collectionBaseItem;

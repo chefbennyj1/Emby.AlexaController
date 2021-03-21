@@ -1,16 +1,15 @@
 ﻿using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -59,7 +58,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                         sound = "<audio src=\"soundbank://soundlibrary/musical/amzn_sfx_electronic_beep_02\"/>"
                     },
                     shouldEndSession = true,
-                    
+
                     directives = new List<IDirective>()
                     {
                         await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(genericLayoutProperties, Session)
@@ -96,7 +95,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
-                
+
                 directives = new List<IDirective>()
                 {
                     renderDocumentDirective,

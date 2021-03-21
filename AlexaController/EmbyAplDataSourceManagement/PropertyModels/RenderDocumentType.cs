@@ -1,4 +1,4 @@
-﻿namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
+﻿namespace AlexaController.EmbyAplDataSourceManagement.PropertyModels
 {
     public enum RenderDocumentType
     {

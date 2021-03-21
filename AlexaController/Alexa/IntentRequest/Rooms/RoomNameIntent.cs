@@ -23,8 +23,8 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         public async Task<string> Response()
         {
             var request = AlexaRequest.request;
-            var intent  = request.intent;
-            var slots   = intent.slots;
+            var intent = request.intent;
+            var slots = intent.slots;
 
             // ReSharper disable once TooManyChainedReferences
             var rePromptIntent = Session.PersistedRequestContextData.request.intent;
@@ -37,7 +37,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); //returns null or a room
 
                 //if (!Plugin.Instance.Configuration.Rooms.Exists(r => string.Equals(r.Name, room?.Name, StringComparison.InvariantCultureIgnoreCase)))
-                if(room is null)
+                if (room is null)
                 {
                     throw new DeviceUnavailableException("That rooms device is currently unavailable to display media.");
                 }

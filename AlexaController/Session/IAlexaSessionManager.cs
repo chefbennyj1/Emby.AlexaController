@@ -1,11 +1,10 @@
-﻿using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.Viewport;
+﻿using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using MediaBrowser.Controller.Session;
 using System.Collections.Generic;
 using System.Linq;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -67,9 +66,9 @@ namespace AlexaController.Session
                 return OpenSessions.FirstOrDefault(s => s.SessionId == alexaRequest.session.sessionId);
             }
 
-            var context       = alexaRequest.context;
-            var system        = context.System;
-            var person        = system.person;
+            var context = alexaRequest.context;
+            var system = context.System;
+            var person = system.person;
             var amazonSession = alexaRequest.session;
 
             IAlexaRequest persistedRequestData = null;

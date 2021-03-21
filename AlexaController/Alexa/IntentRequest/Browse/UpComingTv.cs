@@ -1,16 +1,15 @@
-﻿using AlexaController.Alexa.Presentation.DataSources;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using AlexaController.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {

@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
-using AlexaController.AlexaDataSourceManagers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -24,7 +23,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             AlexaRequest = alexaRequest;
             Session = session;
         }
-       
+
         public async Task<string> Response()
         {
             Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
@@ -47,13 +46,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 ServerController.Instance.Log.Error(exception.Message);
             }
 
-            var aplaDataSource       = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(Session.NowViewingBaseItem, Session);
+            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(Session.NowViewingBaseItem, Session);
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
-                
+
                 directives = new List<IDirective>()
                 {
                     renderAudioDirective

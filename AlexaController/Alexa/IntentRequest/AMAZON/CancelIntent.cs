@@ -12,7 +12,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
-        
+
         public CancelIntent(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             AlexaRequest = alexaRequest;

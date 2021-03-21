@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL;
+﻿using AlexaController.Alexa.Presentation.APL;
+using System.Collections.Generic;
 
-namespace AlexaController.AlexaPresentationManagers
+namespace AlexaController.EmbyAplManagement
 {
     public static class Resources
     {
-        public static List<IResource> GetResources => new List<IResource>()
+        public static List<IResource> RenderResourcesList => new List<IResource>()
         {
             new Resource()
             {

@@ -3,7 +3,6 @@ using MediaBrowser.Controller.Library;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.Exceptions;
 
 // ReSharper disable once ExcessiveIndentation
 
@@ -174,7 +173,7 @@ namespace AlexaController.Utils
                         {
                             return item;
                         }
-                        
+
 
                         if (NormalizeQueryString(item.Name).Contains(NormalizeQueryString(searchName)))
                         {

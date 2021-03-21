@@ -1,16 +1,15 @@
 ﻿using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 
 namespace AlexaController.Alexa.IntentRequest.Browse
@@ -38,16 +37,16 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
-            var request        = AlexaRequest.request;
-            var intent         = request.intent;
-            var slots          = intent.slots;
-            var seasonNumber   = slots.SeasonNumber.value;
-            var context        = AlexaRequest.context;
+            var request = AlexaRequest.request;
+            var intent = request.intent;
+            var slots = intent.slots;
+            var seasonNumber = slots.SeasonNumber.value;
+            var context = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
-            var requestId      = request.requestId;
+            var requestId = request.requestId;
 
             var results = ServerQuery.Instance.GetEpisodes(Convert.ToInt32(seasonNumber), Session.NowViewingBaseItem, Session.User);
-            
+
             // User requested season/episode data that doesn't exist
             if (!results.Any())
             {
@@ -93,7 +92,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
-                
+
                 directives = new List<IDirective>()
                 {
                     renderDocumentDirective,

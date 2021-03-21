@@ -5,7 +5,7 @@ using IPerson = AlexaController.Alexa.RequestModel.IPerson;
 
 namespace AlexaController.Utils
 {
-    public class SpeechAuthorization 
+    public class SpeechAuthorization
     {
         private IUserManager UserManager { get; }
         public static SpeechAuthorization Instance { get; private set; }

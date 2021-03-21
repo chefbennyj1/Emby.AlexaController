@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
+﻿using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APLA.AudioFilters;
@@ -9,8 +7,11 @@ using AlexaController.Alexa.Presentation.DataSources;
 using AlexaController.Alexa.Presentation.DataSources.Transformers;
 using AlexaController.Alexa.Presentation.Directives;
 using AlexaController.Alexa.ResponseModel;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 /*
  * Echo Display Devices use the **LAN address** for Images when using the skill on the same network as emby service (ex. 192.168.X.XXX:8096)
@@ -18,9 +19,9 @@ using AlexaController.Session;
  * https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-image.html
  */
 
-namespace AlexaController.AlexaPresentationManagers
+namespace AlexaController.EmbyAplManagement
 {
-    public class RenderDocumentDirectiveFactory 
+    public class RenderDocumentDirectiveFactory
     {
         public static RenderDocumentDirectiveFactory Instance { get; private set; }
 
@@ -31,58 +32,50 @@ namespace AlexaController.AlexaPresentationManagers
 
         public async Task<IDirective> GetRenderDocumentDirectiveAsync<T>(Properties<T> properties, IAlexaSession session) where T : class
         {
-            List<IComponent> layout;
-
             var dataSource = new DataSourceBuilder();
             dataSource.Add(properties);
 
             switch (properties?.documentType)
             {
-                case RenderDocumentType.GENERIC_VIEW_TEMPLATE:
-                    layout = await Layouts.RenderGenericViewLayout();
-                    break;
                 case RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE:
-                    layout = await Layouts.RenderItemDetailsLayout(properties as Properties<MediaItem>, session);
                     dataSource.Add(new TextToSpeechTransformer()
                     {
-                        inputPath  = "item.overview",
+                        inputPath = "item.overview",
                         outputName = "readOverview"
                     });
                     break;
                 case RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE:
-                    layout = await Layouts.RenderItemListSequenceLayout(properties as Properties<MediaItem>, session);
                     dataSource.Add(new AplaSpeechTransformer()
                     {
-                        template   = "buttonPressEffectApla",
+                        template = "buttonPressEffectApla",
                         outputName = "buttonPressEffect"
                     });
                     break;
-                case RenderDocumentType.ROOM_SELECTION_TEMPLATE:
-                    layout = await Layouts.RenderRoomSelectionLayout(session);
-                    break;
                 case RenderDocumentType.HELP_TEMPLATE:
-                    layout = await Layouts.RenderHelpViewLayout();
                     dataSource.Add(new TextToSpeechTransformer()
                     {
-                        inputPath  = "values[*].value",
+                        inputPath = "values[*].value",
                         outputName = "helpPhrase"
                     });
+                    break;
+                case RenderDocumentType.GENERIC_VIEW_TEMPLATE:
+                    break;
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE:
                     break;
                 default: return null;
             }
 
-            
             return await Task.FromResult(new AplRenderDocumentDirective()
             {
                 token = properties.documentType.ToString(),
                 // ReSharper disable once RedundantNameQualifier
                 document = new Alexa.Presentation.APL.Document()
                 {
-                    theme     = "${payload.templateData.properties.theme}",
-                    import    = Imports.GetImports,
-                    resources = Resources.GetResources,
-                    graphics  = VectorGraphics.GetVectorGraphics,
-                    commands  = new Dictionary<string, ICommand>()
+                    theme = "${payload.templateData.properties.theme}",
+                    import = Imports.RenderImportsList,
+                    resources = Resources.RenderResourcesList,
+                    graphics = VectorGraphics.RenderVectorGraphicsDictionary,
+                    commands = new Dictionary<string, ICommand>()
                     {
                         { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() },
                         { nameof(Animations.FadeIn), await Animations.FadeIn() }
@@ -90,11 +83,11 @@ namespace AlexaController.AlexaPresentationManagers
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>() { "payload" },
-                        items = layout
+                        items = await Layouts.RenderLayoutComponents(properties, session)
                     }
                 },
-                datasources = new Dictionary<string, IDataSource>() { { "templateData", await dataSource.Create() } },
-                sources     = new Dictionary<string, IDocument>()
+                datasources = await dataSource.Create("templateData"),
+                sources = new Dictionary<string, IDocument>()
                 {
                     { "buttonPressEffectApla", new Alexa.Presentation.APLA.Document()
                         {
@@ -136,7 +129,7 @@ namespace AlexaController.AlexaPresentationManagers
                         }
                     }
                 },
-                datasources = new Dictionary<string, IDataSource>() { { "templateData", await dataSource.Create() } }
+                datasources = await dataSource.Create("templateData")
             });
         }
     }

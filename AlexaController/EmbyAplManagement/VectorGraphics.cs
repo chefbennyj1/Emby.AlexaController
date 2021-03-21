@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.APL.VectorGraphics;
+﻿using AlexaController.Alexa.Presentation.APL.VectorGraphics;
+using System.Collections.Generic;
 
-namespace AlexaController.AlexaPresentationManagers
+namespace AlexaController.EmbyAplManagement
 {
     public static class VectorGraphics
     {
-        public static Dictionary<string, IAlexaVectorGraphic> GetVectorGraphics => new Dictionary<string, IAlexaVectorGraphic>
+        public static Dictionary<string, IAlexaVectorGraphic> RenderVectorGraphicsDictionary => new Dictionary<string, IAlexaVectorGraphic>
         {
             {
                 "CheckMark", new AlexaVectorGraphic()

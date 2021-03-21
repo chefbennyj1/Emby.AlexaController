@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Model.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -39,12 +39,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             var request = AlexaRequest.request;
-            var intent  = request.intent;
-            var slots   = intent.slots;
-           
+            var intent = request.intent;
+            var slots = intent.slots;
+
             var searchName = (slots.Movie.value ?? slots.Series.value) ?? slots.MovieCollection.value;
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);
-            
+
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
 
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { "Movie", "Series", "Collection" });

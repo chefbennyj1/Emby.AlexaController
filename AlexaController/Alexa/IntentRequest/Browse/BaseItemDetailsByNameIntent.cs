@@ -2,14 +2,14 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Model.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
-using AlexaController.AlexaPresentationManagers;
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -30,7 +30,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             await AlexaResponseClient.Instance.PostProgressiveResponse("OK.",
                 AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
 
-            
+
             Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
@@ -40,10 +40,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
-            var request    = AlexaRequest.request;
-            var intent     = request.intent;
-            var slots      = intent.slots;
-            var type       = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
+            var request = AlexaRequest.request;
+            var intent = request.intent;
+            var slots = intent.slots;
+            var type = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
             var searchName = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
 
             //Clean up search term
@@ -52,7 +52,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
 
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
-            
+
             if (result is null)
             {
                 var aplaDataSourceProperties = await DataSourceAudioSpeechPropertiesManager.Instance.NoItemExists();
@@ -81,7 +81,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
                 catch { }
 
-                var genericLayoutProperties  = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {result.OfficialRating}", "/particles");
+                var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {result.OfficialRating}", "/particles");
                 var parentalControlNotAllowedAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.ParentalControlNotAllowed(result, Session);
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
@@ -107,7 +107,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var detailLayoutProperties  = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(result, Session);
+            var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(result, Session);
             var aplaDataSource1 = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(result, Session);
 
             //Update Session
@@ -115,14 +115,14 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             AlexaSessionManager.Instance.UpdateSession(Session, detailLayoutProperties);
 
             var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(detailLayoutProperties, Session);
-            var renderAudioDirective    = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource1);
+            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource1);
 
             try
             {
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = null,
-                    
+
                     directives = new List<IDirective>()
                     {
                         renderDocumentDirective,

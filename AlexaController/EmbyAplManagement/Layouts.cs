@@ -1,31 +1,49 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
+﻿using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
 using AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press;
 using AlexaController.Alexa.Presentation.APL.VectorGraphics;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 
-namespace AlexaController.AlexaPresentationManagers
+namespace AlexaController.EmbyAplManagement
 {
     public static class Layouts
     {
-        public static async Task<List<IComponent>> RenderItemListSequenceLayout(Properties<MediaItem> properties, IAlexaSession session)
+        public static async Task<List<IComponent>> RenderLayoutComponents<T>(Properties<T> properties, IAlexaSession session) where T : class
         {
-            var layout     = new List<IComponent>();
+            switch (properties?.documentType)
+            {
+                case RenderDocumentType.GENERIC_VIEW_TEMPLATE: return await RenderGenericViewLayout();
+
+                case RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE: return await RenderItemDetailsLayout(properties as Properties<MediaItem>, session);
+
+                case RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE: return await RenderItemListSequenceLayout(properties as Properties<MediaItem>, session);
+
+                case RenderDocumentType.ROOM_SELECTION_TEMPLATE: return await RenderRoomSelectionLayout(session);
+
+                case RenderDocumentType.HELP_TEMPLATE: return await RenderHelpViewLayout();
+
+                default: return null;
+            }
+        }
+        private static async Task<List<IComponent>> RenderItemListSequenceLayout(Properties<MediaItem> properties, IAlexaSession session)
+        {
+            var layout = new List<IComponent>();
             //var data       = dataSource as DataSource;
             //var properties = data?.properties as Properties<MediaItem>;
             var mediaItems = properties?.items;
-            var type       = mediaItems?[0].type;
+            var type = mediaItems?[0].type;
 
             layout.Add(new Container()
             {
-                id     = "primary",
-                width  = "100vw",
+                id = "primary",
+                width = "100vw",
                 height = "100vh",
                 items = new List<IComponent>()
                 {
@@ -110,13 +128,13 @@ namespace AlexaController.AlexaPresentationManagers
 
         }
 
-        public static async Task<List<IComponent>> RenderItemDetailsLayout(Properties<MediaItem> properties, IAlexaSession session)
+        private static async Task<List<IComponent>> RenderItemDetailsLayout(Properties<MediaItem> properties, IAlexaSession session)
         {
             const string leftColumnSpacing = "36vw";
             //var data       = dataSource as DataSource;
             //var properties = data?.properties as Properties<MediaItem>;
-            var mediaItem  = properties?.item;
-            var type       = mediaItem?.type;
+            var mediaItem = properties?.item;
+            var type = mediaItem?.type;
 
             // ReSharper disable UseObjectOrCollectionInitializer
             var layout = new List<IComponent>();
@@ -131,13 +149,13 @@ namespace AlexaController.AlexaPresentationManagers
                         repeatCount = 0,
                     }
                 },
-                scale      = "best-fill",
-                width      = "100vw",
-                height     = "100vh",
-                position   = "absolute",
-                autoplay   = true,
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                autoplay = true,
                 audioTrack = "none",
-                id         = "${data.item.id}",
+                id = "${data.item.id}",
                 onEnd = new List<ICommand>()
                 {
                     new SetValue()
@@ -163,13 +181,13 @@ namespace AlexaController.AlexaPresentationManagers
             layout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
-                scale        = "best-fill",
-                width        = "100vw",
-                height       = "100vh",
-                position     = "absolute",
-                source       = "${data.url}${data.item.videoOverlaySource}",
-                opacity      = 0.65,
-                id           = "backdropOverlay"
+                scale = "best-fill",
+                width = "100vw",
+                height = "100vh",
+                position = "absolute",
+                source = "${data.url}${data.item.videoOverlaySource}",
+                opacity = 0.65,
+                id = "backdropOverlay"
             });
 
             if (session.paging.canGoBack)
@@ -177,12 +195,12 @@ namespace AlexaController.AlexaPresentationManagers
                 layout.Add(new AlexaIconButton()
                 {
                     vectorSource = MaterialVectorIcons.Left,
-                    buttonSize   = "15vh",
-                    position     = "absolute",
-                    left         = "2vw",
-                    color        = "white",
-                    top          = "-1vw",
-                    id           = "goBack",
+                    buttonSize = "15vh",
+                    position = "absolute",
+                    left = "2vw",
+                    color = "white",
+                    top = "-1vw",
+                    id = "goBack",
                     primaryAction = new Parallel()
                     {
                         commands = new List<ICommand>()
@@ -196,51 +214,51 @@ namespace AlexaController.AlexaPresentationManagers
 
             layout.Add(new Image()
             {
-                id       = "logo",
-                source   = "${data.url}${data.item.logoImageSource}",
-                width    = "12vw",
+                id = "logo",
+                source = "${data.url}${data.item.logoImageSource}",
+                width = "12vw",
                 position = "absolute",
-                left     = "85vw",
+                left = "85vw",
             });
             //Name
             layout.Add(new Text()
             {
-                text       = "${data.item.name}",
-                style      = "textStylePrimary",
-                left       = leftColumnSpacing,
+                text = "${data.item.name}",
+                style = "textStylePrimary",
+                left = leftColumnSpacing,
                 fontWeight = "100",
-                top        = "15vh",
-                id         = "baseItemName",
-                opacity    = 1,
+                top = "15vh",
+                id = "baseItemName",
+                opacity = 1,
 
             });
             //Genres
             layout.Add(new Text()
             {
-                text     = "${data.item.genres}",
-                left     = leftColumnSpacing,
-                style    = "textStyleBody",
-                top      = "15vh",
-                width    = "40vw",
-                height   = "22dp",
+                text = "${data.item.genres}",
+                left = leftColumnSpacing,
+                style = "textStyleBody",
+                top = "15vh",
+                width = "40vw",
+                height = "22dp",
                 fontSize = "18dp",
-                opacity  = 1,
-                id       = "genre",
+                opacity = 1,
+                id = "genre",
 
             });
             //Rating - Runtime - End time
             //Runtime span
             layout.Add(new Text()
             {
-                text     = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
-                left     = leftColumnSpacing,
-                style    = "textStyleBody",
-                top      = "17vh",
-                width    = "40vw",
-                height   = "22dp",
+                text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
+                left = leftColumnSpacing,
+                style = "textStyleBody",
+                top = "17vh",
+                width = "40vw",
+                height = "22dp",
                 fontSize = "18dp",
-                opacity  = 1,
-                id       = "rating",
+                opacity = 1,
+                id = "rating",
 
             });
             //TagLines
@@ -374,9 +392,9 @@ namespace AlexaController.AlexaPresentationManagers
             {
                 layout.Add(new Container()
                 {
-                    position  = "absolute",
-                    left      = "38vw",
-                    top       = "78vh",
+                    position = "absolute",
+                    left = "38vw",
+                    top = "78vh",
                     direction = "row",
                     items = new List<IComponent>()
                     {
@@ -397,9 +415,7 @@ namespace AlexaController.AlexaPresentationManagers
                             style    = "textStyleBody",
                             fontSize = "23dp",
                             left     = "12dp",
-                            text     = "<b>" +
-                                       ServerQuery.Instance.GetItemsResult(mediaItem.id, new []{"Season"}, session.User)
-                                       .TotalRecordCount + "</b>"
+                            text     = "<b>${data.TotalRecordCount}</b>"
                         },
                         new Text()
                         {
@@ -415,12 +431,12 @@ namespace AlexaController.AlexaPresentationManagers
             //Primary Image
             layout.Add(new Container()
             {
-                id       = "primaryButton",
+                id = "primaryButton",
                 position = "absolute",
-                width    = "38%",
-                height   = "75vh",
-                top      = "15vh",
-                opacity  = 1,
+                width = "38%",
+                height = "75vh",
+                top = "15vh",
+                opacity = 1,
                 items = new List<IComponent>()
                 {
                     new Image()
@@ -461,7 +477,7 @@ namespace AlexaController.AlexaPresentationManagers
             });
         }
 
-        public static async Task<List<IComponent>> RenderRoomSelectionLayout(IAlexaSession session)
+        private static async Task<List<IComponent>> RenderRoomSelectionLayout(IAlexaSession session)
         {
             var layout = new List<IComponent>
             {
@@ -547,7 +563,7 @@ namespace AlexaController.AlexaPresentationManagers
             });
         }
 
-        public static async Task<List<IComponent>> RenderGenericViewLayout()
+        private static async Task<List<IComponent>> RenderGenericViewLayout()
         {
             return await Task.FromResult(new List<IComponent>
             {
@@ -595,7 +611,7 @@ namespace AlexaController.AlexaPresentationManagers
 
         }
 
-        public static async Task<List<IComponent>> RenderHelpViewLayout()
+        private static async Task<List<IComponent>> RenderHelpViewLayout()
         {
             return await Task.FromResult(new List<IComponent>()
             {
@@ -876,12 +892,12 @@ namespace AlexaController.AlexaPresentationManagers
 
             return await Task.FromResult(new Frame()
             {
-                position        = "absolute",
-                top             = "29vh",
-                right           = "40%",
-                borderWidth     = "3px",
-                borderColor     = "white",
-                borderRadius    = "75px",
+                position = "absolute",
+                top = "29vh",
+                right = "40%",
+                borderWidth = "3px",
+                borderColor = "white",
+                borderRadius = "75px",
                 backgroundColor = "rgba(0,0,0,0.35)",
                 items = new List<IComponent>()
                 {
@@ -986,14 +1002,14 @@ namespace AlexaController.AlexaPresentationManagers
                 foreach (var session in ServerQuery.Instance.GetCurrentSessions())
                 {
                     if (session.DeviceName == room.DeviceName) disabled = false;
-                    if (session.Client     == room.DeviceName) disabled = false;
+                    if (session.Client == room.DeviceName) disabled = false;
                 }
 
                 roomButtons.Add(new Container()
                 {
                     direction = "row",
-                    left      = "15vw",
-                    top       = "10vh",
+                    left = "15vw",
+                    top = "10vh",
                     items = new List<IComponent>()
                     {
                         new AlexaIconButton()

@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
+﻿using AlexaController.Alexa.Presentation.DataSources.Properties;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+using System.Collections.Generic;
 
-namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
+namespace AlexaController.EmbyAplDataSourceManagement
 {
     public class Properties<T> : BaseDataSourceProperties<T> where T : class
     {

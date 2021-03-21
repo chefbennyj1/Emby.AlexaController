@@ -1,40 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AlexaController.Alexa.SpeechSynthesis;
+﻿using AlexaController.Alexa.SpeechSynthesis;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
+namespace AlexaController.EmbyAplDataSourceManagement.PropertyModels
 {
-    public class DataSourceAudioSpeechPropertiesManager : Ssml
+    public abstract class SpeechBuilderService : Ssml
     {
-        private enum SpeechPrefix
-        {
-            REPOSE,
-            APOLOGETIC,
-            COMPLIANCE,
-            NONE,
-            GREETINGS,
-            NON_COMPLIANT,
-            DEFAULT
-        }
-
-        // Use this to Randomize responses. Don't say things all the time.
-        private static readonly Random RandomIndex = new Random();
-
-        public static DataSourceAudioSpeechPropertiesManager Instance { get; private set; }
-
-        public DataSourceAudioSpeechPropertiesManager()
-        {
-            Instance = this;
-        }
-
-        private readonly List<string> Apologetic = new List<string>()
+        private static readonly List<string> Apologetic = new List<string>()
         {
             "I'm Sorry about this.",
             "Apologies.",
@@ -42,7 +20,7 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             "I'm Sorry.",
             ""
         };
-        private readonly List<string> Compliance = new List<string>()
+        private static readonly List<string> Compliance = new List<string>()
         {
             ExpressiveInterjection("OK"),
             ExpressiveInterjection("absolutely "),
@@ -51,7 +29,7 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             "Here you go.",
             ""
         };
-        private readonly List<string> Repose     = new List<string>()
+        private static readonly List<string> Repose = new List<string>()
         {
             "One moment...",
             "One moment please...",
@@ -60,80 +38,48 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             "I can do that... just a moment...",
             ""
         };
-        private readonly List<string> Greetings  = new List<string>()
+        private static readonly List<string> Greetings = new List<string>()
         {
             "Hey",
             "Hi",
             "Hello",
             ""
         };
-        private readonly List<string> Dysfluency = new List<string>()
+        private static readonly List<string> Dysfluency = new List<string>()
         {
             "oh...",
             "umm... ",
             $"{ExpressiveInterjection("hmm")}...",
         };
-        
-        public async Task<Properties<string>> PersonNotRecognized()
+
+        protected static void PersonNotRecognized(StringBuilder speech)
         {
-            var speech = new StringBuilder();
             speech.Append(GetSpeechPrefix(SpeechPrefix.REPOSE));
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("I don't recognize the current user.");
             speech.Append("Please go to the plugin configuration and link emby account personalization.");
             speech.Append("Or ask for help.");
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> OnLaunch()
+        protected static void OnLaunch(StringBuilder speech)
         {
-            var speech = new StringBuilder();
             speech.Append(GetSpeechPrefix(SpeechPrefix.GREETINGS));
             speech.Append(InsertStrengthBreak(StrengthBreak.strong));
             speech.Append("What media can I help you find.");
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> NotUnderstood()
+        protected static void NotUnderstood(StringBuilder speech)
         {
-            var speech = new StringBuilder();
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append("I misunderstood what you said.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(SayWithEmotion("Can you say that again?", Emotion.excited, Intensity.low));
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> NoItemExists()
+        protected static void NoItemExists(StringBuilder speech)
         {
-            var speech   = new StringBuilder();
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append("I was unable to find that item in the library.");
-
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
-
         }
-        
-        public async Task<Properties<string>> ItemBrowse(BaseItem item, IAlexaSession session, bool correctUserPhrasing = false, bool deviceAvailable = true)
+        protected static void ItemBrowse(StringBuilder speech, BaseItem item, IAlexaSession session, bool correctUserPhrasing = false, bool deviceAvailable = true)
         {
-            var speech = new StringBuilder();
-
             if (deviceAvailable == false)
             {
                 speech.Append("That device is currently unavailable.");
@@ -151,7 +97,6 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             }
 
             var name = StringNormalization.ValidateSpeechQueryString(item.Name);
-
             speech.Append(name);
 
             if (!item.IsFolder) //Don't describe a rating of a library or collection folder.
@@ -161,143 +106,77 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
                 speech.Append(string.IsNullOrEmpty(rating) ? "unrated" : $"Rated {rating}");
             }
 
-            if (!session.hasRoom)
-            {
-                return await Task.FromResult(new Properties<string>()
-                {
-                    value = speech.ToString(),
-                    audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-                });
-            }
+            if (!session.hasRoom) return;
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
-
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> BrowseNextUpEpisode(BaseItem item, IAlexaSession session)
+        protected static void BrowseNextUpEpisode(StringBuilder speech, BaseItem item, IAlexaSession session)
         {
-            var speech = new StringBuilder();
             var season = item.Parent;
             var seriesName = season?.Parent.Name;
             speech.Append("Here is the next up episode for ");
             speech.Append(seriesName);
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(item.Name);
-            if (session.room is null)
-            {
-                return await Task.FromResult(new Properties<string>()
-                {
-                    value = speech.ToString(),
-                    audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-                });
-            }
+            if (session.room is null) return;
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-       
-        public async Task<Properties<string>> PlayNextUpEpisode(BaseItem item, IAlexaSession session)
+        protected static void NoNextUpEpisodeAvailable(StringBuilder speech)
         {
-            var speech = new StringBuilder();
+            speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
+            speech.Append("There doesn't seem to be a new episode available for that series.");
+        }
+        protected static void PlayNextUpEpisode(StringBuilder speech, BaseItem item, IAlexaSession session)
+        {
             speech.Append("Playing the next up episode for ");
             speech.Append(item.Parent.Parent.Name);
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> ParentalControlNotAllowed(BaseItem item, IAlexaSession session)
+        protected static void ParentalControlNotAllowed(StringBuilder speech, BaseItem item, IAlexaSession session)
         {
-            var speech = new StringBuilder();
             speech.Append(GetSpeechPrefix(SpeechPrefix.NON_COMPLIANT));
             speech.Append("Are you sure you are allowed access to ");
             speech.Append(item is null ? "this item" : item.Name);
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(SayName(session.person));
             speech.Append("?");
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> PlayItem(BaseItem item)
+        protected static void PlayItem(StringBuilder speech, BaseItem item)
         {
-            var speech = new StringBuilder();
             speech.Append("Now playing the ");
             speech.Append(item.ProductionYear);
             speech.Append(" ");
             speech.Append(item.GetType().Name);
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(item.Name);
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> RoomContext()
+        protected static void RoomContext(StringBuilder speech)
         {
-            var speech = new StringBuilder();
-            //speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append(SayWithEmotion("I didn't get the room ", Emotion.disappointed, Intensity.high));
             speech.Append("that you wish to view that.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(SayWithEmotion("Which room did you want?", Emotion.excited, Intensity.medium));
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-        
-        public async Task<Properties<string>> VoiceAuthenticationExists(IAlexaSession session)
+        protected static void VoiceAuthenticationExists(StringBuilder speech, IAlexaSession session)
         {
-            var speech = new StringBuilder();
             speech.Append(GetSpeechPrefix(SpeechPrefix.NON_COMPLIANT));
             speech.Append(InsertStrengthBreak(StrengthBreak.strong));
             speech.Append("This profile is already linked to ");
             speech.Append(SayName(session.person));
             speech.Append("'s account");
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> VoiceAuthenticationAccountLinkError()
+        protected static void VoiceAuthenticationAccountLinkError(StringBuilder speech)
         {
-            var speech = new StringBuilder();
             speech.Append("I was unable to learn your voice.");
             speech.Append("Please make sure you have allowed personalization in the Alexa app.");
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
-        }
 
-        public async Task<Properties<string>> VoiceAuthenticationAccountLinkSuccess(IAlexaSession session)
+        }
+        protected static void VoiceAuthenticationAccountLinkSuccess(StringBuilder speech, IAlexaSession session)
         {
-            var speech = new StringBuilder();
             speech.Append(ExpressiveInterjection("Success "));
             speech.Append(ExpressiveInterjection(SayName(session.person)));
             speech.Append("!");
@@ -305,16 +184,9 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             speech.Append("You should now see the I.D. linked to your voice.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Choose your emby account name and press save.");
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> UpComingEpisodes(List<BaseItem> items, DateTime date)
+        protected static void UpComingEpisodes(StringBuilder speech, List<BaseItem> items, DateTime date)
         {
-            var speech = new StringBuilder();
             speech.Append("There ");
             speech.Append(items?.Count > 1 ? "are" : "is");
             speech.Append(SayAsCardinal(items?.Count.ToString()));
@@ -359,16 +231,9 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             speech.Append(
                 $"This completes the list of episodes scheduled for the next {(date - DateTime.Now).Days} days. ");
 
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> NewLibraryItems(List<BaseItem> items, DateTime date, IAlexaSession session)
+        protected static void NewLibraryItems(StringBuilder speech, List<BaseItem> items, DateTime date, IAlexaSession session)
         {
-            var speech = new StringBuilder();
             speech.Append("There ");
             speech.Append(items?.Count > 1 ? "are" : "is");
             speech.Append(SayAsCardinal(items?.Count.ToString()));
@@ -378,45 +243,20 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             //var date = DateTime.Parse(query.args[0]);
             speech.Append($" added in the past {(date - DateTime.Now).Days * -1} days. ");
 
-            if(!session.supportsApl){
+            if (!session.supportsApl)
+            {
                 speech.Append(string.Join($", {InsertStrengthBreak(StrengthBreak.weak)}",
                 // ReSharper disable once AssignNullToNotNullAttribute
                 items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
             }
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
-        public async Task<Properties<string>> NoNextUpEpisodeAvailable()
+        protected static void BrowseItemByActor(StringBuilder speech, List<BaseItem> actors)
         {
-            var speech = new StringBuilder();
-            speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
-            speech.Append("There doesn't seem to be a new episode available for that series.");
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
-        }
-
-        public async Task<Properties<string>> BrowseItemByActor(List<BaseItem> actors)
-        {
-            var speech = new StringBuilder();
             speech.Append(GetSpeechPrefix(SpeechPrefix.COMPLIANCE));
             speech.Append("Items starring");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(string.Join(", ", actors));
-            //speech.Append(string.Join(", and", actors, actors.Count -1, 1));
-            return await Task.FromResult(new Properties<string>()
-            {
-                value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
-            });
         }
-
         private static void CorrectPhrasing(StringBuilder speech, IAlexaSession session, BaseItem item)
         {
             speech.Append("Hey!");
@@ -436,8 +276,19 @@ namespace AlexaController.AlexaDataSourceManagers.DataSourceProperties
             speech.Append("will help me find your selection more efficiently.");
             speech.Append(InsertStrengthBreak(StrengthBreak.strong));
         }
-
-        private string GetSpeechPrefix(SpeechPrefix prefix)
+        private enum SpeechPrefix
+        {
+            REPOSE,
+            APOLOGETIC,
+            COMPLIANCE,
+            NONE,
+            GREETINGS,
+            NON_COMPLIANT,
+            DEFAULT
+        }
+        // Use this to Randomize responses. 
+        private static readonly Random RandomIndex = new Random();
+        private static string GetSpeechPrefix(SpeechPrefix prefix)
         {
             switch (prefix)
             {

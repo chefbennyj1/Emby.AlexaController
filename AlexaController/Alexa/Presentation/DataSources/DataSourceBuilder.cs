@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation.DataSources.Properties;
+﻿using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.Presentation.DataSources.Transformers;
-using AlexaController.AlexaDataSourceManagers.DataSourceProperties;
+using AlexaController.EmbyAplDataSourceManagement;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.Presentation.DataSources
 {
-    public class DataSourceBuilder 
+    public class DataSourceBuilder
     {
         private List<ITransformer> Transformers { get; }
         private IProperties Properties { get; set; }
@@ -31,12 +31,18 @@ namespace AlexaController.Alexa.Presentation.DataSources
             Properties = properties;
         }
 
-        public async Task<IDataSource> Create() 
+        public async Task<Dictionary<string, IDataSource>> Create(string name)
         {
-            return await Task.FromResult(new DataSource()
+            return await Task.FromResult(new Dictionary<string, IDataSource>()
             {
-                properties = Properties,
-                transformers = Transformers
+                {
+                    name,
+                    new DataSource()
+                    {
+                        properties = Properties,
+                        transformers = Transformers
+                    }
+                }
             });
         }
     }
