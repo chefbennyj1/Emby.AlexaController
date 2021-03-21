@@ -26,7 +26,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         public IAlexaSession Session { get; }
         public async Task<string> Response()
         {
-            await AlexaResponseClient.Instance.PostProgressiveResponse("OK. Just a moment.",
+            await AlexaResponseClient.Instance.PostProgressiveResponse($"OK. { SpeechBuilderService.GetSpeechPrefix(SpeechPrefix.REPOSE)}.",
                 AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
 
             Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);

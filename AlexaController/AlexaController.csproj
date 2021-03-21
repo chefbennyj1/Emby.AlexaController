@@ -7,6 +7,7 @@
 </ItemGroup>
 
 <ItemGroup>
+  <None Remove="Alexa\IntentRequest\Browse\BaseItemDetailsByNameIntent.cs~RFe82f8e0f.TMP" />
   <None Remove="Configuration\AlexaPluginConfigurationPage.html" />
   <None Remove="Configuration\AlexaPluginConfigurationPage.js" />
   <None Remove="Configuration\InteractionModel.json" />

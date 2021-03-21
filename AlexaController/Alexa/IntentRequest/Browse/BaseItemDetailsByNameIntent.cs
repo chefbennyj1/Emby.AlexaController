@@ -27,10 +27,9 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            await AlexaResponseClient.Instance.PostProgressiveResponse("OK.",
+            await AlexaResponseClient.Instance.PostProgressiveResponse(SpeechBuilderService.GetSpeechPrefix(SpeechPrefix.REPOSE),
                 AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
-
-
+            
             Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
