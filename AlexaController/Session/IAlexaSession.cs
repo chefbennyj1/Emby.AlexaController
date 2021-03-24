@@ -11,6 +11,8 @@ namespace AlexaController.Session
     {
         User User { get; set; }
         string SessionId { get; set; }
+        string EmbySessionId { get; set; }
+        long PlaybackPositionTicks { get; set; }
         string EchoDeviceId { get; set; }
         ViewportProfile viewport { get; set; }
         bool supportsApl { get; set; }
@@ -27,6 +29,8 @@ namespace AlexaController.Session
     {
         public User User { get; set; }
         public string SessionId { get; set; }
+        public string EmbySessionId { get; set; }
+        public long PlaybackPositionTicks { get; set; }
         public string EchoDeviceId { get; set; }
         public ViewportProfile viewport { get; set; }
         public bool supportsApl { get; set; }

@@ -10,6 +10,7 @@ using MediaBrowser.Model.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+#pragma warning disable 4014
 
 namespace AlexaController.Alexa.IntentRequest.Browse
 {
@@ -27,7 +28,8 @@ namespace AlexaController.Alexa.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-            await AlexaResponseClient.Instance.PostProgressiveResponse(SpeechBuilderService.GetSpeechPrefix(SpeechPrefix.REPOSE),
+
+            AlexaResponseClient.Instance.PostProgressiveResponse(SpeechBuilderService.GetSpeechPrefix(SpeechPrefix.REPOSE),
                 AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
             
             Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
@@ -98,7 +100,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             {
                 try
                 {
-                    await ServerController.Instance.BrowseItemAsync(Session, result);
+                    ServerController.Instance.BrowseItemAsync(Session, result);
                 }
                 catch (Exception exception)
                 {

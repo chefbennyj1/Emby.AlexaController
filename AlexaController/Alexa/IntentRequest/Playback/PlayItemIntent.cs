@@ -10,6 +10,7 @@ using MediaBrowser.Model.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+#pragma warning disable 4014
 
 // ReSharper disable TooManyChainedReferences
 // ReSharper disable once ComplexConditionExpression
@@ -17,12 +18,11 @@ using System.Threading.Tasks;
 namespace AlexaController.Alexa.IntentRequest.Playback
 {
     [Intent]
+    // ReSharper disable once UnusedType.Global
     public class PlayItemIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
-        //If no room is requested in the PlayItemIntent intent, we follow up immediately to get a room value from 'RoomName' intent. 
-
         public IAlexaRequest AlexaRequest { get; }
-        public IAlexaSession Session { get; }
+        public IAlexaSession Session { get; private set; }
 
         public PlayItemIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
@@ -32,22 +32,23 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
         public async Task<string> Response()
         {
-            try { Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session); } catch { }
+            Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
             if (Session.room is null) return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
-
-            var request = AlexaRequest.request;
-            var context = AlexaRequest.context;
+            
+            var request        = AlexaRequest.request;
+            var context        = AlexaRequest.context;
             var apiAccessToken = context.System.apiAccessToken;
-            var requestId = request.requestId;
-            var intent = request.intent;
-            var slots = intent.slots;
+            var requestId      = request.requestId;
+            var intent         = request.intent;
+            var slots          = intent.slots;
 
-            BaseItem result = null;
+            AlexaResponseClient.Instance.PostProgressiveResponse(SpeechBuilderService.GetSpeechPrefix(SpeechPrefix.REPOSE) + " Starting Playback.",apiAccessToken, requestId);
+
+            BaseItem result;
             if (Session.NowViewingBaseItem is null)
             {
                 var type = slots.Movie.value is null ? "Series" : "Movie";
-                result = ServerQuery.Instance.QuerySpeechResultItem(
-                    type == "Movie" ? slots.Movie.value : slots.Series.value, new[] { type });
+                result = ServerQuery.Instance.QuerySpeechResultItem(type == "Movie" ? slots.Movie.value : slots.Series.value, new[] { type });
             }
             else
             {
@@ -80,7 +81,7 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 var genericLayoutProperties =
                     await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {result.OfficialRating}", "/particles");
 
-                var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.ParentalControlNotAllowed(result, Session);
+                var parentalControlNotAllowedAudioSpeech = await DataSourceAudioSpeechPropertiesManager.Instance.ParentalControlNotAllowed(result, Session);
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -89,25 +90,22 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                     directives = new List<IDirective>()
                     {
                         await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
-                        await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
+                        await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(parentalControlNotAllowedAudioSpeech)
 
                     }
 
                 }, Session);
             }
-
+            
             try
             {
-#pragma warning disable 4014
-                await ServerController.Instance.PlayMediaItemAsync(Session, result);
-#pragma warning restore 4014
+
+                ServerController.Instance.PlayMediaItemAsync(Session, result);
+
             }
             catch (Exception exception)
             {
-#pragma warning disable 4014
-                Task.Run(() => AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId)).ConfigureAwait(false);
-#pragma warning restore 4014
-                await Task.Delay(1200);
+               AlexaResponseClient.Instance.PostProgressiveResponse(exception.Message, apiAccessToken, requestId);
             }
 
             Session.PlaybackStarted = true;
@@ -115,10 +113,10 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
             var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(result, Session);
 
-            var aplaDataSource1 = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(result);
+            var playItemAudioSpeech = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(result);
 
             var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(detailLayoutProperties, Session);
-            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource1);
+            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(playItemAudioSpeech);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

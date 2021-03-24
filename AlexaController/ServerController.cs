@@ -129,7 +129,7 @@ namespace AlexaController
 
             // ReSharper disable once TooManyChainedReferences
             long startTicks = item.SupportsPositionTicksResume ? item.PlaybackPositionTicks : 0;
-
+            
             try
             {
                 await SessionManager.SendPlayCommand(null, session.Id, new PlayRequest

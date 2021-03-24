@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
 {
+    // ReSharper disable once UnusedType.Global
     public class VideoOnEnd : IUserEventResponse
     {
         public IAlexaRequest AlexaRequest { get; }
-
 
         public VideoOnEnd(IAlexaRequest alexaRequest)
         {
@@ -19,9 +19,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.Video.End
         }
         public async Task<string> Response()
         {
-            var request = AlexaRequest.request;
+            var request   = AlexaRequest.request;
             var arguments = request.arguments;
-            var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
+            var session   = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,

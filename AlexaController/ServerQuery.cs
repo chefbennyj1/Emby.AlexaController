@@ -197,6 +197,8 @@ namespace AlexaController
             return SessionManager.Sessions.FirstOrDefault(i => i.DeviceId == deviceId);
         }
 
+        
+
         public QueryResult<BaseItem> GetBaseItemsByGenre(string[] type, string[] genres)
         {
             return LibraryManager.GetItemsResult(new InternalItemsQuery()

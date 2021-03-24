@@ -28,9 +28,7 @@ namespace AlexaController.Alexa.IntentRequest
             var context = AlexaRequest.context;
             var person = context.System.person;
             var config = Plugin.Instance.Configuration;
-
-
-
+            
             if (person is null)
             {
                 var voiceAuthenticationLinkErrorAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.VoiceAuthenticationAccountLinkError();

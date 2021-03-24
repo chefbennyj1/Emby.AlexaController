@@ -5,6 +5,7 @@ using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using MediaBrowser.Controller.Session;
 using System.Collections.Generic;
 using System.Linq;
+using MediaBrowser.Controller.Plugins;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -14,7 +15,6 @@ namespace AlexaController.Session
         void EndSession(IAlexaRequest alexaRequest);
         IAlexaSession GetSession(IAlexaRequest alexaRequest, User user = null);
         void UpdateSession(IAlexaSession session, Properties<MediaItem> properties, bool? isBack = null);
-        double GetPlaybackProgressTicks(IAlexaSession alexaSession);
     }
 
     public class AlexaSessionManager : IAlexaSessionManager
@@ -22,9 +22,7 @@ namespace AlexaController.Session
         public static IAlexaSessionManager Instance { get; private set; }
 
         private static readonly List<IAlexaSession> OpenSessions = new List<IAlexaSession>();
-
-        private static Dictionary<string, long> PlaybackPositions = new Dictionary<string, long>();
-
+        
         private ISessionManager SessionManager { get; }
 
         public AlexaSessionManager(ISessionManager sessionManager)
@@ -66,9 +64,9 @@ namespace AlexaController.Session
                 return OpenSessions.FirstOrDefault(s => s.SessionId == alexaRequest.session.sessionId);
             }
 
-            var context = alexaRequest.context;
-            var system = context.System;
-            var person = system.person;
+            var context       = alexaRequest.context;
+            var system        = context.System;
+            var person        = system.person;
             var amazonSession = alexaRequest.session;
 
             IAlexaRequest persistedRequestData = null;
@@ -100,7 +98,9 @@ namespace AlexaController.Session
             sessionInfo = new AlexaSession()
             {
                 SessionId = amazonSession.sessionId,
+                //EmbySessionId = !(sessionInfo?.room is null) ? GetCorrespondingEmbySessionId(sessionInfo) : string.Empty,
                 EchoDeviceId = system.device.deviceId,
+                NowViewingBaseItem = sessionInfo?.NowViewingBaseItem,
                 supportsApl = SupportsApl(alexaRequest),
                 person = person,
                 room = sessionInfo?.room,
@@ -112,7 +112,7 @@ namespace AlexaController.Session
             };
 
             OpenSessions.Add(sessionInfo);
-
+           
             return sessionInfo;
         }
 
@@ -123,11 +123,14 @@ namespace AlexaController.Session
                 session = UpdateSessionPaging(session, properties, isBack);
 
             OpenSessions.RemoveAll(s => s.SessionId.Equals(session.SessionId));
-
+            try
+            {
+                ServerController.Instance.Log.Info("SESSION UPDATE: " + session.NowViewingBaseItem.Name);
+            }catch{}
             OpenSessions.Add(session);
 
         }
-
+        
         private static IAlexaSession UpdateSessionPaging(IAlexaSession session, Properties<MediaItem> properties, bool? isBack = null)
         {
             if (isBack == true)
@@ -163,65 +166,56 @@ namespace AlexaController.Session
 
         }
 
+        private string GetCorrespondingEmbySessionId(IAlexaSession sessionInfo)
+        {
+            //There is an ID
+            if (!string.IsNullOrEmpty(sessionInfo.EmbySessionId))
+            {
+                //Is the ID still an active Emby Session
+                if (SessionManager.Sessions.ToList().Exists(s => s.Id == sessionInfo.EmbySessionId))
+                {
+                    return sessionInfo.EmbySessionId; //ID is still good. TODO:Maybe check the device name is still proper.
+                }
+
+                return SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName).Id;
+                
+            }
+
+            return sessionInfo.room is null ? string.Empty : SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName)?.Id;
+        }
+
         private void SessionManager_PlaybackStopped(object sender, MediaBrowser.Controller.Library.PlaybackStopEventArgs e)
         {
-            var deviceName = e.DeviceName;
-            var config = Plugin.Instance.Configuration;
-            var configRooms = config.Rooms;
+            var session = OpenSessions.FirstOrDefault(s => s.EmbySessionId == e.Session.Id);
 
-            if (!configRooms.Exists(r => r.DeviceName == deviceName)) return;
+            if (session is null) return;
 
-            var room = configRooms.FirstOrDefault(r => r.DeviceName == deviceName);
-
-            if (!OpenSessions.Exists(session => session.room.Name == room?.Name)) return;
-
-            var sessionToUpdate = OpenSessions.FirstOrDefault(session => session.room.Name == room?.Name);
-
-            try
-            {
-                PlaybackPositions.Remove(sessionToUpdate.SessionId);
-            }
-            catch { }
-
-            // ReSharper disable once PossibleNullReferenceException
-            sessionToUpdate.PlaybackStarted = false;
-            UpdateSession(sessionToUpdate, null);
+            session.PlaybackStarted = false;
+            OpenSessions.RemoveAll(s => s.EmbySessionId.Equals(session.EmbySessionId));
+            OpenSessions.Add(session);
         }
 
         private void SessionManager_PlaybackProgress(object sender, MediaBrowser.Controller.Library.PlaybackProgressEventArgs e)
         {
-            var deviceName = e.DeviceName;
-            var config = Plugin.Instance.Configuration;
-            var configRooms = config.Rooms;
-            if (!configRooms.Exists(r => r.DeviceName == deviceName)) return;
-            var room = configRooms.FirstOrDefault(r => r.DeviceName == deviceName);
-            if (!OpenSessions.Exists(session => session.room.Name == room?.Name)) return;
-            var sessionToUpdate = OpenSessions.FirstOrDefault(session => session.room.Name == room?.Name);
+            var session = OpenSessions.FirstOrDefault(s => s.EmbySessionId == e.Session.Id);
 
-            if (!PlaybackPositions.ContainsKey(sessionToUpdate.SessionId))
-            {
-                PlaybackPositions.Add(sessionToUpdate.SessionId, e.PlaybackPositionTicks ?? 0);
-                return;
-            }
+            if (session is null) return;
 
-            PlaybackPositions[sessionToUpdate.SessionId] = e.PlaybackPositionTicks ?? 0;
+            session.PlaybackPositionTicks = e.PlaybackPositionTicks ?? 0;
+            OpenSessions.RemoveAll(s => s.EmbySessionId.Equals(session.EmbySessionId));
+            OpenSessions.Add(session);
+
         }
 
-        public double GetPlaybackProgressTicks(IAlexaSession alexaSession)
+        public void Dispose()
         {
-            var progressPercent = 0.0;
-            try
-            {
-                var d = (int)PlaybackPositions[alexaSession.SessionId] / (int)alexaSession.NowViewingBaseItem.RunTimeTicks;
-                progressPercent = (d * 100);
-            }
-            catch
-            {
-
-            }
-
-            return progressPercent;
-
+            
         }
+
+        public void Run()
+        {
+            
+        }
+        
     }
 }

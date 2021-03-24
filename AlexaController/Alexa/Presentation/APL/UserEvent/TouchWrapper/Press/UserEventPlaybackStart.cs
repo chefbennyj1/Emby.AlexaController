@@ -2,7 +2,6 @@
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.EmbyAplDataSourceManagement;
-using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using System.Collections.Generic;
@@ -35,10 +34,6 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             session.room = session.room ?? RoomContextManager.Instance.GetRoomByName(request.arguments[1]);
 
-            //IDataSource aplDataSource = null;
-            //IDataSource aplaDataSource = null;
-
-
             if (session.room is null)
             {
                 var roomSelectionViewProperties = await DataSourceLayoutPropertiesManager.Instance.GetRoomSelectionViewPropertiesAsync(baseItem, session);
@@ -50,7 +45,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
                     shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(roomSelectionViewProperties, session)
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(roomSelectionViewProperties, session)
                     }
 
                 }, session);
@@ -65,15 +60,13 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
 
             var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(baseItem, session);
-            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(baseItem);
-
-
-            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(detailLayoutProperties, session);
-            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
+            var playItemAudioSpeech = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(baseItem);
+            
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(detailLayoutProperties, session);
+            var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(playItemAudioSpeech);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
-
                 shouldEndSession = null,
                 directives = new List<IDirective>()
                 {

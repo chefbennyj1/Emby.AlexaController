@@ -1,4 +1,5 @@
-﻿using AlexaController.Alexa.Presentation;
+﻿using System;
+using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
@@ -127,12 +128,9 @@ namespace AlexaController.EmbyAplManagement
             return layout;
 
         }
-
         private static async Task<List<IComponent>> RenderItemDetailsLayout(Properties<MediaItem> properties, IAlexaSession session)
         {
             const string leftColumnSpacing = "36vw";
-            //var data       = dataSource as DataSource;
-            //var properties = data?.properties as Properties<MediaItem>;
             var mediaItem = properties?.item;
             var type = mediaItem?.type;
 
@@ -211,7 +209,7 @@ namespace AlexaController.EmbyAplManagement
                     }
                 });
             }
-
+            //Logo
             layout.Add(new Image()
             {
                 id = "logo",
@@ -220,6 +218,38 @@ namespace AlexaController.EmbyAplManagement
                 position = "absolute",
                 left = "85vw",
             });
+
+            //NowPlaying ProgressBar
+            if (session.PlaybackStarted)
+            {
+                layout.Add(new AlexaProgressBar()
+                {
+                    width = "50%",
+                    progressValue = 0,
+                    totalValue = TimeSpan.FromTicks(session.NowViewingBaseItem.RunTimeTicks.Value).TotalMinutes,
+                    id = "currentPlaybackProgress",
+                    left = "20%",
+                    top = "2%",
+                    onMount = new List<ICommand>()
+                    {
+                        new Sequential()
+                        {
+                            repeatCount = TimeSpan.FromTicks(session.NowViewingBaseItem.RunTimeTicks.Value).TotalSeconds / 5,
+                            delay = 5000,
+                            commands = new List<ICommand>()
+                            {
+                                new SendEvent(){ arguments = new List<object>() { " NowPlayingEventUpdateRequest ", "${payload.templateData.properties.documentType}" } },
+                                
+                            }
+                        }
+                        //Calculate the amount of times a sequence must repeat, to poll embys session  playback state,  in order to show a progress bar until the end of playback
+                        // On load NowPlayingItem total runtime ticks, converted to seconds will equal the repeatCount of the sequence.
+                        //The sequence will then delay one second between using a SendEvent to request ExecuteCommands to update the current position of the ProgressBar
+                        //SendEvent will send ExecuteCommand to the ProgressBar (currentPlaybackProgress)  with the value of the current position.
+                    }
+                });
+            }
+
             //Name
             layout.Add(new Text()
             {
@@ -414,16 +444,9 @@ namespace AlexaController.EmbyAplManagement
                         {
                             style    = "textStyleBody",
                             fontSize = "23dp",
-                            left     = "12dp",
-                            text     = "<b>${data.TotalRecordCount}</b>"
-                        },
-                        new Text()
-                        {
-                            style    = "textStyleBody",
-                            fontSize = "23dp",
                             left     = "24dp",
                             width    = "25vw",
-                            text     = "Available Season(s)"
+                            text     = "${data.item.TotalRecordCount} Available Season(s)"
                         }
                     }
                 });
@@ -450,6 +473,7 @@ namespace AlexaController.EmbyAplManagement
                     await RenderComponent_PlayButton(mediaItem, session)
                 }
             });
+
             layout.Add(new AlexaFooter()
             {
                 hintText = type == "Series" ? "Try \"Alexa, show season one...\"" : "Try \"Alexa, play that...\"",
@@ -476,7 +500,6 @@ namespace AlexaController.EmbyAplManagement
                 }
             });
         }
-
         private static async Task<List<IComponent>> RenderRoomSelectionLayout(IAlexaSession session)
         {
             var layout = new List<IComponent>
@@ -562,7 +585,6 @@ namespace AlexaController.EmbyAplManagement
                 }
             });
         }
-
         private static async Task<List<IComponent>> RenderGenericViewLayout()
         {
             return await Task.FromResult(new List<IComponent>
@@ -610,7 +632,6 @@ namespace AlexaController.EmbyAplManagement
             });
 
         }
-
         private static async Task<List<IComponent>> RenderHelpViewLayout()
         {
             return await Task.FromResult(new List<IComponent>()
@@ -927,7 +948,6 @@ namespace AlexaController.EmbyAplManagement
                 }
             });
         }
-
         private static async Task<Container> RenderComponent_SequencePrimaryImageContainer(string type)
         {
             switch (type)
@@ -987,7 +1007,6 @@ namespace AlexaController.EmbyAplManagement
             }
 
         }
-
         private static List<IComponent> RenderComponent_RoomButtonLayoutContainer()
         {
             var config = Plugin.Instance.Configuration;
