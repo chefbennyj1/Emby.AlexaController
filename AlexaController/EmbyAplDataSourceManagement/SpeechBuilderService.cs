@@ -35,7 +35,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
         {
             "One moment...",
             "One moment please...",
-            $"Just {InsertVoicePitch(Pitch.high, "one")} moment...",
             "Just a moment...",
             "I can do that... just a moment...",
             ""
@@ -89,23 +88,22 @@ namespace AlexaController.EmbyAplDataSourceManagement
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append("I was unable to find that item in the library.");
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+            speech.Append("I may have misunderstood you.");
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+            speech.Append("Please Try again.");
         }
 
-        protected static void ItemBrowse(StringBuilder speech, BaseItem item, IAlexaSession session, bool correctUserPhrasing = false, bool deviceAvailable = true)
+        protected static void ItemBrowse(StringBuilder speech, BaseItem item, IAlexaSession session, bool deviceAvailable = true)
         {
             if (deviceAvailable == false)
             {
                 speech.Append("That device is currently unavailable.");
+                return;
             }
-
-            if (correctUserPhrasing && RandomIndex.NextDouble() < 0.3)
-            {
-                CorrectPhrasing(speech, session, item);
-            }
-
+            
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            if (RandomIndex.NextDouble() > 0.7 && !item.IsFolder
-            ) //Don't describe the type of a library or collection folder.
+            if (RandomIndex.NextDouble() > 0.7 && !item.IsFolder) //Randomly incorporate "Here is.." into phrasing
             {
                 speech.Append("Here is ");
             }
@@ -288,25 +286,25 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(string.Join(", ", actors));
         }
 
-        private static void CorrectPhrasing(StringBuilder speech, IAlexaSession session, BaseItem item)
-        {
-            speech.Append("Hey!");
-            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append(SayName(session.person));
-            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append("listen");
-            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append("To make searching media items faster.");
-            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append("Try using the item type in your request");
-            speech.Append(InsertStrengthBreak(StrengthBreak.strong));
-            speech.Append($"For example, using the phrase: \"Show the {item.GetType().Name}\" ");
-            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append($"{item.Name}");
-            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append("will help me find your selection more efficiently.");
-            speech.Append(InsertStrengthBreak(StrengthBreak.strong));
-        }
+        //private static void CorrectPhrasing(StringBuilder speech, IAlexaSession session, BaseItem item)
+        //{
+        //    speech.Append("Hey!");
+        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+        //    speech.Append(SayName(session.person));
+        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+        //    speech.Append("listen");
+        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+        //    speech.Append("To make searching media items faster.");
+        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+        //    speech.Append("Try using the item type in your request");
+        //    speech.Append(InsertStrengthBreak(StrengthBreak.strong));
+        //    speech.Append($"For example, using the phrase: \"Show the {item.GetType().Name}\" ");
+        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+        //    speech.Append($"{item.Name}");
+        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+        //    speech.Append("will help me find your selection more efficiently.");
+        //    speech.Append(InsertStrengthBreak(StrengthBreak.strong));
+        //}
 
         // Use this to Randomize responses. 
         private static readonly Random RandomIndex = new Random();

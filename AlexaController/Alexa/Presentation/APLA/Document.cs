@@ -5,6 +5,7 @@ namespace AlexaController.Alexa.Presentation.APLA
 {
     public class Document : IDocument
     {
+
         public string type => "APLA";
         public string version => "0.91";
         public List<IResource> resources { get; set; }

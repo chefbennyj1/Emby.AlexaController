@@ -89,6 +89,9 @@ namespace AlexaController.Api
                 switch (alexaRequest.request.type)
                 {
                     case "Alexa.Presentation.APL.UserEvent": return await OnUserEvent(alexaRequest);
+                    case "CanFulfillIntentRequest" :
+                        ServerController.Instance.Log.Info(
+                            $"CanFulfillIntentRequest received {alexaRequest.request.intent.name}"); return null;
                     case "IntentRequest": return await OnIntentRequest(alexaRequest);
                     case "SessionEndedRequest": return await OnSessionEndRequest(alexaRequest);
                     case "LaunchRequest": return await OnLaunchRequest(alexaRequest);

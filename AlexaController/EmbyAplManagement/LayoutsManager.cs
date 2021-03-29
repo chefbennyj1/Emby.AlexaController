@@ -136,54 +136,64 @@ namespace AlexaController.EmbyAplManagement
             // ReSharper disable UseObjectOrCollectionInitializer
             var detailLayout = new List<IComponent>();
             //backdrop video and static images
-            detailLayout.Add(new Video()
+            if (!string.IsNullOrEmpty(mediaItem?.videoBackdropSource))
             {
-                source = new List<Source>()
+                detailLayout.Add(new Video()
                 {
-                    new Source()
+                    source = new List<Source>()
                     {
-                        url         = "${data.url}${data.item.videoBackdropSource}",
-                        repeatCount = 0,
-                    }
-                },
-                scale = "best-fill",
-                width = "100vw",
-                height = "100vh",
-                position = "absolute",
-                autoplay = true,
-                audioTrack = "none",
-                id = "${data.item.id}",
-                onEnd = new List<ICommand>()
-                {
-                    new SetValue()
-                    {
-                        componentId = "backdropOverlay",
-                        property    = "source",
-                        value       = "${data.url}${data.item.backdropImageSource}"
+                        new Source()
+                        {
+                            url = "${data.url}${data.item.videoBackdropSource}",
+                            repeatCount = 0,
+                        }
                     },
-                    new SetValue()
+                    scale = "best-fill",
+                    width = "100vw",
+                    height = "100vh",
+                    position = "absolute",
+                    autoplay = true,
+                    audioTrack = "none",
+                    id = "${data.item.id}",
+                    onEnd = new List<ICommand>()
                     {
-                        componentId = "backdropOverlay",
-                        property    = "opacity",
-                        value       = 1
-                    },
-                    new SetValue()
-                    {
-                        componentId = "backdropOverlay",
-                        property    = "overlayColor",
-                        value       = "rgba(0,0,0,0.55)"
+                        new SetValue()
+                        {
+                            componentId = "backdropOverlay",
+                            property = "source",
+                            value = "${data.url}${data.item.backdropImageSource}"
+                        },
+                        new SetValue()
+                        {
+                            componentId = "backdropOverlay",
+                            property = "opacity",
+                            value = 1
+                        },
+                        new SetValue()
+                        {
+                            componentId = "backdropOverlay",
+                            property = "overlayColor",
+                            value = "rgba(0,0,0,0.55)"
+                        }
                     }
-                }
-            });
+                });
+            }
+
             detailLayout.Add(new Image()
             {
-                overlayColor = "rgba(0,0,0,1)",
                 scale = "best-fill",
                 width = "100vw",
                 height = "100vh",
                 position = "absolute",
-                source = "${data.url}${data.item.videoOverlaySource}",
-                opacity = 0.65,
+                // If video backdrop exists in the dataSource, handle an opaque black value for the overlay image (blank.png), and allow the opacity property to handled the overlay transparency value.
+                // If no video backdrop exists in the dataSource, handle the overlay for the static image that is shown and give it a 0.75 transparency black overlay.
+                overlayColor = !string.IsNullOrEmpty(mediaItem?.videoBackdropSource) ? "rgba(0,0,0,1)" :"rgba(0,0,0,0.75)",
+                // Show the back video overlay Image on top of the video
+                // Show the static backdrop image
+                source       = !string.IsNullOrEmpty(mediaItem?.videoBackdropSource) ? "${data.url}${data.item.videoOverlaySource}" : "${data.url}${data.item.backdropImageSource}",
+                // Video backdrop exists in the dataSource, which means this image will be an overlay, is black and should be given a 0.65 transparency
+                // No video backdrop exists in the dataSource, so the static background image must be given no opacity (value: 1), and the "overlay" property will handle ... ... the overlay.
+                opacity      = !string.IsNullOrEmpty(mediaItem?.videoBackdropSource) ? 0.65 : 1,
                 id = "backdropOverlay"
             });
 
@@ -217,7 +227,6 @@ namespace AlexaController.EmbyAplManagement
                 position = "absolute",
                 left = "85vw",
             });
-            
             //Name
             detailLayout.Add(new Text()
             {

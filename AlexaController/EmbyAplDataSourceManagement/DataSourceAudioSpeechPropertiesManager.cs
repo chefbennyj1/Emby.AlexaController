@@ -54,11 +54,10 @@ namespace AlexaController.EmbyAplDataSourceManagement
                 audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
             });
         }
-        public async Task<Properties<string>> ItemBrowse(BaseItem item, IAlexaSession session,
-            bool correctUserPhrasing = false, bool deviceAvailable = true)
+        public async Task<Properties<string>> ItemBrowse(BaseItem item, IAlexaSession session,  bool deviceAvailable = true)
         {
             var speech = new StringBuilder();
-            ItemBrowse(speech, item, session, correctUserPhrasing, deviceAvailable);
+            ItemBrowse(speech, item, session, deviceAvailable);
 
             return await Task.FromResult(new Properties<string>()
             {

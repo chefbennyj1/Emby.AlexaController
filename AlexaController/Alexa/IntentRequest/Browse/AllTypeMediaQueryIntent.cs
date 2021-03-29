@@ -82,7 +82,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
-                    shouldEndSession = true,
+                    shouldEndSession = null,
                     directives = new List<IDirective>()
                     {
                         await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(genericLayoutProperties, Session),
@@ -104,7 +104,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             }
 
             var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(result, Session);
-            var aplaDataSource1 = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(result, Session, correctUserPhrasing: true);
+            var aplaDataSource1 = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(result, Session);
 
             //Update Session
             Session.NowViewingBaseItem = result;
