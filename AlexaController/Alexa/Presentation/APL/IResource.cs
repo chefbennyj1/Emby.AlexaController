@@ -37,14 +37,5 @@
         public int? marginRight { get; set; }
         public int? marginBottom { get; set; }
     }
-
-    public class Settings
-    {
-        public int idleTimeout { get; set; }
-
-    }
-
-
-
-
+    
 }

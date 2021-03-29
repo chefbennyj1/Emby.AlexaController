@@ -78,7 +78,8 @@ namespace AlexaController.EmbyAplDataSourceManagement
                 backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item),
                 videoOverlaySource = "/EmptyPng?quality=90",
                 themeAudioSource = ServerQuery.Instance.GetThemeSongSource(item),
-                TotalRecordCount = item.GetType().Name == "Series" ? ServerQuery.Instance.GetItemsResult(item.InternalId, new[] { "Season" }, session.User).TotalRecordCount : 0
+                TotalRecordCount = item.GetType().Name == "Series" ? ServerQuery.Instance.GetItemsResult(item.InternalId, new[] { "Season" }, session.User).TotalRecordCount : 0,
+                chapterData = item.GetType().Name == "Movie" || item.GetType().Name == "Episode" ? ServerQuery.Instance.GetChapterInfo(item) : null
             };
 
             var similarItems = ServerQuery.Instance.GetSimilarItems(item);

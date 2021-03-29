@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AlexaController.EmbyAplManagement
 {
-    public static class Resources
+    public static class ResourcesManager
     {
         public static List<IResource> RenderResourcesList => new List<IResource>()
         {

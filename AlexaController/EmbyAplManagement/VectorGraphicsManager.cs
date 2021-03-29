@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AlexaController.EmbyAplManagement
 {
-    public static class VectorGraphics
+    public static class VectorGraphicsManager
     {
         public static Dictionary<string, IAlexaVectorGraphic> RenderVectorGraphicsDictionary => new Dictionary<string, IAlexaVectorGraphic>
         {

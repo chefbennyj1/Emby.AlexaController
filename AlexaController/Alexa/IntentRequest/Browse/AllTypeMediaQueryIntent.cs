@@ -33,7 +33,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
             {
-                Session.PersistedRequestContextData = AlexaRequest;
+                Session.PersistedRequestData = AlexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
                 return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }

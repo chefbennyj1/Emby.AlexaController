@@ -8,7 +8,8 @@ namespace AlexaController.Alexa.Presentation.APL
     {
         public string type => "APL";
         public string version => "1.1";
-        public Settings settings { get; set; }
+        public List<IExtension> extensions { get; set; }
+        public ISettings settings { get; set; }
         public string theme { get; set; }
         public List<IImport> import { get; set; }
         public List<IResource> resources { get; set; }

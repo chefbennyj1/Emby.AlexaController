@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.IntentRequest.AMAZON
 {
-    public class FallbackIntent : IIntentResponse
+    // ReSharper disable once UnusedType.Global
+    public class FallbackIntent : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
     {
         public IAlexaRequest AlexaRequest { get; }
         public IAlexaSession Session { get; }
 
-        public FallbackIntent(IAlexaRequest alexaRequest, IAlexaSession session)
+        public FallbackIntent(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
         {
             AlexaRequest = alexaRequest;
             Session = session;
@@ -27,7 +28,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(genericLayoutProperties, Session),
                     await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource)
                 }
             }, Session);

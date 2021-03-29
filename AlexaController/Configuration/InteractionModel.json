@@ -354,6 +354,8 @@
                         }
                     ],
                     "samples": [
+                        "show new {TVAlternatives}",
+                        "show new {MovieAlternatives}",
                         "about new {TVAlternatives} from the last {Duration}",
                         "about new {MovieAlternatives}",
                         "about new {MovieAlternatives} added in the last {Duration}",

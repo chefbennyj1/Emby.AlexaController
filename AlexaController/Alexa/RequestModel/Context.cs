@@ -8,5 +8,6 @@ namespace AlexaController.Alexa.RequestModel
         public AudioPlayer AudioPlayer { get; set; }
         public List<Viewport> Viewports { get; set; }
         public Viewport Viewport { get; set; }
+        public Extensions Extensions { get; set; }
     }
 }

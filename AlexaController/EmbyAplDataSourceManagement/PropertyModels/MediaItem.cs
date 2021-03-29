@@ -1,4 +1,7 @@
-﻿namespace AlexaController.EmbyAplDataSourceManagement.PropertyModels
+﻿using System.Collections.Generic;
+using MediaBrowser.Model.Entities;
+
+namespace AlexaController.EmbyAplDataSourceManagement.PropertyModels
 {
     public class MediaItem
     {
@@ -22,5 +25,6 @@
         public string thumbImageSource { get; set; }
         public string videoOverlaySource { get; set; }
         public int? TotalRecordCount { get; set; }
+        public List<ChapterInfo> chapterData { get; set; }
     }
 }

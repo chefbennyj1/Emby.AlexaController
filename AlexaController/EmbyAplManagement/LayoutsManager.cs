@@ -1,5 +1,4 @@
-﻿using System;
-using AlexaController.Alexa.Presentation;
+﻿using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
@@ -14,7 +13,7 @@ using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 
 namespace AlexaController.EmbyAplManagement
 {
-    public static class Layouts
+    public static class LayoutsManager
     {
         public static async Task<List<IComponent>> RenderLayoutComponents<T>(Properties<T> properties, IAlexaSession session) where T : class
         {
@@ -135,9 +134,9 @@ namespace AlexaController.EmbyAplManagement
             var type = mediaItem?.type;
 
             // ReSharper disable UseObjectOrCollectionInitializer
-            var layout = new List<IComponent>();
+            var detailLayout = new List<IComponent>();
             //backdrop video and static images
-            layout.Add(new Video()
+            detailLayout.Add(new Video()
             {
                 source = new List<Source>()
                 {
@@ -176,7 +175,7 @@ namespace AlexaController.EmbyAplManagement
                     }
                 }
             });
-            layout.Add(new Image()
+            detailLayout.Add(new Image()
             {
                 overlayColor = "rgba(0,0,0,1)",
                 scale = "best-fill",
@@ -190,7 +189,7 @@ namespace AlexaController.EmbyAplManagement
 
             if (session.paging.canGoBack)
             {
-                layout.Add(new AlexaIconButton()
+                detailLayout.Add(new AlexaIconButton()
                 {
                     vectorSource = MaterialVectorIcons.Left,
                     buttonSize = "15vh",
@@ -210,7 +209,7 @@ namespace AlexaController.EmbyAplManagement
                 });
             }
             //Logo
-            layout.Add(new Image()
+            detailLayout.Add(new Image()
             {
                 id = "logo",
                 source = "${data.url}${data.item.logoImageSource}",
@@ -218,40 +217,9 @@ namespace AlexaController.EmbyAplManagement
                 position = "absolute",
                 left = "85vw",
             });
-
-            //NowPlaying ProgressBar
-            if (session.PlaybackStarted)
-            {
-                layout.Add(new AlexaProgressBar()
-                {
-                    width = "50%",
-                    progressValue = 0,
-                    totalValue = TimeSpan.FromTicks(session.NowViewingBaseItem.RunTimeTicks.Value).TotalMinutes,
-                    id = "currentPlaybackProgress",
-                    left = "20%",
-                    top = "2%",
-                    onMount = new List<ICommand>()
-                    {
-                        new Sequential()
-                        {
-                            repeatCount = TimeSpan.FromTicks(session.NowViewingBaseItem.RunTimeTicks.Value).TotalSeconds / 5,
-                            delay = 5000,
-                            commands = new List<ICommand>()
-                            {
-                                new SendEvent(){ arguments = new List<object>() { " NowPlayingEventUpdateRequest ", "${payload.templateData.properties.documentType}" } },
-                                
-                            }
-                        }
-                        //Calculate the amount of times a sequence must repeat, to poll embys session  playback state,  in order to show a progress bar until the end of playback
-                        // On load NowPlayingItem total runtime ticks, converted to seconds will equal the repeatCount of the sequence.
-                        //The sequence will then delay one second between using a SendEvent to request ExecuteCommands to update the current position of the ProgressBar
-                        //SendEvent will send ExecuteCommand to the ProgressBar (currentPlaybackProgress)  with the value of the current position.
-                    }
-                });
-            }
-
+            
             //Name
-            layout.Add(new Text()
+            detailLayout.Add(new Text()
             {
                 text = "${data.item.name}",
                 style = "textStylePrimary",
@@ -263,7 +231,7 @@ namespace AlexaController.EmbyAplManagement
 
             });
             //Genres
-            layout.Add(new Text()
+            detailLayout.Add(new Text()
             {
                 text = "${data.item.genres}",
                 left = leftColumnSpacing,
@@ -278,7 +246,7 @@ namespace AlexaController.EmbyAplManagement
             });
             //Rating - Runtime - End time
             //Runtime span
-            layout.Add(new Text()
+            detailLayout.Add(new Text()
             {
                 text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
                 left = leftColumnSpacing,
@@ -292,7 +260,7 @@ namespace AlexaController.EmbyAplManagement
 
             });
             //TagLines
-            layout.Add(new Text()
+            detailLayout.Add(new Text()
             {
                 text = "${data.item.tagLine}",
                 style = "textStyleBody",
@@ -306,7 +274,7 @@ namespace AlexaController.EmbyAplManagement
                 opacity = 1,
             });
             //Watched check-mark
-            layout.Add(new VectorGraphic()
+            detailLayout.Add(new VectorGraphic()
             {
                 source = "CheckMark",
                 left = "87vw",
@@ -314,7 +282,7 @@ namespace AlexaController.EmbyAplManagement
                 top = "30vh"
             });
             //Overview
-            layout.Add(new TouchWrapper()
+            detailLayout.Add(new TouchWrapper()
             {
                 top = string.Equals(type, "Movie") ? "24vh" : "20vh",
                 left = leftColumnSpacing,
@@ -369,7 +337,7 @@ namespace AlexaController.EmbyAplManagement
 
             });
             //Recommendations
-            layout.Add(new Container()
+            detailLayout.Add(new Container()
             {
                 when = "${viewport.shape == 'rectangle' && viewport.mode == 'hub' && viewport.width > 960 && payload.templateData.properties.similarItems.length > 0}",
                 width = "50vw",
@@ -420,7 +388,7 @@ namespace AlexaController.EmbyAplManagement
             //Series - Season Count
             if (string.Equals(type, "Series"))
             {
-                layout.Add(new Container()
+                detailLayout.Add(new Container()
                 {
                     position = "absolute",
                     left = "38vw",
@@ -452,7 +420,7 @@ namespace AlexaController.EmbyAplManagement
                 });
             }
             //Primary Image
-            layout.Add(new Container()
+            detailLayout.Add(new Container()
             {
                 id = "primaryButton",
                 position = "absolute",
@@ -474,30 +442,141 @@ namespace AlexaController.EmbyAplManagement
                 }
             });
 
-            layout.Add(new AlexaFooter()
+            detailLayout.Add(new AlexaFooter()
             {
                 hintText = type == "Series" ? "Try \"Alexa, show season one...\"" : "Try \"Alexa, play that...\"",
                 position = "absolute",
                 bottom = "1vh"
             });
 
+            var chapterLayout = new List<IComponent>();
+            chapterLayout.Add(new Container()
+            {
+                height = "100vh",
+                width = "100vw",
+                alignItems = "center",
+                items = new List<IComponent>()
+                {
+                    new Text()
+                    {
+                        text = "Chapters",
+                        paddingTop = "5vh"
+                    },
+                    new Sequence()
+                    {
+                        top = "10vh",
+                        height                 = "80vh",
+                        width                  = "95vw",
+                        left                   = "5vw",
+                        scrollDirection        = "horizontal",
+                        data                   = "${payload.templateData.properties.item.chapterData}",
+                        items = new List<IComponent>()
+                        {
+                            new TouchWrapper()
+                            {
+                                width = "545px",
+                                height = "550px",
+                                id = "${payload.templateData.properties.item.id}",
+                                items = new List<IComponent>()
+                                {
+                                    new Container()
+                                    {
+                                        width = "350px",
+                                        bind = new List<DataBind>()
+                                        {
+                                            new DataBind()
+                                            {
+                                                name = "internalIndex",
+                                                value = "${index}"
+                                            }
+                                        },
+                                        direction = "column",
+                                        items = new List<IComponent>()
+                                        {
+                                            new Image()
+                                            {
+                                                scale = "best-fill",
+                                                height = "240px",
+                                                width = "525px",
+                                                source = "${payload.templateData.properties.url}/Items/${payload.templateData.properties.item.id}/Images/Chapter/${internalIndex}",
+                                            },
+                                            new Text()
+                                            {
+                                                text = "Chapter ${internalIndex+1}",
+                                                style = "textStyleBody",
+                                                fontSize = "25dp"
+                                            },
+                                            new Text()
+                                            {
+                                                text = "${data.Name}",
+                                                style = "textStyleBody",
+                                                fontSize = "25dp"
+                                            },
+                                            new Text()
+                                            {
+                                                bind = new List<DataBind>()
+                                                {
+                                                    new DataBind()
+                                                    {
+                                                        name = "T",
+                                                        value = "${payload.templateData.properties.item.chapterData[internalIndex].StartPositionTicks /10000}"
+                                                    }
+                                                },
+                                                text = "${Time.format('mm:ss',T)}",
+                                                style = "textStyleBody",
+                                                fontSize = "25dp"
+                                            }
+                                        }
+                                    }
+
+                                },
+                                onPress = new Parallel()
+                                {
+                                    commands = new List<ICommand>()
+                                    {
+                                        new Command() { type = nameof(Animations.ScaleInOutOnPress) },
+                                        new SendEvent() { arguments = new List<object>(){ nameof(UserEventPlaybackStart), session.room is null ? "" : session.room.Name, "${data.StartPositionTicks}"} }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
             return await Task.FromResult(new List<IComponent>()
             {
-                //TODO: Add pager - swipe to actors, swipe to chapters
-                new Container()
+                new Pager()
                 {
-                    bind = new List<DataBind>()
+                    height        = "100vh",
+                    width         = "100vw",
+                    initialPage   = 0,
+                    items = new List<IComponent>()
                     {
-                        new DataBind()
+                        new Container()
                         {
-                            name = "data",
-                            value = "${payload.templateData.properties}"
+                            bind = new List<DataBind>()
+                            {
+                                new DataBind()
+                                {
+                                    name = "data",
+                                    value = "${payload.templateData.properties}"
+                                }
+                            },
+                            width  = "100vw",
+                            height = "100vh",
+                            items  = detailLayout,
                         },
-                    },
-                    width  = "100vw",
-                    height = "100vh",
-                    items  = layout,
+                        new Frame()
+                        {
+                            width  = "100vw",
+                            height = "100vh",
+                            backgroundColor = "rgba(95,95,95)",
+                            items  = chapterLayout,
+                        }
+                    }
                 }
+                
             });
         }
         private static async Task<List<IComponent>> RenderRoomSelectionLayout(IAlexaSession session)

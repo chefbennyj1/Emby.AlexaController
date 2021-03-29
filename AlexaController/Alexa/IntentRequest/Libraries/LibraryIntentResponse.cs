@@ -25,7 +25,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             session.hasRoom = !(session.room is null);
             if (!session.hasRoom && !session.supportsApl)
             {
-                session.PersistedRequestContextData = alexaRequest;
+                session.PersistedRequestData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session, null);
                 return await RoomContextManager.Instance.RequestRoom(alexaRequest, session);
             }
@@ -46,7 +46,7 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
 
             session.NowViewingBaseItem = result;
             //reset rePrompt data because we have fulfilled the request
-            session.PersistedRequestContextData = null;
+            session.PersistedRequestData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
             var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync($"Showing the {result.Name} library", "/MoviesLibrary");

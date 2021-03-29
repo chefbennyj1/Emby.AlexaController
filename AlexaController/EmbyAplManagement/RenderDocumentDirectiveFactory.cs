@@ -72,9 +72,11 @@ namespace AlexaController.EmbyAplManagement
                 document = new Alexa.Presentation.APL.Document()
                 {
                     theme = "${payload.templateData.properties.theme}",
-                    import = Imports.RenderImportsList,
-                    resources = Resources.RenderResourcesList,
-                    graphics = VectorGraphics.RenderVectorGraphicsDictionary,
+                    extensions = ExtensionsManager.RenderExtensionsList(session.context),
+                    settings = SettingsManager.RenderSettings(session.context),
+                    import = ImportsManager.RenderImportsList,
+                    resources = ResourcesManager.RenderResourcesList,
+                    graphics = VectorGraphicsManager.RenderVectorGraphicsDictionary,
                     commands = new Dictionary<string, ICommand>()
                     {
                         { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() },
@@ -83,7 +85,7 @@ namespace AlexaController.EmbyAplManagement
                     mainTemplate = new MainTemplate()
                     {
                         parameters = new List<string>() { "payload" },
-                        items = await Layouts.RenderLayoutComponents(properties, session)
+                        items = await LayoutsManager.RenderLayoutComponents(properties, session)
                     }
                 },
                 datasources = await dataSource.Create("templateData"),

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AlexaController.Alexa.Presentation.APL.Commands
+﻿namespace AlexaController.Alexa.Presentation.APL.Commands
 {
     public class Idle : ICommand
     {

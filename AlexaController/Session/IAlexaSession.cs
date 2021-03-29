@@ -1,4 +1,5 @@
 ﻿using AlexaController.Alexa.IntentRequest.Rooms;
+using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using MediaBrowser.Controller.Entities;
@@ -14,10 +15,11 @@ namespace AlexaController.Session
         string EmbySessionId { get; set; }
         long PlaybackPositionTicks { get; set; }
         string EchoDeviceId { get; set; }
+        Context context { get; set; }
         ViewportProfile viewport { get; set; }
         bool supportsApl { get; set; }
         IPerson person { get; set; }
-        IAlexaRequest PersistedRequestContextData { get; set; }
+        IAlexaRequest PersistedRequestData { get; set; }
         BaseItem NowViewingBaseItem { get; set; }
         bool PlaybackStarted { get; set; }
         Room room { get; set; }
@@ -32,10 +34,11 @@ namespace AlexaController.Session
         public string EmbySessionId { get; set; }
         public long PlaybackPositionTicks { get; set; }
         public string EchoDeviceId { get; set; }
+        public Context context { get; set; }
         public ViewportProfile viewport { get; set; }
         public bool supportsApl { get; set; }
         public IPerson person { get; set; }
-        public IAlexaRequest PersistedRequestContextData { get; set; }
+        public IAlexaRequest PersistedRequestData { get; set; }
         public BaseItem NowViewingBaseItem { get; set; }
         public bool PlaybackStarted { get; set; }
         public Room room { get; set; }

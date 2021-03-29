@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace AlexaController.EmbyAplManagement
 {
-    public static class Imports
+    // ReSharper disable once UnusedType.Global
+    public static class ImportsManager
     {
         public static List<IImport> RenderImportsList => new List<IImport>()
         {

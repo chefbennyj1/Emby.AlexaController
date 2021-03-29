@@ -1,4 +1,5 @@
-﻿using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using System;
+using AlexaController.Alexa.IntentRequest.Rooms;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.EmbyAplDataSourceManagement;
@@ -6,13 +7,14 @@ using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+#pragma warning disable 4014
 
 
 namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 {
     /// <summary>
     /// request arguments[0] will be "UserEventPlaybackStart"
-    /// request arguments[1] will be the room name
+    /// request arguments[1] will be the room name. This can not be null.
     /// </summary>
 
     public class UserEventPlaybackStart : IUserEventResponse
@@ -53,12 +55,10 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(session, null);
-
-#pragma warning disable 4014
-            Task.Run(() => ServerController.Instance.PlayMediaItemAsync(session, baseItem)).ConfigureAwait(false);
-#pragma warning restore 4014
-
-
+            var startPosition = request.arguments[2] is null ? 0 : Convert.ToInt64(request.arguments[2]);
+            
+            ServerController.Instance.PlayMediaItemAsync(session, baseItem, startPosition);
+            
             var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(baseItem, session);
             var playItemAudioSpeech = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(baseItem);
             

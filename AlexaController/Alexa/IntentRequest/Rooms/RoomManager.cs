@@ -29,7 +29,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
         {
             var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("Which room did you want?", "/Question");
             var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.RoomContext();
-            session.PersistedRequestContextData = alexaRequest;
+            session.PersistedRequestData = alexaRequest;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

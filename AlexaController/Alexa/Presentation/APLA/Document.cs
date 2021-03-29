@@ -7,7 +7,6 @@ namespace AlexaController.Alexa.Presentation.APLA
     {
         public string type => "APLA";
         public string version => "0.91";
-        public Settings settings { get; set; }
         public List<IResource> resources { get; set; }
         public IMainTemplate mainTemplate { get; set; }
     }

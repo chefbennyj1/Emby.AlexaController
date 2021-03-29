@@ -7,7 +7,7 @@ using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.Session;
 
-namespace AlexaController.Alexa.Presentation.APL.UserEvent.AlexaProgressBar.onMount
+namespace AlexaController.Alexa.Presentation.APL.UserEvent.Container.Mount
 {
     public class NowPlayingEventUpdateRequest : IUserEventResponse
     {
@@ -23,6 +23,9 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.AlexaProgressBar.onMo
             var arguments = request.arguments;
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             ServerController.Instance.Log.Info("ProgressBar Update Request!");
+            ServerController.Instance.Log.Info($"ProgressBar Update Request SessionId: {session.SessionId}");
+            var progressUpdate = TimeSpan.FromTicks(session.PlaybackPositionTicks).TotalSeconds;
+            ServerController.Instance.Log.Info($"ProgressBar Update: {progressUpdate}");
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
@@ -37,7 +40,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.AlexaProgressBar.onMo
                             {
                                 componentId = "currentPlaybackProgress",
                                 property = "progressValue",
-                                value = TimeSpan.FromTicks(session.PlaybackPositionTicks).TotalMinutes 
+                                value = progressUpdate
                             }
                         }
                     }

@@ -5,7 +5,6 @@ using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using MediaBrowser.Controller.Session;
 using System.Collections.Generic;
 using System.Linq;
-using MediaBrowser.Controller.Plugins;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -77,7 +76,7 @@ namespace AlexaController.Session
             {
                 sessionInfo = OpenSessions.FirstOrDefault(s => s.SessionId == amazonSession.sessionId);
 
-                persistedRequestData = sessionInfo?.PersistedRequestContextData;
+                persistedRequestData = sessionInfo?.PersistedRequestData;
                 //room = sessionInfo?.room;
 
                 // ReSharper disable once ComplexConditionExpression
@@ -98,7 +97,8 @@ namespace AlexaController.Session
             sessionInfo = new AlexaSession()
             {
                 SessionId = amazonSession.sessionId,
-                //EmbySessionId = !(sessionInfo?.room is null) ? GetCorrespondingEmbySessionId(sessionInfo) : string.Empty,
+                EmbySessionId = !(sessionInfo?.room is null) ? GetCorrespondingEmbySessionId(sessionInfo) : string.Empty,
+                context = context,
                 EchoDeviceId = system.device.deviceId,
                 NowViewingBaseItem = sessionInfo?.NowViewingBaseItem,
                 supportsApl = SupportsApl(alexaRequest),
@@ -107,7 +107,7 @@ namespace AlexaController.Session
                 hasRoom = !(sessionInfo?.room is null),
                 User = user,
                 viewport = GetCurrentViewport(alexaRequest),
-                PersistedRequestContextData = persistedRequestData,
+                PersistedRequestData = persistedRequestData,
                 paging = new Paging { pages = new Dictionary<int, Properties<MediaItem>>() }
             };
 
@@ -197,25 +197,16 @@ namespace AlexaController.Session
 
         private void SessionManager_PlaybackProgress(object sender, MediaBrowser.Controller.Library.PlaybackProgressEventArgs e)
         {
+            
             var session = OpenSessions.FirstOrDefault(s => s.EmbySessionId == e.Session.Id);
 
             if (session is null) return;
-
+           
             session.PlaybackPositionTicks = e.PlaybackPositionTicks ?? 0;
+            
             OpenSessions.RemoveAll(s => s.EmbySessionId.Equals(session.EmbySessionId));
             OpenSessions.Add(session);
-
-        }
-
-        public void Dispose()
-        {
             
         }
-
-        public void Run()
-        {
-            
-        }
-        
     }
 }

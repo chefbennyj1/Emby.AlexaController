@@ -138,7 +138,7 @@ namespace AlexaController.Api
                 session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
 
                 //There can not be a room intent request without any prior session context data.
-                if (session.PersistedRequestContextData is null && IsRoomNameIntentRequest(intent))
+                if (session.PersistedRequestData is null && IsRoomNameIntentRequest(intent))
                 {
                     //end the session.
                     return await new NotUnderstood(alexaRequest, session).Response();
@@ -185,6 +185,7 @@ namespace AlexaController.Api
         private static async Task<string> OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request = alexaRequest.request;
+            
             return await GetResponseResult(Type.GetType($"AlexaController.Alexa.Presentation.APL.UserEvent.{request.source.type}.{request.source.handler}.{request.arguments[0]}"), alexaRequest, null);
         }
 

@@ -14,6 +14,8 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+using MediaBrowser.Model.Dto;
 using User = MediaBrowser.Controller.Entities.User;
 
 
@@ -27,11 +29,11 @@ namespace AlexaController
         private ILibraryManager LibraryManager { get; }
         private ITVSeriesManager TvSeriesManager { get; }
         private ISessionManager SessionManager { get; }
-
+        private IDtoService DtoService { get;  }
         public static ServerQuery Instance { get; private set; }
 
         // ReSharper disable once TooManyDependencies
-        public ServerQuery(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IUserManager userManager) : base(libMan, userManager)
+        public ServerQuery(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IUserManager userManager, IDtoService dtoService) : base(libMan, userManager)
         {
             Host = host;
             LibraryManager = libMan;
@@ -39,6 +41,7 @@ namespace AlexaController
             SessionManager = sesMan;
             UserManager = userManager;
             Instance = this;
+            DtoService = dtoService;
         }
 
         public IEnumerable<SessionInfo> GetCurrentSessions()
@@ -197,8 +200,12 @@ namespace AlexaController
             return SessionManager.Sessions.FirstOrDefault(i => i.DeviceId == deviceId);
         }
 
-        
-
+        public List<ChapterInfo> GetChapterInfo(BaseItem item)
+        {
+            var dto = DtoService.GetBaseItemDto(item, new DtoOptions(true));
+            return dto.Chapters;
+        }
+      
         public QueryResult<BaseItem> GetBaseItemsByGenre(string[] type, string[] genres)
         {
             return LibraryManager.GetItemsResult(new InternalItemsQuery()

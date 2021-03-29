@@ -111,7 +111,7 @@ namespace AlexaController
             }
         }
 
-        public async Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item)
+        public async Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item, long? startPositionTicks = null)
         {
             var deviceId = ServerQuery.Instance.GetDeviceIdFromRoomName(alexaSession.room.Name);
 
@@ -128,9 +128,20 @@ namespace AlexaController
             }
 
             // ReSharper disable once TooManyChainedReferences
-            long startTicks = item.SupportsPositionTicksResume ? item.PlaybackPositionTicks : 0;
-            
-            try
+            long startTicks = 0;
+            if (startPositionTicks is null)
+            {
+                if (item.SupportsPositionTicksResume)
+                {
+                    startTicks = item.PlaybackPositionTicks;
+                }
+            }
+            else
+            {
+                startTicks = startPositionTicks.Value;
+            }
+
+            try 
             {
                 await SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
                 {
