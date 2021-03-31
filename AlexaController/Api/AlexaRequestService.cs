@@ -69,11 +69,11 @@ namespace AlexaController.Api
             if (RenderDocumentDirectiveFactory.Instance is null)
                 Activator.CreateInstance<RenderDocumentDirectiveFactory>();
 
-            if (DataSourceLayoutPropertiesManager.Instance is null)
-                Activator.CreateInstance<DataSourceLayoutPropertiesManager>();
+            if (DataSourcePropertiesManager.Instance is null)
+                Activator.CreateInstance<DataSourcePropertiesManager>();
 
-            if (DataSourceAudioSpeechPropertiesManager.Instance is null)
-                Activator.CreateInstance<DataSourceAudioSpeechPropertiesManager>();
+            //if (DataSourceAudioSpeechPropertiesManager.Instance is null)
+            //    Activator.CreateInstance<DataSourceAudioSpeechPropertiesManager>();
 
         }
 
@@ -89,9 +89,6 @@ namespace AlexaController.Api
                 switch (alexaRequest.request.type)
                 {
                     case "Alexa.Presentation.APL.UserEvent": return await OnUserEvent(alexaRequest);
-                    case "CanFulfillIntentRequest" :
-                        ServerController.Instance.Log.Info(
-                            $"CanFulfillIntentRequest received {alexaRequest.request.intent.name}"); return null;
                     case "IntentRequest": return await OnIntentRequest(alexaRequest);
                     case "SessionEndedRequest": return await OnSessionEndRequest(alexaRequest);
                     case "LaunchRequest": return await OnLaunchRequest(alexaRequest);
@@ -162,7 +159,7 @@ namespace AlexaController.Api
             }
             catch (Exception exception)
             {
-                var dataSource = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync(exception.Message, "/particles");
+                var dataSource = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync(exception.Message, "/particles");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -199,7 +196,10 @@ namespace AlexaController.Api
 
             if (user is null)
             {
-                var personNotRecognizedAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.PersonNotRecognized();
+                var personNotRecognizedAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+                {
+                    SpeechResponseType = SpeechResponseType.PersonNotRecognized
+                });
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(
                     new Response()
                     {
@@ -212,9 +212,12 @@ namespace AlexaController.Api
             }
 
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
-            var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("Welcome to Home Theater Emby Controller", "/particles");
+            var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("Welcome to Home Theater Emby Controller", "/particles");
 
-            var skillLaunchedAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.OnLaunch();
+            var skillLaunchedAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.OnLaunch
+            });
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using AlexaController.Alexa.SpeechSynthesis;
@@ -10,7 +11,29 @@ using MediaBrowser.Model.Extensions;
 
 namespace AlexaController.EmbyAplDataSourceManagement
 {
-    public class SpeechBuilderService : Ssml
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public enum SpeechResponseType
+    {
+        PersonNotRecognized,
+        OnLaunch,
+        NotUnderstood,
+        NoItemExists,
+        ItemBrowse,
+        BrowseNextUpEpisode,
+        NoNextUpEpisodeAvailable,
+        PlayNextUpEpisode,
+        ParentalControlNotAllowed,
+        PlayItem,
+        RoomContext,
+        VoiceAuthenticationExists,
+        VoiceAuthenticationAccountLinkError,
+        VoiceAuthenticationAccountLinkSuccess,
+        UpComingEpisodes,
+        NewLibraryItems,
+        BrowseItemByActor
+    }
+
+    public abstract class SpeechBuilderService : Ssml
     {
         private static readonly List<string> Apologetic = new List<string>()
         {
@@ -63,14 +86,12 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append("Please go to the plugin configuration and link emby account personalization.");
             speech.Append("Or ask for help.");
         }
-
         protected static void OnLaunch(StringBuilder speech)
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.GREETINGS));
             speech.Append(InsertStrengthBreak(StrengthBreak.strong));
             speech.Append("What media can I help you find.");
         }
-
         protected static void NotUnderstood(StringBuilder speech)
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
@@ -83,7 +104,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("For example: Use the word \"Movie\" if the item is a movie, or \"Series\" if it is a TV series.");
         }
-
         protected static void NoItemExists(StringBuilder speech)
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
@@ -93,7 +113,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Please Try again.");
         }
-
         protected static void ItemBrowse(StringBuilder speech, BaseItem item, IAlexaSession session, bool deviceAvailable = true)
         {
             if (deviceAvailable == false)
@@ -123,7 +142,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
         }
-
         protected static void BrowseNextUpEpisode(StringBuilder speech, BaseItem item, IAlexaSession session)
         {
             var season = item.Parent;
@@ -137,13 +155,11 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
         }
-
         protected static void NoNextUpEpisodeAvailable(StringBuilder speech)
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append("There doesn't seem to be a new episode available for that series.");
         }
-
         protected static void PlayNextUpEpisode(StringBuilder speech, BaseItem item, IAlexaSession session)
         {
             speech.Append("Playing the next up episode for ");
@@ -151,7 +167,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append("Showing in the ");
             speech.Append(session.room.Name);
         }
-
         protected static void ParentalControlNotAllowed(StringBuilder speech, BaseItem item, IAlexaSession session)
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.NON_COMPLIANT));
@@ -161,7 +176,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(SayName(session.person));
             speech.Append("?");
         }
-
         protected static void PlayItem(StringBuilder speech, BaseItem item)
         {
             speech.Append("Now playing the ");
@@ -171,7 +185,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(item.Name);
         }
-
         protected static void RoomContext(StringBuilder speech)
         {
             speech.Append(SayWithEmotion("I didn't get the room ", Emotion.disappointed, Intensity.high));
@@ -179,7 +192,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(SayWithEmotion("Which room did you want?", Emotion.excited, Intensity.medium));
         }
-
         protected static void VoiceAuthenticationExists(StringBuilder speech, IAlexaSession session)
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.NON_COMPLIANT));
@@ -188,14 +200,12 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(SayName(session.person));
             speech.Append("'s account");
         }
-
         protected static void VoiceAuthenticationAccountLinkError(StringBuilder speech)
         {
             speech.Append("I was unable to learn your voice.");
             speech.Append("Please make sure you have allowed personalization in the Alexa app.");
 
         }
-
         protected static void VoiceAuthenticationAccountLinkSuccess(StringBuilder speech, IAlexaSession session)
         {
             speech.Append(ExpressiveInterjection("Success "));
@@ -206,7 +216,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Choose your emby account name and press save.");
         }
-
         protected static void UpComingEpisodes(StringBuilder speech, List<BaseItem> items, DateTime date)
         {
             speech.Append("There ");
@@ -257,9 +266,7 @@ namespace AlexaController.EmbyAplDataSourceManagement
                 $"This completes the list of episodes scheduled for the next {(date - DateTime.Now).Days} days. ");
 
         }
-
-        protected static void NewLibraryItems(StringBuilder speech, List<BaseItem> items, DateTime date,
-            IAlexaSession session)
+        protected static void NewLibraryItems(StringBuilder speech, List<BaseItem> items, DateTime date, IAlexaSession session)
         {
             speech.Append("There ");
             speech.Append(items?.Count > 1 ? "are" : "is");
@@ -277,7 +284,6 @@ namespace AlexaController.EmbyAplDataSourceManagement
                     items?.ToArray().Select(item => StringNormalization.ValidateSpeechQueryString(item.Name))));
             }
         }
-
         protected static void BrowseItemByActor(StringBuilder speech, List<BaseItem> actors)
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.COMPLIANCE));
@@ -285,27 +291,7 @@ namespace AlexaController.EmbyAplDataSourceManagement
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(string.Join(", ", actors));
         }
-
-        //private static void CorrectPhrasing(StringBuilder speech, IAlexaSession session, BaseItem item)
-        //{
-        //    speech.Append("Hey!");
-        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-        //    speech.Append(SayName(session.person));
-        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-        //    speech.Append("listen");
-        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-        //    speech.Append("To make searching media items faster.");
-        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-        //    speech.Append("Try using the item type in your request");
-        //    speech.Append(InsertStrengthBreak(StrengthBreak.strong));
-        //    speech.Append($"For example, using the phrase: \"Show the {item.GetType().Name}\" ");
-        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-        //    speech.Append($"{item.Name}");
-        //    speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-        //    speech.Append("will help me find your selection more efficiently.");
-        //    speech.Append(InsertStrengthBreak(StrengthBreak.strong));
-        //}
-
+        
         // Use this to Randomize responses. 
         private static readonly Random RandomIndex = new Random();
 

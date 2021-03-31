@@ -55,8 +55,14 @@ namespace AlexaController.Alexa.IntentRequest
                 }, Session);
             }
 
-            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(results);
-            var newLibraryItemsAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.NewLibraryItems(results, d, Session);
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(results);
+            var newLibraryItemsAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery() 
+            {
+                SpeechResponseType = SpeechResponseType.NewLibraryItems, 
+                items = results, 
+                session = Session, 
+                date = d
+            });
 
             AlexaSessionManager.Instance.UpdateSession(Session, sequenceLayoutProperties);
 

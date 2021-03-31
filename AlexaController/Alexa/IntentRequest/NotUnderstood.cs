@@ -20,8 +20,11 @@ namespace AlexaController.Alexa.IntentRequest
         }
         public async Task<string> Response()
         {
-            var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("Could you say that again?", "/Question");
-            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.NotUnderstood();
+            var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("Could you say that again?", "/Question");
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.NotUnderstood
+            });
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = false,

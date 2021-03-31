@@ -351,18 +351,22 @@
                         {
                             "name": "Duration",
                             "type": "AMAZON.DURATION"
+                        },
+                        {
+                            "name": "VisualModeTrigger",
+                            "type": "AMAZON.VisualModeTrigger"
                         }
                     ],
                     "samples": [
-                        "show new {TVAlternatives}",
-                        "show new {MovieAlternatives}",
+                        "{VisualModeTrigger} new {TVAlternatives}",
+                        "{VisualModeTrigger} new {MovieAlternatives}",
                         "about new {TVAlternatives} from the last {Duration}",
                         "about new {MovieAlternatives}",
                         "about new {MovieAlternatives} added in the last {Duration}",
-                        "to show new {MovieAlternatives} added in the last {Duration}",
-                        "to show {MovieAlternatives} added in the last {Duration}",
-                        "to show {TVAlternatives} added in the last {Duration}",
-                        "to show new {TVAlternatives} added in the last {Duration}",
+                        "to {VisualModeTrigger} new {MovieAlternatives} added in the last {Duration}",
+                        "to {VisualModeTrigger} {MovieAlternatives} added in the last {Duration}",
+                        "to {VisualModeTrigger} {TVAlternatives} added in the last {Duration}",
+                        "to {VisualModeTrigger} new {TVAlternatives} added in the last {Duration}",
                         "about new {TVAlternatives} added in the last {Duration}",
                         "about new {MovieAlternatives} from the last {Duration}",
                         "about new {TVAlternatives}"
@@ -540,6 +544,7 @@
                         }
                     ],
                     "samples": [
+                        "{VisualModeTrigger} {MovieCollection} in the {Room}",
                         "{VisualModeTrigger} {MovieCollection}",
                         "{VisualModeTrigger} {Series} in the {Room}",
                         "{VisualModeTrigger} {Series}",

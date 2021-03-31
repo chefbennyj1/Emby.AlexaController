@@ -49,8 +49,13 @@ namespace AlexaController.Alexa.IntentRequest.Libraries
             session.PersistedRequestData = null;
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
-            var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync($"Showing the {result.Name} library", "/MoviesLibrary");
-            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(result, session);
+            var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync($"Showing the {result.Name} library", "/MoviesLibrary");
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.ItemBrowse, 
+                item = result, 
+                session = session
+            });
             var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(genericLayoutProperties, session);
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 

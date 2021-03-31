@@ -48,7 +48,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
 
             if (result is null)
             {
-                var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("I was unable to find that actor.", "/particles");
+                var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("I was unable to find that actor.", "/particles");
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -81,8 +81,12 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             var actors = result.Keys.FirstOrDefault();
             var actorCollection = result.Values.FirstOrDefault();
 
-            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(actorCollection);
-            var aplaDataSource1 = await DataSourceAudioSpeechPropertiesManager.Instance.BrowseItemByActor(actors);
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(actorCollection);
+            var aplaDataSource1 = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.BrowseItemByActor, 
+                items = actors
+            });
 
             //TODO: Fix session Update (it is only looking at one actor, might not matter)
             //Update Session

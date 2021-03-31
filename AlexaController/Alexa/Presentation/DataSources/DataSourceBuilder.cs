@@ -31,7 +31,7 @@ namespace AlexaController.Alexa.Presentation.DataSources
             Properties = properties;
         }
 
-        public async Task<Dictionary<string, IDataSource>> Create(string name)
+        public async Task<Dictionary<string, IDataSource>> CreateDataSource(string name)
         {
             return await Task.FromResult(new Dictionary<string, IDataSource>()
             {

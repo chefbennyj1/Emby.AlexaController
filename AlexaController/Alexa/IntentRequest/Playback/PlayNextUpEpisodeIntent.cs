@@ -38,7 +38,10 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
             if (nextUpEpisode is null)
             {
-                var itemDoesNotExistAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.NoItemExists();
+                var itemDoesNotExistAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+                {
+                    SpeechResponseType = SpeechResponseType.NoItemExists
+                });
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -58,14 +61,19 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.NowViewingBaseItem = nextUpEpisode;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(nextUpEpisode, Session);
-            var nextUpEpisodeAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.PlayNextUpEpisode(nextUpEpisode, Session);
+            var detailLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(nextUpEpisode, Session);
+            var nextUpEpisodeAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery() 
+            {
+                SpeechResponseType = SpeechResponseType.PlayNextUpEpisode, 
+                item = nextUpEpisode, 
+                session = Session
+            });
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = true,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(detailLayoutProperties, Session),
+                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(detailLayoutProperties, Session),
                     await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(nextUpEpisodeAudioProperties)
                 }
             }, Session);

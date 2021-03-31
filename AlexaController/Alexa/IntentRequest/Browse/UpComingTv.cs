@@ -37,8 +37,13 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             //IDataSource aplDataSource;
             //IDataSource aplaDataSource;
 
-            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(result.Items.ToList(), null);
-            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.UpComingEpisodes(result.Items.ToList(), duration);
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(result.Items.ToList());
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.UpComingEpisodes, 
+                items = result.Items.ToList(), 
+                date= duration
+            });
 
             AlexaSessionManager.Instance.UpdateSession(Session, sequenceLayoutProperties);
 

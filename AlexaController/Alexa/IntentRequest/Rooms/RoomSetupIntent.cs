@@ -32,7 +32,7 @@ namespace AlexaController.Alexa.IntentRequest.Rooms
                 Session.PersistedRequestData = AlexaRequest;
 
                 var genericLayoutProperties =
-                    await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("Please say the name of the room you want to setup.", "/particles");
+                    await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("Please say the name of the room you want to setup.", "/particles");
 
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
 

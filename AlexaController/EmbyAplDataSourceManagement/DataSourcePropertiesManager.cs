@@ -3,15 +3,16 @@ using AlexaController.Session;
 using MediaBrowser.Controller.Entities;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AlexaController.EmbyAplDataSourceManagement
 {
-    public class DataSourceLayoutPropertiesManager
+    public class DataSourcePropertiesManager : SpeechBuilderService
     {
-        public static DataSourceLayoutPropertiesManager Instance { get; private set; }
+        public static DataSourcePropertiesManager Instance { get; private set; }
 
-        public DataSourceLayoutPropertiesManager()
+        public DataSourcePropertiesManager()
         {
             Instance = this;
         }
@@ -189,6 +190,70 @@ namespace AlexaController.EmbyAplDataSourceManagement
                 }
             });
         }
-
+        
+        public async Task<Properties<string>> GetSpeechResponseProperties(SpeechResponsePropertiesQuery speechResponsePropertiesQuery)
+        {
+            var speech = new StringBuilder();
+            switch (speechResponsePropertiesQuery.SpeechResponseType)
+            {
+                case SpeechResponseType.PersonNotRecognized:
+                    PersonNotRecognized(speech);
+                    break;
+                case SpeechResponseType.OnLaunch:
+                    OnLaunch(speech);
+                    break;
+                case SpeechResponseType.NotUnderstood:
+                    NotUnderstood(speech);
+                    break;
+                case SpeechResponseType.NoItemExists:
+                    NoItemExists(speech);
+                    break;
+                case SpeechResponseType.ItemBrowse:
+                    ItemBrowse(speech, speechResponsePropertiesQuery.item, speechResponsePropertiesQuery.session, speechResponsePropertiesQuery.deviceAvailable);
+                    break;
+                case SpeechResponseType.BrowseNextUpEpisode:
+                    BrowseNextUpEpisode(speech, speechResponsePropertiesQuery.item, speechResponsePropertiesQuery.session);
+                    break;
+                case SpeechResponseType.NoNextUpEpisodeAvailable:
+                    NoNextUpEpisodeAvailable(speech);
+                    break;
+                case SpeechResponseType.PlayNextUpEpisode:
+                    PlayNextUpEpisode(speech, speechResponsePropertiesQuery.item, speechResponsePropertiesQuery.session);
+                    break;
+                case SpeechResponseType.ParentalControlNotAllowed:
+                    ParentalControlNotAllowed(speech, speechResponsePropertiesQuery.item, speechResponsePropertiesQuery.session);
+                    break;
+                case SpeechResponseType.PlayItem:
+                    PlayItem(speech, speechResponsePropertiesQuery.item);
+                    break;
+                case SpeechResponseType.RoomContext:
+                    RoomContext(speech);
+                    break;
+                case SpeechResponseType.VoiceAuthenticationExists:
+                    VoiceAuthenticationExists(speech, speechResponsePropertiesQuery.session);
+                    break;
+                case SpeechResponseType.VoiceAuthenticationAccountLinkError:
+                    VoiceAuthenticationAccountLinkError(speech);
+                    break;
+                case SpeechResponseType.VoiceAuthenticationAccountLinkSuccess:
+                    VoiceAuthenticationAccountLinkSuccess(speech, speechResponsePropertiesQuery.session);
+                    break;
+                case SpeechResponseType.UpComingEpisodes:
+                    UpComingEpisodes(speech, speechResponsePropertiesQuery.items, speechResponsePropertiesQuery.date);
+                    break;
+                case SpeechResponseType.NewLibraryItems:
+                    NewLibraryItems(speech, speechResponsePropertiesQuery.items, speechResponsePropertiesQuery.date, speechResponsePropertiesQuery.session);
+                    break;
+                case SpeechResponseType.BrowseItemByActor:
+                    BrowseItemByActor(speech, speechResponsePropertiesQuery.items);
+                    break;
+                default: return null;
+            }
+            return await Task.FromResult(new Properties<string>()
+            {
+                value = speech.ToString(),
+                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
+            });
+        }
     }
 }

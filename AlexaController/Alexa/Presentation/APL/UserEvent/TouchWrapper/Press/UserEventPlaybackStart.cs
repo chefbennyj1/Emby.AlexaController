@@ -38,7 +38,7 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
 
             if (session.room is null)
             {
-                var roomSelectionViewProperties = await DataSourceLayoutPropertiesManager.Instance.GetRoomSelectionViewPropertiesAsync(baseItem, session);
+                var roomSelectionViewProperties = await DataSourcePropertiesManager.Instance.GetRoomSelectionViewPropertiesAsync(baseItem, session);
                 session.NowViewingBaseItem = baseItem;
                 AlexaSessionManager.Instance.UpdateSession(session, roomSelectionViewProperties);
 
@@ -59,8 +59,11 @@ namespace AlexaController.Alexa.Presentation.APL.UserEvent.TouchWrapper.Press
             
             ServerController.Instance.PlayMediaItemAsync(session, baseItem, startPosition);
             
-            var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(baseItem, session);
-            var playItemAudioSpeech = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(baseItem);
+            var detailLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(baseItem, session);
+            var playItemAudioSpeech = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.PlayItem, item = baseItem
+            });
             
             var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(detailLayoutProperties, session);
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(playItemAudioSpeech);

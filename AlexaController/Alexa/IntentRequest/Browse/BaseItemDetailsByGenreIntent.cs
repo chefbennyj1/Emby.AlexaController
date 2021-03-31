@@ -51,7 +51,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             
             if (result.TotalRecordCount <= 0)
             {
-                var genericLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync("I was unable to find that. Does that genre exist?", "/Question");
+                var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("I was unable to find that. Does that genre exist?", "/Question");
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     outputSpeech = new OutputSpeech()
@@ -98,7 +98,7 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(result.Items.ToList());
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(result.Items.ToList());
 
             //Update Session
             Session.NowViewingBaseItem = result.Items[0];

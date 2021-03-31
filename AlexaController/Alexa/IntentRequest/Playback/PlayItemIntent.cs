@@ -58,7 +58,10 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             //Item doesn't exist in the library
             if (result is null)
             {
-                var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.NoItemExists();
+                var aplaDataSource = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+                {
+                    SpeechResponseType = SpeechResponseType.NoItemExists
+                });
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -79,9 +82,14 @@ namespace AlexaController.Alexa.IntentRequest.Playback
                 }
 
                 var genericLayoutProperties =
-                    await DataSourceLayoutPropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {result.OfficialRating}", "/particles");
+                    await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {result.OfficialRating}", "/particles");
 
-                var parentalControlNotAllowedAudioSpeech = await DataSourceAudioSpeechPropertiesManager.Instance.ParentalControlNotAllowed(result, Session);
+                var parentalControlNotAllowedAudioSpeech = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery() 
+                {
+                    SpeechResponseType = SpeechResponseType.ParentalControlNotAllowed, 
+                    item = result, 
+                    session = Session
+                });
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -89,9 +97,8 @@ namespace AlexaController.Alexa.IntentRequest.Playback
 
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
+                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(genericLayoutProperties, Session),
                         await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(parentalControlNotAllowedAudioSpeech)
-
                     }
 
                 }, Session);
@@ -111,9 +118,12 @@ namespace AlexaController.Alexa.IntentRequest.Playback
             Session.PlaybackStarted = true;
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
-            var detailLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(result, Session);
+            var detailLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(result, Session);
 
-            var playItemAudioSpeech = await DataSourceAudioSpeechPropertiesManager.Instance.PlayItem(result);
+            var playItemAudioSpeech = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.PlayItem, item = result
+            });
 
             var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(detailLayoutProperties, Session);
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(playItemAudioSpeech);

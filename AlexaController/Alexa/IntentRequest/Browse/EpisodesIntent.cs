@@ -3,7 +3,6 @@ using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api;
 using AlexaController.EmbyAplDataSourceManagement;
-using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using AlexaController.EmbyAplManagement;
 using AlexaController.Session;
 using System;
@@ -50,7 +49,10 @@ namespace AlexaController.Alexa.IntentRequest.Browse
             // User requested season/episode data that doesn't exist
             if (!results.Any())
             {
-                var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.NoItemExists();
+                var aplaDataSource = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+                {
+                    SpeechResponseType = SpeechResponseType.NoItemExists
+                });
 
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
@@ -80,13 +82,18 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 }
             }
 
-            var sequenceLayoutProperties = await DataSourceLayoutPropertiesManager.Instance.GetSequenceViewPropertiesAsync(results, season.Parent);
-            var aplaDataSource1 = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(season, Session);
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(results, season.Parent);
+            var aplaDataSource1 = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery() 
+            {
+                SpeechResponseType = SpeechResponseType.ItemBrowse,  
+                item = season, 
+                session = Session
+            });
 
             Session.NowViewingBaseItem = season;
             AlexaSessionManager.Instance.UpdateSession(Session, sequenceLayoutProperties);
 
-            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync<MediaItem>(sequenceLayoutProperties, Session);
+            var renderDocumentDirective = await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(sequenceLayoutProperties, Session);
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource1);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

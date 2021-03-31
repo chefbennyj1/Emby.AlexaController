@@ -23,7 +23,7 @@ namespace AlexaController.Alexa.IntentRequest.AMAZON
         }
         public async Task<string> Response()
         {
-            var dataSource = await DataSourceLayoutPropertiesManager.Instance.GetHelpViewPropertiesAsync();
+            var dataSource = await DataSourcePropertiesManager.Instance.GetHelpViewPropertiesAsync();
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 outputSpeech = new OutputSpeech()

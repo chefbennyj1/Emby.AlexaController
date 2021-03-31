@@ -46,7 +46,11 @@ namespace AlexaController.Alexa.IntentRequest.Browse
                 ServerController.Instance.Log.Error(exception.Message);
             }
 
-            var aplaDataSource = await DataSourceAudioSpeechPropertiesManager.Instance.ItemBrowse(Session.NowViewingBaseItem, Session);
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery() 
+            {
+                SpeechResponseType = SpeechResponseType.ItemBrowse, 
+                item = Session.NowViewingBaseItem, session = Session
+            });
             var renderAudioDirective = await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(aplaDataSource);
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()

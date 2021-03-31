@@ -31,7 +31,10 @@ namespace AlexaController.Alexa.IntentRequest
             
             if (person is null)
             {
-                var voiceAuthenticationLinkErrorAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.VoiceAuthenticationAccountLinkError();
+                var voiceAuthenticationLinkErrorAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+                {
+                    SpeechResponseType = SpeechResponseType.VoiceAuthenticationAccountLinkError
+                });
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {
                     shouldEndSession = true,
@@ -47,7 +50,10 @@ namespace AlexaController.Alexa.IntentRequest
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
-                    var voiceAuthenticationProfileExistsAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.VoiceAuthenticationExists(Session);
+                    var voiceAuthenticationProfileExistsAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+                    {
+                        SpeechResponseType = SpeechResponseType.VoiceAuthenticationExists, session = Session
+                    });
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
                     {
                         shouldEndSession = true,
@@ -64,7 +70,10 @@ namespace AlexaController.Alexa.IntentRequest
             Task.Run(() => ServerController.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 #pragma warning restore 4014
 
-            var voiceAuthenticationLinkSuccessAudioProperties = await DataSourceAudioSpeechPropertiesManager.Instance.VoiceAuthenticationAccountLinkSuccess(Session);
+            var voiceAuthenticationLinkSuccessAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.VoiceAuthenticationAccountLinkSuccess, session = Session
+            });
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
             {

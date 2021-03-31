@@ -12,6 +12,8 @@ using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.APLA;
+using AlexaController.Alexa.Presentation.Sources;
 
 /*
  * Echo Display Devices use the **LAN address** for Images when using the skill on the same network as emby service (ex. 192.168.X.XXX:8096)
@@ -32,27 +34,69 @@ namespace AlexaController.EmbyAplManagement
 
         public async Task<IDirective> GetRenderDocumentDirectiveAsync<T>(Properties<T> properties, IAlexaSession session) where T : class
         {
-            var dataSource = new DataSourceBuilder();
-            dataSource.Add(properties);
+            var dataSourceBuilder = new DataSourceBuilder();
+            dataSourceBuilder.Add(properties);
+
+            var sources = new SourcesBuilder();
+            sources.Add( "buttonPressEffectApla", new Alexa.Presentation.APLA.Document()
+            {
+                mainTemplate = new MainTemplate()
+                {
+                    parameters = new List<string>() { "payload" },
+                    item = new Audio()
+                    {
+                        source = "soundbank://soundlibrary/camera/camera_15",
+                        filter = new List<IFilter>() { new Volume() { amount = 0.2 } }
+                    }
+                }
+            });
 
             switch (properties?.documentType)
             {
                 case RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE:
-                    dataSource.Add(new TextToSpeechTransformer()
+
+                    //sources.Add("readOverviewAplAudio", new Alexa.Presentation.APLA.Document()
+                    //{
+                    //    mainTemplate = new MainTemplate()
+                    //    {
+                    //        parameters = new List<string>() { "payload" },
+                    //        item = new Mixer()
+                    //        {
+                    //            items = new List<AudioBaseComponent>()
+                    //            {
+                    //                new Audio()
+                    //                {
+                    //                    source = $"{properties.url}{item.themeAudioSource}", //"${payload.templateData.properties.url}${payload.templateData.properties.item.themeAudioSource}",
+                    //                    filter = new List<IFilter>() { new Volume() { amount = 0.2 } }
+                    //                },
+                    //                new Speech()
+                    //                {
+                    //                    content = $"<speak>{item.overview}</speak>"//"<speak>${payload.templateData.properties.item.overview}</speak>"
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //});
+                    //dataSourceBuilder.Add(new AplaSpeechTransformer()
+                    //{
+                    //    template = "readOverviewAplAudio",
+                    //    outputName = "speech"
+                    //});
+                    dataSourceBuilder.Add(new TextToSpeechTransformer()
                     {
                         inputPath = "item.overview",
                         outputName = "readOverview"
                     });
                     break;
                 case RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE:
-                    dataSource.Add(new AplaSpeechTransformer()
+                    dataSourceBuilder.Add(new AplaSpeechTransformer()
                     {
                         template = "buttonPressEffectApla",
                         outputName = "buttonPressEffect"
                     });
                     break;
                 case RenderDocumentType.HELP_TEMPLATE:
-                    dataSource.Add(new TextToSpeechTransformer()
+                    dataSourceBuilder.Add(new TextToSpeechTransformer()
                     {
                         inputPath = "values[*].value",
                         outputName = "helpPhrase"
@@ -71,13 +115,13 @@ namespace AlexaController.EmbyAplManagement
                 // ReSharper disable once RedundantNameQualifier
                 document = new Alexa.Presentation.APL.Document()
                 {
-                    theme = "${payload.templateData.properties.theme}",
+                    theme      = "${payload.templateData.properties.theme}",
                     extensions = ExtensionsManager.RenderExtensionsList(session.context),
-                    settings = SettingsManager.RenderSettings(session.context),
-                    import = ImportsManager.RenderImportsList,
-                    resources = ResourcesManager.RenderResourcesList,
-                    graphics = VectorGraphicsManager.RenderVectorGraphicsDictionary,
-                    commands = new Dictionary<string, ICommand>()
+                    settings   = SettingsManager.RenderSettings(session.context),
+                    import     = ImportsManager.RenderImportsList,
+                    resources  = ResourcesManager.RenderResourcesList,
+                    graphics   = VectorGraphicsManager.RenderVectorGraphicsDictionary,
+                    commands   = new Dictionary<string, ICommand>()
                     {
                         { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() },
                         { nameof(Animations.FadeIn), await Animations.FadeIn() }
@@ -88,23 +132,8 @@ namespace AlexaController.EmbyAplManagement
                         items = await LayoutsManager.RenderLayoutComponents(properties, session)
                     }
                 },
-                datasources = await dataSource.Create("templateData"),
-                sources = new Dictionary<string, IDocument>()
-                {
-                    { "buttonPressEffectApla", new Alexa.Presentation.APLA.Document()
-                        {
-                            mainTemplate = new MainTemplate()
-                            {
-                                parameters = new List<string>() { "payload" },
-                                item = new Audio()
-                                {
-                                    source = "soundbank://soundlibrary/camera/camera_15",
-                                    filter = new List<IFilter>() { new Volume() { amount = 0.2 } }
-                                }
-                            }
-                        }
-                    }
-                }
+                datasources = await dataSourceBuilder.CreateDataSource("templateData"),
+                sources = await sources.Create()
             });
         }
 
@@ -131,7 +160,7 @@ namespace AlexaController.EmbyAplManagement
                         }
                     }
                 },
-                datasources = await dataSource.Create("templateData")
+                datasources = await dataSource.CreateDataSource("templateData")
             });
         }
     }

@@ -14,8 +14,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
-using MediaBrowser.Model.Dto;
 using User = MediaBrowser.Controller.Entities.User;
 
 
@@ -344,7 +342,9 @@ namespace AlexaController
 
         public string GetThemeSongSource(BaseItem item)
         {
-            return item.ThemeSongIds.Length > 0 ? $"/Audio/{item.ThemeSongIds.FirstOrDefault().ToString()}/stream.mp3" : "";
+            //TODO: Get API key for HLS streaming audio??
+            //"https://theater.unityhome.online/Audio/61335/universal?MaxStreamingBitrate=140000000&Container=mp3&TranscodingContainer=aac&TranscodingProtocol=hls&AudioCodec=aac&api_key=644138eb19884b119a52440fa9b51983&StartTimeTicks=0&EnableRedirection=true"
+            return item.ThemeSongIds.Length > 0 ? $"/Audio/{item.ThemeSongIds.FirstOrDefault()}/universal?MaxStreamingBitrate=140000000&Container=mp3&TranscodingContainer=aac&TranscodingProtocol=hls&AudioCodec=aac&api_key=644138eb19884b119a52440fa9b51983&StartTimeTicks=0&EnableRedirection=true" : "";
         }
         public void Dispose()
         {
