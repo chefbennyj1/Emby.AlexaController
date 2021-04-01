@@ -1,4 +1,4 @@
-﻿using AlexaController.Alexa.IntentRequest.Rooms;
+﻿using AlexaController.Api.IntentRequest.Rooms;
 using MediaBrowser.Model.Plugins;
 using System.Collections.Generic;
 

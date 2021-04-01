@@ -1,7 +1,7 @@
-﻿using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
+using AlexaController.Api.IntentRequest.Rooms;
 using MediaBrowser.Controller.Entities;
 using IPerson = AlexaController.Alexa.RequestModel.IPerson;
 using User = MediaBrowser.Controller.Entities.User;

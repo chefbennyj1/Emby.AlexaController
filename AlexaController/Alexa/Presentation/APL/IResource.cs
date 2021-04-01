@@ -37,5 +37,5 @@
         public int? marginRight { get; set; }
         public int? marginBottom { get; set; }
     }
-    
+
 }

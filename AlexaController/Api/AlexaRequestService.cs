@@ -1,10 +1,9 @@
-﻿using AlexaController.Alexa.IntentRequest;
-using AlexaController.Alexa.IntentRequest.Rooms;
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
-using AlexaController.EmbyAplDataSourceManagement;
-using AlexaController.EmbyAplManagement;
+using AlexaController.Api.IntentRequest;
+using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using AlexaController.Utils;
 using MediaBrowser.Common.Net;
@@ -16,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using AlexaController.EmbyApl;
 
 // ReSharper disable once TooManyDependencies
 // ReSharper disable once PossibleNullReferenceException
@@ -66,14 +66,11 @@ namespace AlexaController.Api
             if (SpeechAuthorization.Instance is null)
                 Activator.CreateInstance(typeof(SpeechAuthorization), user);
 
-            if (RenderDocumentDirectiveFactory.Instance is null)
-                Activator.CreateInstance<RenderDocumentDirectiveFactory>();
+            if (RenderDocumentDirectiveManager.Instance is null)
+                Activator.CreateInstance<RenderDocumentDirectiveManager>();
 
             if (DataSourcePropertiesManager.Instance is null)
                 Activator.CreateInstance<DataSourcePropertiesManager>();
-
-            //if (DataSourceAudioSpeechPropertiesManager.Instance is null)
-            //    Activator.CreateInstance<DataSourceAudioSpeechPropertiesManager>();
 
         }
 
@@ -155,7 +152,7 @@ namespace AlexaController.Api
                 */
                 var intentName = intent.name.Replace("_", ".");
 
-                return await GetResponseResult(Type.GetType($"AlexaController.Alexa.IntentRequest.{intentName}"), alexaRequest, session);
+                return await GetResponseResult(Type.GetType($"AlexaController.Api.IntentRequest.{intentName}"), alexaRequest, session);
             }
             catch (Exception exception)
             {
@@ -170,7 +167,7 @@ namespace AlexaController.Api
 
                     directives = new List<IDirective>()
                     {
-                        await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(dataSource, session)
+                        await RenderDocumentDirectiveManager.Instance.RenderVisualDocumentDirectiveAsync(dataSource, session)
                     }
                 }, session);
             }
@@ -185,8 +182,8 @@ namespace AlexaController.Api
         private static async Task<string> OnUserEvent(IAlexaRequest alexaRequest)
         {
             var request = alexaRequest.request;
-            
-            return await GetResponseResult(Type.GetType($"AlexaController.Alexa.Presentation.APL.UserEvent.{request.source.type}.{request.source.handler}.{request.arguments[0]}"), alexaRequest, null);
+
+            return await GetResponseResult(Type.GetType($"AlexaController.Api.UserEvent.{request.source.type}.{request.source.handler}.{request.arguments[0]}"), alexaRequest, null);
         }
 
         private static async Task<string> OnLaunchRequest(IAlexaRequest alexaRequest)
@@ -196,7 +193,7 @@ namespace AlexaController.Api
 
             if (user is null)
             {
-                var personNotRecognizedAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+                var personNotRecognizedAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
                 {
                     SpeechResponseType = SpeechResponseType.PersonNotRecognized
                 });
@@ -206,7 +203,7 @@ namespace AlexaController.Api
                         shouldEndSession = true,
                         directives = new List<IDirective>()
                         {
-                            await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(personNotRecognizedAudioProperties)
+                            await RenderDocumentDirectiveManager.Instance.RenderAudioDocumentDirectiveAsync(personNotRecognizedAudioProperties)
                         }
                     }, null);
             }
@@ -214,7 +211,7 @@ namespace AlexaController.Api
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
             var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("Welcome to Home Theater Emby Controller", "/particles");
 
-            var skillLaunchedAudioProperties = await DataSourcePropertiesManager.Instance.GetSpeechResponseProperties(new SpeechResponsePropertiesQuery()
+            var skillLaunchedAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
             {
                 SpeechResponseType = SpeechResponseType.OnLaunch
             });
@@ -224,8 +221,8 @@ namespace AlexaController.Api
                 shouldEndSession = false,
                 directives = new List<IDirective>()
                 {
-                    await RenderDocumentDirectiveFactory.Instance.GetRenderDocumentDirectiveAsync(genericLayoutProperties, session),
-                    await RenderDocumentDirectiveFactory.Instance.GetAudioDirectiveAsync(skillLaunchedAudioProperties)
+                    await RenderDocumentDirectiveManager.Instance.RenderVisualDocumentDirectiveAsync(genericLayoutProperties, session),
+                    await RenderDocumentDirectiveManager.Instance.RenderAudioDocumentDirectiveAsync(skillLaunchedAudioProperties)
                 }
             }, session);
         }

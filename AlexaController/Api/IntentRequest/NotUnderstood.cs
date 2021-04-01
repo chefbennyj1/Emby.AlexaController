@@ -1,0 +1,39 @@
+﻿using AlexaController.Alexa;
+using AlexaController.Alexa.ResponseModel;
+using AlexaController.EmbyAplDataSource;
+using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using AlexaController.EmbyApl;
+
+namespace AlexaController.Api.IntentRequest
+{
+    public class NotUnderstood : IntentResponseBase<IAlexaRequest, IAlexaSession>, IIntentResponse
+    {
+        public IAlexaRequest AlexaRequest { get; }
+        public IAlexaSession Session { get; }
+
+        public NotUnderstood(IAlexaRequest alexaRequest, IAlexaSession session) : base(alexaRequest, session)
+        {
+            AlexaRequest = alexaRequest;
+            Session = session;
+        }
+        public async Task<string> Response()
+        {
+            var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("Could you say that again?", "/Question");
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            {
+                SpeechResponseType = SpeechResponseType.NotUnderstood
+            });
+            return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
+            {
+                shouldEndSession = false,
+                directives = new List<IDirective>()
+                {
+                     await RenderDocumentDirectiveManager.Instance.RenderVisualDocumentDirectiveAsync<string>(genericLayoutProperties, Session),
+                     await RenderDocumentDirectiveManager.Instance.RenderAudioDocumentDirectiveAsync(aplaDataSource)
+                }
+            }, Session);
+        }
+    }
+}

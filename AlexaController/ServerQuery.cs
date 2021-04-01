@@ -27,7 +27,7 @@ namespace AlexaController
         private ILibraryManager LibraryManager { get; }
         private ITVSeriesManager TvSeriesManager { get; }
         private ISessionManager SessionManager { get; }
-        private IDtoService DtoService { get;  }
+        private IDtoService DtoService { get; }
         public static ServerQuery Instance { get; private set; }
 
         // ReSharper disable once TooManyDependencies
@@ -203,7 +203,7 @@ namespace AlexaController
             var dto = DtoService.GetBaseItemDto(item, new DtoOptions(true));
             return dto.Chapters;
         }
-      
+
         public QueryResult<BaseItem> GetBaseItemsByGenre(string[] type, string[] genres)
         {
             return LibraryManager.GetItemsResult(new InternalItemsQuery()

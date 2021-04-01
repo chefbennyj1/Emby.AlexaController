@@ -1,5 +1,4 @@
-﻿using AlexaController.EmbyAplDataSourceManagement;
-using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+﻿using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using System.Collections.Generic;
 
 namespace AlexaController.Session

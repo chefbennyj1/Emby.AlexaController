@@ -141,7 +141,7 @@ namespace AlexaController
                 startTicks = startPositionTicks.Value;
             }
 
-            try 
+            try
             {
                 await SessionManager.SendPlayCommand(null, session.Id, new PlayRequest
                 {

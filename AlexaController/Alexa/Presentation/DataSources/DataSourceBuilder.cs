@@ -1,6 +1,6 @@
 ﻿using AlexaController.Alexa.Presentation.DataSources.Properties;
 using AlexaController.Alexa.Presentation.DataSources.Transformers;
-using AlexaController.EmbyAplDataSourceManagement;
+using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

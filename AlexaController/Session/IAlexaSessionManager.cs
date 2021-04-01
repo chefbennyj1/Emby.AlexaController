@@ -1,7 +1,6 @@
 ﻿using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
-using AlexaController.EmbyAplDataSourceManagement;
-using AlexaController.EmbyAplDataSourceManagement.PropertyModels;
+using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using MediaBrowser.Controller.Session;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +20,7 @@ namespace AlexaController.Session
         public static IAlexaSessionManager Instance { get; private set; }
 
         private static readonly List<IAlexaSession> OpenSessions = new List<IAlexaSession>();
-        
+
         private ISessionManager SessionManager { get; }
 
         public AlexaSessionManager(ISessionManager sessionManager)
@@ -63,9 +62,9 @@ namespace AlexaController.Session
                 return OpenSessions.FirstOrDefault(s => s.SessionId == alexaRequest.session.sessionId);
             }
 
-            var context       = alexaRequest.context;
-            var system        = context.System;
-            var person        = system.person;
+            var context = alexaRequest.context;
+            var system = context.System;
+            var person = system.person;
             var amazonSession = alexaRequest.session;
 
             IAlexaRequest persistedRequestData = null;
@@ -112,7 +111,7 @@ namespace AlexaController.Session
             };
 
             OpenSessions.Add(sessionInfo);
-           
+
             return sessionInfo;
         }
 
@@ -126,11 +125,12 @@ namespace AlexaController.Session
             try
             {
                 ServerController.Instance.Log.Info("SESSION UPDATE: " + session.NowViewingBaseItem.Name);
-            }catch{}
+            }
+            catch { }
             OpenSessions.Add(session);
 
         }
-        
+
         private static IAlexaSession UpdateSessionPaging(IAlexaSession session, Properties<MediaItem> properties, bool? isBack = null)
         {
             if (isBack == true)
@@ -178,7 +178,7 @@ namespace AlexaController.Session
                 }
 
                 return SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName).Id;
-                
+
             }
 
             return sessionInfo.room is null ? string.Empty : SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName)?.Id;
@@ -197,16 +197,16 @@ namespace AlexaController.Session
 
         private void SessionManager_PlaybackProgress(object sender, MediaBrowser.Controller.Library.PlaybackProgressEventArgs e)
         {
-            
+
             var session = OpenSessions.FirstOrDefault(s => s.EmbySessionId == e.Session.Id);
 
             if (session is null) return;
-           
+
             session.PlaybackPositionTicks = e.PlaybackPositionTicks ?? 0;
-            
+
             OpenSessions.RemoveAll(s => s.EmbySessionId.Equals(session.EmbySessionId));
             OpenSessions.Add(session);
-            
+
         }
     }
 }
