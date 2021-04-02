@@ -11,7 +11,7 @@ namespace AlexaController.Alexa.Presentation.Directives
         public string token { get; set; }
         public IDocument document { get; set; }
         public List<ICommand> commands { get; set; }
-        public Dictionary<string, IDataSource> datasources { get; set; }
+        public DataSource datasources { get; set; }
         public Dictionary<string, IDocument> sources { get; set; }
     }
 }

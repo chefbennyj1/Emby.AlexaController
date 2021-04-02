@@ -71,7 +71,6 @@ namespace AlexaController.Api
 
             if (DataSourcePropertiesManager.Instance is null)
                 Activator.CreateInstance<DataSourcePropertiesManager>();
-
         }
 
         public async Task<object> Post(AlexaRequest data)

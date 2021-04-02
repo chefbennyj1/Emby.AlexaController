@@ -29,7 +29,6 @@ namespace AlexaController.Api.IntentRequest.Browse
         }
         public async Task<string> Response()
         {
-
             AlexaResponseClient.Instance.PostProgressiveResponse(SpeechBuilderService.GetSpeechPrefix(SpeechPrefix.REPOSE),
                 AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
 

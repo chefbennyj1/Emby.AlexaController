@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using User = MediaBrowser.Controller.Entities.User;
@@ -67,6 +69,13 @@ namespace AlexaController
                 Recursive = true
             });
             return result;
+        }
+
+        public async Task<string> GetWanAddressAsync()
+        {
+            var sysInfo = await Host.GetSystemInfo(IPAddress.Loopback, CancellationToken.None);
+            var wan = sysInfo.WanAddress.Split(':');
+            return await Task.FromResult($"{wan[0]}:{wan[1]}");
         }
 
         public async Task<string> GetLocalApiUrlAsync()
@@ -343,7 +352,7 @@ namespace AlexaController
         public string GetThemeSongSource(BaseItem item)
         {
             //TODO: Get API key for HLS streaming audio??
-            //"https://theater.unityhome.online/Audio/61335/universal?MaxStreamingBitrate=140000000&Container=mp3&TranscodingContainer=aac&TranscodingProtocol=hls&AudioCodec=aac&api_key=644138eb19884b119a52440fa9b51983&StartTimeTicks=0&EnableRedirection=true"
+            //"https://theater.unityhome.online/Audio/61335/universal?MaxStreamingBitrate=140000000&Container=mp3&TranscodingContainer=aac&TranscodingProtocol=hls&AudioCodec=aac&api_key=644138eb19884b119a52440fa9b51983&StartTimeTicks=400&EnableRedirection=true"
             return item.ThemeSongIds.Length > 0 ? $"/Audio/{item.ThemeSongIds.FirstOrDefault()}/universal?MaxStreamingBitrate=140000000&Container=mp3&TranscodingContainer=aac&TranscodingProtocol=hls&AudioCodec=aac&api_key=644138eb19884b119a52440fa9b51983&StartTimeTicks=0&EnableRedirection=true" : "";
         }
         public void Dispose()

@@ -96,6 +96,7 @@ namespace AlexaController.EmbyAplDataSource
             return await Task.FromResult(new Properties<MediaItem>()
             {
                 url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                wanAddress = await ServerQuery.Instance.GetWanAddressAsync(),
                 documentType = RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE,
                 similarItems = recommendedItems,
                 item = mediaItem
@@ -161,6 +162,7 @@ namespace AlexaController.EmbyAplDataSource
                 documentType = RenderDocumentType.GENERIC_VIEW_TEMPLATE,
                 text = text,
                 url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                wanAddress = await ServerQuery.Instance.GetWanAddressAsync(),
                 videoUrl = videoUrl
             });
         }

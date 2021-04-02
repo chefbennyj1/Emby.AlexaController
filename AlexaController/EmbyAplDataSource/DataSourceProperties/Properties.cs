@@ -8,6 +8,7 @@ namespace AlexaController.EmbyAplDataSource.DataSourceProperties
         public RenderDocumentType documentType { get; set; }
         public string theme { get; set; } = "dark";
         public string url { get; set; }
+        public string wanAddress { get; set; }
         public string audioUrl { get; set; }
         public string text { get; set; }
         public string videoUrl { get; set; }

@@ -33,10 +33,10 @@ namespace AlexaController.EmbyApl
 
         public async Task<IDirective> RenderVisualDocumentDirectiveAsync<T>(Properties<T> properties, IAlexaSession session) where T : class
         {
-            var dataSourceBuilder = new DataSourceBuilder();
-            dataSourceBuilder.Add(properties);
-            
-            var sources = new SourcesBuilder();
+            var data = new Data();
+            data.Add(properties);
+
+            var sources = new Sources();
             sources.Add("buttonPressEffectApla", new Alexa.Presentation.APLA.Document()
             {
                 mainTemplate = new MainTemplate()
@@ -53,23 +53,45 @@ namespace AlexaController.EmbyApl
             switch (properties?.documentType)
             {
                 case RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE:
-                    dataSourceBuilder.Add(new TextToSpeechTransformer()
+                    sources.Add("overviewApla", new Alexa.Presentation.APLA.Document()
                     {
-                        inputPath = "item.overview",
-                        outputName = "readOverview"
+                        mainTemplate = new MainTemplate()
+                        {
+                            parameters = new List<string>() { "payload" },
+                            item = new Mixer()
+                            {
+                                items = new List<AudioBaseComponent>()
+                                {
+                                    new Audio()
+                                    {
+                                        source = "${payload.templateData.properties.wanAddress}${payload.templateData.properties.item.themeAudioSource}",
+                                        filter = new List<IFilter>() { new FadeIn() { duration = 1000 }, new FadeOut() { duration = 2000 }, new Trim() { start = 2000 } }
+                                    },
+                                    new Speech()
+                                    {
+                                        content = "<speak>${payload.templateData.properties.item.overview}</speak>"
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    data.Add(new AplaSpeechTransformer()
+                    {
+                        outputName = "readOverview",
+                        template   = "overviewApla"
                     });
                     break;
                 case RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE:
-                    dataSourceBuilder.Add(new AplaSpeechTransformer()
+                    data.Add(new AplaSpeechTransformer()
                     {
-                        template = "buttonPressEffectApla",
+                        template   = "buttonPressEffectApla",
                         outputName = "buttonPressEffect"
                     });
                     break;
                 case RenderDocumentType.HELP_TEMPLATE:
-                    dataSourceBuilder.Add(new TextToSpeechTransformer()
+                    data.Add(new TextToSpeechTransformer()
                     {
-                        inputPath = "values[*].value",
+                        inputPath  = "values[*].value",
                         outputName = "helpPhrase"
                     });
                     break;
@@ -103,19 +125,22 @@ namespace AlexaController.EmbyApl
                         items = await Layouts.RenderLayoutComponents(properties, session)
                     }
                 },
-                datasources = await dataSourceBuilder.CreateDataSource("templateData"),
-                sources = await sources.Create()
+                datasources = new DataSource()
+                {
+                    templateData = await data.Build()
+                },
+                sources = await sources.Build()
             });
         }
 
         public async Task<IDirective> RenderAudioDocumentDirectiveAsync(Properties<string> properties)
         {
-            var dataSource = new DataSourceBuilder();
+            var dataSource = new Data();
             dataSource.Add(properties);
 
             return await Task.FromResult(new AplaRenderDocumentDirective()
             {
-                token = "AplAudioSpeech",
+                token = "AplAudio",
                 document = new Alexa.Presentation.APLA.Document()
                 {
                     mainTemplate = new MainTemplate()
@@ -131,7 +156,10 @@ namespace AlexaController.EmbyApl
                         }
                     }
                 },
-                datasources = await dataSource.CreateDataSource("templateData")
+                datasources = new DataSource()
+                {
+                    templateData = await dataSource.Build()
+                },//await dataSource.Build("templateData")
             });
         }
     }

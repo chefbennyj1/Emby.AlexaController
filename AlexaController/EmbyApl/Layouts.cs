@@ -295,7 +295,7 @@ namespace AlexaController.EmbyApl
                 maxHeight = "20vh",
                 opacity = 1,
                 id = "overview_${data.item.id}",
-                speech = "${data.item.readOverview}",
+                speech = "${data.readOverview.url}",
                 onPress = new SpeakItem() { componentId = "overview_${data.item.id}" },
                 item = new Container()
                 {
@@ -1151,6 +1151,7 @@ namespace AlexaController.EmbyApl
             switch (type)
             {
                 case "Movie":
+                case "Series":
                 case "Trailer": return new List<object>() { nameof(UserEventShowBaseItemDetailsTemplate) };
                 case "Episode": return new List<object>() { nameof(UserEventPlaybackStart), room };
                 default: return new List<object>() { nameof(UserEventShowItemListSequenceTemplate) };
