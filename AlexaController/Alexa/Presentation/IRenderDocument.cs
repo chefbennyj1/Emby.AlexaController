@@ -9,7 +9,7 @@ namespace AlexaController.Alexa.Presentation
         string token { get; set; }
         IDocument document { get; set; }
         List<ICommand> commands { get; set; }
-        DataSource datasources { get; set; }
+        IDataSource datasources { get; set; }
         Dictionary<string, IDocument> sources { get; set; }
     }
 }

@@ -53,33 +53,53 @@ namespace AlexaController.EmbyApl
             switch (properties?.documentType)
             {
                 case RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE:
-                    sources.Add("overviewApla", new Alexa.Presentation.APLA.Document()
+                    data.Add(new TextToSpeechTransformer()
                     {
-                        mainTemplate = new MainTemplate()
-                        {
-                            parameters = new List<string>() { "payload" },
-                            item = new Mixer()
-                            {
-                                items = new List<AudioBaseComponent>()
-                                {
-                                    new Audio()
-                                    {
-                                        source = "${payload.templateData.properties.wanAddress}${payload.templateData.properties.item.themeAudioSource}",
-                                        filter = new List<IFilter>() { new FadeIn() { duration = 1000 }, new FadeOut() { duration = 2000 }, new Trim() { start = 2000 } }
-                                    },
-                                    new Speech()
-                                    {
-                                        content = "<speak>${payload.templateData.properties.item.overview}</speak>"
-                                    }
-                                }
-                            }
-                        }
+                        inputPath = "item.overview",
+                        outputName = "readOverview"
                     });
-                    data.Add(new AplaSpeechTransformer()
-                    {
-                        outputName = "readOverview",
-                        template   = "overviewApla"
-                    });
+                    //sources.Add("overviewApla", new Alexa.Presentation.APLA.Document()
+                    //{
+                    //    mainTemplate = new MainTemplate()
+                    //    {
+                    //        parameters = new List<string>() { "payload" },
+                    //        item = new Mixer()
+                    //        {
+                                
+                    //            items = new List<AudioBaseComponent>()
+                    //            {
+                    //                new Audio()
+                    //                {
+                    //                    source = "${payload.templateData.properties.wanAddress}${payload.templateData.properties.item.themeAudioSource}",
+                    //                    //filter = new List<IFilter>() { new FadeIn() { duration = 1000 }, new FadeOut() { duration = 2000 } }
+                    //                },
+                    //                new Sequencer()
+                    //                {
+                    //                    items = new List<AudioBaseComponent>()
+                    //                    {
+                    //                        new Silence()
+                    //                        {
+                    //                            duration = 2000
+                    //                        },
+                    //                        new Speech()
+                    //                        {
+                    //                            content = "<speak>${payload.templateData.properties.item.overview}</speak>"
+                    //                        },
+                    //                        new Silence()
+                    //                        {
+                    //                            duration = 2000
+                    //                        }
+                    //                    }
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //});
+                    //data.Add(new AplaSpeechTransformer()
+                    //{
+                    //    outputName = "readOverview",
+                    //    template   = "overviewApla"
+                    //});
                     break;
                 case RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE:
                     data.Add(new AplaSpeechTransformer()

@@ -81,7 +81,7 @@ namespace AlexaController.EmbyApl
                                    {
                                        new SpeakItem() { componentId = "${data.id}" },
                                        new Command()   { type = nameof(Animations.ScaleInOutOnPress) },
-                                       new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
+                                       new SendEvent() { arguments = GetItemLayoutOnPressArguments(type, session) }
                                    }
                                 },
                                 items = new List<IComponent>()
@@ -295,8 +295,26 @@ namespace AlexaController.EmbyApl
                 maxHeight = "20vh",
                 opacity = 1,
                 id = "overview_${data.item.id}",
-                speech = "${data.readOverview.url}",
-                onPress = new SpeakItem() { componentId = "overview_${data.item.id}" },
+                speech = "${data.item.readOverview}",
+                onPress = new Parallel() 
+                { 
+                    commands = new List<ICommand>()
+                    {
+                        new Sequential()
+                        {
+                            commands = new List<ICommand>()
+                            {
+                                new SetValue() { componentId = "audioIcon", property = "display", value = "none"},
+                                new SetValue() { componentId = "loadingIcon", property = "display", value = "normal"},
+                                await Animations.Rotate360("loadingIcon"),
+                                new SetValue() { componentId = "loadingIcon", property = "display", value = "none"},
+                                new SetValue() { componentId = "audioIcon", property = "display", value = "normal"},
+                            }
+                        },
+                        new SpeakItem() { componentId = "overview_${data.item.id}" }
+                    }
+
+                },
                 item = new Container()
                 {
                     items = new List<IComponent>()
@@ -322,6 +340,16 @@ namespace AlexaController.EmbyApl
                                     right   = "20vw",
                                     opacity = 1,
                                     id      = "audioIcon",
+                                    top     = "5px",
+
+                                },
+                                new VectorGraphic()
+                                {
+                                    source  = "Loading",
+                                    right   = "20vw",
+                                    display = "none",
+                                    opacity = 1,
+                                    id      = "loadingIcon",
                                     top     = "5px",
 
                                 }
@@ -382,7 +410,7 @@ namespace AlexaController.EmbyApl
                                     commands = new List<ICommand>()
                                     {
                                         new Command() { type = nameof(Animations.ScaleInOutOnPress) },
-                                        new SendEvent() { arguments = GetSequenceItemsOnPressArguments(type, session) }
+                                        new SendEvent() { arguments = GetItemLayoutOnPressArguments(type, session) }
                                     }
                                 }
                             }
@@ -1144,7 +1172,7 @@ namespace AlexaController.EmbyApl
             return roomButtons;
         }
 
-        private static List<object> GetSequenceItemsOnPressArguments(string type, IAlexaSession session)
+        private static List<object> GetItemLayoutOnPressArguments(string type, IAlexaSession session)
         {
             var room = session.room != null ? session.room.Name : "";
             //TODO: Do we want to show episodes Detail page from sequence, or just play the item?

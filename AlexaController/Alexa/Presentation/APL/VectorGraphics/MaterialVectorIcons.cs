@@ -13,6 +13,7 @@
         public static string Right => "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z";
         public static string Carousel => "M18,6V17H22V6M2,17H6V6H2M7,19H17V4H7V19Z";
         public static string ArrayIcon => "M8,18H17V5H8M18,5V18H21V5M4,18H7V5H4V18Z";
+        public static string Loading => "M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z";
         public static string Audio => "M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z";
     }
 

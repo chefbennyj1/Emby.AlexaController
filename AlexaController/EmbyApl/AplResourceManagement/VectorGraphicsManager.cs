@@ -27,6 +27,25 @@ namespace AlexaController.EmbyApl.AplResourceManagement
                 }
             },
             {
+                "Loading", new AlexaVectorGraphic()
+                {
+                    height         = 25,
+                    width          = 25,
+                    viewportHeight = 28,
+                    viewportWidth  = 28,
+                    items          = new List<IVectorGraphic>()
+                    {
+                        new VectorPath()
+                        {
+                            pathData    = MaterialVectorIcons.Loading,
+                            stroke      = "none",
+                            strokeWidth = 1,
+                            fill        = "white"
+                        }
+                    }
+                }
+            },
+            {
                 "Audio", new AlexaVectorGraphic()
                 {
                     height         = 25,

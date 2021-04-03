@@ -41,10 +41,10 @@ namespace AlexaController.Api.IntentRequest.Browse
                 return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
 
-            var request = AlexaRequest.request;
-            var intent = request.intent;
-            var slots = intent.slots;
-            var type = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
+            var request    = AlexaRequest.request;
+            var intent     = request.intent;
+            var slots      = intent.slots;
+            var type       = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
             var searchName = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
 
             //Clean up search term
@@ -54,12 +54,12 @@ namespace AlexaController.Api.IntentRequest.Browse
 
             var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { type });
 
+            
             if (result is null)
             {
                 var aplaDataSourceProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
                 {
                     SpeechResponseType = SpeechResponseType.NoItemExists
-
                 });
                 return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                 {

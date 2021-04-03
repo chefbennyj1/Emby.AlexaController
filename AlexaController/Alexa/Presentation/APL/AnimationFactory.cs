@@ -96,6 +96,31 @@ namespace AlexaController.Alexa.Presentation.APL
             });
         }
 
+        public static async Task<ICommand> Rotate360(string componentId)
+        {
+            return await Task.FromResult(new Sequential()
+            {
+                repeatCount = 20,
+                commands = new List<ICommand>()
+                {
+                    new AnimateItem()
+                    {
+                        easing = "ease",
+                        duration = 250,
+                        componentId = componentId,
+                        value = new List<IValue>()
+                        {
+                            new TransitionValue()
+                            {
+                                from = new List<From>() { new From() { rotate = 0 } },
+                                to = new List<To>() { new To() { rotate = 360 }}
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         public static async Task<ICommand> ScaleInOutOnPress()
         {
             return await Task.FromResult(new Sequential()

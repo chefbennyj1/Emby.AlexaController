@@ -1,7 +1,4 @@
-﻿// ReSharper disable ComplexConditionExpression
-// ReSharper disable InconsistentNaming
-
-using AlexaController.Alexa.RequestModel;
+﻿using AlexaController.Alexa.RequestModel;
 
 namespace AlexaController.Alexa.SpeechSynthesis
 {
