@@ -65,22 +65,26 @@ namespace AlexaController.EmbyApl
                     //        parameters = new List<string>() { "payload" },
                     //        item = new Mixer()
                     //        {
-                                
                     //            items = new List<AudioBaseComponent>()
                     //            {
-                    //                new Audio()
-                    //                {
-                    //                    source = "${payload.templateData.properties.wanAddress}${payload.templateData.properties.item.themeAudioSource}",
-                    //                    //filter = new List<IFilter>() { new FadeIn() { duration = 1000 }, new FadeOut() { duration = 2000 } }
-                    //                },
                     //                new Sequencer()
                     //                {
                     //                    items = new List<AudioBaseComponent>()
                     //                    {
                     //                        new Silence()
                     //                        {
-                    //                            duration = 2000
+                    //                            duration = 1000
                     //                        },
+                    //                        new Audio()
+                    //                        {
+                    //                            source = "https://actions.google.com/sounds/v1/human_voices/human_breathing_nose.ogg",
+                    //                        }
+                    //                    }
+                    //                },
+                    //                new Sequencer()
+                    //                {
+                    //                    items = new List<AudioBaseComponent>()
+                    //                    {
                     //                        new Speech()
                     //                        {
                     //                            content = "<speak>${payload.templateData.properties.item.overview}</speak>"
@@ -98,7 +102,7 @@ namespace AlexaController.EmbyApl
                     //data.Add(new AplaSpeechTransformer()
                     //{
                     //    outputName = "readOverview",
-                    //    template   = "overviewApla"
+                    //    template = "overviewApla"
                     //});
                     break;
                 case RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE:

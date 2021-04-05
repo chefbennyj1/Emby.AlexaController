@@ -1,7 +1,7 @@
 ﻿using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using System.Linq;
-using IPerson = AlexaController.Alexa.RequestModel.IPerson;
+using Person = AlexaController.Alexa.RequestModel.Person;
 
 namespace AlexaController.Utils
 {
@@ -16,13 +16,13 @@ namespace AlexaController.Utils
             Instance = this;
         }
 
-        public bool UserPersonalizationProfileExists(IPerson person)
+        public bool UserPersonalizationProfileExists(Person person)
         {
             var config = Plugin.Instance.Configuration;
             return config.UserCorrelations.Exists(u => u.AlexaPersonId == person.personId);
         }
 
-        public User GetRecognizedPersonalizationProfileResult(IPerson person)
+        public User GetRecognizedPersonalizationProfileResult(Person person)
         {
             var users = UserManager.Users;
             var defaultUser = users.FirstOrDefault(user => user.Policy.IsAdministrator);

@@ -37,7 +37,7 @@ namespace AlexaController.EmbyAplDataSource
     {
         private static readonly List<string> Apologetic = new List<string>()
         {
-            "I'm Sorry about this.",
+            "Sorry",
             "Apologies.",
             "I apologize.",
             "I'm Sorry.",
@@ -46,39 +46,57 @@ namespace AlexaController.EmbyAplDataSource
 
         private static readonly List<string> Compliance = new List<string>()
         {
-            ExpressiveInterjection("OK"),
-            ExpressiveInterjection("absolutely "),
+            $"{ExpressiveInterjection("you bet!")}",
+            $"{ExpressiveInterjection("OK")}",
+            $"{ExpressiveInterjection("absolutely!")}",
+            $"{ExpressiveInterjection("all righty!")}",
+            $"{ExpressiveInterjection("as you wish!")}",
             "Alright, ",
-            SayWithEmotion("Yes, ... ", Emotion.excited, Intensity.medium),
-            "Here you go.",
-            ""
+            SayWithEmotion("Yes.", Emotion.excited, Intensity.medium),
+            "Here you go."
         };
 
         private static readonly List<string> Repose = new List<string>()
         {
             "One moment...",
             "One moment please...",
-            "Just a moment...",
-            ""
+            "Just a moment..."
         };
 
         private static readonly List<string> Greetings = new List<string>()
         {
             "Hey",
             "Hi",
-            "Hello",
-            ""
+            "Hello"
         };
 
-        private static readonly List<string> Dysfluency = new List<string>()
+        private static readonly List<string> DysfluencyNegative = new List<string>()
         {
-            "oh...",
-            "umm... ",
-            $"{ExpressiveInterjection("hmm")}...",
+            $"{ExpressiveInterjection("oops!")}",
+            $"{ExpressiveInterjection("ugh!")}",
+            $"{ExpressiveInterjection("jeez!")}",
+            $"{ExpressiveInterjection("my goodness!")}",
+            $"{ExpressiveInterjection("good grief!")}",
+            $"{ExpressiveInterjection("darn!")}",
+            $"{ExpressiveInterjection("alas!")}",
+            $"{ExpressiveInterjection("uh ho!")}",
+            $"{ExpressiveInterjection("um!")}",
+            $"{ExpressiveInterjection("uh uh!")}",
+        };
+
+        private static readonly List<string> DysfluencyPositive = new List<string>()
+        {
+            $"{ExpressiveInterjection("ahem!")}",
+            $"{ExpressiveInterjection("uh!")}",
+            $"{ExpressiveInterjection("uh huh!")}",
+            $"{ExpressiveInterjection("um!")}",
+            $"{ExpressiveInterjection("hmm!")}",
         };
 
         protected static void PersonNotRecognized(StringBuilder speech)
         {
+            speech.Append(GetSpeechPrefix(SpeechPrefix.DYSFLUENCY_NEGATIVE));
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(GetSpeechPrefix(SpeechPrefix.REPOSE));
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("I don't recognize the current user.");
@@ -93,18 +111,22 @@ namespace AlexaController.EmbyAplDataSource
         }
         protected static void NotUnderstood(StringBuilder speech)
         {
+            speech.Append(GetSpeechPrefix(SpeechPrefix.DYSFLUENCY_NEGATIVE));
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append("I misunderstood what you said.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(SayWithEmotion("Can you say that again?", Emotion.excited, Intensity.low));
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append(
-                SayWithEmotion("Try using the type of media in your request.", Emotion.excited, Intensity.low));
+            if (!(RandomIndex.NextDouble() > 0.7)) return;
+            speech.Append(SayWithEmotion("Try using the type of media in your request.", Emotion.excited, Intensity.low));
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("For example: Use the word \"Movie\" if the item is a movie, or \"Series\" if it is a TV series.");
         }
         protected static void NoItemExists(StringBuilder speech)
         {
+            speech.Append(GetSpeechPrefix(SpeechPrefix.DYSFLUENCY_NEGATIVE));
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append("I was unable to find that item in the library.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
@@ -116,12 +138,17 @@ namespace AlexaController.EmbyAplDataSource
         {
             if (deviceAvailable == false)
             {
+                speech.Append(GetSpeechPrefix(SpeechPrefix.DYSFLUENCY_NEGATIVE));
+                speech.Append(InsertStrengthBreak(StrengthBreak.weak));
+                speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
+                speech.Append(InsertStrengthBreak(StrengthBreak.weak));
                 speech.Append("That device is currently unavailable.");
                 return;
             }
 
+            //speech.Append(GetSpeechPrefix(SpeechPrefix.COMPLIANCE));
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            if (RandomIndex.NextDouble() > 0.7 && !item.IsFolder) //Randomly incorporate "Here is.." into phrasing
+            if (RandomIndex.NextDouble() > 0.5 && !item.IsFolder) //Randomly incorporate "Here is.." into phrasing
             {
                 speech.Append("Here is ");
             }
@@ -168,11 +195,12 @@ namespace AlexaController.EmbyAplDataSource
         }
         protected static void ParentalControlNotAllowed(StringBuilder speech, BaseItem item, IAlexaSession session)
         {
-            speech.Append(GetSpeechPrefix(SpeechPrefix.NON_COMPLIANT));
+            speech.Append("<say-as interpret-as=\"interjection\">mm hmm</say-as>");
+            speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append("Are you sure you are allowed access to ");
             speech.Append(item is null ? "this item" : item.Name);
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append(SayName(session.person));
+            speech.Append(SayName(session.context.System.person));
             speech.Append("?");
         }
         protected static void PlayItem(StringBuilder speech, BaseItem item)
@@ -193,27 +221,30 @@ namespace AlexaController.EmbyAplDataSource
         }
         protected static void VoiceAuthenticationExists(StringBuilder speech, IAlexaSession session)
         {
-            speech.Append(GetSpeechPrefix(SpeechPrefix.NON_COMPLIANT));
+            speech.Append(GetSpeechPrefix(SpeechPrefix.DYSFLUENCY_NEGATIVE));
+            speech.Append(GetSpeechPrefix(SpeechPrefix.APOLOGETIC));
             speech.Append(InsertStrengthBreak(StrengthBreak.strong));
-            speech.Append("This profile is already linked to ");
-            speech.Append(SayName(session.person));
+            speech.Append("This profile is already linked to an account.");
+            speech.Append(SayName(session.context.System.person));
             speech.Append("'s account");
+
+            
+
         }
         protected static void VoiceAuthenticationAccountLinkError(StringBuilder speech)
         {
-            speech.Append("I was unable to learn your voice.");
+            speech.Append("I was unable to learn your voice. ");
             speech.Append("Please make sure you have allowed personalization in the Alexa app.");
-
         }
         protected static void VoiceAuthenticationAccountLinkSuccess(StringBuilder speech, IAlexaSession session)
         {
             speech.Append(ExpressiveInterjection("Success "));
-            speech.Append(ExpressiveInterjection(SayName(session.person)));
+            speech.Append(ExpressiveInterjection(SayName(session.context.System.person)));
             speech.Append("!");
-            speech.Append("Please look at the plugin configuration.");
+            speech.Append("Please look at the plugin configuration. ");
             speech.Append("You should now see the I.D. linked to your voice.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-            speech.Append("Choose your emby account name and press save.");
+            speech.Append("Choose your emby account name and press save. ");
         }
         protected static void UpComingEpisodes(StringBuilder speech, List<BaseItem> items, DateTime date)
         {
@@ -222,9 +253,7 @@ namespace AlexaController.EmbyAplDataSource
             speech.Append(SayAsCardinal(items?.Count.ToString()));
             speech.Append(" upcoming episode");
             speech.Append(items?.Count > 1 ? "s" : "");
-
-            //var date = DateTime.Parse(query.args[0]);
-
+            
             speech.Append($" scheduled to air over the next {(date - DateTime.Now).Days} days.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
 
@@ -244,19 +273,14 @@ namespace AlexaController.EmbyAplDataSource
                     speech.Append(StringNormalization.ValidateSpeechQueryString(item.Parent.Parent.Name));
                     if (item.IndexNumber == 1)
                     {
-                        speech.Append(
-                            $" which will premiere season {SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
+                        speech.Append($" which will premiere season {SayAsCardinal(item.Parent.IndexNumber.ToString())} ");
                         speech.Append(SayAsDate(Date.md, d.Key.Value.ToString("M/d")));
                         speech.Append(InsertStrengthBreak(StrengthBreak.weak));
-                        //speech.Append(" and ");
                     }
 
                     speech.Append(", ");
-                    if (d.Count() > 1 && i == d.Count() - 1)
-                    {
-                        speech.Append(" and ");
-                    }
-
+                    if (d.Count() > 1 && i == d.Count() - 1) speech.Append(" and ");
+                    
                     i++;
                 }
             }
@@ -299,12 +323,11 @@ namespace AlexaController.EmbyAplDataSource
             switch (prefix)
             {
                 case SpeechPrefix.COMPLIANCE: return Compliance[RandomIndex.Next(0, Compliance.Count)];
-                case SpeechPrefix.APOLOGETIC:
-                    return SayWithEmotion(Apologetic[RandomIndex.Next(0, Apologetic.Count)], Emotion.disappointed,
-                        Intensity.medium);
+                case SpeechPrefix.APOLOGETIC: return SayWithEmotion(Apologetic[RandomIndex.Next(0, Apologetic.Count)], Emotion.disappointed, Intensity.medium);
                 case SpeechPrefix.REPOSE: return Repose[RandomIndex.Next(0, Repose.Count)];
                 case SpeechPrefix.GREETINGS: return Greetings[RandomIndex.Next(0, Greetings.Count)];
-                case SpeechPrefix.NON_COMPLIANT: return Dysfluency[RandomIndex.Next(0, Dysfluency.Count)];
+                case SpeechPrefix.DYSFLUENCY_POSITIVE: return DysfluencyPositive[RandomIndex.Next(0, DysfluencyPositive.Count)];
+                case SpeechPrefix.DYSFLUENCY_NEGATIVE: return DysfluencyNegative[RandomIndex.Next(0, DysfluencyNegative.Count)];
                 case SpeechPrefix.NONE: return string.Empty;
                 case SpeechPrefix.DEFAULT: return string.Empty;
                 default: return string.Empty;
@@ -318,7 +341,8 @@ namespace AlexaController.EmbyAplDataSource
         COMPLIANCE,
         NONE,
         GREETINGS,
-        NON_COMPLIANT,
+        DYSFLUENCY_POSITIVE,
+        DYSFLUENCY_NEGATIVE,
         DEFAULT
     }
 }

@@ -8,6 +8,25 @@ namespace AlexaController.EmbyApl.AplResourceManagement
         public static Dictionary<string, IAlexaVectorGraphic> RenderVectorGraphicsDictionary => new Dictionary<string, IAlexaVectorGraphic>
         {
             {
+                "HD", new AlexaVectorGraphic()
+                {
+                    height         = 55,
+                    width          = 55,
+                    viewportHeight = 50,
+                    viewportWidth  = 50,
+                    items          = new List<IVectorGraphic>()
+                    {
+                        new VectorPath()
+                        {
+                            pathData    = MaterialVectorIcons.HighDefinition,
+                            stroke      = "none",
+                            strokeWidth = 0,
+                            fill        = "rgba(255,255,255,1)"
+                        }
+                    }
+                }
+            },
+            {
                 "CheckMark", new AlexaVectorGraphic()
                 {
                     height         = 35,

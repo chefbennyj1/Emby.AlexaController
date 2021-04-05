@@ -3,7 +3,6 @@ using AlexaController.Alexa.Viewport;
 using AlexaController.Api;
 using AlexaController.Api.IntentRequest.Rooms;
 using MediaBrowser.Controller.Entities;
-using IPerson = AlexaController.Alexa.RequestModel.IPerson;
 using User = MediaBrowser.Controller.Entities.User;
 
 namespace AlexaController.Session
@@ -18,7 +17,6 @@ namespace AlexaController.Session
         Context context { get; set; }
         ViewportProfile viewport { get; set; }
         bool supportsApl { get; set; }
-        IPerson person { get; set; }
         IAlexaRequest PersistedRequestData { get; set; }
         BaseItem NowViewingBaseItem { get; set; }
         bool PlaybackStarted { get; set; }
@@ -37,7 +35,6 @@ namespace AlexaController.Session
         public Context context { get; set; }
         public ViewportProfile viewport { get; set; }
         public bool supportsApl { get; set; }
-        public IPerson person { get; set; }
         public IAlexaRequest PersistedRequestData { get; set; }
         public BaseItem NowViewingBaseItem { get; set; }
         public bool PlaybackStarted { get; set; }

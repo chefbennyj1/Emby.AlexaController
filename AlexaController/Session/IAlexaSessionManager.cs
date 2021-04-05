@@ -101,7 +101,7 @@ namespace AlexaController.Session
                 EchoDeviceId = system.device.deviceId,
                 NowViewingBaseItem = sessionInfo?.NowViewingBaseItem,
                 supportsApl = SupportsApl(alexaRequest),
-                person = person,
+                //person = person,
                 room = sessionInfo?.room,
                 hasRoom = !(sessionInfo?.room is null),
                 User = user,

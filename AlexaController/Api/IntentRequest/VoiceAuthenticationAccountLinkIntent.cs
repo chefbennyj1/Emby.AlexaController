@@ -54,13 +54,14 @@ namespace AlexaController.Api.IntentRequest
                         SpeechResponseType = SpeechResponseType.VoiceAuthenticationExists,
                         session = Session
                     });
-                    return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response
+                    
+                    //For some reason, Alexa will only utilize the "<alexa:name>" ssml in a OutputSpeech object, not an APLA document.
+                    return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
                         shouldEndSession = true,
-
-                        directives = new List<IDirective>()
+                        outputSpeech = new OutputSpeech()
                         {
-                            await RenderDocumentDirectiveManager.Instance.RenderAudioDocumentDirectiveAsync(voiceAuthenticationProfileExistsAudioProperties)
+                            phrase = $"{voiceAuthenticationProfileExistsAudioProperties.value}",
                         }
                     }, Session);
                 }

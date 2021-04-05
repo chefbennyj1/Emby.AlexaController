@@ -106,6 +106,11 @@ namespace AlexaController.Alexa.SpeechSynthesis
 
         public static string SayAsDate(Date date, string text) => $"<say-as interpret-as='date' format='{date}'>{text}</say-as>";
 
-        public static string SayName(IPerson person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
+        /// <summary>
+        /// Alexa will only utilize the "<alexa:name />" ssml in a OutputSpeech object, not an APLA document.
+        /// </summary>
+        /// <param name="person"></param>
+        /// <returns></returns>
+        public static string SayName(Person person) => $"<alexa:name type=\"first\" personId=\"{person.personId}\"/>";
     }
 }

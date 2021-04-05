@@ -252,19 +252,32 @@ namespace AlexaController.EmbyApl
             });
             //Rating - Runtime - End time
             //Runtime span
-            detailLayout.Add(new Text()
+            detailLayout.Add(new Container()
             {
-                text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
-                left = leftColumnSpacing,
-                style = "textStyleBody",
+                direction = "row",
                 top = "17vh",
-                width = "40vw",
+                width = "50vw",
                 height = "22dp",
-                fontSize = "18dp",
-                opacity = 1,
-                id = "rating",
-
+                left = leftColumnSpacing,
+                items = new List<IComponent>()
+                {
+                    new Text()
+                    {
+                        text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
+                        style = "textStyleBody",
+                        fontSize = "18dp",
+                        opacity = 1,
+                        id = "rating"
+                    },
+                    new VectorGraphic()
+                    {
+                        source = "HD",
+                        left = "2vw"
+                    }
+                }
             });
+
+            
             //TagLines
             detailLayout.Add(new Text()
             {

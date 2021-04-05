@@ -254,7 +254,7 @@ namespace AlexaController.EmbyAplDataSource
             return await Task.FromResult(new Properties<string>()
             {
                 value = speech.ToString(),
-                audioUrl = "soundbank://soundlibrary/computers/beeps_tones/beeps_tones_13"
+                audioUrl = "https://actions.google.com/sounds/v1/human_voices/human_breathing_nose.ogg"
             });
         }
     }
