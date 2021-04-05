@@ -7,6 +7,8 @@ namespace AlexaController.Alexa.RequestModel
     {
         public string name { get; set; }
         public string value { get; set; }
+
+        public Resolutions resolutions { get; set; }
         public string canUnderstand { get; set; }
         public string canFulfill { get; set; }
         public SlotValue slotValue { get; set; }
@@ -23,5 +25,23 @@ namespace AlexaController.Alexa.RequestModel
     {
         public string type { get; set; }
         public string value { get; set; }
+        public string name { get; set; }
+        public string id { get; set; }
+    }
+
+    public class Resolutions
+    {
+        public List<ResolutionsPerAuthority> resolutionsPerAuthority { get; set; }
+    }
+    public class ResolutionsPerAuthority
+    {
+        public string authority { get; set; }
+        public Status status { get; set; }
+        public List<Value> values { get; set; }
+    }
+
+    public class Status
+    {
+        public string code { get; set; }
     }
 }

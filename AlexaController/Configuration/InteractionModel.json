@@ -603,6 +603,25 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "AMAZON.TVSeries",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "The Falcon and the Winter Soldier",
+                                "synonyms": [
+                                    "Falcon and the Winter Soldier",
+                                    "Falcon and Winter Soldier"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "WandaVision"
+                            }
+                        }
+                    ]
                 }
             ]
         }

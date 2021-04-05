@@ -14,6 +14,7 @@
             catch { }
 
             input = input.EndsWith(" junior") ? input.Replace("junior", "jr.") : input;
+            input = input.ToLowerInvariant().StartsWith("falcon") ? "The Falcon and the Winter Soldier" : input;
             return input
                 .Replace("&", " and")
                 .Replace("@", "at")

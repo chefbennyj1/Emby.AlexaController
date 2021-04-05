@@ -45,6 +45,7 @@ namespace AlexaController.Api.IntentRequest.Browse
             var intent     = request.intent;
             var slots      = intent.slots;
             var type       = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
+            
             var searchName = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
 
             //Clean up search term

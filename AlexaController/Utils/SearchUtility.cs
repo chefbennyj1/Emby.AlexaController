@@ -12,7 +12,7 @@ namespace AlexaController.Utils
     {
         private ILibraryManager LibraryManager { get; }
         private IUserManager UserManager { get; }
-
+       
         protected SearchUtility(ILibraryManager libMan, IUserManager userManager)
         {
             LibraryManager = libMan;
@@ -23,6 +23,7 @@ namespace AlexaController.Utils
         {
             ServerController.Instance.Log.Info("Beginning item search");
             ServerController.Instance.Log.Info($"Search: {searchName} Type: {type[0]}");
+
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 Name = searchName,
@@ -173,19 +174,18 @@ namespace AlexaController.Utils
                         {
                             return item;
                         }
-
-
+                        
                         if (NormalizeQueryString(item.Name).Contains(NormalizeQueryString(searchName)))
                         {
                             return item;
                         }
-
+                        
                     }
 
                 }
             }
 
-            if (!result.Any()) //split name "" - Starts with string first and second word
+            if (!result.Any()) //split name "" - Starts with string first and second letter
             {
                 var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4) : searchName;
 
@@ -199,7 +199,6 @@ namespace AlexaController.Utils
 
                 if (queryResult.Items.Any())
                 {
-
                     return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(searchName)));
                 }
             }
@@ -218,27 +217,23 @@ namespace AlexaController.Utils
 
                 if (queryResult.Items.Any())
                 {
-
                     return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
                 }
             }
 
-            //User has definitely mis-spoke the name - a Hail Mary search
+            //User has definitely mis-spoke the name - a Hail Mary search items with the same types
             if (!result.Any())
             {
-                var query = searchName.Replace("the", string.Empty);
-
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
-                    IncludeItemTypes = type,
+                    //IncludeItemTypes = type,
                     Recursive = true,
-                    NameStartsWith = query,
+                    NameStartsWithOrGreater = searchName,
                     User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
-
                     return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
                 }
             }
@@ -253,8 +248,10 @@ namespace AlexaController.Utils
 
         private static string NormalizeQueryString(string sample)
         {
-            var result = sample.ToLowerInvariant()
-                .Replace("versus", "vs.")
+            var result = sample.ToLowerInvariant();
+
+            result.Replace("versus", "vs.")
+                .Replace("the", string.Empty)
                 .Replace("-", string.Empty)
                 .Replace("(", string.Empty)
                 .Replace(")", string.Empty)

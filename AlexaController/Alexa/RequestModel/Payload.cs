@@ -8,5 +8,9 @@ namespace AlexaController.Alexa.RequestModel
         public IList<string> arguments { get; set; }
         public Source source { get; set; }
         public string dialogRequestId { get; set; }
+        /// <summary>
+        /// For smart motion "mode": "ON" or "mode": "OFF"
+        /// </summary>
+        public string mode { get; set; }
     }
 }
