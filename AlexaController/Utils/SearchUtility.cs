@@ -119,7 +119,7 @@ namespace AlexaController.Utils
             //Return items that start with the first two letters of search term, removing proceeding  "the"
             if (!result.Any())
             {
-                //var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0);
+                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0);
 
                 ServerController.Instance.Log.Info($"Final Search hit: {searchName}");
 
@@ -127,13 +127,12 @@ namespace AlexaController.Utils
                 {
                     IncludeItemTypes = type,
                     Recursive = true,
-                    //NameStartsWithOrGreater = query,
+                    NameStartsWithOrGreater = query,
                     User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
-
                     foreach (var item in queryResult.Items)
                     {
                         // The user may have used the phrase "part 2", the movie name is "part ii"
@@ -248,9 +247,9 @@ namespace AlexaController.Utils
 
         private static string NormalizeQueryString(string sample)
         {
-            var result = sample.ToLowerInvariant();
+            var result = sample.ToLowerInvariant()
 
-            result.Replace("versus", "vs.")
+            .Replace("versus", "vs.")
                 .Replace("the", string.Empty)
                 .Replace("-", string.Empty)
                 .Replace("(", string.Empty)

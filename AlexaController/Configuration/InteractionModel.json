@@ -146,15 +146,23 @@
                         {
                             "name": "VisualModeTrigger",
                             "type": "AMAZON.VisualModeTrigger"
+                        },
+                        {
+                            "name": "MediaTypeSeries",
+                            "type": "MEDIA_TYPE_SERIES"
+                        },
+                        {
+                            "name": "MediaTypeMovie",
+                            "type": "MEDIA_TYPE_MOVIES"
                         }
                     ],
                     "samples": [
-                        "to {VisualModeTrigger} the series {Series}",
-                        "to {VisualModeTrigger} the movie {Movie}",
-                        "to {VisualModeTrigger} the movie {Movie} and {VisualModeTrigger} it in the {Room}",
-                        "to {VisualModeTrigger} the series  {Series} and {VisualModeTrigger} it in the {Room}",
-                        "to {VisualModeTrigger} the series {Series} in the {Room}",
-                        "to {VisualModeTrigger} the movie {Movie} in the {Room}"
+                        "to {VisualModeTrigger} the {MediaTypeSeries} {Series}",
+                        "to {VisualModeTrigger} the {MediaTypeMovie} {Movie}",
+                        "to {VisualModeTrigger} the {MediaTypeMovie} {Movie} and {VisualModeTrigger} it in the {Room}",
+                        "to {VisualModeTrigger} the {MediaTypeSeries}  {Series} and {VisualModeTrigger} it in the {Room}",
+                        "to {VisualModeTrigger} the {MediaTypeSeries} {Series} in the {Room}",
+                        "to {VisualModeTrigger} the {MediaTypeMovie} {Movie} in the {Room}"
                     ]
                 },
                 {
@@ -611,6 +619,9 @@
                             "name": {
                                 "value": "The Falcon and the Winter Soldier",
                                 "synonyms": [
+                                    "falcon in the winter soldier",
+                                    "falcon and the winter soldier",
+                                    "falcon and winter soldier",
                                     "Falcon and the Winter Soldier",
                                     "Falcon and Winter Soldier"
                                 ]
@@ -618,7 +629,45 @@
                         },
                         {
                             "name": {
-                                "value": "WandaVision"
+                                "value": "WandaVision",
+                                "synonyms": [
+                                    "for hunter fish",
+                                    "One Division",
+                                    "1 division",
+                                    "one division",
+                                    "1 Division",
+                                    "wanderfish"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "MEDIA_TYPE_SERIES",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "the series"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "series"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "MEDIA_TYPE_MOVIES",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "the movie"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "movie"
                             }
                         }
                     ]

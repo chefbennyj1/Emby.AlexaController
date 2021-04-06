@@ -8,6 +8,7 @@ using AlexaController.Utils;
 using MediaBrowser.Model.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AlexaController.EmbyApl;
 
@@ -44,9 +45,32 @@ namespace AlexaController.Api.IntentRequest.Browse
             var request    = AlexaRequest.request;
             var intent     = request.intent;
             var slots      = intent.slots;
-            var type       = slots.Movie.value is null ? slots.Series.value is null ? "" : "Series" : "Movie";
-            
-            var searchName = (slots.Movie.value ?? slots.Series.value) ?? slots.@object.value;
+            var type       = slots.MediaTypeMovie.value is null ? slots.MediaTypeSeries.value is null ? "" : "Series" : "Movie";
+
+            var searchName = slots.Movie.value ?? slots.Series.value ?? slots.@object.value;
+
+            ////TODO: figure out more info on resolutions!!! 
+            //string searchName;
+            //var slot = type == "Series" ? slots.Series : slots.Movie;
+
+            //var status = slot.slotValue.resolutions.resolutionsPerAuthority[0].status;
+            //if (status.code == "ER_SUCCESS_MATCH")
+            //{
+            //    searchName = slot.slotValue.resolutions.resolutionsPerAuthority[0].values[0].value.name;
+            //}
+            //else
+            //{
+            //    searchName = type == "Series" ? slots.Series.value : slots.Movie.value;
+            //}
+
+            //foreach (var s in slot.slotValue.resolutions.resolutionsPerAuthority)
+            //{
+            //    ServerController.Instance.Log.Info(s.status.code);
+            //    foreach (var t in s.values)
+            //    {
+            //        ServerController.Instance.Log.Info(t.value.name);
+            //    }
+            //}
 
             //Clean up search term
             searchName = StringNormalization.ValidateSpeechQueryString(searchName);

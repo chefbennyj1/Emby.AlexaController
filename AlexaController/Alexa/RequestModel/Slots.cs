@@ -24,5 +24,7 @@
         public slotData MovieAlternatives { get; set; }
         // ReSharper disable once InconsistentNaming
         public slotData TVAlternatives { get; set; }
+        public slotData MediaTypeMovie { get; set; }
+        public slotData MediaTypeSeries { get; set; }
     }
 }
