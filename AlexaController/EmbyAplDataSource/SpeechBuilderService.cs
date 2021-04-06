@@ -310,7 +310,7 @@ namespace AlexaController.EmbyAplDataSource
         protected static void BrowseItemByActor(StringBuilder speech, List<BaseItem> actors)
         {
             speech.Append(GetSpeechPrefix(SpeechPrefix.COMPLIANCE));
-            speech.Append("Items starring");
+            speech.Append(" Items starring");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
             speech.Append(string.Join(", ", actors));
         }

@@ -71,10 +71,7 @@ namespace AlexaController.Api.IntentRequest.Rooms
 
             //Room's not mentioned in request
             if (slots.Room.value is null) return null;
-
-            //TODO: This sucks putting alexa speech mis-recognitions here
-            if (slots.Room.value == "winter") return null;
-
+            
             if (!HasRoomConfiguration(slots.Room.value, config))
             {
                 await AlexaResponseClient.Instance.PostProgressiveResponse($"Sorry. There is currently no device configuration for {slots.Room.value}.",

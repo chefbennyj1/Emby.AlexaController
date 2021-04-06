@@ -29,8 +29,12 @@ namespace AlexaController.Api.IntentRequest.Browse
         {
             await AlexaResponseClient.Instance.PostProgressiveResponse("OK.",
                 AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
-
-            Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+            try
+            {
+                //TODO: Room validation is throwing an error in this class???? WTF!
+                Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+            } catch 
+            { }
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
             {
@@ -38,15 +42,18 @@ namespace AlexaController.Api.IntentRequest.Browse
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
                 return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
+           
 
             var request = AlexaRequest.request;
             var intent = request.intent;
             var slots = intent.slots;
             var searchNames = GetActorList(slots);
-
+            ServerController.Instance.Log.Info(slots.ActorName.value);
+            searchNames.ForEach(n => ServerController.Instance.Log.Info(n));
+            
             var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchNames);
 
-            if (result is null)
+            if (result is null || !result.Values.Any())
             {
                 var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("I was unable to find that actor.", "/particles");
 
@@ -85,7 +92,9 @@ namespace AlexaController.Api.IntentRequest.Browse
             var aplaDataSource1 = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
             {
                 SpeechResponseType = SpeechResponseType.BrowseItemByActor,
-                items = actors
+                items = actors,
+                session = Session
+                
             });
 
             //TODO: Fix session Update (it is only looking at one actor, might not matter)
@@ -99,7 +108,6 @@ namespace AlexaController.Api.IntentRequest.Browse
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {
                 shouldEndSession = null,
-
                 directives = new List<IDirective>()
                 {
                     renderDocumentDirective,
