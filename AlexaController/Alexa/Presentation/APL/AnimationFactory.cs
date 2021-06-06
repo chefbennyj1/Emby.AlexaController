@@ -130,7 +130,7 @@ namespace AlexaController.Alexa.Presentation.APL
                     new AnimateItem()
                     {
                         easing = "ease",
-                        duration = 250,
+                        duration = 500,
                         value = new List<IValue>()
                         {
                             new TransitionValue()
@@ -144,7 +144,7 @@ namespace AlexaController.Alexa.Presentation.APL
                     new AnimateItem()
                     {
                         easing = "ease",
-                        duration = 250,
+                        duration = 500,
                         value = new List<IValue>()
                         {
                             new TransitionValue()

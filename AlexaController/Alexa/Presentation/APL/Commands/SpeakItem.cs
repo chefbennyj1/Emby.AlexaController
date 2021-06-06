@@ -4,5 +4,6 @@
     {
         public string type => nameof(SpeakItem);
         public string componentId { get; set; }
+        public string when { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -9,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.Browse
 {
@@ -45,7 +45,7 @@ namespace AlexaController.Api.IntentRequest.Browse
 
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
 
-            var collection = ServerQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
+            var collection = ServerDataQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems = collection.Values.FirstOrDefault();
             var collectionBaseItem = collection.Keys.FirstOrDefault();
 
@@ -61,7 +61,7 @@ namespace AlexaController.Api.IntentRequest.Browse
                     }
 
                     var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {collectionBaseItem.OfficialRating}", "/particles");
-                    var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+                    var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
                     {
                         SpeechResponseType = SpeechResponseType.ParentalControlNotAllowed,
                         item = collectionBaseItem,
@@ -94,7 +94,7 @@ namespace AlexaController.Api.IntentRequest.Browse
                 }
             }
 
-            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(collectionItems, collectionBaseItem);
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemCollectionSequenceViewPropertiesAsync(collectionItems, collectionBaseItem);
 
             //Update Session
             Session.NowViewingBaseItem = collectionBaseItem;

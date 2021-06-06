@@ -1,6 +1,7 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using AlexaController.Session;
@@ -9,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.Browse
 {
@@ -32,13 +32,13 @@ namespace AlexaController.Api.IntentRequest.Browse
             var durationValue = slots.Duration.value;
             var duration = durationValue is null ? DateTime.Now.AddDays(7) : DateTimeDurationSerializer.GetMaxPremiereDate(durationValue);
 
-            var result = await ServerQuery.Instance.GetUpComingTvAsync(duration);
+            var result = await ServerDataQuery.Instance.GetUpComingTvAsync(duration);
 
             //IDataSource aplDataSource;
             //IDataSource aplaDataSource;
 
-            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(result.Items.ToList());
-            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemCollectionSequenceViewPropertiesAsync(result.Items.ToList());
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.UpComingEpisodes,
                 items = result.Items.ToList(),

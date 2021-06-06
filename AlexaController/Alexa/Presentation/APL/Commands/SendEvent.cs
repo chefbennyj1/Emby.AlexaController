@@ -10,5 +10,6 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
         public List<object> components { get; set; }
         public bool screenLock { get; set; }
         public int delay { get; set; }
+        public string when { get; set; }
     }
 }

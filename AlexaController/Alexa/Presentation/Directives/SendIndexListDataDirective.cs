@@ -19,6 +19,6 @@ namespace AlexaController.Alexa.Presentation.Directives
         public string maximumInclusiveIndex { get; set; }
         public List<object> items { get; set; }
 
-        public Dictionary<string, IData> datasources { get; set; }
+        public Dictionary<string, ITemplateData> datasources { get; set; }
     }
 }

@@ -58,8 +58,8 @@ namespace AlexaController
         {
             try
             {
-                deviceId = deviceId ?? ServerQuery.Instance.GetDeviceIdFromRoomName(room);
-                session = session ?? ServerQuery.Instance.GetSession(deviceId);
+                deviceId = deviceId ?? ServerDataQuery.Instance.GetDeviceIdFromRoomName(room);
+                session = session ?? ServerDataQuery.Instance.GetSession(deviceId);
 
                 await SessionManager.SendGeneralCommand(null, session.Id, new GeneralCommand()
                 {
@@ -79,14 +79,14 @@ namespace AlexaController
             string deviceId;
             try
             {
-                deviceId = ServerQuery.Instance.GetDeviceIdFromRoomName(alexaSession.room.Name);
+                deviceId = ServerDataQuery.Instance.GetDeviceIdFromRoomName(alexaSession.room.Name);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
 
-            var session = ServerQuery.Instance.GetSession(deviceId);
+            var session = ServerDataQuery.Instance.GetSession(deviceId);
             var type = request.GetType().Name;
 
             // ReSharper disable once ComplexConditionExpression
@@ -113,14 +113,14 @@ namespace AlexaController
 
         public async Task PlayMediaItemAsync(IAlexaSession alexaSession, BaseItem item, long? startPositionTicks = null)
         {
-            var deviceId = ServerQuery.Instance.GetDeviceIdFromRoomName(alexaSession.room.Name);
+            var deviceId = ServerDataQuery.Instance.GetDeviceIdFromRoomName(alexaSession.room.Name);
 
             if (string.IsNullOrEmpty(deviceId))
             {
                 throw new DeviceUnavailableException($"{alexaSession.room.Name} device is currently not available.");
             }
 
-            var session = ServerQuery.Instance.GetSession(deviceId);
+            var session = ServerDataQuery.Instance.GetSession(deviceId);
 
             if (session is null)
             {

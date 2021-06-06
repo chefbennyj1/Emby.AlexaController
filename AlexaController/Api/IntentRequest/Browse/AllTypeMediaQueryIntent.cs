@@ -2,6 +2,7 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -9,7 +10,6 @@ using MediaBrowser.Model.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.Browse
 {
@@ -47,11 +47,11 @@ namespace AlexaController.Api.IntentRequest.Browse
 
             if (string.IsNullOrEmpty(searchName)) return await new NotUnderstood(AlexaRequest, Session).Response();
 
-            var result = ServerQuery.Instance.QuerySpeechResultItem(searchName, new[] { "Movie", "Series", "Collection" });
+            var result = ServerDataQuery.Instance.QuerySpeechResultItem(searchName, new[] { "Movie", "Series", "Collection" });
 
             if (result is null)
             {
-                var aplaDataSourceProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+                var aplaDataSourceProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
                 {
                     SpeechResponseType = SpeechResponseType.NoItemExists
                 });
@@ -81,7 +81,7 @@ namespace AlexaController.Api.IntentRequest.Browse
                 catch { }
 
                 var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync($"Stop! Rated {result.OfficialRating}", "/particles");
-                var parentalControlNotAllowedAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+                var parentalControlNotAllowedAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
                 {
                     SpeechResponseType = SpeechResponseType.ParentalControlNotAllowed,
                     item = result,
@@ -112,7 +112,7 @@ namespace AlexaController.Api.IntentRequest.Browse
             }
 
             var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(result, Session);
-            var aplaDataSource1 = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var aplaDataSource1 = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.ItemBrowse,
                 item = result,

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
+﻿using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APLA.AudioFilters;
@@ -13,6 +11,9 @@ using AlexaController.Alexa.ResponseModel;
 using AlexaController.EmbyApl.AplResourceManagement;
 using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using AlexaController.Alexa.Presentation.APL.Commands.SmartMotion;
 
 /*
  * Echo Display Devices use the **LAN address** for Images when using the skill on the same network as emby service (ex. 192.168.X.XXX:8096)
@@ -33,11 +34,10 @@ namespace AlexaController.EmbyApl
 
         public async Task<IDirective> RenderVisualDocumentDirectiveAsync<T>(Properties<T> properties, IAlexaSession session) where T : class
         {
-            var data = new Data();
-            data.Add(properties);
 
-            var sources = new Sources();
-            sources.Add("buttonPressEffectApla", new Alexa.Presentation.APLA.Document()
+            var sourcesTemplate = new SourcesTemplate();
+            //Button click effect
+            sourcesTemplate.Add("buttonPressEffectApla", new Alexa.Presentation.APLA.Document()
             {
                 mainTemplate = new MainTemplate()
                 {
@@ -50,72 +50,34 @@ namespace AlexaController.EmbyApl
                 }
             });
 
+            var dataSourceTemplate = new DataSourceTemplate();
+            dataSourceTemplate.Add(properties);
+
             switch (properties?.documentType)
             {
                 case RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE:
-                    data.Add(new TextToSpeechTransformer()
+                    dataSourceTemplate.Add(new TextToSpeechTransformer()
                     {
                         inputPath = "item.overview",
                         outputName = "readOverview"
                     });
-                    //sources.Add("overviewApla", new Alexa.Presentation.APLA.Document()
-                    //{
-                    //    mainTemplate = new MainTemplate()
-                    //    {
-                    //        parameters = new List<string>() { "payload" },
-                    //        item = new Mixer()
-                    //        {
-                    //            items = new List<AudioBaseComponent>()
-                    //            {
-                    //                new Sequencer()
-                    //                {
-                    //                    items = new List<AudioBaseComponent>()
-                    //                    {
-                    //                        new Silence()
-                    //                        {
-                    //                            duration = 1000
-                    //                        },
-                    //                        new Audio()
-                    //                        {
-                    //                            source = "https://actions.google.com/sounds/v1/human_voices/human_breathing_nose.ogg",
-                    //                        }
-                    //                    }
-                    //                },
-                    //                new Sequencer()
-                    //                {
-                    //                    items = new List<AudioBaseComponent>()
-                    //                    {
-                    //                        new Speech()
-                    //                        {
-                    //                            content = "<speak>${payload.templateData.properties.item.overview}</speak>"
-                    //                        },
-                    //                        new Silence()
-                    //                        {
-                    //                            duration = 2000
-                    //                        }
-                    //                    }
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //});
-                    //data.Add(new AplaSpeechTransformer()
-                    //{
-                    //    outputName = "readOverview",
-                    //    template = "overviewApla"
-                    //});
+                    dataSourceTemplate.Add(new AplaSpeechTransformer()
+                    {
+                        template = "buttonPressEffectApla",
+                        outputName = "buttonPressEffect"
+                    });
                     break;
                 case RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE:
-                    data.Add(new AplaSpeechTransformer()
+                    dataSourceTemplate.Add(new AplaSpeechTransformer()
                     {
-                        template   = "buttonPressEffectApla",
+                        template = "buttonPressEffectApla",
                         outputName = "buttonPressEffect"
                     });
                     break;
                 case RenderDocumentType.HELP_TEMPLATE:
-                    data.Add(new TextToSpeechTransformer()
+                    dataSourceTemplate.Add(new TextToSpeechTransformer()
                     {
-                        inputPath  = "values[*].value",
+                        inputPath = "values[*].value",
                         outputName = "helpPhrase"
                     });
                     break;
@@ -141,7 +103,8 @@ namespace AlexaController.EmbyApl
                     commands   = new Dictionary<string, ICommand>()
                     {
                         { nameof(Animations.ScaleInOutOnPress), await Animations.ScaleInOutOnPress() },
-                        { nameof(Animations.FadeIn), await Animations.FadeIn() }
+                        { nameof(Animations.FadeIn), await Animations.FadeIn() },
+                        { "ShakesHead", new PlayNamedChoreo() { name = Choreo.MixedExpressiveShakes } }
                     },
                     mainTemplate = new MainTemplate()
                     {
@@ -151,15 +114,15 @@ namespace AlexaController.EmbyApl
                 },
                 datasources = new DataSource()
                 {
-                    templateData = await data.Build()
+                    templateData = await dataSourceTemplate.BuildTemplateData()
                 },
-                sources = await sources.Build()
+                sources = await sourcesTemplate.BuildSources()
             });
         }
 
         public async Task<IDirective> RenderAudioDocumentDirectiveAsync(Properties<string> properties)
         {
-            var dataSource = new Data();
+            var dataSource = new DataSourceTemplate();
             dataSource.Add(properties);
 
             return await Task.FromResult(new AplaRenderDocumentDirective()
@@ -182,7 +145,7 @@ namespace AlexaController.EmbyApl
                 },
                 datasources = new DataSource()
                 {
-                    templateData = await dataSource.Build()
+                    templateData = await dataSource.BuildTemplateData()
                 },//await dataSource.Build("templateData")
             });
         }

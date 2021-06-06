@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AlexaController.EmbyAplDataSource
 {
-    public class SpeechResponsePropertiesQuery
+    public class InternalAudioResponseQuery
     {
         public SpeechResponseType SpeechResponseType { get; set; }
         public List<BaseItem> items { get; set; }

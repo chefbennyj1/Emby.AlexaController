@@ -1,11 +1,11 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.ResponseModel;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.UserEvent.TouchWrapper.Press
 {
@@ -22,15 +22,15 @@ namespace AlexaController.Api.UserEvent.TouchWrapper.Press
         {
             var request = AlexaRequest.request;
             var source = request.source;
-            var baseItem = ServerQuery.Instance.GetItemById(source.id);
+            var baseItem = ServerDataQuery.Instance.GetItemById(source.id);
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var type = baseItem.GetType().Name;
 
-            var results = ServerQuery.Instance.GetItemsResult(baseItem,
+            var results = ServerDataQuery.Instance.GetItemsResult(baseItem,
                 new[] { type == "Series" ? "Season" : "Episode" }, session.User);
 
             var sequenceViewProperties =
-                await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(results.Items.ToList(), baseItem);
+                await DataSourcePropertiesManager.Instance.GetBaseItemCollectionSequenceViewPropertiesAsync(results.Items.ToList(), baseItem);
 
             session.NowViewingBaseItem = baseItem;
             AlexaSessionManager.Instance.UpdateSession(session, sequenceViewProperties);

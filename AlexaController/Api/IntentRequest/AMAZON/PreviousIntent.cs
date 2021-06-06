@@ -1,12 +1,12 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.AMAZON
 {
@@ -38,7 +38,7 @@ namespace AlexaController.Api.IntentRequest.AMAZON
                 try
                 {
 #pragma warning disable 4014
-                    Task.Run(() => ServerController.Instance.BrowseItemAsync(Session, ServerQuery.Instance.GetItemById(properties?.item.id)))
+                    Task.Run(() => ServerController.Instance.BrowseItemAsync(Session, ServerDataQuery.Instance.GetItemById(properties?.item.id)))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
                 }

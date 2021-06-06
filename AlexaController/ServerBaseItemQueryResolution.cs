@@ -1,19 +1,19 @@
-﻿using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Library;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Library;
 
 // ReSharper disable once ExcessiveIndentation
 
-namespace AlexaController.Utils
+namespace AlexaController
 {
-    public class SearchUtility
+    public class ServerBaseItemQueryResolution
     {
         private ILibraryManager LibraryManager { get; }
         private IUserManager UserManager { get; }
-       
-        protected SearchUtility(ILibraryManager libMan, IUserManager userManager)
+
+        protected ServerBaseItemQueryResolution(ILibraryManager libMan, IUserManager userManager)
         {
             LibraryManager = libMan;
             UserManager = userManager;
@@ -116,18 +116,15 @@ namespace AlexaController.Utils
                 }
             }
 
-            //Return items that start with the first two letters of search term, removing proceeding  "the"
+            
             if (!result.Any())
             {
-                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0);
-
-                ServerController.Instance.Log.Info($"Final Search hit: {searchName}");
+                //ServerController.Instance.Log.Info($"Final Search hit: {searchName}");
 
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
                     Recursive = true,
-                    NameStartsWithOrGreater = query,
                     User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
@@ -173,12 +170,17 @@ namespace AlexaController.Utils
                         {
                             return item;
                         }
-                        
+
                         if (NormalizeQueryString(item.Name).Contains(NormalizeQueryString(searchName)))
                         {
                             return item;
                         }
-                        
+
+                        if (NormalizeQueryString(item.Name).Equals(NormalizeQueryString(searchName)))
+                        {
+                            return item;
+                        }
+
                     }
 
                 }
@@ -202,30 +204,30 @@ namespace AlexaController.Utils
                 }
             }
 
-            if (!result.Any())
-            {
-                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0, 2);
+            //if (!result.Any())
+            //{
+            //    //var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0, 2);
 
-                var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
-                {
-                    IncludeItemTypes = type,
-                    Recursive = true,
-                    NameStartsWith = query,
-                    User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
-                });
+            //    var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
+            //    {
+            //        IncludeItemTypes = type,
+            //        Recursive = true,
+            //        //NameStartsWith = query,
+            //        User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+            //    });
 
-                if (queryResult.Items.Any())
-                {
-                    return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
-                }
-            }
+            //    if (queryResult.Items.Any())
+            //    {
+            //        return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
+            //    }
+            //}
 
             //User has definitely mis-spoke the name - a Hail Mary search items with the same types
             if (!result.Any())
             {
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
-                    //IncludeItemTypes = type,
+                    IncludeItemTypes = type,
                     Recursive = true,
                     NameStartsWithOrGreater = searchName,
                     User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)

@@ -2,13 +2,13 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.Browse
 {
@@ -47,7 +47,7 @@ namespace AlexaController.Api.IntentRequest.Browse
 
             var genres = GetGenreList(slotGenres);
 
-            var result = ServerQuery.Instance.GetBaseItemsByGenre(new[] { type }, genres.ToArray());
+            var result = ServerDataQuery.Instance.GetBaseItemsByGenre(new[] { type }, genres.ToArray());
 
             if (result.TotalRecordCount <= 0)
             {
@@ -98,7 +98,7 @@ namespace AlexaController.Api.IntentRequest.Browse
                 }
             }
 
-            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(result.Items.ToList());
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemCollectionSequenceViewPropertiesAsync(result.Items.ToList());
 
             //Update Session
             Session.NowViewingBaseItem = result.Items[0];

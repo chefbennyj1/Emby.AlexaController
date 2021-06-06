@@ -3,5 +3,6 @@
     public class GoToRestPosition : ICommand
     {
         public object type => "SmartMotion:GoToRestPosition";
+        public string when { get; set; }
     }
 }

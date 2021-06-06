@@ -2,6 +2,7 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using AlexaController.Session;
@@ -9,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.Browse
 {
@@ -33,8 +33,8 @@ namespace AlexaController.Api.IntentRequest.Browse
             {
                 //TODO: Room validation is throwing an error in this class???? WTF!
                 Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
-            } catch 
-            { }
+            }
+            catch { }
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
             {
@@ -42,16 +42,14 @@ namespace AlexaController.Api.IntentRequest.Browse
                 AlexaSessionManager.Instance.UpdateSession(Session, null);
                 return await RoomContextManager.Instance.RequestRoom(AlexaRequest, Session);
             }
-           
+
 
             var request = AlexaRequest.request;
             var intent = request.intent;
             var slots = intent.slots;
             var searchNames = GetActorList(slots);
-            ServerController.Instance.Log.Info(slots.ActorName.value);
-            searchNames.ForEach(n => ServerController.Instance.Log.Info(n));
-            
-            var result = ServerQuery.Instance.GetItemsByActor(Session.User, searchNames);
+
+            var result = ServerDataQuery.Instance.GetItemsByActor(Session.User, searchNames);
 
             if (result is null || !result.Values.Any())
             {
@@ -88,13 +86,12 @@ namespace AlexaController.Api.IntentRequest.Browse
             var actors = result.Keys.FirstOrDefault();
             var actorCollection = result.Values.FirstOrDefault();
 
-            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(actorCollection);
-            var aplaDataSource1 = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemCollectionSequenceViewPropertiesAsync(actorCollection);
+            var aplaDataSource1 = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.BrowseItemByActor,
                 items = actors,
                 session = Session
-                
             });
 
             //TODO: Fix session Update (it is only looking at one actor, might not matter)

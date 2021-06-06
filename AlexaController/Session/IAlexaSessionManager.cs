@@ -95,19 +95,18 @@ namespace AlexaController.Session
             // Sync AMAZON session Id with our own.
             sessionInfo = new AlexaSession()
             {
-                SessionId = amazonSession.sessionId,
-                EmbySessionId = !(sessionInfo?.room is null) ? GetCorrespondingEmbySessionId(sessionInfo) : string.Empty,
-                context = context,
-                EchoDeviceId = system.device.deviceId,
-                NowViewingBaseItem = sessionInfo?.NowViewingBaseItem,
-                supportsApl = SupportsApl(alexaRequest),
-                //person = person,
-                room = sessionInfo?.room,
-                hasRoom = !(sessionInfo?.room is null),
-                User = user,
-                viewport = GetCurrentViewport(alexaRequest),
+                SessionId            = amazonSession.sessionId,
+                EmbySessionId        = !(sessionInfo?.room is null) ? GetCorrespondingEmbySessionId(sessionInfo) : string.Empty,
+                context              = context,
+                EchoDeviceId         = system.device.deviceId,
+                NowViewingBaseItem   = sessionInfo?.NowViewingBaseItem,
+                supportsApl          = SupportsApl(alexaRequest),
+                room                 = sessionInfo?.room,
+                hasRoom              = !(sessionInfo?.room is null),
+                User                 = user,
+                viewport             = GetCurrentViewport(alexaRequest),
                 PersistedRequestData = persistedRequestData,
-                paging = new Paging { pages = new Dictionary<int, Properties<MediaItem>>() }
+                paging               = new Paging { pages = new Dictionary<int, Properties<MediaItem>>() }
             };
 
             OpenSessions.Add(sessionInfo);
@@ -128,7 +127,6 @@ namespace AlexaController.Session
             }
             catch { }
             OpenSessions.Add(session);
-
         }
 
         private static IAlexaSession UpdateSessionPaging(IAlexaSession session, Properties<MediaItem> properties, bool? isBack = null)
@@ -142,8 +140,6 @@ namespace AlexaController.Session
 
                 return session;
             }
-
-
             if (session.paging.pages.Count == 0)
             {
                 //set the pages dictionary with page 1
@@ -152,7 +148,6 @@ namespace AlexaController.Session
 
                 return session;
             }
-
             if (!session.paging.pages.ContainsValue(properties))
             {
                 session.paging.currentPage += 1;
@@ -161,9 +156,7 @@ namespace AlexaController.Session
 
                 return session;
             }
-
             return session;
-
         }
 
         private string GetCorrespondingEmbySessionId(IAlexaSession sessionInfo)
@@ -176,11 +169,8 @@ namespace AlexaController.Session
                 {
                     return sessionInfo.EmbySessionId; //ID is still good. TODO:Maybe check the device name is still proper.
                 }
-
                 return SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName).Id;
-
             }
-
             return sessionInfo.room is null ? string.Empty : SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName)?.Id;
         }
 
@@ -197,16 +187,11 @@ namespace AlexaController.Session
 
         private void SessionManager_PlaybackProgress(object sender, MediaBrowser.Controller.Library.PlaybackProgressEventArgs e)
         {
-
             var session = OpenSessions.FirstOrDefault(s => s.EmbySessionId == e.Session.Id);
-
             if (session is null) return;
-
             session.PlaybackPositionTicks = e.PlaybackPositionTicks ?? 0;
-
             OpenSessions.RemoveAll(s => s.EmbySessionId.Equals(session.EmbySessionId));
             OpenSessions.Add(session);
-
         }
     }
 }

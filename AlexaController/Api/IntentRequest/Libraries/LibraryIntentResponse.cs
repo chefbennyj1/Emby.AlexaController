@@ -1,11 +1,11 @@
 ﻿using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Exceptions;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.Libraries
 {
@@ -21,16 +21,16 @@ namespace AlexaController.Api.IntentRequest.Libraries
         public async Task<string> Response(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             session.room = await RoomContextManager.Instance.ValidateRoom(alexaRequest, session);
-            session.hasRoom = !(session.room is null);
-            if (!session.hasRoom && !session.supportsApl)
+            session.hasRoom = session.room != null;
+            if (!session.hasRoom || !session.hasRoom && !session.supportsApl) //Still go if we have a room, but we don't support APL
             {
                 session.PersistedRequestData = alexaRequest;
                 AlexaSessionManager.Instance.UpdateSession(session, null);
                 return await RoomContextManager.Instance.RequestRoom(alexaRequest, session);
             }
 
-            var libraryId = ServerQuery.Instance.GetLibraryId(LibraryName);
-            var result = ServerQuery.Instance.GetItemById(libraryId);
+            var libraryId = ServerDataQuery.Instance.GetLibraryId(LibraryName);
+            var result = ServerDataQuery.Instance.GetItemById(libraryId);
 
             try
             {
@@ -49,7 +49,7 @@ namespace AlexaController.Api.IntentRequest.Libraries
             AlexaSessionManager.Instance.UpdateSession(session, null);
 
             var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync($"Showing the {result.Name} library", "/MoviesLibrary");
-            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.ItemBrowse,
                 item = result,

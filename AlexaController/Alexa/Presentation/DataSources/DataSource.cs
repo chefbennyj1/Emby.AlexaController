@@ -2,6 +2,6 @@
 {
     public class DataSource : IDataSource
     {
-        public IData templateData { get; set; }
+        public ITemplateData templateData { get; set; }
     }
 }

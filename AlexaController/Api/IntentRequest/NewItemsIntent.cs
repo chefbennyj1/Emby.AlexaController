@@ -1,6 +1,7 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -8,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest
 {
@@ -36,8 +36,8 @@ namespace AlexaController.Api.IntentRequest
             var d = duration is null ? DateTime.Now.AddDays(-25) : DateTimeDurationSerializer.GetMinDateCreation(duration);
 
             var query = type == "Series"
-                ? ServerQuery.Instance.GetLatestTv(Session.User, d)
-                : ServerQuery.Instance.GetLatestMovies(Session.User, d);
+                ? ServerDataQuery.Instance.GetLatestTv(Session.User, d)
+                : ServerDataQuery.Instance.GetLatestMovies(Session.User, d);
 
             var results = query.Where(item => item.IsParentalAllowed(Session.User)).ToList();
 
@@ -54,8 +54,8 @@ namespace AlexaController.Api.IntentRequest
                 }, Session);
             }
 
-            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetSequenceViewPropertiesAsync(results);
-            var newLibraryItemsAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var sequenceLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemCollectionSequenceViewPropertiesAsync(results);
+            var newLibraryItemsAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.NewLibraryItems,
                 items = results,

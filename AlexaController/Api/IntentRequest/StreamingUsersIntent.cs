@@ -26,7 +26,7 @@ namespace AlexaController.Api.IntentRequest
 
         public async Task<string> Response()
         {
-            var speechString = GetUserSessionSpeechString(ServerQuery.Instance.GetCurrentSessions());
+            var speechString = GetUserSessionSpeechString(ServerDataQuery.Instance.GetCurrentSessions());
 
             return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
             {

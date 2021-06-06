@@ -15,39 +15,39 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using MediaBrowser.Model.Configuration;
 using User = MediaBrowser.Controller.Entities.User;
 
 
 namespace AlexaController
 {
     // ReSharper disable once ClassTooBig
-    public class ServerQuery : SearchUtility, IServerEntryPoint
+    public class ServerDataQuery : ServerBaseItemQueryResolution, IServerEntryPoint
     {
-        private IServerApplicationHost Host { get; }
-        private IUserManager UserManager { get; }
-        private ILibraryManager LibraryManager { get; }
+        private IServerApplicationHost Host      { get; }
+        private IUserManager UserManager         { get; }
+        private ILibraryManager LibraryManager   { get; }
         private ITVSeriesManager TvSeriesManager { get; }
-        private ISessionManager SessionManager { get; }
-        private IDtoService DtoService { get; }
-        public static ServerQuery Instance { get; private set; }
+        private ISessionManager SessionManager   { get; }
+        private IDtoService DtoService           { get; }
+        public static ServerDataQuery Instance   { get; private set; }
 
         // ReSharper disable once TooManyDependencies
-        public ServerQuery(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IUserManager userManager, IDtoService dtoService) : base(libMan, userManager)
+        public ServerDataQuery(ILibraryManager libMan, ITVSeriesManager tvMan, ISessionManager sesMan, IServerApplicationHost host, IUserManager userManager, IDtoService dtoService) : base(libMan, userManager)
         {
-            Host = host;
-            LibraryManager = libMan;
+            Host            = host;
+            LibraryManager  = libMan;
             TvSeriesManager = tvMan;
-            SessionManager = sesMan;
-            UserManager = userManager;
-            Instance = this;
-            DtoService = dtoService;
+            SessionManager  = sesMan;
+            UserManager     = userManager;
+            Instance        = this;
+            DtoService      = dtoService;
         }
 
         public IEnumerable<SessionInfo> GetCurrentSessions()
         {
             return SessionManager.Sessions;
         }
-
         public QueryResult<BaseItem> GetItemsResult(long id, string[] types, User user)
         {
             var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
@@ -82,15 +82,16 @@ namespace AlexaController
             return await Host.GetLocalApiUrl(CancellationToken.None);
         }
 
-        public List<BaseItem> GetEpisodes(int seasonNumber, BaseItem parent, User user)
+        public List<BaseItem> GetEpisodes(int seasonNumber, BaseItem series, User user)
         {
             var result = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
             {
-                Parent = parent,
+                Parent = series,
                 IncludeItemTypes = new[] { "Episode" },
                 ParentIndexNumber = seasonNumber,
                 Recursive = true
             });
+            ServerController.Instance.Log.Info($"Episodes Found: {result.TotalRecordCount}");
             return result.Items.ToList();
         }
 
@@ -125,21 +126,17 @@ namespace AlexaController
 
         public Dictionary<BaseItem, List<BaseItem>> GetCollectionItems(User user, string collectionName)
         {
-            var result = QuerySpeechResultItem(collectionName, new[] { "BoxSet" });
-
-            ServerController.Instance.Log.Info("Search found collection item: " + result.Name);
-            var users = UserManager.Users;
+            var result        = QuerySpeechResultItem(collectionName, new[] { "BoxSet" });
+            var users         = UserManager.Users;
             var administrator = users.FirstOrDefault(u => u.Policy.IsAdministrator);
-            var collection = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
+            var collection    = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
             {
-                ListIds = new[] { result.InternalId },
+                ListIds        = new[] { result.InternalId },
                 EnableAutoSort = true,
-                OrderBy = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray(),
+                OrderBy        = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray(),
 
             });
-
             return new Dictionary<BaseItem, List<BaseItem>>() { { result, collection.Items.ToList() } };
-
         }
 
         public IEnumerable<BaseItem> GetLatestMovies(User user, DateTime duration)
@@ -148,11 +145,11 @@ namespace AlexaController
             var results = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 IncludeItemTypes = new[] { "Movie" },
-                User = user,
-                MinDateCreated = duration,
-                Limit = 20,
-                EnableAutoSort = true,
-                OrderBy = new[] { ItemSortBy.DateCreated }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Descending)).ToArray()
+                User             = user,
+                MinDateCreated   = duration,
+                Limit            = 20,
+                EnableAutoSort   = true,
+                OrderBy          = new[] { ItemSortBy.DateCreated }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Descending)).ToArray()
             });
 
             return results.Select(id => LibraryManager.GetItemById(id)).ToList();
@@ -211,7 +208,6 @@ namespace AlexaController
             var dto = DtoService.GetBaseItemDto(item, new DtoOptions(true));
             return dto.Chapters;
         }
-
         public QueryResult<BaseItem> GetBaseItemsByGenre(string[] type, string[] genres)
         {
             return LibraryManager.GetItemsResult(new InternalItemsQuery()
@@ -222,7 +218,6 @@ namespace AlexaController
                 Limit = 15
             });
         }
-
         public IDictionary<List<BaseItem>, List<BaseItem>> GetItemsByActor(User user, List<string> actorNames)
         {
             var actors = new List<BaseItem>();
@@ -233,8 +228,8 @@ namespace AlexaController
                 var actorQuery = LibraryManager.GetItemsResult(new InternalItemsQuery()
                 {
                     IncludeItemTypes = new[] { "Person" },
-                    SearchTerm = actorName,
-                    Recursive = true
+                    SearchTerm       = actorName,
+                    Recursive        = true
                 });
 
                 if (actorQuery.TotalRecordCount <= 0) continue;
@@ -245,8 +240,8 @@ namespace AlexaController
             var query = LibraryManager.GetItemsResult(new InternalItemsQuery(user)
             {
                 IncludeItemTypes = new[] { "Series", "Movie" },
-                Recursive = true,
-                PersonIds = actors.Select(a => a.InternalId).ToArray()
+                Recursive        = true,
+                PersonIds        = actors.Select(a => a.InternalId).ToArray()
             });
 
             return new Dictionary<List<BaseItem>, List<BaseItem>>() { { actors, query.Items.ToList() } };
@@ -262,22 +257,18 @@ namespace AlexaController
                 MaxPremiereDate = duration,
                 OrderBy = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray()
             }));
-
         }
-
         public string GetRunTime(BaseItem baseItem)
         {
             if (!string.Equals(baseItem.GetType().Name, "Movie")) return string.Empty;
             var runTimeTicks = baseItem.RunTimeTicks;
             return !(runTimeTicks is null) ? $"{TimeSpan.FromTicks(runTimeTicks.Value).TotalMinutes.ToString(CultureInfo.InvariantCulture).Split('.')[0]} minutes" : string.Empty;
         }
-
         public string GetEndTime(BaseItem baseItem)
         {
             return
                 $"Ends at: {DateTime.Now.AddTicks(baseItem.GetRunTimeTicksForPlayState()).ToString("h:mm tt", CultureInfo.InvariantCulture)}";
         }
-
         public string GetPrimaryImageSource(BaseItem item)
         {
             if (item.GetType().Name != "Episode")
@@ -289,7 +280,6 @@ namespace AlexaController
                 ? $"/Items/{ item.InternalId }/Images/primary?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;"
                 : $"/Items/{ item.Parent.Parent.InternalId }/Images/backdrop?quality=90&amp;maxHeight=508&amp;maxWidth=600&amp;";
         }
-
         public string GetBackdropImageSource(BaseItem item)
         {
             switch (item.GetType().Name)
@@ -299,7 +289,6 @@ namespace AlexaController
                 default: return $"/Items/{item.InternalId}/Images/backdrop?maxWidth=1200&amp;maxHeight=800&amp;quality=90";
             }
         }
-
         public string GetThumbImageSource(BaseItem item)
         {
             var internalId = item.InternalId;
@@ -307,7 +296,6 @@ namespace AlexaController
                 ? $"/Items/{internalId}/Images/thumb?quality=90&maxWidth=225"
                 : $"/Items/{internalId}/Images/backdrop?quality=90&maxWidth=225";
         }
-
         public string GetLogoImageSource(BaseItem item)
         {
             switch (item.GetType().Name)
@@ -322,13 +310,11 @@ namespace AlexaController
             return item.HasImage(ImageType.Logo)
                 ? $"/Items/{item.InternalId}/Images/logo?quality=90&maxHeight=508&maxWidth=200" : "";
         }
-
         public string GetVideoBackdropImageSource(BaseItem item)
         {
             var videoBackdropIds = item.ThemeVideoIds;
             return videoBackdropIds.Length > 0 ? $"/videos/{GetItemById(videoBackdropIds[0]).InternalId}/stream.mp4" : string.Empty;
         }
-
         public List<BaseItem> GetSimilarItems(BaseItem item)
         {
             var users = UserManager.Users;
@@ -339,32 +325,40 @@ namespace AlexaController
                 Recursive = true,
                 IncludeItemTypes = new[] { item.GetType().Name }
             });
-
             return similarQuery.Items.Take(4).ToList();
         }
-
         public string GetGenres(BaseItem item)
         {
             return $"{(item.Genres.Any() ? item.Genres.Aggregate((genres, genre) => genres + ", " + genre) : "")}";
         }
-
         public string GetThemeSongSource(BaseItem item)
         {
-            //TODO: Get API key for HLS streaming audio??
-            //"https://theater.unityhome.online/Audio/61335/universal?MaxStreamingBitrate=140000000&Container=mp3&TranscodingContainer=aac&TranscodingProtocol=hls&AudioCodec=aac&api_key=644138eb19884b119a52440fa9b51983&StartTimeTicks=400&EnableRedirection=true"
             return item.ThemeSongIds.Length > 0 ? $"/Audio/{item.ThemeSongIds.FirstOrDefault()}/universal?MaxStreamingBitrate=140000000&Container=mp3&TranscodingContainer=aac&TranscodingProtocol=hls&AudioCodec=aac&api_key=644138eb19884b119a52440fa9b51983&StartTimeTicks=0&EnableRedirection=true" : "";
+        }
+        public string GetResolution(BaseItem item)
+        {
+            var mediaSources = item.GetMediaSources(true, false, new LibraryOptions());
+
+            MediaStream videoStream = null;
+
+            try //TODO: Test, does this need to be wrapped in a try catch?
+            {
+                videoStream = mediaSources.Count > 0
+                    ? mediaSources[0].MediaStreams.FirstOrDefault(s => s.Type == MediaStreamType.Video)
+                    : null;
+
+            } catch {}
+
+            return videoStream is null ? string.Empty : videoStream.DisplayTitle;
         }
         public void Dispose()
         {
 
         }
-
         // ReSharper disable once MethodNameNotMeaningful
         public void Run()
         {
 
         }
-
-
     }
 }

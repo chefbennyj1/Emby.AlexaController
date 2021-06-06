@@ -1,10 +1,10 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.ResponseModel;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.UserEvent.TouchWrapper.Press
 {
@@ -21,12 +21,12 @@ namespace AlexaController.Api.UserEvent.TouchWrapper.Press
             ServerController.Instance.Log.Info("UserEventShowBaseItemDetailsTemplate");
             var request = AlexaRequest.request;
             var source = request.source;
-            var baseItem = ServerQuery.Instance.GetItemById(source.id);
+            var baseItem = ServerDataQuery.Instance.GetItemById(source.id);
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
             var room = session.room;
 
             var baseItemDetailViewProperties = await DataSourcePropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(baseItem, session);
-            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.ItemBrowse,
                 item = baseItem,

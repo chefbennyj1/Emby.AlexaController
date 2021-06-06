@@ -2,11 +2,11 @@
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.Playback
 {
@@ -30,13 +30,13 @@ namespace AlexaController.Api.IntentRequest.Playback
             var request = AlexaRequest.request;
             var intent = request.intent;
             var slots = intent.slots;
-            var nextUpEpisode = ServerQuery.Instance.GetNextUpEpisode(slots.Series.value, Session?.User);
+            var nextUpEpisode = ServerDataQuery.Instance.GetNextUpEpisode(slots.Series.value, Session?.User);
 
             //IDataSource aplaDataSource = null;
 
             if (nextUpEpisode is null)
             {
-                var itemDoesNotExistAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+                var itemDoesNotExistAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
                 {
                     SpeechResponseType = SpeechResponseType.NoItemExists
                 });
@@ -60,7 +60,7 @@ namespace AlexaController.Api.IntentRequest.Playback
             AlexaSessionManager.Instance.UpdateSession(Session, null);
 
             var detailLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(nextUpEpisode, Session);
-            var nextUpEpisodeAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var nextUpEpisodeAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.PlayNextUpEpisode,
                 item = nextUpEpisode,

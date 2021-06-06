@@ -6,5 +6,6 @@
         public string position { get; set; }
         public object value { get; set; }
         public string componentId { get; set; }
+        public string when { get; set; }
     }
 }

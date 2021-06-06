@@ -6,6 +6,7 @@ namespace AlexaController.EmbyAplDataSource.DataSourceProperties
     public class Properties<T> : BaseDataSourceProperties<T> where T : class
     {
         public RenderDocumentType documentType { get; set; }
+        public SpeechResponseType speechResponseType { get; set; }
         public string theme { get; set; } = "dark";
         public string url { get; set; }
         public string wanAddress { get; set; }

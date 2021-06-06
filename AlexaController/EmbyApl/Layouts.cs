@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AlexaController.Alexa.Presentation;
+﻿using AlexaController.Alexa.Presentation;
 using AlexaController.Alexa.Presentation.APL;
 using AlexaController.Alexa.Presentation.APL.Commands;
 using AlexaController.Alexa.Presentation.APL.Components;
@@ -8,6 +6,8 @@ using AlexaController.Alexa.Presentation.APL.VectorGraphics;
 using AlexaController.Api.UserEvent.TouchWrapper.Press;
 using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using AlexaController.Session;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Parallel = AlexaController.Alexa.Presentation.APL.Commands.Parallel;
 
 namespace AlexaController.EmbyApl
@@ -205,12 +205,14 @@ namespace AlexaController.EmbyApl
                     color = "white",
                     top = "-1vw",
                     id = "goBack",
+                    speech = "${payload.templateData.properties.buttonPressEffect.url}",
                     primaryAction = new Parallel()
                     {
                         commands = new List<ICommand>()
                         {
-                           new Command() { type = nameof(Animations.ScaleInOutOnPress) },
-                           new SendEvent() { arguments = new List<object>() { "goBack" } }
+                            new SpeakItem() { componentId = "goBack" },
+                            new Command() { type = nameof(Animations.ScaleInOutOnPress) },
+                            new SendEvent() { arguments = new List<object>() { "goBack" } }
                         }
                     }
                 });
@@ -263,7 +265,7 @@ namespace AlexaController.EmbyApl
                 {
                     new Text()
                     {
-                        text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime}",
+                        text = "${data.item.premiereDate} | ${data.item.officialRating} | ${data.item.runtimeMinutes} | ${data.item.endTime} | ${data.item.Resolution} ",
                         style = "textStyleBody",
                         fontSize = "18dp",
                         opacity = 1,
@@ -276,8 +278,6 @@ namespace AlexaController.EmbyApl
                     }
                 }
             });
-
-            
             //TagLines
             detailLayout.Add(new Text()
             {
@@ -309,8 +309,8 @@ namespace AlexaController.EmbyApl
                 opacity = 1,
                 id = "overview_${data.item.id}",
                 speech = "${data.item.readOverview}",
-                onPress = new Parallel() 
-                { 
+                onPress = new Parallel()
+                {
                     commands = new List<ICommand>()
                     {
                         new Sequential()
@@ -412,6 +412,7 @@ namespace AlexaController.EmbyApl
                             {
                                 width = "245px",
                                 id = "${data.id}",
+                                speech = "${payload.templateData.properties.buttonPressEffect.url}",
                                 item = new Image()
                                 {
                                     height = "140px",
@@ -422,6 +423,7 @@ namespace AlexaController.EmbyApl
                                 {
                                     commands = new List<ICommand>()
                                     {
+                                        new SpeakItem() { componentId = "${data.id}" },
                                         new Command() { type = nameof(Animations.ScaleInOutOnPress) },
                                         new SendEvent() { arguments = GetItemLayoutOnPressArguments(type, session) }
                                     }
@@ -750,7 +752,16 @@ namespace AlexaController.EmbyApl
                         },
                         new AlexaHeadline()
                         {
-                            backgroundColor = "rgba(0,0,0,0.1)", primaryText = "${payload.templateData.properties.text}"
+                            backgroundColor = "rgba(0,0,0,0.1)", primaryText = "${payload.templateData.properties.text}",
+                            onMount = new List<ICommand>()
+                            {
+                                
+                                new Command()
+                                {
+                                    when = "${environment.extension.SmartMotion}",
+                                    type = "ShakesHead"
+                                }
+                            }
                         },
                         new AlexaFooter() {hintText = "Alexa, open help...", position = "absolute", bottom = "1vh"}
                     }
@@ -1053,7 +1064,7 @@ namespace AlexaController.EmbyApl
                         vectorSource = item.type == "Series" ?  MaterialVectorIcons.ListIcon : MaterialVectorIcons.PlayOutlineIcon,
                         buttonSize = "13vh",
                         id = item.id.ToString(),
-
+                        speech = "${payload.templateData.properties.buttonPressEffect.url}",
                         primaryAction = new Sequential()
                         {
                             commands = new List<ICommand>()
@@ -1062,6 +1073,7 @@ namespace AlexaController.EmbyApl
                                 {
                                     commands = new List<ICommand>()
                                     {
+                                        new SpeakItem() { componentId = item.id.ToString() },
                                         new Command()   { type = nameof(Animations.ScaleInOutOnPress) },
                                     }
                                 },
@@ -1144,7 +1156,7 @@ namespace AlexaController.EmbyApl
             {
                 var disabled = true;
 
-                foreach (var session in ServerQuery.Instance.GetCurrentSessions())
+                foreach (var session in ServerDataQuery.Instance.GetCurrentSessions())
                 {
                     if (session.DeviceName == room.DeviceName) disabled = false;
                     if (session.Client == room.DeviceName) disabled = false;

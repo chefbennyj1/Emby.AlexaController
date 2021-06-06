@@ -9,5 +9,6 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
         public object repeatCount { get; set; }
         public bool screenLock { get; set; }
         public int delay { get; set; }
+        public string when { get; set; }
     }
 }

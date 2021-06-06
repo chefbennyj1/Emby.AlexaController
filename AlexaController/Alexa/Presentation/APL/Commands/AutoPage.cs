@@ -8,5 +8,6 @@
         public string componentId { get; set; }
         public bool screenLock { get; set; }
         public int delay { get; set; }
+        public string when { get; set; }
     }
 }

@@ -5,7 +5,7 @@
         /// <summary>
         /// Smart motion namespace -> "namespace": "Alexa.SmartMotion",
         /// </summary>
-        
+
         public string @namespace { get; set; }
         /// <summary>
         /// SmartMotion -> "name": "ModeChanged",

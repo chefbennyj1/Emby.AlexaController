@@ -3,5 +3,6 @@
     public class TurnToPrimaryUser : ICommand
     {
         public object type => "SmartMotion:TurnToPrimaryUser";
+        public string when { get; set; }
     }
 }

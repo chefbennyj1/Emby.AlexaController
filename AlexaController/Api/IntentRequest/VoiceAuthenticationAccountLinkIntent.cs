@@ -1,12 +1,12 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.RequestModel;
 using AlexaController.Alexa.ResponseModel;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest
 {
@@ -30,7 +30,7 @@ namespace AlexaController.Api.IntentRequest
 
             if (person is null)
             {
-                var voiceAuthenticationLinkErrorAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+                var voiceAuthenticationLinkErrorAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
                 {
                     SpeechResponseType = SpeechResponseType.VoiceAuthenticationAccountLinkError
                 });
@@ -49,12 +49,12 @@ namespace AlexaController.Api.IntentRequest
             {
                 if (config.UserCorrelations.Exists(p => p.AlexaPersonId == person.personId))
                 {
-                    var voiceAuthenticationProfileExistsAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+                    var voiceAuthenticationProfileExistsAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
                     {
                         SpeechResponseType = SpeechResponseType.VoiceAuthenticationExists,
                         session = Session
                     });
-                    
+
                     //For some reason, Alexa will only utilize the "<alexa:name>" ssml in a OutputSpeech object, not an APLA document.
                     return await AlexaResponseClient.Instance.BuildAlexaResponseAsync(new Response()
                     {
@@ -71,7 +71,7 @@ namespace AlexaController.Api.IntentRequest
             Task.Run(() => ServerController.Instance.SendMessageToPluginConfigurationPage("SpeechAuthentication", person.personId));
 #pragma warning restore 4014
 
-            var voiceAuthenticationLinkSuccessAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var voiceAuthenticationLinkSuccessAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.VoiceAuthenticationAccountLinkSuccess,
                 session = Session

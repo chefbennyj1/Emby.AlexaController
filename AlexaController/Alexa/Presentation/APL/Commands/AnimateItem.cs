@@ -63,5 +63,6 @@ namespace AlexaController.Alexa.Presentation.APL.Commands
 
         public bool screenLock { get; set; }
         public int? delay { get; set; }
+        public string when { get; set; }
     }
 }

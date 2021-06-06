@@ -17,8 +17,9 @@ namespace AlexaController.EmbyAplDataSource
             Instance = this;
         }
 
-        public async Task<Properties<MediaItem>> GetSequenceViewPropertiesAsync(List<BaseItem> collectionItems, BaseItem collection = null)
+        public async Task<Properties<MediaItem>> GetBaseItemCollectionSequenceViewPropertiesAsync(List<BaseItem> collectionItems, BaseItem collection = null)
         {
+            ServerController.Instance.Log.Info("Preparing Sequence View Data.");
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
             var mediaItems = new List<MediaItem>();
 
@@ -28,78 +29,81 @@ namespace AlexaController.EmbyAplDataSource
             collectionItems.ForEach(i => mediaItems.Add(new MediaItem()
             {
                 type = type,
-                primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(i),
-                backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(i),
+                primaryImageSource = ServerDataQuery.Instance.GetPrimaryImageSource(i),
+                backdropImageSource = ServerDataQuery.Instance.GetBackdropImageSource(i),
                 id = i.InternalId,
                 name = i.Name,
                 index = type == "Episode" ? $"Episode {i.IndexNumber}" : string.Empty,
                 premiereDate = i.PremiereDate?.ToString("D")
 
             }));
-
+            
             MediaItem mediaItem = null;
             if (collection != null)
             {
                 mediaItem = new MediaItem()
                 {
-                    name = textInfo.ToTitleCase(collection.Name.ToLower()),
-                    logoImageSource = ServerQuery.Instance.GetLogoImageSource(collection),
-                    backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(collection),
-                    id = collection.InternalId,
-                    genres = ServerQuery.Instance.GetGenres(collection)
+                    name                = textInfo.ToTitleCase(collection.Name.ToLower()),
+                    logoImageSource     = ServerDataQuery.Instance.GetLogoImageSource(collection),
+                    backdropImageSource = ServerDataQuery.Instance.GetBackdropImageSource(collection),
+                    id                  = collection.InternalId,
+                    genres              = ServerDataQuery.Instance.GetGenres(collection)
                 };
             }
 
+            ServerController.Instance.Log.Info($"Sequence View has {mediaItems.Count} items under {mediaItem?.name}.");
+
             return await Task.FromResult(new Properties<MediaItem>()
             {
-                url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                url          = await ServerDataQuery.Instance.GetLocalApiUrlAsync(),
                 documentType = RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE,
-                items = mediaItems,
-                item = mediaItem
+                items        = mediaItems,
+                item         = mediaItem
             });
         }
         public async Task<Properties<MediaItem>> GetBaseItemDetailViewPropertiesAsync(BaseItem item, IAlexaSession session)
         {
             var mediaItem = new MediaItem()
             {
-                type = item.GetType().Name,
-                isPlayed = item.IsPlayed(session.User),
-                primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(item),
-                id = item.InternalId,
-                name = item.Name,
-                premiereDate = item.ProductionYear.ToString(),
-                officialRating = item.OfficialRating,
-                tagLine = item.Tagline,
-                runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
-                endTime = ServerQuery.Instance.GetEndTime(item),
-                genres = ServerQuery.Instance.GetGenres(item),
-                logoImageSource = ServerQuery.Instance.GetLogoImageSource(item),
-                overview = item.Overview,
-                videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
-                backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item),
-                videoOverlaySource = "/EmptyPng?quality=90",
-                themeAudioSource = ServerQuery.Instance.GetThemeSongSource(item),
-                TotalRecordCount = item.GetType().Name == "Series" ? ServerQuery.Instance.GetItemsResult(item.InternalId, new[] { "Season" }, session.User).TotalRecordCount : 0,
-                chapterData = item.GetType().Name == "Movie" || item.GetType().Name == "Episode" ? ServerQuery.Instance.GetChapterInfo(item) : null
+                type                = item.GetType().Name,
+                isPlayed            = item.IsPlayed(session.User),
+                primaryImageSource  = ServerDataQuery.Instance.GetPrimaryImageSource(item),
+                id                  = item.InternalId,
+                name                = item.Name,
+                premiereDate        = item.ProductionYear.ToString(),
+                officialRating      = item.OfficialRating,
+                tagLine             = item.Tagline,
+                runtimeMinutes      = ServerDataQuery.Instance.GetRunTime(item),
+                endTime             = ServerDataQuery.Instance.GetEndTime(item),
+                genres              = ServerDataQuery.Instance.GetGenres(item),
+                logoImageSource     = ServerDataQuery.Instance.GetLogoImageSource(item),
+                overview            = item.Overview,
+                videoBackdropSource = ServerDataQuery.Instance.GetVideoBackdropImageSource(item),
+                backdropImageSource = ServerDataQuery.Instance.GetBackdropImageSource(item),
+                videoOverlaySource  = "/EmptyPng?quality=90",
+                themeAudioSource    = ServerDataQuery.Instance.GetThemeSongSource(item),
+                TotalRecordCount    = item.GetType().Name == "Series" ? ServerDataQuery.Instance.GetItemsResult(item.InternalId, new[] { "Season" }, session.User).TotalRecordCount : 0,
+                chapterData         = item.GetType().Name == "Movie" || item.GetType().Name == "Episode" ? ServerDataQuery.Instance.GetChapterInfo(item) : null,
+                Resolution          = ServerDataQuery.Instance.GetResolution(item)
             };
 
-            var similarItems = ServerQuery.Instance.GetSimilarItems(item);
+            var similarItems = ServerDataQuery.Instance.GetSimilarItems(item);
 
             var recommendedItems = new List<MediaItem>();
 
             similarItems.ForEach(r => recommendedItems.Add(new MediaItem()
             {
                 id = r.InternalId,
-                thumbImageSource = ServerQuery.Instance.GetThumbImageSource(r)
+                thumbImageSource = ServerDataQuery.Instance.GetThumbImageSource(r)
             }));
 
             return await Task.FromResult(new Properties<MediaItem>()
             {
-                url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                wanAddress = await ServerQuery.Instance.GetWanAddressAsync(),
+                url          = await ServerDataQuery.Instance.GetLocalApiUrlAsync(),
+                wanAddress   = await ServerDataQuery.Instance.GetWanAddressAsync(),
                 documentType = RenderDocumentType.MEDIA_ITEM_DETAILS_TEMPLATE,
                 similarItems = recommendedItems,
-                item = mediaItem
+                item         = mediaItem
             });
 
         }
@@ -160,43 +164,43 @@ namespace AlexaController.EmbyAplDataSource
             return await Task.FromResult(new Properties<string>()
             {
                 documentType = RenderDocumentType.GENERIC_VIEW_TEMPLATE,
-                text = text,
-                url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
-                wanAddress = await ServerQuery.Instance.GetWanAddressAsync(),
-                videoUrl = videoUrl
+                text         = text,
+                url          = await ServerDataQuery.Instance.GetLocalApiUrlAsync(),
+                wanAddress   = await ServerDataQuery.Instance.GetWanAddressAsync(),
+                videoUrl     = videoUrl
             });
         }
         public async Task<Properties<MediaItem>> GetRoomSelectionViewPropertiesAsync(BaseItem item, IAlexaSession session)
         {
             return await Task.FromResult(new Properties<MediaItem>()
             {
-                url = await ServerQuery.Instance.GetLocalApiUrlAsync(),
+                url = await ServerDataQuery.Instance.GetLocalApiUrlAsync(),
                 documentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
                 item = new MediaItem()
                 {
                     type = item.GetType().Name,
                     isPlayed = item.IsPlayed(session.User),
-                    primaryImageSource = ServerQuery.Instance.GetPrimaryImageSource(item),
+                    primaryImageSource = ServerDataQuery.Instance.GetPrimaryImageSource(item),
                     id = item.InternalId,
                     name = item.Name,
                     premiereDate = item.ProductionYear.ToString(),
                     officialRating = item.OfficialRating,
                     tagLine = item.Tagline,
-                    runtimeMinutes = ServerQuery.Instance.GetRunTime(item),
-                    endTime = ServerQuery.Instance.GetEndTime(item),
-                    genres = ServerQuery.Instance.GetGenres(item),
-                    logoImageSource = ServerQuery.Instance.GetLogoImageSource(item),
+                    runtimeMinutes = ServerDataQuery.Instance.GetRunTime(item),
+                    endTime = ServerDataQuery.Instance.GetEndTime(item),
+                    genres = ServerDataQuery.Instance.GetGenres(item),
+                    logoImageSource = ServerDataQuery.Instance.GetLogoImageSource(item),
                     overview = item.Overview,
-                    videoBackdropSource = ServerQuery.Instance.GetVideoBackdropImageSource(item),
-                    backdropImageSource = ServerQuery.Instance.GetBackdropImageSource(item)
+                    videoBackdropSource = ServerDataQuery.Instance.GetVideoBackdropImageSource(item),
+                    backdropImageSource = ServerDataQuery.Instance.GetBackdropImageSource(item)
                 }
             });
         }
 
-        public async Task<Properties<string>> GetAudioResponsePropertiesAsync(SpeechResponsePropertiesQuery speechResponsePropertiesQuery)
+        public async Task<Properties<string>> GetAudioResponsePropertiesAsync(InternalAudioResponseQuery internalAudioResponseQuery)
         {
             var speech = new StringBuilder();
-            switch (speechResponsePropertiesQuery.SpeechResponseType)
+            switch (internalAudioResponseQuery.SpeechResponseType)
             {
                 case SpeechResponseType.PersonNotRecognized:
                     PersonNotRecognized(speech);
@@ -211,49 +215,50 @@ namespace AlexaController.EmbyAplDataSource
                     NoItemExists(speech);
                     break;
                 case SpeechResponseType.ItemBrowse:
-                    ItemBrowse(speech, speechResponsePropertiesQuery.item, speechResponsePropertiesQuery.session, speechResponsePropertiesQuery.deviceAvailable);
+                    ItemBrowse(speech, internalAudioResponseQuery.item, internalAudioResponseQuery.session, internalAudioResponseQuery.deviceAvailable);
                     break;
                 case SpeechResponseType.BrowseNextUpEpisode:
-                    BrowseNextUpEpisode(speech, speechResponsePropertiesQuery.item, speechResponsePropertiesQuery.session);
+                    BrowseNextUpEpisode(speech, internalAudioResponseQuery.item, internalAudioResponseQuery.session);
                     break;
                 case SpeechResponseType.NoNextUpEpisodeAvailable:
                     NoNextUpEpisodeAvailable(speech);
                     break;
                 case SpeechResponseType.PlayNextUpEpisode:
-                    PlayNextUpEpisode(speech, speechResponsePropertiesQuery.item, speechResponsePropertiesQuery.session);
+                    PlayNextUpEpisode(speech, internalAudioResponseQuery.item, internalAudioResponseQuery.session);
                     break;
                 case SpeechResponseType.ParentalControlNotAllowed:
-                    ParentalControlNotAllowed(speech, speechResponsePropertiesQuery.item, speechResponsePropertiesQuery.session);
+                    ParentalControlNotAllowed(speech, internalAudioResponseQuery.item, internalAudioResponseQuery.session);
                     break;
                 case SpeechResponseType.PlayItem:
-                    PlayItem(speech, speechResponsePropertiesQuery.item);
+                    PlayItem(speech, internalAudioResponseQuery.item);
                     break;
                 case SpeechResponseType.RoomContext:
                     RoomContext(speech);
                     break;
                 case SpeechResponseType.VoiceAuthenticationExists:
-                    VoiceAuthenticationExists(speech, speechResponsePropertiesQuery.session);
+                    VoiceAuthenticationExists(speech, internalAudioResponseQuery.session);
                     break;
                 case SpeechResponseType.VoiceAuthenticationAccountLinkError:
                     VoiceAuthenticationAccountLinkError(speech);
                     break;
                 case SpeechResponseType.VoiceAuthenticationAccountLinkSuccess:
-                    VoiceAuthenticationAccountLinkSuccess(speech, speechResponsePropertiesQuery.session);
+                    VoiceAuthenticationAccountLinkSuccess(speech, internalAudioResponseQuery.session);
                     break;
                 case SpeechResponseType.UpComingEpisodes:
-                    UpComingEpisodes(speech, speechResponsePropertiesQuery.items, speechResponsePropertiesQuery.date);
+                    UpComingEpisodes(speech, internalAudioResponseQuery.items, internalAudioResponseQuery.date);
                     break;
                 case SpeechResponseType.NewLibraryItems:
-                    NewLibraryItems(speech, speechResponsePropertiesQuery.items, speechResponsePropertiesQuery.date, speechResponsePropertiesQuery.session);
+                    NewLibraryItems(speech, internalAudioResponseQuery.items, internalAudioResponseQuery.date, internalAudioResponseQuery.session);
                     break;
                 case SpeechResponseType.BrowseItemByActor:
-                    BrowseItemByActor(speech, speechResponsePropertiesQuery.items);
+                    BrowseItemByActor(speech, internalAudioResponseQuery.items);
                     break;
                 default: return null;
             }
             return await Task.FromResult(new Properties<string>()
             {
-                value = speech.ToString(),
+                speechResponseType = internalAudioResponseQuery.SpeechResponseType,
+                value =  speech.ToString(),
                 audioUrl = "https://actions.google.com/sounds/v1/human_voices/human_breathing_nose.ogg"
             });
         }

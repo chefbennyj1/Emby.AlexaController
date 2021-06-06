@@ -7,7 +7,7 @@ namespace AlexaController.Alexa.Presentation.Directives
     public class UpdateIndexListDataDirective : IDirective
     {
         public string type => "Alexa.Presentation.APL.UpdateIndexListData";
-        public Dictionary<string, IData> datasources { get; set; }
+        public Dictionary<string, ITemplateData> datasources { get; set; }
         public string token { get; set; }
         public string listId { get; set; }
         public string listVersion { get; set; }

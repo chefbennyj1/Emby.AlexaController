@@ -17,7 +17,7 @@ namespace AlexaController.Alexa.RequestModel
         public string type { get; set; }
         public string value { get; set; }
         public List<Value> values { get; set; }
-        public Resolutions resolutions { get; set; } 
+        public Resolutions resolutions { get; set; }
     }
 
     public class Value
@@ -38,8 +38,9 @@ namespace AlexaController.Alexa.RequestModel
         public Status status { get; set; }
         public List<Values> values { get; set; }
     }
-    public class Values {
-        public Value value { get; set; } 
+    public class Values
+    {
+        public Value value { get; set; }
 
     }
     public class Status

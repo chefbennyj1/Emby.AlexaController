@@ -13,7 +13,7 @@ namespace AlexaController.EmbyApl.AplResourceManagement
             {
                 settings.SmartMotion = new SmartMotion()
                 {
-                    deviceStateName = "MyDeviceState",
+                    deviceStateName = "DeviceState",
                     wakeWordResponse = WakeWordResponse.followOnWakeWord
                 };
             }
@@ -22,7 +22,7 @@ namespace AlexaController.EmbyApl.AplResourceManagement
             {
                 settings.EntitySensing = new EntitySensing()
                 {
-                    primaryUserName = "MyPrimaryUser",
+                    primaryUserName = "PrimaryUser",
                     entitySensingStateName = "MyEntitySensingState"
                 };
             }

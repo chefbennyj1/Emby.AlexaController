@@ -3,6 +3,7 @@ using AlexaController.Alexa.ResponseModel;
 using AlexaController.Alexa.SpeechSynthesis;
 using AlexaController.Api.IntentRequest;
 using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using AlexaController.Utils;
@@ -15,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 // ReSharper disable once TooManyDependencies
 // ReSharper disable once PossibleNullReferenceException
@@ -150,7 +150,7 @@ namespace AlexaController.Api
                 * Replace the "_" (underscore) with a "." (period) to create the proper reflection path to the corresponding IntentRequest file.
                 */
                 var intentName = intent.name.Replace("_", ".");
-
+                ServerController.Instance.Log.Info($"Intent Name Route to {intentName}");
                 return await GetResponseResult(Type.GetType($"AlexaController.Api.IntentRequest.{intentName}"), alexaRequest, session);
             }
             catch (Exception exception)
@@ -192,7 +192,7 @@ namespace AlexaController.Api
 
             if (user is null)
             {
-                var personNotRecognizedAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+                var personNotRecognizedAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
                 {
                     SpeechResponseType = SpeechResponseType.PersonNotRecognized
                 });
@@ -210,7 +210,7 @@ namespace AlexaController.Api
             var session = AlexaSessionManager.Instance.GetSession(alexaRequest, user);
             var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("Welcome to Home Theater Emby Controller", "/particles");
 
-            var skillLaunchedAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var skillLaunchedAudioProperties = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.OnLaunch
             });

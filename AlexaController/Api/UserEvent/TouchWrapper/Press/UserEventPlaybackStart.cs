@@ -1,12 +1,12 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.ResponseModel;
 using AlexaController.Api.IntentRequest.Rooms;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 #pragma warning disable 4014
 
@@ -33,7 +33,7 @@ namespace AlexaController.Api.UserEvent.TouchWrapper.Press
             var request = AlexaRequest.request;
             var source = request.source;
             var session = AlexaSessionManager.Instance.GetSession(AlexaRequest);
-            var baseItem = ServerQuery.Instance.GetItemById(source.id);
+            var baseItem = ServerDataQuery.Instance.GetItemById(source.id);
 
             session.room = session.room ?? RoomContextManager.Instance.GetRoomByName(request.arguments[1]);
 
@@ -61,7 +61,7 @@ namespace AlexaController.Api.UserEvent.TouchWrapper.Press
             ServerController.Instance.PlayMediaItemAsync(session, baseItem, startPosition);
 
             var detailLayoutProperties = await DataSourcePropertiesManager.Instance.GetBaseItemDetailViewPropertiesAsync(baseItem, session);
-            var playItemAudioSpeech = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var playItemAudioSpeech = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.PlayItem,
                 item = baseItem

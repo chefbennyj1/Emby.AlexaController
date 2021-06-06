@@ -2,6 +2,6 @@
 {
     public interface IDataSource
     {
-        IData templateData { get; set; }
+        ITemplateData templateData { get; set; }
     }
 }

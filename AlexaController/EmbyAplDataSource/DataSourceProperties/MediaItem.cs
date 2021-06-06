@@ -26,5 +26,6 @@ namespace AlexaController.EmbyAplDataSource.DataSourceProperties
         public string videoOverlaySource { get; set; }
         public int? TotalRecordCount { get; set; }
         public List<ChapterInfo> chapterData { get; set; }
+        public string Resolution { get; set; }
     }
 }

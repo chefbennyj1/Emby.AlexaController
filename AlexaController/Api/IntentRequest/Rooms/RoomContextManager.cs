@@ -1,12 +1,12 @@
 ﻿using AlexaController.Alexa.ResponseModel;
 using AlexaController.Configuration;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.IntentRequest.Rooms
 {
@@ -27,7 +27,7 @@ namespace AlexaController.Api.IntentRequest.Rooms
         public async Task<string> RequestRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
             var genericLayoutProperties = await DataSourcePropertiesManager.Instance.GetGenericViewPropertiesAsync("Which room did you want?", "/Question");
-            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new SpeechResponsePropertiesQuery()
+            var aplaDataSource = await DataSourcePropertiesManager.Instance.GetAudioResponsePropertiesAsync(new InternalAudioResponseQuery()
             {
                 SpeechResponseType = SpeechResponseType.RoomContext
             });
@@ -55,13 +55,19 @@ namespace AlexaController.Api.IntentRequest.Rooms
 
         public async Task<Room> ValidateRoom(IAlexaRequest alexaRequest, IAlexaSession session)
         {
+            ServerController.Instance.Log.Info("Validating Intent Request Room data.");
             var request = alexaRequest.request;
             var intent = request.intent;
             var slots = intent.slots;
             var config = Plugin.Instance.Configuration;
 
-            //Already have a room marked in the session
-            if (!(session.room is null)) return session.room;
+            //Already have a room data saved for the session
+            ServerController.Instance.Log.Info("Checking Session Room Data.");
+            if (!(session.room is null))
+            {
+                ServerController.Instance.Log.Info("Session Already Contains Room Data. Returning Room Data.");
+                return session.room;
+            }
 
             //Is a user event (button press)
             if (!(request.arguments is null))
@@ -70,18 +76,21 @@ namespace AlexaController.Api.IntentRequest.Rooms
                     : config.Rooms.FirstOrDefault(r => string.Equals(r.Name, request.arguments[1], StringComparison.CurrentCultureIgnoreCase));
 
             //Room's not mentioned in request
-            if (slots.Room.value is null) return null;
+            ServerController.Instance.Log.Info("Checking Intent Request Room Data.");
+            if (string.IsNullOrEmpty(slots.Room.value))
+            {
+                ServerController.Instance.Log.Info("Intent does not mention a room.");
+                return null;
+            }
             
             if (!HasRoomConfiguration(slots.Room.value, config))
             {
-                await AlexaResponseClient.Instance.PostProgressiveResponse($"Sorry. There is currently no device configuration for {slots.Room.value}.",
-                    alexaRequest.context.System.apiAccessToken, alexaRequest.request.requestId).ConfigureAwait(false);
                 return null;
             }
 
             var room = config.Rooms.FirstOrDefault(r => string.Equals(r.Name, slots.Room.value, StringComparison.CurrentCultureIgnoreCase));
 
-            var openEmbySessions = ServerQuery.Instance.GetCurrentSessions().ToList();
+            var openEmbySessions = ServerDataQuery.Instance.GetCurrentSessions().ToList();
             //device needs to be on, and emby must be open and ready for commands
             if (openEmbySessions.Exists(s => string.Equals(s.DeviceName, room?.DeviceName, StringComparison.CurrentCultureIgnoreCase)))
             {

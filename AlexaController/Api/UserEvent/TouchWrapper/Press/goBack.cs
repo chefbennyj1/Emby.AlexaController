@@ -1,11 +1,11 @@
 ﻿using AlexaController.Alexa;
 using AlexaController.Alexa.ResponseModel;
+using AlexaController.EmbyApl;
 using AlexaController.EmbyAplDataSource.DataSourceProperties;
 using AlexaController.Session;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlexaController.EmbyApl;
 
 namespace AlexaController.Api.UserEvent.TouchWrapper.Press
 {
@@ -35,7 +35,7 @@ namespace AlexaController.Api.UserEvent.TouchWrapper.Press
                 try
                 {
 #pragma warning disable 4014
-                    Task.Run(() => ServerController.Instance.BrowseItemAsync(session, ServerQuery.Instance.GetItemById(previousPage?.item.id)))
+                    Task.Run(() => ServerController.Instance.BrowseItemAsync(session, ServerDataQuery.Instance.GetItemById(previousPage?.item.id)))
                         .ConfigureAwait(false);
 #pragma warning restore 4014
                 }

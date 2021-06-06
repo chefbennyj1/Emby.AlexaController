@@ -228,7 +228,7 @@ namespace AlexaController.EmbyAplDataSource
             speech.Append(SayName(session.context.System.person));
             speech.Append("'s account");
 
-            
+
 
         }
         protected static void VoiceAuthenticationAccountLinkError(StringBuilder speech)
@@ -253,7 +253,7 @@ namespace AlexaController.EmbyAplDataSource
             speech.Append(SayAsCardinal(items?.Count.ToString()));
             speech.Append(" upcoming episode");
             speech.Append(items?.Count > 1 ? "s" : "");
-            
+
             speech.Append($" scheduled to air over the next {(date - DateTime.Now).Days} days.");
             speech.Append(InsertStrengthBreak(StrengthBreak.weak));
 
@@ -280,7 +280,7 @@ namespace AlexaController.EmbyAplDataSource
 
                     speech.Append(", ");
                     if (d.Count() > 1 && i == d.Count() - 1) speech.Append(" and ");
-                    
+
                     i++;
                 }
             }

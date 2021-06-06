@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 
 namespace AlexaController.Alexa.Presentation.Sources
 {
-    public class Sources
+    public class SourcesTemplate
     {
         private Dictionary<string, IDocument> sources { get; }
 
-        public Sources()
+        public SourcesTemplate()
         {
             sources = new Dictionary<string, IDocument>();
         }
@@ -17,7 +17,7 @@ namespace AlexaController.Alexa.Presentation.Sources
             sources.Add(name, document);
         }
 
-        public async Task<Dictionary<string, IDocument>> Build()
+        public async Task<Dictionary<string, IDocument>> BuildSources()
         {
             return await Task.FromResult(sources);
         }
