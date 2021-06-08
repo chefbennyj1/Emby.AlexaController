@@ -7,7 +7,7 @@ namespace AlexaController.Alexa.Presentation.APL
     public class Document : IDocument
     {
         public string type => "APL";
-        public string version => "1.1";
+        public string version => "1.6";
         public List<IExtension> extensions { get; set; }
         public ISettings settings { get; set; }
         public string theme { get; set; }

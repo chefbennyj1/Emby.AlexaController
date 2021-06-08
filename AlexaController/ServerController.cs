@@ -11,6 +11,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediaBrowser.Model.Configuration;
 
 namespace AlexaController
 {
@@ -131,7 +132,7 @@ namespace AlexaController
             long startTicks = 0;
             if (startPositionTicks is null)
             {
-                if (item.SupportsPositionTicksResume)
+                if (item.SupportsPlayedStatus(new LibraryOptions(){ MinResumeDurationSeconds = 50}))
                 {
                     startTicks = item.PlaybackPositionTicks;
                 }

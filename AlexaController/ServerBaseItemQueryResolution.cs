@@ -22,8 +22,10 @@ namespace AlexaController
         public BaseItem QuerySpeechResultItem(string searchName, string[] type)
         {
             ServerController.Instance.Log.Info("Beginning item search");
-            ServerController.Instance.Log.Info($"Search: {searchName} Type: {type[0]}");
+            ServerController.Instance.Log.Info($"Search Name: {searchName}");
+            ServerController.Instance.Log.Info($"Search Type: {type[0]}");
 
+            ServerController.Instance.Log.Info("Query 1:");
             var result = LibraryManager.GetItemIds(new InternalItemsQuery
             {
                 Name = searchName,
@@ -33,9 +35,11 @@ namespace AlexaController
 
             });
 
+            // 
             //Remove "The" from search Term
             if (!result.Any())
             {
+                ServerController.Instance.Log.Info("Query 2");
                 try
                 {
                     if (searchName.ToLower().StartsWith("the "))
@@ -52,7 +56,9 @@ namespace AlexaController
                         if (queryResult.Items.Any())
                         {
 
-                            return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(query)));
+                            var rv = queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(query)));
+                            ServerController.Instance.Log.Info(rv.Name);
+                            return rv;
                         }
                     }
                 }
@@ -63,6 +69,7 @@ namespace AlexaController
             if (!result.Any())
             {
                 //Remove "The" from query and check against request
+                ServerController.Instance.Log.Info("Query 3");
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
@@ -111,7 +118,9 @@ namespace AlexaController
                     });
                     if (!(resultItem is null))
                     {
-                        return resultItem;
+                        var r = resultItem;
+                        ServerController.Instance.Log.Info(r.Name);
+                        return r;
                     }
                 }
             }
@@ -119,7 +128,8 @@ namespace AlexaController
             
             if (!result.Any())
             {
-                //ServerController.Instance.Log.Info($"Final Search hit: {searchName}");
+                ServerController.Instance.Log.Info("Query 4");
+                
 
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
@@ -130,46 +140,109 @@ namespace AlexaController
 
                 if (queryResult.Items.Any())
                 {
+                    
                     foreach (var item in queryResult.Items)
                     {
-                        // The user may have used the phrase "part 2", the movie name is "part ii"
-                        if (item.Name.ToLower().Replace(" ii", " 2").Equals(searchName))
+                        //Check for Roman Numerals in the name, and replace them with numeric string values for name comparison
+                        if (item.Name.ToLower().EndsWith(" ii"))
                         {
-                            return item;
+                            if (item.Name.ToLower().Replace(" ii", " 2").Equals(searchName))
+                            {
+                                return item;
+                            }
                         }
 
-                        if (item.Name.ToLower().Replace(" iii", " 3").Equals(searchName))
+                        if (item.Name.ToLower().EndsWith(" iii"))
                         {
-                            return item;
+                            if (item.Name.ToLower().Replace(" iii", " 3").Equals(searchName))
+                            {
+                                return item;
+                            }
                         }
 
-                        if (item.Name.ToLower().Replace(" iv", " 4").Equals(searchName))
+                        if (item.Name.ToLower().EndsWith(" iv"))
                         {
-                            return item;
+                            if (item.Name.ToLower().Replace(" iv", " 4").Equals(searchName))
+                            {
+                                return item;
+                            }
                         }
 
-                        if (item.Name.ToLower().Replace(" v", " 5").Equals(searchName))
+                        if (item.Name.ToLower().EndsWith(" v"))
                         {
-                            return item;
-                        }
-                        if (item.Name.ToLower().Replace("part ii", "2").Equals(searchName))
-                        {
-                            return item;
-                        }
-                        if (item.Name.ToLower().Replace("part iii", "3").Equals(searchName))
-                        {
-                            return item;
+                            if (item.Name.ToLower().Replace(" v", " 5").Equals(searchName))
+                            {
+                                return item;
+                            }
                         }
 
-                        if (item.Name.ToLower().Replace("part iv", "4").Equals(searchName))
+                        if (item.Name.ToLower().Contains(" part ii"))
                         {
-                            return item;
+                            if (item.Name.ToLower().Replace("part ii", "2").Equals(searchName))
+                            {
+                                return item;
+                            }
                         }
 
-                        if (item.Name.ToLower().Replace("part v", "5").Equals(searchName))
+                        if (item.Name.ToLower().Contains(" part iii"))
                         {
-                            return item;
+                            if (item.Name.ToLower().Replace("part iii", "3").Equals(searchName))
+                            {
+                                return item;
+                            }
                         }
+
+                        if (item.Name.ToLower().Contains(" part iv"))
+                        {
+                            if (item.Name.ToLower().Replace("part iv", "4").Equals(searchName))
+                            {
+                                return item;
+                            }
+                        }
+
+                        if (item.Name.ToLower().Contains(" part v"))
+                        {
+                            if (item.Name.ToLower().Replace("part v", "5").Equals(searchName))
+                            {
+                                return item;
+                            }
+                        }
+
+                        //Check for Numeric values in the name, and replace them with Roman Numerals for name comparison
+                        if (item.Name.ToLower().EndsWith(" ii"))
+                        {
+                            if (NormalizeQueryString(item.Name.ToLower().Replace(" ii", " 2")).Equals(NormalizeQueryString(searchName)))
+                            {
+                                return item;
+                            }
+                        }
+
+                        if (item.Name.ToLower().EndsWith(" iii"))
+                        {
+                            if (NormalizeQueryString(item.Name.ToLower().Replace(" iii", " 3")).Equals(NormalizeQueryString(searchName)))
+                            {
+                                return item;
+                            }
+                        }
+
+                        if (item.Name.ToLower().EndsWith(" iv"))
+                        {
+                            if (NormalizeQueryString(item.Name.ToLower().Replace(" iv", " 4")).Equals(NormalizeQueryString(searchName)))
+                            {
+                                return item;
+                            }
+                        }
+
+                        if (item.Name.ToLower().EndsWith(" v"))
+                        {
+                            if (NormalizeQueryString(item.Name.ToLower().Replace(" v", " 5")).Equals(NormalizeQueryString(searchName)))
+                            {
+                                return item;
+                            }
+                        }
+
+
+
 
                         if (NormalizeQueryString(item.Name).Contains(NormalizeQueryString(searchName)))
                         {
@@ -183,44 +256,50 @@ namespace AlexaController
 
                     }
 
+                    
                 }
             }
 
             if (!result.Any()) //split name "" - Starts with string first and second letter
             {
+                ServerController.Instance.Log.Info("Query 5");
                 var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4) : searchName;
 
                 var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
                 {
                     IncludeItemTypes = type,
                     Recursive = true,
-                    SearchTerm = query,
+                    //SearchTerm = query,
                     User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
                 });
 
                 if (queryResult.Items.Any())
                 {
-                    return queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(searchName)));
+                    var rv = queryResult.Items.FirstOrDefault(r => NormalizeQueryString(r.Name).Contains(NormalizeQueryString(query)));
+                    ServerController.Instance.Log.Info(rv.Name);
+                    return rv;
                 }
             }
 
-            //if (!result.Any())
-            //{
-            //    //var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0, 2);
+            if (!result.Any())
+            {
+                var query = searchName.ToLower().StartsWith("the ") ? searchName.Substring(4, 6) : searchName.Substring(0, 2);
+                ServerController.Instance.Log.Info("Query 6");
+                var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
+                {
+                    IncludeItemTypes = type,
+                    Recursive = true,
+                    NameStartsWithOrGreater = query,
+                    User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
+                });
 
-            //    var queryResult = LibraryManager.QueryItems(new InternalItemsQuery()
-            //    {
-            //        IncludeItemTypes = type,
-            //        Recursive = true,
-            //        //NameStartsWith = query,
-            //        User = UserManager.Users.FirstOrDefault(user => user.Policy.IsAdministrator)
-            //    });
-
-            //    if (queryResult.Items.Any())
-            //    {
-            //        return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
-            //    }
-            //}
+                if (queryResult.Items.Any())
+                {
+                    var r = queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(query.ToLower()));
+                    ServerController.Instance.Log.Info(r.Name);
+                    return r;
+                }
+            }
 
             //User has definitely mis-spoke the name - a Hail Mary search items with the same types
             if (!result.Any())
@@ -235,7 +314,9 @@ namespace AlexaController
 
                 if (queryResult.Items.Any())
                 {
-                    return queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
+                    var r =  queryResult.Items.FirstOrDefault(item => item.Name.ToLower().Contains(searchName.ToLower()));
+                    ServerController.Instance.Log.Info(r.Name);
+                    return r;
                 }
             }
 

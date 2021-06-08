@@ -51,7 +51,7 @@ namespace AlexaController.EmbyApl
                         width        = "100%",
                         scale        = "best-fill",
                         position     = "absolute",
-                        source       = "${payload.templateData.properties.url}${payload.templateData.properties.item.backdropImageSource}",
+                        source       = "${payload.templateData.properties.wanAddress}${payload.templateData.properties.item.backdropImageSource}",
                     },
                     new AlexaHeader()
                     {
@@ -59,7 +59,7 @@ namespace AlexaController.EmbyApl
                         //headerTitle            = "${payload.templateData.properties.item.name}",
                         headerBackButton       = session.paging.canGoBack,
                         headerDivider          = true,
-                        headerAttributionImage = "${payload.templateData.properties.url}${payload.templateData.properties.item.logoImageSource}"
+                        headerAttributionImage = "${payload.templateData.properties.wanAddress}${payload.templateData.properties.item.logoImageSource}"
                     },
                     new Sequence()
                     {
@@ -81,7 +81,7 @@ namespace AlexaController.EmbyApl
                                    {
                                        new SpeakItem() { componentId = "${data.id}" },
                                        new Command()   { type = nameof(Animations.ScaleInOutOnPress) },
-                                       new SendEvent() { arguments = GetItemLayoutOnPressArguments(type, session) }
+                                       new SendEvent() { arguments = RenderItemLayoutOnPressArgs(type, session) }
                                    }
                                 },
                                 items = new List<IComponent>()
@@ -141,7 +141,7 @@ namespace AlexaController.EmbyApl
                     {
                         new Source()
                         {
-                            url = "${data.url}${data.item.videoBackdropSource}",
+                            url = "${data.wanAddress}${data.item.videoBackdropSource}",
                             repeatCount = 0,
                         }
                     },
@@ -158,7 +158,7 @@ namespace AlexaController.EmbyApl
                         {
                             componentId = "backdropOverlay",
                             property = "source",
-                            value = "${data.url}${data.item.backdropImageSource}"
+                            value = "${data.wanAddress}${data.item.backdropImageSource}"
                         },
                         new SetValue()
                         {
@@ -187,7 +187,7 @@ namespace AlexaController.EmbyApl
                 overlayColor = !string.IsNullOrEmpty(mediaItem?.videoBackdropSource) ? "rgba(0,0,0,1)" : "rgba(0,0,0,0.75)",
                 // Show the back video overlay Image on top of the video
                 // Show the static backdrop image
-                source = !string.IsNullOrEmpty(mediaItem?.videoBackdropSource) ? "${data.url}${data.item.videoOverlaySource}" : "${data.url}${data.item.backdropImageSource}",
+                source = !string.IsNullOrEmpty(mediaItem?.videoBackdropSource) ? "${data.wanAddress}${data.item.videoOverlaySource}" : "${data.wanAddress}${data.item.backdropImageSource}",
                 // Video backdrop exists in the dataSource, which means this image will be an overlay, is black and should be given a 0.65 transparency
                 // No video backdrop exists in the dataSource, so the static background image must be given no opacity (value: 1), and the "overlay" property will handle ... ... the overlay.
                 opacity = !string.IsNullOrEmpty(mediaItem?.videoBackdropSource) ? 0.65 : 1,
@@ -221,7 +221,7 @@ namespace AlexaController.EmbyApl
             detailLayout.Add(new Image()
             {
                 id = "logo",
-                source = "${data.url}${data.item.logoImageSource}",
+                source = "${data.wanAddress}${data.item.logoImageSource}",
                 width = "12vw",
                 position = "absolute",
                 left = "85vw",
@@ -417,7 +417,7 @@ namespace AlexaController.EmbyApl
                                 {
                                     height = "140px",
                                     width = "225px",
-                                    source = "${payload.templateData.properties.url}${data.thumbImageSource}",
+                                    source = "${payload.templateData.properties.wanAddress}${data.thumbImageSource}",
                                 },
                                 onPress = new Parallel()
                                 {
@@ -425,7 +425,7 @@ namespace AlexaController.EmbyApl
                                     {
                                         new SpeakItem() { componentId = "${data.id}" },
                                         new Command() { type = nameof(Animations.ScaleInOutOnPress) },
-                                        new SendEvent() { arguments = GetItemLayoutOnPressArguments(type, session) }
+                                        new SendEvent() { arguments = RenderItemLayoutOnPressArgs(type, session) }
                                     }
                                 }
                             }
@@ -481,7 +481,7 @@ namespace AlexaController.EmbyApl
                 {
                     new Image()
                     {
-                        source = "${data.url}${data.item.primaryImageSource}",
+                        source = "${data.wanAddress}${data.item.primaryImageSource}",
                         scale  = "best-fit",
                         height = "63vh",
                         width  = "100%",
@@ -547,7 +547,7 @@ namespace AlexaController.EmbyApl
                                                 scale = "best-fill",
                                                 height = "240px",
                                                 width = "525px",
-                                                source = "${payload.templateData.properties.url}/Items/${payload.templateData.properties.item.id}/Images/Chapter/${internalIndex}",
+                                                source = "${payload.templateData.properties.wanAddress}/Items/${payload.templateData.properties.item.id}/Images/Chapter/${internalIndex}",
                                             },
                                             new Text()
                                             {
@@ -638,7 +638,7 @@ namespace AlexaController.EmbyApl
                     {
                         new Source()
                         {
-                            url = "${data.url}${data.item.videoBackdropSource}", repeatCount = 0,
+                            url = "${data.wanAddress}${data.item.videoBackdropSource}", repeatCount = 0,
                         }
                     },
                     scale      = "best-fill",
@@ -654,7 +654,7 @@ namespace AlexaController.EmbyApl
                         {
                             componentId = "backdropOverlay",
                             property    = "source",
-                            value       = "${data.url}${data.item.backdropImageSource}"
+                            value       = "${data.wanAddress}${data.item.backdropImageSource}"
                         },
                         new SetValue() {componentId = "backdropOverlay", property = "opacity", value = 1},
                         new SetValue()
@@ -672,7 +672,7 @@ namespace AlexaController.EmbyApl
                     width        = "100vw",
                     height       = "100vh",
                     position     = "absolute",
-                    source       = "${data.url}${data.item.videoOverlaySource}",
+                    source       = "${data.wanAddress}${data.item.videoOverlaySource}",
                     opacity      = 0.65,
                     id           = "backdropOverlay"
                 },
@@ -686,7 +686,7 @@ namespace AlexaController.EmbyApl
                 new Image()
                 {
                     position = "absolute",
-                    source   = "${data.url}${data.item.logoImageSource}",
+                    source   = "${data.wanAddress}${data.item.logoImageSource}",
                     width    = "25vw",
                     height   = "10vh",
                     right    = "5vw",
@@ -729,7 +729,7 @@ namespace AlexaController.EmbyApl
                             {
                                 new Source()
                                 {
-                                    url = "${payload.templateData.properties.url}${payload.templateData.properties.videoUrl}",
+                                    url = "${payload.templateData.properties.wanAddress}${payload.templateData.properties.videoUrl}",
                                     repeatCount = 1,
                                 }
                             },
@@ -747,7 +747,7 @@ namespace AlexaController.EmbyApl
                             width        = "100vw",
                             height       = "100vh",
                             position     = "absolute",
-                            source       = "${payload.templateData.properties.url}/EmptyPng?quality=90",
+                            source       = "${payload.templateData.properties.wanAddress}/EmptyPng?quality=90",
                             opacity      = 0.35
                         },
                         new AlexaHeadline()
@@ -1099,7 +1099,7 @@ namespace AlexaController.EmbyApl
                         {
                             new Image()
                             {
-                                source       = "${payload.templateData.properties.url}${data.primaryImageSource}",
+                                source       = "${payload.templateData.properties.wanAddress}${data.primaryImageSource}",
                                 width        = "30vw",
                                 height       = "52vh",
                                 paddingRight = "12px",
@@ -1135,7 +1135,7 @@ namespace AlexaController.EmbyApl
                         {
                             new Image()
                             {
-                                source       = "${payload.templateData.properties.url}${data.primaryImageSource}",
+                                source       = "${payload.templateData.properties.wanAddress}${data.primaryImageSource}",
                                 width        = "30vw",
                                 height       = "62vh",
                                 paddingRight = "12px",
@@ -1197,10 +1197,10 @@ namespace AlexaController.EmbyApl
             return roomButtons;
         }
 
-        private static List<object> GetItemLayoutOnPressArguments(string type, IAlexaSession session)
+        private static List<object> RenderItemLayoutOnPressArgs(string type, IAlexaSession session)
         {
             var room = session.room != null ? session.room.Name : "";
-            //TODO: Do we want to show episodes Detail page from sequence, or just play the item?
+            
             switch (type)
             {
                 case "Movie":

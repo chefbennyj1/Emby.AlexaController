@@ -27,14 +27,16 @@ namespace AlexaController.Api.IntentRequest.Browse
 
         public async Task<string> Response()
         {
+            //TODO: Why does validating a room throw an object exception in this class? No other Intent class throws an object exception here. 
             try
             {
                 Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
             }
-            catch { }
+            catch { } //catch the exception and throw it away. If there is a room requested at this point there will be no exception.
 
             Session.hasRoom = !(Session.room is null);
-            
+            ServerController.Instance.Log.Info($"{nameof(EpisodesIntent)} has room: {Session.hasRoom}.");
+
             if (!Session.hasRoom && !Session.supportsApl)
             {
                 Session.PersistedRequestData = AlexaRequest;

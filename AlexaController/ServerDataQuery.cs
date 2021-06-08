@@ -126,12 +126,12 @@ namespace AlexaController
 
         public Dictionary<BaseItem, List<BaseItem>> GetCollectionItems(User user, string collectionName)
         {
-            var result        = QuerySpeechResultItem(collectionName, new[] { "BoxSet" });
+            var result        = QuerySpeechResultItem(collectionName, new[] { "BoxSet", "Collection" });
             var users         = UserManager.Users;
             var administrator = users.FirstOrDefault(u => u.Policy.IsAdministrator);
             var collection    = LibraryManager.QueryItems(new InternalItemsQuery(administrator)
             {
-                ListIds        = new[] { result.InternalId },
+                CollectionIds  = new[] { result.InternalId },
                 EnableAutoSort = true,
                 OrderBy        = new[] { ItemSortBy.PremiereDate }.Select(i => new ValueTuple<string, SortOrder>(i, SortOrder.Ascending)).ToArray(),
 

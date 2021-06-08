@@ -56,6 +56,7 @@ namespace AlexaController.EmbyAplDataSource
             return await Task.FromResult(new Properties<MediaItem>()
             {
                 url          = await ServerDataQuery.Instance.GetLocalApiUrlAsync(),
+                wanAddress   = await ServerDataQuery.Instance.GetWanAddressAsync(),
                 documentType = RenderDocumentType.MEDIA_ITEM_LIST_SEQUENCE_TEMPLATE,
                 items        = mediaItems,
                 item         = mediaItem
@@ -175,6 +176,7 @@ namespace AlexaController.EmbyAplDataSource
             return await Task.FromResult(new Properties<MediaItem>()
             {
                 url = await ServerDataQuery.Instance.GetLocalApiUrlAsync(),
+                wanAddress   = await ServerDataQuery.Instance.GetWanAddressAsync(),
                 documentType = RenderDocumentType.ROOM_SELECTION_TEMPLATE,
                 item = new MediaItem()
                 {

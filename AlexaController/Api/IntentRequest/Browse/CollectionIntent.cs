@@ -29,7 +29,12 @@ namespace AlexaController.Api.IntentRequest.Browse
             await AlexaResponseClient.Instance.PostProgressiveResponse("OK.",
                 AlexaRequest.context.System.apiAccessToken, AlexaRequest.request.requestId);
 
-            Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+            //TODO: Why does validating a room throw an object exception in this class? No other Intent class throws an object exception here. 
+            try
+            {
+                Session.room = await RoomContextManager.Instance.ValidateRoom(AlexaRequest, Session);
+            }
+            catch { } //catch the exception and throw it away. If there is a room requested at this point there will be no exception.
             Session.hasRoom = !(Session.room is null);
             if (!Session.hasRoom && !Session.supportsApl)
             {
@@ -44,6 +49,8 @@ namespace AlexaController.Api.IntentRequest.Browse
             var collectionRequest = slots.MovieCollection.value ?? slots.Movie.value;
 
             collectionRequest = StringNormalization.ValidateSpeechQueryString(collectionRequest);
+
+            ServerController.Instance.Log.Info($"Collection Request: {collectionRequest}");
 
             var collection = ServerDataQuery.Instance.GetCollectionItems(Session.User, collectionRequest);
             var collectionItems = collection.Values.FirstOrDefault();

@@ -64,7 +64,7 @@ namespace AlexaController.Session
 
             var context = alexaRequest.context;
             var system = context.System;
-            var person = system.person;
+            //var person = system.person;
             var amazonSession = alexaRequest.session;
 
             IAlexaRequest persistedRequestData = null;
@@ -169,7 +169,7 @@ namespace AlexaController.Session
                 {
                     return sessionInfo.EmbySessionId; //ID is still good. TODO:Maybe check the device name is still proper.
                 }
-                return SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName).Id;
+                return SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName)?.Id;
             }
             return sessionInfo.room is null ? string.Empty : SessionManager.Sessions.FirstOrDefault(s => s.DeviceName == sessionInfo.room.DeviceName)?.Id;
         }

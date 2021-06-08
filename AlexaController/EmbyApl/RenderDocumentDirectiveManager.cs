@@ -34,7 +34,6 @@ namespace AlexaController.EmbyApl
 
         public async Task<IDirective> RenderVisualDocumentDirectiveAsync<T>(Properties<T> properties, IAlexaSession session) where T : class
         {
-
             var sourcesTemplate = new SourcesTemplate();
             //Button click effect
             sourcesTemplate.Add("buttonPressEffectApla", new Alexa.Presentation.APLA.Document()
@@ -122,8 +121,8 @@ namespace AlexaController.EmbyApl
 
         public async Task<IDirective> RenderAudioDocumentDirectiveAsync(Properties<string> properties)
         {
-            var dataSource = new DataSourceTemplate();
-            dataSource.Add(properties);
+            var dataSourceTemplate = new DataSourceTemplate();
+            dataSourceTemplate.Add(properties);
 
             return await Task.FromResult(new AplaRenderDocumentDirective()
             {
@@ -145,7 +144,7 @@ namespace AlexaController.EmbyApl
                 },
                 datasources = new DataSource()
                 {
-                    templateData = await dataSource.BuildTemplateData()
+                    templateData = await dataSourceTemplate.BuildTemplateData()
                 },//await dataSource.Build("templateData")
             });
         }

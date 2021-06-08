@@ -36,6 +36,6 @@
   <None Include="Api\IntentRequest\AMAZON\CancelIntent.cs" />
 </ItemGroup>
 
-<ItemGroup> <PackageReference Include="mediabrowser.server.core" Version="4.5.0.28" /> <PackageReference Include="Newtonsoft.Json" Version="12.0.3" /> <PackageReference Include="System.Memory" Version="4.5.4" /> </ItemGroup>
+<ItemGroup> <PackageReference Include="mediabrowser.server.core" Version="4.6.0.50" /> <PackageReference Include="Newtonsoft.Json" Version="12.0.3" /> <PackageReference Include="System.Memory" Version="4.5.4" /> </ItemGroup>
 
 </Project>

@@ -1,4 +1,6 @@
-﻿namespace AlexaController.Utils
+﻿using AlexaController.Alexa.Presentation.APL.Commands;
+
+namespace AlexaController.Utils
 {
     public class StringNormalization
     {
@@ -24,7 +26,8 @@
                 .Replace("saga", "")
                 .Replace("collection", "")
                 .Replace("1 division", "wandavision")
-                .Replace("home theater", string.Empty);
+                .Replace("home theater", string.Empty)
+                .Replace("to show me ", string.Empty);
         }
     }
 }
